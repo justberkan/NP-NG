@@ -382,14 +382,13 @@ function mkHumanGLB(cols,PF,zombie){
  }
  for(const s of['R','L'])t['md'+s]=mdl.getObjectByName(PF.prefix+PF.bones['md'+s]);
  h.glb=mdl;h.gd={t,boxes:[],PF,ak:1};
- /* kollar kısa: silahı iki elle tutabilmek için kol boyunu uzat (sadece kol ekseninde; el eski boyutunda kalır) */
+ /* Kol boyunu eklem aralıklarıyla uzat. İç içe eksen ölçekleri dönen bilekte
+    kesme (shear) oluşturup silahı avuçtan, sol eli de tutamaktan ayırıyordu. */
  if(PF.id==='soldier'){
   const K=ARM_K;
-  const axOf=(b,c)=>{const p=c.position,ax=Math.abs(p.x)>=Math.abs(p.y)&&Math.abs(p.x)>=Math.abs(p.z)?'x':Math.abs(p.y)>=Math.abs(p.z)?'y':'z';return ax};
   for(const sd of['R','L']){
-   const ua=t['ua'+sd].b,fa=t['fa'+sd].b,ha=t['ha'+sd].b;
-   const a1=axOf(ua,fa),a2=axOf(fa,ha);
-   ua.scale[a1]=K;fa.scale[a2]=K;ha.scale[a2]=1/(K*K);
+   t['fa'+sd].b.position.multiplyScalar(K);
+   t['ha'+sd].b.position.multiplyScalar(K);
   }
   h.gd.ak=K;
  }
@@ -427,10 +426,62 @@ function gAttach(h,d,side,obj,Qw_rig){
  _gm2.copy(hb.matrixWorld).invert().multiply(_gm);
  _gm2.decompose(obj.position,obj.quaternion,obj.scale);
 }
+function gSyncMagazine(h,mag,gun,logical){
+ if(!mag||!mag.visible)return;
+ gun.updateWorldMatrix(true,false);mag.parent.updateWorldMatrix(true,false);mag.updateMatrix();
+ _gm.copy(logical).invert().multiply(mag.matrix);
+ _gm.premultiply(gun.matrixWorld);
+ _gm2.copy(mag.parent.matrixWorld).invert().multiply(_gm);
+ _gm2.decompose(mag.position,mag.quaternion,mag.scale);
+}
 
 /* ---------- Kol IK: mantık kolunun el hedefine, GLB kol kemikleriyle ulaş ---------- */
 /* mantık kolunun avuç konumu (spine orijinine göre, rig yönü): iki el aynı silahı tutarken aralarındaki GERÇEK mesafeyi korumak için */
 const _pR=V3(),_pL=V3(),_pT=V3();
+const _fitR=V3(),_fitL=V3(),_fitT=V3(),_fitD=V3(),_fitOffR=V3(),_fitOffL=V3(),_reloadGrip=V3(),_fitQ=new THREE.Quaternion();
+function gReachCenter(h,d,side,Qw,out){
+ const b=d.t['ua'+side].b;b.updateWorldMatrix(true,false);
+ out.setFromMatrixPosition(b.matrixWorld);h.root.worldToLocal(out);
+ _fitQ.copy(Qw).multiply(_RXN90);if(side==='L'&&d.lrifle)_fitQ.multiply(_RZL);
+ return out.add(_fitD.copy(d.PF.tab['palmRest'+side]).applyQuaternion(_fitQ));
+}
+/* Silahı iki kolun erişebildiği ortak alana taşı. Kol boyunu artırmak veya
+   sol tutamağı model üzerinde kaydırmak yerine iki gerçek avuç hedefini koru. */
+function gFitTwoHands(h,d,Qw,retry,grip){
+ const W=h.W;
+ gReachCenter(h,d,'R',Qw,_fitR);
+ _fitOffR.copy(_fitD);
+ gReachCenter(h,d,'L',Qw,_fitL);
+ _fitOffL.copy(_fitD);
+ _pL.copy(grip||W.gL).sub(W.gR).applyQuaternion(Qw);
+ _fitL.sub(_pL);
+ const rR=(d.PF.len.R[0]+d.PF.len.R[1])*d.ak*.995;
+ const rL=(d.PF.len.L[0]+d.PF.len.L[1])*d.ak*.995;
+ _fitT.copy(d.tp.R);
+ for(let i=0;i<48;i++){
+  _fitD.copy(_fitT).sub(_fitR);if(_fitD.length()>rR)_fitT.copy(_fitR).add(_fitD.setLength(rR));
+  _fitD.copy(_fitT).sub(_fitL);if(_fitD.length()>rL)_fitT.copy(_fitL).add(_fitD.setLength(rL));
+  // IK'nin gövde korumasını önceden hesaba kat; sonradan tek bileği ileri itmek
+  // iki el arasındaki sabit tutuş mesafesini yeniden bozmasın.
+  _fitD.copy(_fitT).sub(_fitOffR);
+  if(Math.abs(_fitD.x)<.23&&_fitD.y>.86&&_fitD.y<1.61&&_fitD.z<.17&&_fitD.z>-.17)_fitT.z=.17001+_fitOffR.z;
+  _fitD.copy(_fitT).add(_pL).sub(_fitOffL);
+  if(Math.abs(_fitD.x)<.23&&_fitD.y>.86&&_fitD.y<1.61&&_fitD.z<.17&&_fitD.z>-.17)_fitT.z=.17001+_fitOffL.z-_pL.z;
+ }
+ if(!retry&&!grip&&W.support&&(_fitT.distanceTo(_fitR)>rR+.001||_fitT.distanceTo(_fitL)>rL+.001)){
+  // Uzun namluda erişilemeyen ileri nokta yerine aynı kundağın ölçülmüş
+  // alt yüzeyindeki daha yakın bir temas noktasını seç.
+  const best=W.gL.clone();let bestError=Math.max(0,_fitT.distanceTo(_fitR)-rR)+Math.max(0,_fitT.distanceTo(_fitL)-rL);
+  for(let i=W.support.length-1;i>=0;i--){
+   W.gL.copy(W.support[i]);gFitTwoHands(h,d,Qw,true);
+   if(_fitT.distanceTo(_fitR)<=rR+.001&&_fitT.distanceTo(_fitL)<=rL+.001)return _fitT;
+   const error=Math.max(0,_fitT.distanceTo(_fitR)-rR)+Math.max(0,_fitT.distanceTo(_fitL)-rL);
+   if(error<bestError){bestError=error;best.copy(W.gL);}
+  }
+  W.gL.copy(best);return gFitTwoHands(h,d,Qw,true);
+ }
+ return _fitT;
+}
 function gPalm(h,side,out){
  const a=side==='R'?h.armR:h.armL;
  _gq1.copy(h.hips.quaternion).multiply(h.spine.quaternion);
@@ -526,15 +577,24 @@ function glbSync(h,c){
   if(W.g2){QwL=new THREE.Quaternion().copy(_gq1).multiply(W.g2.quaternion);modeL='w';d.lrifle=false}
   else if(typeof P!=='undefined'&&P.lhOn){QwL=QwR;modeL='w';d.lrifle=true}
  }
+ const reloadL=hasW&&!W.g2&&c.rq>=0;
+ if(reloadL){QwL=QwR;modeL='w';d.lrifle=false;_gm.copy(_m4).invert();_reloadGrip.copy(P.lh).applyMatrix4(_gm);}
+ h.holdingMag=!!(reloadL&&((c.rq>=.18&&c.rq<.38)||(c.rq>=.64&&c.rq<.92)));
  gArm(h,d,'R',modeR,QwR);
  let TovL=null;
  if(hasW&&modeL==='w'&&!W.g2){ // iki el tek silahta: sol avuç = sağ avuç + (mantık sol avuç − mantık sağ avuç)
-  TovL=_pT.copy(W.gL).sub(W.gR).applyQuaternion(QwR).add(d.tp.R); /* sol avuç: silah üzerindeki gerçek tutacak noktası (sağ avuca göre) */
+  const fit=gFitTwoHands(h,d,QwR,false,reloadL?_reloadGrip:null);
+  if(fit.distanceToSquared(d.tp.R)>1e-10)gArm(h,d,'R',modeR,QwR,fit);
+  const hb=d.t.haR.b;hb.updateWorldMatrix(true,false);
+  _pR.copy(d.PF.palm.R);hb.localToWorld(_pR);h.root.worldToLocal(_pR);
+  TovL=_pT.copy(reloadL?_reloadGrip:W.gL).sub(W.gR).applyQuaternion(QwR).add(_pR);
  }
  gArm(h,d,'L',modeL,QwL,TovL);
  if(hasW){
   gAttach(h,d,'R',W.g,QwR);
   if(W.g2)gAttach(h,d,'L',W.g2,QwL);
+  gSyncMagazine(h,W.mag,W.g,_m4);
+  if(W.g2)gSyncMagazine(h,W.mag2,W.g2,_m4b);
  }
 }
 const _animHuman0=animHuman;

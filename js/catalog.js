@@ -158,7 +158,8 @@ function mdlPlace(mm,k,d,sp){
    let gL=null;
    if(!pis&&G.gL)gL=[0,cy+s*G.gL[0]-(G.gLk==='ön tutamak'?0:.03),cz+s*G.gL[1]];
    mm.userData.auto=1;
-   return {bk:s*(G.gR[1]-G.zmin),adsz:pis?0:((k==='smg'?.4:.42)-gf)*L,mz:[0,cy+s*G.mz[0],cz+s*G.mz[1]],gL,sh:cy+s*G.top-.012};
+   const support=G.support?G.support.map(p=>[0,cy+s*p[0]-.03,cz+s*p[1]]):null;
+   return {bk:s*(G.gR[1]-G.zmin),adsz:pis?0:((k==='smg'?.4:.42)-gf)*L,mz:[0,cy+s*G.mz[0],cz+s*G.mz[1]],gL,support,sh:cy+s*G.top-.012};
   }
  }
  const gf=mel?(sp.sw?.15:.22):(pis?.28:(k==='smg'?.27:.3)); /* kabza: silahın arkadan %27-30'unda */

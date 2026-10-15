@@ -1,16 +1,16 @@
 'use strict';
 /* ===== Açık dünya kılıçları: 10 farklı model, istatistik, yükseltme verisi ===== */
 const SWD=[
- {id:'s0',n:'Demir Kılıç',r:1,p:0,up:40,dmg:80,rate:.6,range:3.4,ang:.8,hitT:.45,pose:'sword',gl:null,d:'Her maceranın başlangıcı. Dengeli, güvenilir bir kılıç.'},
- {id:'s1',n:'Ay Palası',r:1,p:300,up:60,dmg:92,rate:.55,range:3.5,ang:.85,hitT:.45,pose:'sword',gl:null,d:'Eğri bıçağı geniş bir yay çizer. Kalabalıkta rahat vurur.'},
- {id:'s2',n:'Sakura Katana',r:2,p:900,up:90,dmg:105,rate:.5,range:3.7,ang:.75,hitT:.42,pose:'sword',gl:null,d:'İnce, uzun ve hızlı. Bir nefeste iki kesik.'},
- {id:'s3',n:'Kırlangıç Meci',r:2,p:1100,up:110,dmg:78,rate:.34,range:4.0,ang:.45,hitT:.4,pose:'sword',gl:null,d:'Çok hızlı saplama. Dar ama uzun menzilli.'},
- {id:'s4',n:'Çelik Claymore',r:3,p:1800,up:150,dmg:165,rate:1,range:4.2,ang:1.05,hitT:.5,pose:'gsword',gl:null,d:'İki elle taşınan ağır kılıç. Yavaş, ama ezer geçer.'},
- {id:'s5',n:'Yılan Dişi',r:3,p:1500,up:130,dmg:100,rate:.48,range:3.5,ang:.8,hitT:.43,pose:'sword',gl:0x6dff4a,d:'Zehir yeşili bıçak. Hızlı ve acımasız.'},
- {id:'s6',n:'Don Keskisi',r:4,p:3000,up:200,dmg:128,rate:.5,range:3.8,ang:.8,hitT:.42,pose:'sword',gl:0x7fe9ff,d:'Buz tutmuş bıçak, soğuk bir parıltı bırakır.'},
- {id:'s7',n:'Magma Yaran',r:4,p:4200,up:250,dmg:190,rate:.95,range:4.3,ang:1.1,hitT:.5,pose:'gsword',gl:0xff6a1a,d:'Lav damarlı dev kılıç. Her darbe kor saçar.'},
- {id:'s8',n:'Gece Yarısı',r:5,p:7000,up:350,dmg:150,rate:.42,range:3.9,ang:.8,hitT:.4,pose:'sword',gl:0xa060ff,d:'Gölgeden dökülmüş katana. Sessiz, çok hızlı.'},
- {id:'s9',n:'Ejderha Bıçağı',r:5,p:12000,up:500,dmg:210,rate:.5,range:4.0,ang:.85,hitT:.42,pose:'sword',gl:0xffd24a,d:'Altın bıçak, içinde şimşek dolaşır. Efsanelerin kılıcı.'}
+ {id:'s0',n:'Demir Kılıç',r:1,p:0,up:40,dmg:80,rate:.6,range:4.4,ang:.8,hitT:.45,pose:'sword',gl:null,d:'Her maceranın başlangıcı. Dengeli, güvenilir bir kılıç.'},
+ {id:'s1',n:'Ay Palası',r:1,p:300,up:60,dmg:92,rate:.55,range:4.5,ang:.85,hitT:.45,pose:'sword',gl:null,d:'Eğri bıçağı geniş bir yay çizer. Kalabalıkta rahat vurur.'},
+ {id:'s2',n:'Sakura Katana',r:2,p:900,up:90,dmg:105,rate:.5,range:4.7,ang:.75,hitT:.42,pose:'sword',gl:null,d:'İnce, uzun ve hızlı. Bir nefeste iki kesik.'},
+ {id:'s3',n:'Kırlangıç Meci',r:2,p:1100,up:110,dmg:78,rate:.34,range:5.0,ang:.45,hitT:.4,pose:'sword',gl:null,d:'Çok hızlı saplama. Dar ama uzun menzilli.'},
+ {id:'s4',n:'Çelik Claymore',r:3,p:1800,up:150,dmg:165,rate:1,range:5.2,ang:1.05,hitT:.5,pose:'gsword',gl:null,d:'İki elle taşınan ağır kılıç. Yavaş, ama ezer geçer.'},
+ {id:'s5',n:'Yılan Dişi',r:3,p:1500,up:130,dmg:100,rate:.48,range:4.5,ang:.8,hitT:.43,pose:'sword',gl:0x6dff4a,d:'Zehir yeşili bıçak. Hızlı ve acımasız.'},
+ {id:'s6',n:'Don Keskisi',r:4,p:3000,up:200,dmg:128,rate:.5,range:4.8,ang:.8,hitT:.42,pose:'sword',gl:0x7fe9ff,d:'Buz tutmuş bıçak, soğuk bir parıltı bırakır.'},
+ {id:'s7',n:'Magma Yaran',r:4,p:4200,up:250,dmg:190,rate:.95,range:5.3,ang:1.1,hitT:.5,pose:'gsword',gl:0xff6a1a,d:'Lav damarlı dev kılıç. Her darbe kor saçar.'},
+ {id:'s8',n:'Gece Yarısı',r:5,p:7000,up:350,dmg:150,rate:.42,range:4.9,ang:.8,hitT:.4,pose:'sword',gl:0xa060ff,d:'Gölgeden dökülmüş katana. Sessiz, çok hızlı.'},
+ {id:'s9',n:'Ejderha Bıçağı',r:5,p:12000,up:500,dmg:210,rate:.5,range:5.0,ang:.85,hitT:.42,pose:'sword',gl:0xffd24a,d:'Altın bıçak, içinde şimşek dolaşır. Efsanelerin kılıcı.'}
 ];
 const SWID={};SWD.forEach(s=>SWID[s.id]=s);
 const SW_MAXLV=10;

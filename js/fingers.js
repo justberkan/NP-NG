@@ -55,11 +55,12 @@ function fngSync(h){
  const W=h.W,hasW=!!W&&!((h.freeW||0)>.5);
  let pr=FNG_POSE.free,pl=FNG_POSE.free;
  if(hasW){
-  const mel=!!(W.mel||W.melee);
+  const mel=!!(WP[h.wk]&&WP[h.wk].melee);
   pr=mel?FNG_POSE.fist:FNG_POSE.rGun;
   const two=!!W.g2||(typeof P!=='undefined'&&P.lhOn);
   if(two)pl=mel?FNG_POSE.fist:(W.g2?FNG_POSE.rGun:FNG_POSE.lGrip);
   else if(mel&&W.g2)pl=FNG_POSE.fist;
+  if(h.holdingMag)pl=FNG_POSE.lGrip;
  }
  fngApply(h,'R',pr);fngApply(h,'L',pl);
 }

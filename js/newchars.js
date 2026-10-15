@@ -38,9 +38,9 @@ mkHuman=function(cols,zombie){
  }
  return h;
 };
-const _animHuman1=animHuman;
+const _animHumanNc=animHuman;
 animHuman=function(h,c,dt){
- _animHuman1(h,c,dt);
+ _animHumanNc(h,c,dt);
  const g=h.gm;if(!g||h.root.visible===false)return;
  const sp=Math.min(1,(c.speed||0)/2.2);
  if(g.walk)g.walk.setEffectiveWeight(sp);if(g.idle)g.idle.setEffectiveWeight(1-sp);

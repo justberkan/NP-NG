@@ -287,7 +287,17 @@ function mdlGripsObj(obj,kind,id){
   const frontMost=Math.max(mag?mag.z1:-1e9,grip?grip.z1:zmin);
   const zA=Math.max(frontMost+.03*L,zmin+.36*L),zB=zmax-.14*L;
   if(zB-zA<.07*L){out.gL=[lo[Math.round(.72*NB)],zmin+.72*L];out.conf=Math.min(out.conf,.5);out.why+=' ön kundak dar'}
-  else{const zl=zA+(zB-zA)*.3,b=Math.max(0,Math.min(NB-1,Math.floor((zl-zmin)/bw)));out.gL=[lo[b],zl];out.gLk='kundak altı'}
+  else{
+   const zl=zA+(zB-zA)*.3,b=Math.max(0,Math.min(NB-1,Math.floor((zl-zmin)/bw)));out.gL=[lo[b],zl];out.gLk='kundak altı';
+   out.support=[];
+   for(let i=0;i<=8;i++){const z=zA+(zl-zA)*i/8,bi=Math.max(0,Math.min(NB-1,Math.floor((z-zmin)/bw)));out.support.push([lo[bi],z]);}
+  }
+ }
+ // Ayrı ön tutamak erişilemiyorsa onun gerisindeki gerçek kundak yüzeyi de
+ // geçerli bir destek alanıdır; şarjör ve kabzanın arkasına geçilmez.
+ if(!pis&&!out.support&&out.gL){
+  const start=Math.max(mag?mag.z1:-1e9,grip?grip.z1:zmin)+.03*L,end=out.gL[1];
+  if(end-start>.07*L){out.support=[];for(let i=0;i<=8;i++){const z=start+(end-start)*i/8,b=Math.max(0,Math.min(NB-1,Math.floor((z-zmin)/bw)));out.support.push([lo[b],z]);}}
  }
  let ys=0,cs2=0,ym=0,cm=0;
  for(let b=0;b<NB;b++){if(b<4){ys+=(lo[b]+hi[b])/2;cs2++}if(b>=NB-3){ym+=(lo[b]+hi[b])/2;cm++}}
@@ -298,4 +308,30 @@ function mdlGrips(id,kind){
  const key=id+'|'+kind;if(MDLG[key])return MDLG[key];
  const m=MDL.cache[id];if(!m)return null;
  return MDLG[key]=mdlGripsObj(m.obj,kind,id);
+}
+
+/* Ayrı şarjör parçasını model geometrisinden bul. Gövde/namlu kadar uzun
+   parçaları kabul etme; tek parça modellerde uydurma kutu şarjör üretme. */
+function mdlMagazine(mm,kind,id){
+ const G=mdlGrips(id,kind);if(!G||G.conf<.5)return null;
+ const anchor=G.mag||((kind==='pistol'&&G.gR)?G.gR:null);if(!anchor)return null;
+ mm.updateWorldMatrix(true,true);
+ const inv=mm.matrixWorld.clone().invert(),mat=new THREE.Matrix4(),box=new THREE.Box3();
+ let best=null,volume=Infinity;
+ mm.traverse(o=>{
+  if(!o.isMesh||!o.geometry.attributes.position)return;
+  o.geometry.computeBoundingBox();mat.multiplyMatrices(inv,o.matrixWorld);
+  box.copy(o.geometry.boundingBox).applyMatrix4(mat);
+  const sz=box.getSize(new THREE.Vector3());
+  if(sz.z>G.L*.45||sz.y<G.H*.18||sz.z<G.L*.025)return;
+  if(anchor[0]<box.min.y-G.H*.03||anchor[0]>box.max.y+G.H*.03||anchor[1]<box.min.z-G.L*.03||anchor[1]>box.max.z+G.L*.03)return;
+  const v=sz.x*sz.y*sz.z;if(v<volume){volume=v;best=o;}
+ });
+ if(!best)return null;
+ const worldBox=new THREE.Box3().setFromObject(best),center=worldBox.getCenter(new THREE.Vector3());
+ const moving=new THREE.Group(),copy=best.clone();
+ copy.matrixAutoUpdate=false;
+ copy.matrix.copy(best.matrixWorld);copy.matrix.premultiply(new THREE.Matrix4().makeTranslation(-center.x,-center.y,-center.z));
+ moving.add(copy);moving.visible=false;
+ return {source:best,moving,center,size:worldBox.getSize(new THREE.Vector3())};
 }

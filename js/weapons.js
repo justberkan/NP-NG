@@ -159,6 +159,7 @@ function buildWeapon(k,sk,mid,own){
  if(mm)g.add(mm); /* kutu (klasik) silah modeli kaldırıldı: GLB yüklenene kadar boş durur */
  const gR=d.gR,gL=pl&&pl.gL?pl.gL:d.gL,mz=pl?pl.mz:d.mz;
  const W={g,g2:null,mag:null,mag2:null,flash:null,flash2:null,gR:V3(...gR),gL:gL?V3(...gL):V3(),well:d.mg?V3(...d.well):V3(),mz:V3(...mz),sh:pl?pl.sh:d.sh,hideMag:!!mm,adsZ:pl&&pl.adsz||0,bk:pl&&pl.bk!=null?pl.bk:null};
+ W.support=pl&&pl.support?pl.support.map(p=>V3(...p)):null;
  const optOK=!d.melee&&d.hold!=='pistol'&&d.hold!=='dual';
  if(optOK&&mm&&typeof optModel==='function'&&(own?(SV.eq.o||'o0'):'o0')!=='o0'){
   /* nişangah (optik): kuşanılan model sadece kendi silahında görünür, diğerlerinde standart kırmızı nokta */
@@ -166,8 +167,17 @@ function buildWeapon(k,sk,mid,own){
   const y0=mm?pl.sh:(d.sh-.03),oz=mm?(mm.position.z):(d.dot?d.dot[1]:.1);
   om.g.position.set(0,y0,oz);g.add(om.g);W.sh=y0+om.cy;W.opt=oid;W.dotM=om.dot||null;
  }
- if(d.mg)W.mag=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e);
- if(d.hold==='dual'){W.g2=new THREE.Group();if(mm){const m2=mdlBuild(sp);mdlPlace(m2,k,d,sp);W.g2.add(m2)}W.mag2=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e)}
+ if(d.mg){
+  const mg=mm?mdlMagazine(mm,d.hold==='pistol'||d.hold==='dual'?'pistol':k,sp.mid):null;
+  if(mg){W.mag=mg.moving;W.nativeMag=mg.source;W.well.copy(mg.center);W.magSize=mg.size}
+  else if(!mm)W.mag=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e);
+  W.magStatus=mg?'geometry':mm?'integrated-or-unresolved':'loading';
+ }
+ if(d.hold==='dual'){
+  W.g2=new THREE.Group();
+  if(mm){const m2=mdlBuild(sp);mdlPlace(m2,k,d,sp);W.g2.add(m2);const mg=mdlMagazine(m2,'pistol',sp.mid);if(mg){W.mag2=mg.moving;W.nativeMag2=mg.source}}
+  else W.mag2=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e);
+ }
  if(!d.melee){W.flash=mkFlash(mz);g.add(W.flash);if(W.g2){W.flash2=mkFlash(mz);W.g2.add(W.flash2)}}
  return W;
 }
@@ -223,7 +233,7 @@ function tilt(q){if(q<.18)return ease(q/.18);if(q<.82)return 1;if(q<.95)return 1
 
 /* Şarjör değiştirme: sol el şarjörü tutar, çeker, atar, kemerden yenisini alır, takar */
 function reloadHands(h,q,d){
- const W=h.W,mh=d.mg[1],w=W.well;
+ const W=h.W,mh=W.magSize?W.magSize.y:d.mg[1],w=W.well;
  _pW.set(w.x,w.y,w.z).applyMatrix4(_m4);
  _pBelow.set(w.x,w.y-mh*.75,w.z).applyMatrix4(_m4);
  _pOut.set(w.x,w.y-mh*1.9,w.z).applyMatrix4(_m4);
@@ -290,13 +300,14 @@ function poseDual(h,c){
  P.wp.y-=.1*lr;P.w2p.y-=.1*lr;P.wr.x+=.7*lr;P.w2r.x+=.7*lr;
  P.wp.y-=(1-sw)*.3;P.w2p.y-=(1-sw)*.3;P.wr.x+=(1-sw)*.9;P.w2r.x+=(1-sw)*.9;
  P.wp.z-=kR*.05;P.wr.x-=kR*.1;P.w2p.z-=kL*.05;P.w2r.x-=kL*.1;
- const rq=c.rq==null?-1:c.rq,mh=d.mg[1],w=W.well;
+ const rq=c.rq==null?-1:c.rq,mh=W.magSize?W.magSize.y:d.mg[1],w=W.well;
  if(rq>=0){const tl=tilt(rq);P.wr.z+=tl*.6;P.wr.x+=tl*.5;P.w2r.z-=tl*.6;P.w2r.x+=tl*.5;P.wp.x+=.05*tl;P.w2p.x-=.05*tl;P.wp.y-=.05*tl;P.w2p.y-=.05*tl}
  _qa.setFromEuler(P.wr);_m4.compose(P.wp,_qa,_one);
  _qb.setFromEuler(P.w2r);_m4b.compose(P.w2p,_qb,_one);
  P.rh.copy(W.gR).applyMatrix4(_m4);
  P.lh.copy(W.gR).applyMatrix4(_m4b);P.lhOn=false;
- P.magAtt=false;P.magV=true;P.mag2V=true;
+ // Takılı GLB şarjörün üstüne ikinci kutu şarjör çizme; yalnız değişim sırasında ayır.
+ P.magAtt=rq<.4||rq>=.85;P.magV=true;P.mag2V=true;
  P.magQ.copy(_qa);P.mag2Q.copy(_qb);
  P.magP.set(w.x,w.y,w.z).applyMatrix4(_m4);
  P.mag2P.set(w.x,w.y,w.z).applyMatrix4(_m4b);
@@ -366,7 +377,9 @@ function applyPose(h,c){
   if(P.magAtt&&d.hold!=='dual'){P.magP.set(W.well.x,W.well.y,W.well.z).applyMatrix4(_m4);P.magQ.copy(_qa)}
   W.mag.visible=P.magV&&!(W.hideMag&&P.magAtt);W.mag.position.copy(P.magP);W.mag.quaternion.copy(P.magQ);
  }
- if(W.mag2){W.mag2.visible=P.mag2V;W.mag2.position.copy(P.mag2P);W.mag2.quaternion.copy(P.mag2Q)}
+ if(W.mag2){W.mag2.visible=P.mag2V&&!(W.hideMag&&P.magAtt);W.mag2.position.copy(P.mag2P);W.mag2.quaternion.copy(P.mag2Q)}
+ if(W.nativeMag)W.nativeMag.visible=P.magAtt;
+ if(W.nativeMag2)W.nativeMag2.visible=P.magAtt;
  if(W.flash)W.flash.visible=(c.flash||0)>0;
  if(W.flash2)W.flash2.visible=(c.flashL||0)>0;
 }
@@ -471,10 +484,9 @@ function spawnMagProp(h,which){
  if(window.BGMODE)return;
  if(!SET.fx)return;
  const m=which===2?h.W.mag2:h.W.mag;if(!m)return;
- const p=new THREE.Mesh(m.geometry,m.material);
+ const p=m.clone(true);p.visible=true;
  m.updateWorldMatrix(true,false);
- p.position.setFromMatrixPosition(m.matrixWorld);
- p.quaternion.setFromRotationMatrix(m.matrixWorld);
+ m.matrixWorld.decompose(p.position,p.quaternion,p.scale);
  S.add(p);
  props.push({m:p,v:V3(rnd(-.8,.8),rnd(.2,1.2),rnd(-.8,.8)),w:V3(rnd(-6,6),0,rnd(-6,6)),t:3});
 }
