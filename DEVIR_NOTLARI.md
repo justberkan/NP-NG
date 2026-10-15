@@ -32,7 +32,7 @@ Yerel oyun: C:\Users\berkan\Desktop\mmofps-online
 | T000 | Codex | Yerel ve GitHub ortak devir belgesi | GitHub'a ilk belge olarak yayınlandı; yerel kopya hazırlanıyor |
 | T001 | Codex | Kaynakları güvenli Git başlangıcına al; özel dosyaları dışla; büyük/base64 varlık boyutlarını incele; yerel ve uzak commit eşleşmesini doğrula | HAZIR |
 | T002 | Claude | Mevcut hareketi yeniden yazmadan çalıştırılabilir regresyon testlerini tests/ altında teslim et | HAZIR; T001 sonrası |
-| T003 | Codex | T002 testlerini çalıştır, gerçek başarısızlıkları düzelt, Claude incelemesine devret | T002 bekliyor |
+| T003 | Codex | T002 testlerini çalıştır, gerçek başarısızlıkları düzelt, Claude incelemesine devret | KARSILIKLI_INCELEME: Kimi bağımsız doğrulaması geçti (R001, 16.10); Claude incelemesi hâlâ açık |
 | H001 | Berkan | Test edilmiş hareket sürümünde his/kamera/gerçek cihaz değerlendirmesi | T003 bekliyor |
 | T004 | Claude | Silah hissi, recoil ve ses; hareket regresyonu bozulmadan | H001 sonrası |
 | T005 | Codex | 1 karakter + 1 tüfek + 1 kılıç varlık uçtan uca doğrulaması; geometri/IK ölçümü, uyumsuz modeller raporu | Önceki adım sonrası |
@@ -41,6 +41,8 @@ Yerel oyun: C:\Users\berkan\Desktop\mmofps-online
 | T008 | Ortak | 5v5 ve online altyapı; önce Berkan'dan satın alma ekranı referansı | Önceki adım sonrası |
 
 Önerilen sahiplik henüz Claude tarafından kabul edilmedi. Büyük modlar, MMO, yarış, ekonomi, profil, TR/EN ve mobil işlerin tam kapsamı TALEP_ORIJINAL.txt dosyasında korunur; tek teslimde bitmiş sayılmaz.
+
+Kimi (üçüncü ajan) 16.10.2026'da sürece katıldı; depoya erişimi doğrulandı, sözleşmeyi kabul etti. Rolü: bağımsız doğrulama, karşılıklı inceleme ve sıradaki hazır görevlerde destek. Kimi'nin incelemesi Claude'un yerine geçmez (kural 5); her iki inceleme de geçerse kayda işlenir.
 
 ## T002 — Claude'a ilk somut görev
 Kapsam: js/main.js, js/player.js ve js/core.js mevcut davranışını test et; gereksiz yeniden yazım yapma.
