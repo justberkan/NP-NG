@@ -25,15 +25,29 @@ for (const x of [-10, -5, 0, 5, 10]) { SPAWNS.push([x, 24]); SPAWNS.push([x, -24
 /* ---------- HTTP: oyun dosyalarını sun ---------- */
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json' };
 const server = http.createServer((req, res) => {
-  let u = decodeURIComponent((req.url || '/').split('?')[0]);
+  // Yalnız istemci dosyalarını sun; Git, hesaplar ve yedekler web kökü değildir.
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  if (req.method !== 'GET' && req.method !== 'HEAD') { res.writeHead(405, { Allow: 'GET, HEAD' }); res.end('405'); return; }
+  let u;
+  try { u = decodeURIComponent((req.url || '/').split('?')[0]); }
+  catch (e) { res.writeHead(400); res.end('400'); return; }
   if (u === '/api/info') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify({ game: 'mmofps', players: totalPlayers(), max: MAXP })); return; }
   if (u === '/') u = '/index.html';
+  const parts = u.split('/');
+  const publicPath = u === '/index.html' || /^\/(assets|js|css|lib)\//.test(u);
+  if (!publicPath || /[\\\0:]/.test(u) || parts.some(s => s.startsWith('.'))) { res.writeHead(403); res.end('403'); return; }
   const f = path.normalize(path.join(ROOT, u));
-  if (!f.startsWith(ROOT + path.sep) || /server\.js$|\.bat$|\.command$/i.test(f) || /[\\/]data[\\/]/i.test(f)) { res.writeHead(403); res.end('403'); return; }
-  fs.readFile(f, (e, d) => {
-    if (e) { res.writeHead(404); res.end('404'); return; }
-    res.writeHead(200, { 'Content-Type': MIME[path.extname(f).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store' });
-    res.end(d);
+  if (!f.startsWith(ROOT + path.sep)) { res.writeHead(403); res.end('403'); return; }
+  fs.realpath(f, (err, real) => {
+    if (err) { res.writeHead(404); res.end('404'); return; }
+    // assets içinden dışarıya veya özel dizinlere verilen sembolik bağları da engelle.
+    const relative = path.relative(fs.realpathSync(ROOT), real).split(path.sep).join('/');
+    if (relative !== 'index.html' && (!/^(assets|js|css|lib)\//.test(relative) || relative.split('/').some(s => s.startsWith('.')))) { res.writeHead(403); res.end('403'); return; }
+    fs.readFile(real, (e, d) => {
+      if (e) { res.writeHead(404); res.end('404'); return; }
+      res.writeHead(200, { 'Content-Type': MIME[path.extname(f).toLowerCase()] || 'application/octet-stream', 'Cache-Control': 'no-store' });
+      res.end(d);
+    });
   });
 });
 

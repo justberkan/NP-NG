@@ -1,0 +1,13 @@
+{
+  "name": "npng",
+  "version": "0.1.0",
+  "private": true,
+  "description": "N.P.N.G. tarayıcı oyunu; çalışma zamanında ek paket gerekmez",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node tests/run.cjs",
+    "test:http": "node --test tests/http.cjs",
+    "test:movement": "node tests/movement.cjs"
+  },
+  "devDependencies": { "playwright": "1.62.1" }
+}

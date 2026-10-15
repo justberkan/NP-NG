@@ -2,7 +2,7 @@
 /* ===== Ana döngü ve akış ===== */
 /* ----- Fare güvenliği: pencere dışına çıkınca basılı kalan tuş/tık sıfırlanır; fare kilidi alınamazsa kenar-bakış devreye girer ----- */
 const PL={fail:false,mx:0,my:0,hint:0};
-function releaseInputs(){firing=false;ads=false;jHeld=false;jPress=false;for(const k in key)key[k]=0;joy.x=joy.y=0;PL.mx=PL.my=0}
+function releaseInputs(){firing=false;ads=false;jHeld=false;jPress=false;sPress=false;qPress=false;jBuf=0;for(const k in key)key[k]=0;joy.x=joy.y=0;PL.mx=PL.my=0}
 addEventListener('blur',releaseInputs);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseInputs()});
 document.documentElement.addEventListener('mouseleave',()=>{PL.mx=PL.my=0;firing=false;ads=false});
@@ -89,7 +89,8 @@ function tick(dt){
  if(state==='play'){
   /* Sabit zaman adımı: fizik her zaman 1/120 sn'lik adımlarla işlenir (FPS'ten bağımsız hız, zıplama, bhop) */
   accP+=dt;let nSub=0;
-  while(accP>=FIX_DT&&state==='play'&&nSub<8){p.ox=p.x;p.oy=p.y;p.oz=p.z;stepPlayer(FIX_DT);accP-=FIX_DT;nSub++}
+  // 144 Hz gibi oranlarda yuvarlama hatası tam bir fizik adımını geciktirmesin.
+  while(accP+1e-10>=FIX_DT&&state==='play'&&nSub<8){p.ox=p.x;p.oy=p.y;p.oz=p.z;stepPlayer(FIX_DT);accP=Math.max(0,accP-FIX_DT);nSub++}
   if(nSub>=8)accP=0;
  }else{accP=0;if(mode==='mp')mpUpdate(dt)}
  if(state==='play'&&!touch&&!document.pointerLockElement&&PL.fail)edgeLook(dt);
