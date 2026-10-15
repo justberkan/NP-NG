@@ -1,0 +1,14 @@
+data/
+_yedek/
+node_modules/
+test-results/
+.env
+.env.*
+!.env.example
+*.log
+*.pem
+*.key
+cloudflared.exe
+LINK.txt
+.DS_Store
+Thumbs.db

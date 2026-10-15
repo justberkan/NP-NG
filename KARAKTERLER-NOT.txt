@@ -1,0 +1,18 @@
+N.P.N.G - YENI SAMPIYON KARAKTERLER (16.10.2026)
+================================================
+13 yeni karakter eklendi (magaza > Sampiyonlar). Sadece gorunum, guc vermez.
+
+ Demir Adam (efsanevi 1600)   Orumcek Adam (efsanevi 1500)  Beyaz Samuray (efsanevi 1400)
+ Ada Wong (epik 1000)         Kara Dul (epik 1000)          Leon (epik 900)
+ Siber Savasci (epik 900)     Ronin (epik 800)              Uzay Piyadesi (epik 800)
+ Gotik Zarafet (nadir 600)    Heetah (nadir 600)            Anime Kiz (nadir 500)
+ SWAT (nadir 450)
+
+Model dosyalari: assets/ch_<ad>.js (her biri 0.5-2.2 MB). Sadece gerekince yuklenir:
+ kusandigin karakter acilista, digerleri magazada / lobide / rakip oyuncuda goruldugunde.
+
+Degisen kod dosyalari: index.html, js/weapons.js, js/glbrig.js, js/shop.js, js/ui.js, js/mp.js, js/owmp.js
+Eski hallerinin yedegi: _yedek/2026-10-16_karakterler/
+Geri almak icin: yedekteki dosyalari ayni yerlerine kopyala.
+
+Sunucu acikken guncelledikten sonra SUNUCU-INTERNET.bat'i kapatip yeniden ac.
