@@ -1,0 +1,11 @@
+# Oyuncu hesapları ve kayıtları (şifre özetleri içerir) - ASLA repoya girmez
+data/
+# Değişiklik öncesi yerel yedekler
+_yedek/
+# Boş/deneme klasörleri ve sistem dosyaları
+assets/Yeni/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini

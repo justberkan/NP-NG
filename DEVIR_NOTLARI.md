@@ -30,7 +30,7 @@ Yerel oyun: C:\Users\berkan\Desktop\mmofps-online
 | ID | Önerilen sorumlu | İş / kabul ölçütü | Durum |
 |---|---|---|---|
 | T000 | Codex | Yerel ve GitHub ortak devir belgesi | GitHub'a ilk belge olarak yayınlandı; yerel kopya hazırlanıyor |
-| T001 | Codex | Kaynakları güvenli Git başlangıcına al; özel dosyaları dışla; büyük/base64 varlık boyutlarını incele; yerel ve uzak commit eşleşmesini doğrula | HAZIR |
+| T001 | Claude (Berkan'ın isteğiyle Codex'ten devralındı) | Kaynakları güvenli Git başlangıcına al; özel dosyaları dışla; büyük/base64 varlık boyutlarını incele; yerel ve uzak commit eşleşmesini doğrula | KOD_HAZIR · PR açık · Codex incelemesi BEKLIYOR |
 | T002 | Claude | Mevcut hareketi yeniden yazmadan çalıştırılabilir regresyon testlerini tests/ altında teslim et | HAZIR; T001 sonrası |
 | T003 | Codex | T002 testlerini çalıştır, gerçek başarısızlıkları düzelt, Claude incelemesine devret | T002 bekliyor |
 | H001 | Berkan | Test edilmiş hareket sürümünde his/kamera/gerçek cihaz değerlendirmesi | T003 bekliyor |
@@ -68,3 +68,21 @@ Bilinen hata / geri alma yöntemi:
 İnsan testi gerekiyor mu, neden:
 Sıradaki tek görev:
 Teslim alanın inceleme sonucu:
+
+---
+## Teslim kaydı — T001
+Görev ID: T001
+Teslim eden / teslim alan: Claude → Codex (inceleme)
+Durum / tarih-saat: KOD_HAZIR · 16.10.2026 ~02:50 (Europe/Istanbul)
+Dal / taban commit / teslim commit / PR: `claude/T001-ilk-gonderim` / taban `d463f2a` / teslim: bu daldaki son commit / PR: bu dal için açılan PR
+Build: `202610170100 · forma-v2` (oyun kodu değişmedi; sadece depoya alındı)
+Değişen dosyalar: tüm oyun kaynakları (143 dosya) + `.gitignore`, `README.md`; `NOTLAR.md` tarih düzeltmesi; bu belge (T001 satırı + bu kayıt)
+Çözülen sorun: oyun kaynakları GitHub'da yoktu.
+Kaynak: Berkan'ın `C:\Users\berkan\Desktop\mmofps-online` klasörü, 16.10.2026 ~02:45'te bağlantılı bilgisayardan dosya dosya kopyalandı. `_yedek/` hariç. `data/` klasörü o anda yoktu (hesap verisi yok); yine de `.gitignore`'da.
+Varlık boyutları: toplam ~66 MB; en büyükler `assets/map_mc.js` 4,5 MB, `assets/ch_samus.js` 3,4 MB, `js/model_soldier.js` 2,8 MB. GitHub'ın 100 MB dosya sınırının çok altında; Git LFS gerekmiyor.
+Test komutları ve gerçek sonuçları: oyun kodu değişmedi, oyun testi yapılmadı. Dosya sayısı yerel klasörle karşılaştırıldı: 143 = 143.
+HTTP içerik doğrulaması: yapılmadı (kod değişmedi).
+Bilinen hata / geri alma: Berkan'ın yerel klasörü Git deposu değil; GitHub Desktop ile bu depoyu klonlayıp oradan çalıştırması gerekecek. Geri alma: PR'ı birleştirmemek yeterli.
+İnsan testi gerekiyor mu: Hayır.
+Sıradaki tek görev: T002 (Claude) — hareket regresyon testleri `tests/` altında.
+Teslim alanın inceleme sonucu: BEKLIYOR (Codex)

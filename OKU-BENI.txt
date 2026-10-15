@@ -1,0 +1,37 @@
+N.P.N.G (NO PAIN NO GAIN) - HIZLI KURULUM
+==============================
+
+SUNUCU BILGISAYARI (evdeki pc):
+ 1) Node.js kur (nodejs.org, LTS). Bir kere.
+ 2) Bu klasoru bilgisayara cikar (zip'ten).
+ 3) SUNUCU-INTERNET.bat dosyasina cift tikla.
+    - Ilk seferde tunel programini kendisi indirir.
+    - Cikan https://....trycloudflare.com linki panoya kopyalanir ve LINK.txt dosyasina yazilir.
+ 4) Linki arkadaslarina gonder. Port ayari / modem ayari GEREKMEZ.
+ 5) Kapatmak icin DURDUR.bat.
+ Hesaplar ve ilerleme "data" klasorunde saklanir. O klasoru yedekle.
+
+ARKADASLAR:
+ Linke tikla > Cevrimici Arena > Kayit ol (kullanici adi + sifre) > BAGLAN > OYNA.
+ Kurulum yok.
+
+NOT: Link sunucu her yeniden baslatildiginda degisir. Ayni agdaysaniz SUNUCU-BASLAT.bat ile
+ http://<sunucu-ip>:3000 adresi de kullanilabilir.
+
+OYUN KONTROLLERI (YENI)
+ Shift (basili)     : hizlan - Naruto kosusu (ileri giderken)
+ Havada Space basili: suzul (parasut)
+ Bhop / strafe      : yere inmeden Space'e bas, havada A/D + fareyi o yone cevir -> hiz kazan
+ Enter              : yazili sohbet (ayni oda); Enter gonder, Esc iptal
+ Sesli sohbet       : sohbet kutusundaki mikrofon dugmesi -> Bas-konus (B tusu) -> Acik mikrofon -> Kapali
+ Acik dunyada sol ustteki sinif dugmesi: Savasci / Ninja / Sifaci / Tank
+ NOT: Sunucuyu (SUNUCU-INTERNET.bat) yeniden baslatmadan sohbet, ses ve sinif takim yetenekleri calismaz.
+
+ONLINE MODLAR (sunucu acik olmali, hesap ile giris gerekir)
+ - 5v5 Online : gercek oyuncularla 5'e 5. Harita sec (Arena / Dust2 / Minecraft), takimlar otomatik dengelenir, ilk 30 oldurme.
+ - Zombi Co-op Online : arkadaslarinla ayni dalgalara karsi. Sunucu zombileri yonetir. Hepsi olurse oyun biter, yeniden baslar.
+ - Cevrimici Arena : herkes herkese, ilk 20 oldurme.
+ - Acik Dunya : ortak mob ve oyuncular.
+ - Aim Training : giris yaptiysan skorun sunucudaki siralamaya gider.
+ Not: Online modlarda bot yok (bot doldurma yapilmadi). Zombi co-op'ta zombiler kutularin icinden gecer.
+ Sunucuyu guncelledikten sonra SUNUCU-BASLAT.bat / SUNUCU-INTERNET.bat'i kapatip yeniden ac.
