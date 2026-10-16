@@ -89,6 +89,7 @@ const LobbyAtmosphere=(()=>{
   // Tek gölge ışığı; yalnız mevcut gölge ayarı açıksa çalışır.
   sunlight.shadow.mapSize.set(512,512);sunlight.shadow.camera.left=-9;sunlight.shadow.camera.right=9;
   sunlight.shadow.camera.top=8;sunlight.shadow.camera.bottom=-4;sunlight.shadow.camera.near=.5;sunlight.shadow.camera.far=65;sunlight.shadow.bias=-.001;
+  sunlight.shadow.camera.updateProjectionMatrix();
   const fill=new THREE.DirectionalLight(0xc0d5eb,.6);fill.position.set(-4,4,8);root.add(fill);
   function spot(x,y,z,tx,ty,tz,color,intensity,distance,angle){
    const l=new THREE.SpotLight(color,intensity,distance,angle,.55,1);l.position.set(x,y,z);l.target.position.set(tx,ty,tz);root.add(l,l.target);lights.push(l);return l;
