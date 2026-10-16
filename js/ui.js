@@ -99,7 +99,7 @@ function shopV(){
  });
  while(cells.length<10)cells.push(`<div class='cell em'>boş</div>`);
  const st=it&&it.t==='w'?WP[it.w].st:null;
- const chips=vt==='g'?`<div class='tabs'>${WKEYS.map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${WP[k].n}</button>`).join('')}${WMOD.filter(wmOn).map(m=>`<button data-w='m:${m.id}' class='${vw==='m:'+m.id?'on':''}'>${m.n}</button>`).join('')}</div>`:'';
+ const chips=vt==='g'?`<div class='tabs'>${WKEYS.filter(k=>k!=='gsword').map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${k==='sword'?'Büyük Kılıç':WP[k].n}</button>`).join('')}${WMOD.filter(wmOn).map(m=>`<button data-w='m:${m.id}' class='${vw==='m:'+m.id?'on':''}'>${m.n}</button>`).join('')}</div>`:'';
  return `<div class='pn2'><div class='tabs'>${TABS.map(t=>`<button data-t='${t[1]}' class='${vt===t[1]?'on':''}'>${t[0]}</button>`).join('')}</div>${chips}<div class='grid'>${cells.join('')}</div></div>
  <div class='dr'><div class='pn2'><h3>${it?it.n:'-'}</h3><p>${it?dsc(it):'Bu sekmede eşya yok.'}</p><p class='ms'>${vmsg}</p></div>
  <div class='pn2'>${st?['Hasar','İsabet','Tepme','Atış hızı','Mermi'].map((l,j)=>`<div class='sr'><span>${l}</span><span class='bar'><em class='c${j}' style='width:${Math.min(100,st[j]*(j===4?3:1))}%'></em></span><b>${j===4?(WP[it.w].mag||'-'):st[j]}</b></div>`).join(''):`<p>${it?'Bu eşya hasar ya da can vermez. Sadece görünüm.':''}</p>`}</div></div>`;
@@ -127,7 +127,7 @@ function act(id){
 }
 function equip(i){
  if(i.t==='w'){SV.eq.w=i.w;applyEq(true)}
- else if(i.t==='g'){SV.sk[vw]=i.id;applyEq(true)}
+ else if(i.t==='g'){SV.sk[vw]=i.id;if(vw==='sword')SV.sk.gsword=i.id;applyEq(true)} /* tek kategori: kılıç kaplaması büyük kılıca da uygulanır */
  else if(i.t==='c'){SV.eq.c=i.id;applyEq(true)}
  else if(i.t==='f'){SV.eq.f=i.id==='f0'?null:i.id;applyEq(true)}
  else if(i.t==='op'){SV.eq.o=i.id;applyEq(true)}

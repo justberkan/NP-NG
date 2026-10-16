@@ -130,7 +130,7 @@ function shopNew(){
  const it=L.find(x=>x.id===SH.sel)||null;
  const tabs=SH_TABS.filter(t=>!(inv&&t[0]==='k')).map(t=>`<button data-t='${t[0]}' class='${SH.tab===t[0]?'on':''}'>${t[1]}</button>`).join('');
  const chips=SH.tab==='w'?`<div class='sh-sub'>${SH_SUB.map(c=>`<button data-sub='${c[0]}' class='${SH.sub===c[0]?'on':''}'>${c[1]}</button>`).join('')}</div>`
-  :SH.tab==='g'?`<div class='sh-sub'>${WKEYS.map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${WP[k].n}</button>`).join('')}${WMOD.filter(wmOn).map(m=>`<button data-w='m:${m.id}' class='${vw==='m:'+m.id?'on':''}'>${m.n}</button>`).join('')}</div>`:'';
+  :SH.tab==='g'?`<div class='sh-sub'>${WKEYS.filter(k=>k!=='gsword').map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${k==='sword'?'Büyük Kılıç':WP[k].n}</button>`).join('')}${WMOD.filter(wmOn).map(m=>`<button data-w='m:${m.id}' class='${vw==='m:'+m.id?'on':''}'>${m.n}</button>`).join('')}</div>`:'';
  const cards=L.map(shCard).join('')||`<div class='sh-empty'>${inv?'Bu sekmede henüz eşyan yok. Mağazadan alabilirsin.':'Bu sekmede eşya yok.'}</div>`;
  return `<div class='sh'>
   <div class='sh-main'>

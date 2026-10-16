@@ -36,7 +36,7 @@ const WP={
  dual:{n:'Çift Tabanca',hold:'dual',mag:24,rate:.13,dmg:22,auto:1,rel:2,kick:.8,spread:.03,sh:.087,mg:[.03,.09,.04],well:[0,-.09,-.005],gR:[0,-.05,-.01],gL:[0,-.05,-.01],mz:[0,.045,.2],st:[45,40,45,70,24],ic:'🔫',d:'İki el tabanca. Sırayla ateş eder, yakın menzilde yıkıcı. Oyunda 4 tuşu.'},
  knife:{n:'Bıçak',hold:'knife',melee:1,rate:.32,dmg:50,range:2.6,ang:.55,hitT:.45,gR:[0,0,0],mz:[0,0,.25],st:[40,100,0,90,0],ic:'🔪',d:'Hızlı yakın dövüş silahı. Oyunda 5 tuşu.'},
  sword:{n:'Kılıç',hold:'sword',melee:1,rate:.6,dmg:80,range:4,ang:.8,hitT:.45,gR:[0,0,0],gL:[0,0,-.15],mz:[0,0,.9],st:[70,100,0,60,0],ic:'🗡️',d:'Geniş kesik atar, birden çok düşmana çarpar. Oyunda 6 tuşu.'},
- gsword:{n:'İki El Kılıcı',hold:'gsword',melee:1,rate:1.05,dmg:140,range:4.6,ang:1.05,hitT:.5,gR:[0,0,.08],gL:[0,0,-.1],mz:[0,0,1.5],st:[100,100,0,30,0],ic:'⚔️',d:'Ağır ve yavaş. Tek vuruşta ezer, geniş alanı süpürür. Oyunda 7 tuşu.'}
+ gsword:{n:'Büyük Kılıç',hold:'gsword',melee:1,rate:1.05,dmg:140,range:4.6,ang:1.05,hitT:.5,gR:[0,0,.08],gL:[0,0,-.1],mz:[0,0,1.5],st:[100,100,0,30,0],ic:'⚔️',d:'Ağır ve yavaş. Tek vuruşta ezer, geniş alanı süpürür. Oyunda 7 tuşu.'}
 };
 const WNAME=k=>WP[k].n;
 
