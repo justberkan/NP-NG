@@ -33,7 +33,7 @@ const shFind=id=>shList().find(x=>x.id===id);
 
 /* ----- Metinler, istatistikler ----- */
 function shDesc(i){
- if(i.t==='op')return i.o.d+' Tüfek ve SMG\'lerin üstüne takılır, nişan alırken (sağ tık) yakınlaştırır.';
+ if(i.t==='op')return i.o.d+' Tüfek, SMG ve tekli tabancanın üstüne takılır, nişan alırken (sağ tık) yakınlaştırır.';
  if(i.t==='k')return i.cr.d+' Çıkacak eşya rastgele, sahip olmadıkların arasından seçilir.';
  if(i.t==='m')return `${i.m.sub}. ${WM_CLS[i.m.cls]} slotuna bağlanır: kuşanınca o slotun görünümü ve değerleri değişir.`+(i.m.cat==='sg'?' Tek atışta 7 saçma fırlatır.':'')+(i.m.cat==='sn'?' Yavaş ama ağır vurur, uzak menzilde ölümcül.':'');
  return dsc(i);

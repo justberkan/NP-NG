@@ -184,7 +184,7 @@ function buildWeapon(k,sk,mid,own){
  const gR=d.gR,gL=pl&&pl.gL?pl.gL:d.gL,mz=pl?pl.mz:d.mz;
  const W={g,g2:null,mag:null,mag2:null,flash:null,flash2:null,gR:V3(...gR),gL:gL?V3(...gL):V3(),well:d.mg?V3(...d.well):V3(),mz:V3(...mz),sh:pl?pl.sh:d.sh,hideMag:!!mm,adsZ:pl&&pl.adsz||0,bk:pl&&pl.bk!=null?pl.bk:null};
  W.support=pl&&pl.support?pl.support.map(p=>V3(...p)):null;
- const optOK=!d.melee&&d.hold!=='pistol'&&d.hold!=='dual';
+ const optOK=!d.melee&&d.hold!=='dual'; /* tekli tabancaya da optik takılabilir */
  if(optOK&&mm&&typeof optModel==='function'&&(own?(SV.eq.o||'o0'):'o0')!=='o0'){
   /* nişangah (optik): kuşanılan model sadece kendi silahında görünür, diğerlerinde standart kırmızı nokta */
   const oid=own?(SV.eq.o||'o0'):'o0',om=optModel(oid);
@@ -291,8 +291,10 @@ function poseGun(h,c){
   const bk=pis?0:(W.bk!=null?W.bk:.24);
   const smg=h.wk==='smg',gx=pis?-.15:-.2,gy=pis?-.21:-.215,gz=pis?.33:(bk+(smg?-.1:-.04)); /* kalça: kabza kameraya göre (sağ, aşağı, ileri) */
   /* nişan: silah ileri ve hafif aşağı → ekranın ortası açık kalır, kırmızı nokta (ekran katmanı) tam ortada.
-     ADS_ILERI: büyütünce silah küçülür/uzaklaşır · ADS_ALT: büyütünce silah ekranın altına iner */
-  const ADS_ILERI=pis?.12:.16,ADS_ALT=pis?.03:.045;
+     ADS_ILERI: büyütünce silah küçülür/uzaklaşır · ADS_ALT: büyütünce silah ekranın altına iner.
+     Optik takılıysa (W.opt) nişangah hizası göze yaklaştırılır: artı penceresinden bakılır. */
+  const hasO=!!W.opt;
+  const ADS_ILERI=hasO?.08:(pis?.12:.16),ADS_ALT=hasO?.006:(pis?.03:.045);
   const sx=0,sy=-W.sh-ADS_ALT,sz=(pis?.3:(bk+(smg?-.08:.03)))+ADS_ILERI;
   const tx=lerp(gx,sx,ads),tz=lerp(gz,sz,ads);
   P.wp.x=tx-W.gR.x;P.wp.z=tz-W.gR.z;

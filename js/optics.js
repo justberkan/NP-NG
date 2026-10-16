@@ -9,7 +9,7 @@ const OPT=[
 const OPTID={};OPT.forEach(o=>OPTID[o.id]=o);
 const optCur=()=>OPTID[SV.eq.o||'o0']||OPT[0];
 /* ADS yakınlaştırması: tüfek/SMG'de optiğin değeri, diğerlerinde standart */
-function optLong(){return typeof cw!=='undefined'&&cw&&!cw.melee&&cw.hold!=='pistol'&&cw.hold!=='dual'}
+function optLong(){return typeof cw!=='undefined'&&cw&&!cw.melee&&cw.hold!=='dual'} /* tekli tabancaya da optik takılır */
 function optRawZoom(){return optLong()?optCur().z:1.4}
 /* Ayarlar > Nişan yakınlaştırması: 0 = hiç yakınlaşmaz, 1 = optiğin tam değeri. Dürbünlerde (3x+) en az %60 uygulanır */
 function optZoom(){const z=optRawZoom(),k=SET.adsZoom==null?.5:+SET.adsZoom;return 1+(z-1)*(z>=3?Math.max(.6,k):k)}
@@ -27,7 +27,11 @@ function optModel(id){
   const m=typeof MDL!=='undefined'?MDL.cache[o.mid]:null;
   if(m&&typeof mdlMake==='function'){
    const len=OPTGLEN[o.mid]||.18,o2=mdlMake(o.mid,len);
-   if(o2){o2.position.y=o2.userData.H/2;g.add(o2);return {g,cy:o2.userData.H*.55}}
+   if(o2){
+    if(o.mid==='op_holosight')o2.rotation.y=Math.PI; /* model arkaya dönük geliyor: çevir */
+    const bb=new THREE.Box3().setFromObject(o2),bh=bb.max.y-bb.min.y;
+    o2.position.y=-bb.min.y;g.add(o2);return {g,cy:bh*.55}
+   }
   }
   if(typeof mdlLoad==='function'&&m===undefined&&!MDL.fail[o.mid])mdlLoad(o.mid,()=>{}); /* modeli önceden yükle (mdlPreload da yapar) */
   return {g,cy:.05};
@@ -111,7 +115,12 @@ function thermScan(on){
     const k=m.uuid;
     if(!_thM.has(k))_thM.set(k,{h:m.emissive.getHex(),i:'emissiveIntensity' in m?m.emissiveIntensity:1});
     const v=_thM.get(k);
-    if(hot){if(m.emissive.getHex()!==0xffa040)m.emissive.setHex(0xffa040);if('emissiveIntensity' in m&&m.emissiveIntensity!==1)m.emissiveIntensity=1}
+    if(hot){ /* vücut ısısı: parlak kırmızı-sıcak imza */
+     const hx=(k.length*7)%3; /* hafif ton farkı: kimi parça turuncu-kırmızı, kimi derin kırmızı */
+     const col=hx===0?0xff3a10:(hx===1?0xff2008:0xd81505);
+     if(m.emissive.getHex()!==col)m.emissive.setHex(col);
+     if('emissiveIntensity' in m&&m.emissiveIntensity!==1.3)m.emissiveIntensity=1.3;
+    }
     else{if(m.emissive.getHex()!==v.h)m.emissive.setHex(v.h);if('emissiveIntensity' in m&&m.emissiveIntensity!==v.i)m.emissiveIntensity=v.i}
    }
   });
