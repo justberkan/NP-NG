@@ -14,7 +14,7 @@ const rnd=(a,b)=>a+Math.random()*(b-a);
 let low=false,baseFov=75;
 try{baseFov=+localStorage.getItem('mmofps_fov')||75}catch(e){}
 
-const R=new THREE.WebGLRenderer({canvas:$('c'),antialias:false,powerPreference:'high-performance'});
+const R=new THREE.WebGLRenderer({canvas:$('c'),antialias:false,powerPreference:'high-performance',stencil:false});
 const S=new THREE.Scene();S.background=new THREE.Color(0x9cc3de);S.fog=new THREE.Fog(0x9cc3de,25,70);
 const cam=new THREE.PerspectiveCamera(75,1,.1,100);cam.rotation.order='YXZ';S.add(cam);
 S.add(new THREE.HemisphereLight(0xffffff,0x4a5a6a,1.05));

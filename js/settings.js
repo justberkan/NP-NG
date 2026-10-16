@@ -17,7 +17,7 @@ const PRESETS={
  high:{res:100,light:2,shadow:true,fog:2,fx:2}
 };
 const FOGFAR=[0,70,110,170],OWFOG=[0,110,170,260],HEMI=S.children.find(o=>o.isHemisphereLight);
-function pixelRatio(){return Math.max(.4,Math.min(devicePixelRatio,1.5)*SET.res/100)}
+function pixelRatio(){return Math.max(.25,Math.min(devicePixelRatio,1.5)*SET.res/100)}
 
 function applyVideo(){
  baseFov=SET.fov;

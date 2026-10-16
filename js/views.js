@@ -133,7 +133,7 @@ const SEL={
  light:[[0,'Düz (en hızlı)'],[1,'Güneş ışığı'],[2,'Güneş ışığı (güçlü)']],
  fog:[[0,'Kapalı'],[1,'Yakın'],[2,'Orta'],[3,'Uzak']],
  fx:[[0,'Düşük (izsiz, az ragdoll)'],[1,'Orta'],[2,'Yüksek']],
- fpsCap:[[0,'Ekran hızı'],[30,'30'],[60,'60'],[90,'90'],[120,'120'],[144,'144']],
+ fpsCap:[[0,'Limitsiz'],[30,'30'],[60,'60'],[90,'90'],[120,'120'],[144,'144'],[240,'240']],
  preset:[['low','Düşük'],['mid','Orta'],['high','Yüksek'],['custom','Özel']]
 };
 const cRange=(l,k,mn,mx,st,u)=>`<div class='sr2'><span>${l}</span><input type='range' data-k='${k}' min='${mn}' max='${mx}' step='${st}' value='${SET[k]}'><b data-v='${k}'>${SET[k]}${u||''}</b></div>`;
@@ -168,11 +168,11 @@ function setV(ig){
   <hr style='border:0;border-top:1px solid #243242'><h3>Kırmızı nokta (tüfek ve SMG)</h3>`+cRange('Çerçeve boyutu','opticSize',.3,1.5,.05,'x')+cRange('Nokta boyutu','dotSize',.3,3,.1,'x')+`<p class='note'>Değişiklik silah modeli yenilenince hemen görünür. Nişan alırken (sağ tık) kırmızı nokta kullanılır, normal nişangah silikleşir.</p>`;
  else if(setTab==='vid'){
   const pr=pixelRatio();
-  b=cSel('Grafik ön ayarı','preset',SEL.preset)+cRange('Çözünürlük ölçeği','res',40,100,5,'%')+`<p class='note'>Şu an yaklaşık ${Math.round(innerWidth*pr)}×${Math.round(innerHeight*pr)} piksel çiziliyor.</p>`+
+  b=cSel('Grafik ön ayarı','preset',SEL.preset)+cRange('Çözünürlük ölçeği','res',25,100,5,'%')+`<p class='note'>Şu an yaklaşık ${Math.round(innerWidth*pr)}×${Math.round(innerHeight*pr)} piksel çiziliyor. FPS kazanmak için en etkili ayar budur: %25-%60 arası zayıf PC'ler için önerilir.</p>`+
   cSel('Işık kalitesi','light',SEL.light)+cCheck('Gölgeler (yavaş PC\'de kapalı tut)','shadow')+cSel('Sis ve çizim mesafesi','fog',SEL.fog)+cSel('Efekt kalitesi','fx',SEL.fx)+
   cSel('FPS sınırı','fpsCap',SEL.fpsCap)+cCheck('FPS göstergesi','fpsShow')+
   `<p class='note'>Doku: modeller şimdilik doku kullanmıyor, renkli yüzeylerle çiziliyor. Silah skin dokuları gelince doku kalitesi ayarı da eklenecek.</p>
-  <p class='note'>V-Sync: tarayıcıda otomatik açık ve kapatılamıyor, ekranının yenileme hızına kilitli. EXE sürümünde bu seçenek açılıp kapanabilecek. Şimdilik FPS sınırı ile düşürebilirsin.</p>`;
+  <p class='note'>FPS sınırı "Limitsiz" = yapay sınır yok. V-Sync tarayıcıda otomatik açık ve kapatılamıyor: üst sınır ekranının yenileme hızıdır (örn. 144 Hz ekranda en fazla 144 FPS). Sınır seçince sistem ısınmasını ve fan sesini azaltırsın; Limitsiz'de mümkün olan en yüksek değeri alırsın. EXE sürümünde V-Sync açılıp kapanabilecek.</p>`;
  }else if(setTab==='mob')b=cRange('Dokunmatik bakış hassasiyeti','touchSens',.4,2.5,.05,'x')+`<div class='row' style='margin-top:10px'><button class='btn alt' id='tle2'>Tuş düzenini değiştir</button></div><p class='note'>Düğmeleri sürükleyip yerleştirir, boyutlarını ayarlarsın. Dokunmatik cihazda en rahat çalışır.</p>`;
  else if(setTab==='cr')b=creditsHTML();
  else if(setTab==='mk'){

@@ -782,12 +782,33 @@ function rgStep(r){
   }
  }
 }
+/* Goblin (iskeleti farklı mob) ölümü: ragdoll yerine vuruş yönüne devrilip kayar, 6 sn sonra toprağa gömülür.
+   newchars.js bu kaydı {g,dir,q0,y0,pw} olarak GLBDEAD'e ekler; eskiden işleyen kod yoktu ve insan ragdoll kodu
+   bu kaydı okurken hata fırlatıp ana döngüyü her karede durduruyordu (açık dünyada ilk öldürmede donma). */
+const _gdA=V3(),_gdQ=new THREE.Quaternion();
+function gobDeadStep(r){
+ if(r.x0==null){r.x0=r.g.position.x;r.z0=r.g.position.z}
+ const k=Math.min(1,r.t/.55),e=k*k*(3-2*k);
+ _gdA.set(r.dir.z,0,-r.dir.x);if(_gdA.lengthSq()<1e-6)_gdA.set(1,0,0);_gdA.normalize();
+ r.g.quaternion.copy(_gdQ.setFromAxisAngle(_gdA,e*Math.PI/2)).multiply(r.q0);
+ const slide=.55*(r.pw||1)*e;
+ r.g.position.set(r.x0+r.dir.x*slide,r.y0-(r.t>6?Math.min(1.2,(r.t-6)*.3):0),r.z0+r.dir.z*slide);
+ if(r.pts&&r.pts.pel)r.pts.pel.p.copy(r.g.position);
+}
 function glbDeadUpdate(dt){
  for(let i=GLBDEAD.length-1;i>=0;i--){
-  const r=GLBDEAD[i];r.t+=dt;r.acc+=dt;
-  let n=0;while(r.acc>=1/60&&n<4){r.acc-=1/60;rgStep(r);n++}
-  if(r.acc>.1)r.acc=0;
-  rgPose(r);
+  const r=GLBDEAD[i];r.t+=dt;
+  try{
+   if(!r.d){gobDeadStep(r)} /* goblin tipi kayıt */
+   else{
+    r.acc+=dt;
+    let n=0;while(r.acc>=1/60&&n<4){r.acc-=1/60;rgStep(r);n++}
+    if(r.acc>.1)r.acc=0;
+    rgPose(r);
+   }
+  }catch(e){ /* tek bir bozuk ölü beden oyunu dondurmasın: kaldır, devam et */
+   console.warn('ölü beden güncellenemedi, kaldırıldı',e);r.t=99;
+  }
   if(r.t>10){S.remove(r.g);GLBDEAD.splice(i,1)}
  }
 }

@@ -40,6 +40,7 @@ Yerel oyun: C:\Users\berkan\Desktop\mmofps-online
 | T007 | Codex | Aim Training rafları/gerçek hedefler; loadout yalnız zom/zo; diğer modlara regresyon kontrolü | Önceki adım sonrası |
 | T008 | Ortak | 5v5 ve online altyapı; önce Berkan'dan satın alma ekranı referansı | Önceki adım sonrası |
 | T009 | Kimi | Berkan'ın isteği: açık dünyada otomatik savaş/kılıç menzili yetmiyordu. Kılıç menzili +1 m (10 kılıç), auto: menzilli hedefe dash, auto vuruş menzili +0.3. Ayrıca newchars.js `_animHuman1` çakışması düzeltildi (goblin animasyonları ölüydü). Berkan'ın yerel son hâli depoya eşitlendi | KOD_HAZIR → OTOMATIK_TEST_GECTI (17/17 hareket, 5/5 HTTP, 43 dosya açılış; menzil kanıtı: 4.5 m ve 4.9 m isabet, 5.5 m ıskar). İnsan testi: Berkan |
+| T010 | Kimi + Claude | Berkan'ın isteği: FPS limitine "Limitsiz" ayarı + fps kazandıran iyileştirmeler (çözünürlük %25'e indi, pixelRatio tabanı .25, stencil tamponu kapalı, 240 seçeneği). Claude: goblin ölüm donması düzeltmesi (gobDeadStep + try/catch, build 202610170104) | OTOMATIK_TEST_GECTI (18 PASS + HTTP 5/5; fpsSkip 30/60/240/Limitsiz davranışı başsız tarayıcıda doğrulandı). İnsan testi: Berkan |
 
 Önerilen sahiplik henüz Claude tarafından kabul edilmedi. Büyük modlar, MMO, yarış, ekonomi, profil, TR/EN ve mobil işlerin tam kapsamı TALEP_ORIJINAL.txt dosyasında korunur; tek teslimde bitmiş sayılmaz.
 

@@ -116,3 +116,5 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 16.10.2026 · Kimi · `202610170102 menzil-v1` · Açık dünya kılıç menzili +1 m (10 kılıç), otomatik savaşta menzilli hedefe dash ile boşluk kapatma, auto vuruş menzili +0.3 · swords, auto
 - 16.10.2026 · Kimi · `202610170102 menzil-v1` · newchars.js `_animHuman1` çakışması düzeltildi: fingers.js ile aynı adda const → newchars.js bütünüyle çalışmıyordu (goblin animasyonları ölüydü) · newchars
 - 16.10.2026 · Eşitleme · Berkan'ın yerel son hâli (Claude güncellemeleri: glbrig, models, weapons, catalog, fingers.js, index.html) depoya alındı · fingers yeni dosya
+- 16.10.2026 · Kimi · `202610170103 fps-v1` · FPS sınırına Limitsiz + 240 seçeneği; çözünürlük ölçeği %25'e indi (pixelRatio tabanı .25); stencil tamponu kapalı · views, settings, core
+- 16.10.2026 · Claude · `202610170104 fps-v1+donma-fix` · Goblin ölümü ragdoll yerine devrilip kayma (gobDeadStep); bozuk ölü beden artık oyunu dondurmuyor (try/catch) · glbrig
