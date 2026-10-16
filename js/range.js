@@ -50,6 +50,18 @@ function rangeStart(){
   px.position.set(-28.4,1.1,3+i*2.4);px.userData.range={char:c.id,form,n:c.n+(form?' + Forma':'')};g.add(px);RANGE.items.push(px);
   RANGE.mans.push(rig);
  });
+ /* optik bankı (doğu duvarı, parkurun kuzeyi): 3 GLB dürbün, E ile tak-çıkar dene */
+ const OPTRANGE=['o7','o8','o9'];
+ OPTRANGE.forEach((oid,i)=>{
+  const z=16.5+i*2.2,o=OPTID[oid];
+  const ped=new THREE.Mesh(new THREE.BoxGeometry(.7,1.05,.7),new THREE.MeshLambertMaterial({color:0x2a3440}));
+  ped.position.set(27.6,.53,z);g.add(ped);
+  const hold=new THREE.Group();hold.position.set(27.6,1.08,z);hold.rotation.y=Math.PI/2;g.add(hold);
+  const place=()=>{const m=MDL.cache[o.mid];if(!m||!hold.parent)return;const om=optModel(oid);om.g.rotation.z=0;hold.add(om.g)};
+  if(MDL.cache[o.mid]||MDL.fail[o.mid])place();else mdlLoad(o.mid,place);
+  const px=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.6,1.4),proxyMat);
+  px.position.set(27.6,1,z);px.userData.range={optic:oid,n:o.n};g.add(px);RANGE.items.push(px);
+ });
  /* parkur (doğu tarafı): basamaklar, tırmanma duvarı, üst platform, bhop kütükleri */
  const pad=(...a)=>{box(...a);RANGE.pads.push(boxes[boxes.length-1])};
  pad(10,14,2,.5,2,0x2bb5a0);pad(13,14,2,1,2,0x2bb5a0);pad(16,14,2,1.5,2,0x2bb5a0);pad(19,14,2,2,2,0x2bb5a0);
@@ -67,12 +79,19 @@ function rangeStop(){
  for(const k in RANGE_MOD)delete RANGE_MOD[k];
  if(RANGE.hint)RANGE.hint.textContent='';
  if(RANGE.char!=null){SV.eq.c=RANGE.char;SV.eq.f=RANGE.form;rebuildPlayerModels();RANGE.char=null} /* denenen karakter/forma geri alınır */
+ if(RANGE.optic!=null){SV.eq.o=RANGE.optic;if(typeof rebuildPlayerModels==='function')rebuildPlayerModels();RANGE.optic=null} /* denenen optik geri alınır */
 }
 function rangeTake(it){
  if(it.k){
   const cls=it.k==='dual'?'pistol':it.k;
   if(it.mid)RANGE_MOD[cls]=it.mid;else delete RANGE_MOD[cls];
   wa[it.k]=9999;setW(it.k);
+  $('msg').textContent='Deneniyor: '+it.n;setTimeout(()=>{if(mode==='aim')$('msg').textContent=''},1500);
+ }else if(it.optic){
+  if(RANGE.optic==null)RANGE.optic=SV.eq.o||'o0';
+  SV.eq.o=it.optic;
+  if(typeof rebuildPlayerModels==='function')rebuildPlayerModels();
+  if(typeof wk!=='undefined'&&wk&&typeof setW==='function')setW(wk,true);
   $('msg').textContent='Deneniyor: '+it.n;setTimeout(()=>{if(mode==='aim')$('msg').textContent=''},1500);
  }else if(it.char){
   if(RANGE.char==null){RANGE.char=SV.eq.c;RANGE.form=SV.eq.f||null}

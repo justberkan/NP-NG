@@ -1,13 +1,7 @@
 'use strict';
 /* ===== Nişangahlar (optikler): silahın üstüne takılan modeller, nişan alınca yakınlaştırma + artı (reticle) ===== */
 const OPT=[
- {id:'o0',n:'Kırmızı nokta',p:0,r:'common',z:1.4,ty:'dot',d:'Hafif ve hızlı. Standart nişangah.'},
- {id:'o1',n:'Reflex',p:220,r:'common',z:1.5,ty:'ring',d:'Dairesel kırmızı artı, geniş camlı küçük nişangah.'},
- {id:'o2',n:'Holografik',p:520,r:'rare',z:1.7,ty:'holo',d:'Dairenin ortasında nokta. Yakın ve orta mesafede çok net.'},
- {id:'o3',n:'ACOG 3,5x',p:1100,r:'rare',z:2.6,ty:'acog',d:'Orta menzil için 3,5 kat yakınlaştırma, şivron artı.'},
- {id:'o4',n:'Tüp dürbün 4x',p:1500,r:'epic',z:3.3,ty:'tube',d:'Klasik dürbün: 4 kat yakınlaştırma, ince artı.'},
- {id:'o5',n:'Nişancı dürbünü 6x',p:2600,r:'epic',z:4.6,ty:'snip',d:'Uzun mesafe için 6 kat, nişan alırken ekran daralır.'},
- {id:'o6',n:'Termal dürbün 3x',p:4200,r:'legendary',z:3,ty:'therm',th:1,d:'Yeşil termal görüntü, 3 kat yakınlaştırma. Düşmanlar nişan alırken parlak vurgulanır.'},
+ {id:'o0',n:'Kırmızı nokta',p:0,r:'common',z:1.4,ty:'dot',d:'Standart nişangah (silahların kendi gezineği).'},
  {id:'o7',n:'Modern tüfek dürbünü 4x',p:1700,r:'epic',z:3.4,ty:'tube',mid:'op_scope_modern',d:'Modern keskin nişancı dürbünü: 4 kat yakınlaştırma, ince artı.'},
  {id:'o8',n:'Holosight XPS',p:680,r:'rare',z:1.7,ty:'holo',mid:'op_holosight',d:'Gerçek holografik nişangah modeli: dairenin ortasında nokta.'},
  {id:'o9',n:'CYBER dürbün 4x (Termal)',p:5600,r:'legendary',z:4,ty:'therm',th:1,mid:'op_scope_futur',d:'Geleceğin termal dürbünü: nişan alırken düşmanlar sıcak imza ile parlar; duman/sis eklendiğinde bu dürbünle görünür kalırlar.'}
