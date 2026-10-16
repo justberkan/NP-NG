@@ -151,3 +151,6 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 202610171302 holo-lobi-v1 (Claude): Holosight XPS baş aşağıydı, düzeltildi (optics.js); pencereye 3B kırmızı nokta+halka eklendi, nişanda gizlenir (ekranda tek retikül). ChatGPT lobi karakter alanı yaması (LOBI-ALAN-001) uygulandı: style.css, lobby3d.js, ui.js.
 - 202610171303 kasa-v1 (Claude): Yeni kasa tasarımları (7 SVG) crates.js içine gömüldü (crateArt); eski crateicon yalnız yedek. Kasa fiyatları x10: 1000/2500/2000/1800/2200/1500/7000.
 - GitHub: tam oyun justberkan/NP-NG main dalında; her güncellemede Claude main'i günceller.
+
+- 17.10.2026 · Codex · Launcher 0.2.0 · electron/ altinda yeni launcher arayuzu, yerel server.js baslatma/klasor secimi, gercek HTTP kontrolu, tam ekran/uyku tercihi, GPU tanisi ve rapor aktarimi. 7 servis/politika testi, paketlenmis v2 ve smoke PASS; mevcut tests/run.cjs PASS. Masaustu/NPNG-Launcher-0.2.0 kurulum ve Claude kaynak teslimi; performans artisi orani iddia edilmedi. Gercek monitor/FPS ve temiz cihaz kurulumu Berkan kabulunde. Oyun kodu degismedi.
+- 202610171304 odul-v1 (Claude): Görevler sayfasına "TÜM ÖDÜLLERİ AL" düğmesi (views.js claimAll): günlük+haftalık+sezon görevleri ve battle pass (ücretsiz+premium) tek tıkla; görev XP'si yeni BP seviyesi açarsa onlar da alınır. Battle pass'teki "HEPSİNİ AL" da aynı fonksiyonu kullanır.

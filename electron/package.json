@@ -1,14 +1,14 @@
 {
   "name": "npng-desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "N.P.N.G. masaüstü oyun istemcisi",
+  "description": "N.P.N.G. oyun launcher ve masaüstü istemcisi",
   "author": "Berkan / N.P.N.G.",
   "license": "UNLICENSED",
   "main": "main.cjs",
   "scripts": {
     "start": "electron .",
-    "test": "node --test tests/policy.cjs",
+    "test": "node --test tests/policy.cjs tests/services.cjs",
     "test:smoke": "node tests/smoke.cjs",
     "prepack": "node tools/make-icon.cjs && node node_modules/electron/install.js",
     "pack": "electron-builder --win --x64 --dir --publish never",
@@ -35,7 +35,8 @@
       "preload.cjs",
       "launcher/**",
       "build/icon.ico",
-      "package.json"
+      "package.json",
+      "services.cjs"
     ],
     "win": {
       "icon": "build/icon.ico",

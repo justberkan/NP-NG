@@ -1,19 +1,22 @@
 'use strict';
-const form=document.getElementById('server-form'),address=document.getElementById('address'),button=document.getElementById('connect'),status=document.getElementById('status'),hint=document.getElementById('hint');
-let remote='';
-function mode(remoteMode){
- if(remoteMode){address.value=remote;address.placeholder='https://oyun-adresi.example';hint.textContent='Oyunun veya arkadaşının paylaştığı sunucu linkini yapıştır.';address.focus()}
- else{if(address.value&&!/^http:\/\/(localhost|127\.0\.0\.1)(:|\/)/.test(address.value))remote=address.value;address.value='http://localhost:3000/';hint.textContent='Önce oyun klasöründeki SUNUCU-BASLAT.bat dosyasını aç.'}
-}
-form.addEventListener('change',event=>{if(event.target.name==='server')mode(event.target.value==='remote')});
-form.addEventListener('submit',async event=>{
- event.preventDefault();button.disabled=true;status.textContent='Sunucuya bağlanılıyor…';
- try{const result=await window.npngLauncher.connect(address.value);status.textContent=result.ok?'':result.error}
- catch(e){status.textContent='Bağlantı kurulamadı. Adresi kontrol edip yeniden dene.'}
- finally{button.disabled=false}
-});
-window.npngLauncher.onStatus(message=>{status.textContent=message});
-window.npngLauncher.preferences().then(p=>{
- address.value=p.url;document.getElementById('version').textContent='v'+p.version;status.textContent=p.error||'';
- if(!/^http:\/\/(localhost|127\.0\.0\.1)(:|\/)/.test(p.url)){remote=p.url;form.querySelector('[value=remote]').checked=true;hint.textContent='Kaydedilmiş sunucu adresin.'}
-}).catch(()=>{status.textContent='Kayıtlı adres okunamadı; yerel sunucuyu kullanabilirsin.'});
+const $=id=>document.getElementById(id),form=$('server-form'),address=$('address'),button=$('connect'),status=$('status'),hint=$('hint'),api=window.npngLauncher;
+let remote='',probeSequence=0;
+const options=()=>({fullscreen:$('fullscreen').checked,keepAwake:$('keep-awake').checked});
+function message(text){status.textContent=text||''}
+function resetHealth(){probeSequence++;$('health').textContent='Bağlantı henüz kontrol edilmedi';$('health-dot').className='health-dot'}
+function mode(remoteMode){resetHealth();if(remoteMode){address.value=remote;address.placeholder='https://oyun-sunucusu.example';hint.textContent='Oyunun veya arkadaşının paylaştığı sunucu linkini yapıştır.';address.focus()}else{if(address.value&&!/^http:\/\/(localhost|127\.0\.0\.1)(:|\/)/.test(address.value))remote=address.value;address.value='http://localhost:3000/';hint.textContent='Oyun sunucusunu sağdaki düğmeden başlatabilirsin.'}}
+form.addEventListener('change',e=>{if(e.target.name==='server')mode(e.target.value==='remote')});address.addEventListener('input',resetHealth);
+async function probe(){const id=++probeSequence;$('probe').disabled=true;$('health').textContent='Sunucu kontrol ediliyor…';try{const r=await api.probe(address.value);if(id!==probeSequence)return;$('health').textContent=r.ok?'Sunucu yanıt veriyor · HTTP '+r.ms+' ms':r.error;$('health-dot').className='health-dot '+(r.ok?'ready':'error')}catch(e){if(id===probeSequence)$('health').textContent='Bağlantı kontrol edilemedi.'}finally{$('probe').disabled=false}}
+$('probe').onclick=probe;
+form.addEventListener('submit',async e=>{e.preventDefault();button.disabled=true;message('Oyun hazırlanıyor…');try{const r=await api.connect(address.value,options());message(r.ok?'':r.error)}catch(e){message('Bağlantı kurulamadı. Adresi kontrol edip yeniden dene.')}finally{button.disabled=false}});
+api.onStatus(message);
+function page(name){if(!['play','settings','system'].includes(name))return;document.querySelectorAll('.page').forEach(el=>el.hidden=el.id!=='page-'+name);document.querySelectorAll('.nav').forEach(el=>{const active=el.dataset.page===name;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});if(name==='system')loadSystem()}
+document.querySelectorAll('[data-page]').forEach(el=>el.addEventListener('click',()=>page(el.dataset.page)));
+let saving=Promise.resolve();for(const id of ['fullscreen','keep-awake'])$(id).onchange=()=>{const value=options();saving=saving.catch(()=>{}).then(()=>api.saveSettings(value)).then(()=>{$('settings-status').textContent='Tercihlerin kaydedildi.'}).catch(()=>{$('settings-status').textContent='Tercihler kaydedilemedi.'})};
+const flagNames={'disable-frame-rate-limit':'Chromium kare sınırı kaldırma isteği','disable-gpu-vsync':'V-Sync kapatma isteği','force_high_performance_gpu':'Yüksek performanslı GPU tercihi','disable-background-timer-throttling':'Arka plan zamanlayıcı kısıtı kapalı','disable-renderer-backgrounding':'Görüntü işlemi önceliği korunur'};
+async function loadSystem(){try{const d=await api.diagnostics(),items=[['İşlemci',d.cpu],['Bellek',d.ramGB+' GB'],['İşletim sistemi',d.os],['WebGL',d.graphics.webgl2||d.graphics.webgl||'Bilgi bekleniyor'],['GPU birleştirme',d.graphics.gpu_compositing||'Bilgi bekleniyor'],['Launcher',d.launcher+' / Electron '+d.electron]];$('system-info').replaceChildren();for(const [key,value] of items){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=key;dd.textContent=value;$('system-info').append(dt,dd)}$('flags').replaceChildren();for(const f of d.switches){const el=document.createElement('div');el.className='flag'+(f.active?'':' off');el.textContent=(f.active?'✓  ':'!  ')+(flagNames[f.name]||f.name);$('flags').append(el)}}catch(e){$('system-info').textContent='Sistem bilgisi alınamadı.'}}
+$('refresh-system').onclick=loadSystem;
+$('export-report').onclick=async()=>{try{const r=await api.exportReport();$('report-status').textContent=r.ok?'Rapor kaydedildi.':r.canceled?'':r.error}catch(e){$('report-status').textContent='Rapor kaydedilemedi.'}};
+$('choose-folder').onclick=async()=>{try{const r=await api.chooseFolder();if(r.ok)$('folder-label').textContent=r.folder;else if(!r.canceled)message(r.error)}catch(e){message('Klasör seçilemedi.')}};
+$('start-local').onclick=async()=>{const b=$('start-local');b.disabled=true;message('Yerel sunucu hazırlanıyor…');try{const r=await api.startLocal();message(r.ok?(r.alreadyRunning?'Yerel sunucu zaten açık. OYNA ile bağlanabilirsin.':'Yerel sunucu hazır. OYNA ile bağlanabilirsin.'):r.error);if(r.ok){form.querySelector('[value=local]').checked=true;mode(false);await probe()}}catch(e){message('Yerel sunucu başlatılamadı.')}finally{b.disabled=false}};
+api.preferences().then(p=>{address.value=p.url;$('version').textContent='v'+p.version;message(p.error);$('fullscreen').checked=p.fullscreen!==false;$('keep-awake').checked=p.keepAwake!==false;$('folder-label').textContent=p.localFolder||'Oyun klasörünü seçerek başlayabilirsin.';if(!/^http:\/\/(localhost|127\.0\.0\.1)(:|\/)/.test(p.url)){remote=p.url;form.querySelector('[value=remote]').checked=true;hint.textContent='Kaydedilmiş sunucu adresin.'}}).catch(()=>message('Kayıtlı tercihler okunamadı.'));

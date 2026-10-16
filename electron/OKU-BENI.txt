@@ -1,70 +1,59 @@
-N.P.N.G. — WINDOWS EXE İSTEMCİSİ (C1)
+N.P.N.G. LAUNCHER — 0.2.0 TEST SÜRÜMÜ
 ====================================
 
-OYUNCU İÇİN
-1. dist klasöründeki NPNG-Kurulum-0.1.0-x64.exe dosyasını aç.
-2. Kurulum klasörünü seçip kurulumu tamamla; masaüstündeki NPNG kısayolunu aç.
-3. Aynı bilgisayardaki oyun için önce mmofps-online klasöründe
-   SUNUCU-BASLAT.bat dosyasını çalıştır. EXE oyun sunucusunu içermez/açmaz.
-4. "Bu bilgisayardaki oyun" seçiliyken BAĞLAN VE OYNA'ya bas.
-   Varsayılan adres: http://localhost:3000/
-5. İnternetteki oyun için "İnternet / arkadaş linki" seçip HTTP/HTTPS
-   sunucu linkini yapıştır. Hesabına oyunun kendi giriş ekranından gir.
+KURULUM
+NPNG-Kurulum-0.2.0-x64.exe dosyasını aç, kurulumu tamamla.
+Masaüstündeki NPNG kısayolundan launcher'ı aç.
 
-Tuşlar:
-  F11       : Gerçek tam ekran / pencere arasında geçiş.
-  Esc       : Oyunun fare kilidini / duraklatma menüsünü yönetir.
-  Ctrl+W    : Oyun penceresini kapatıp sunucu seçimine döner.
-  Ctrl+R/F5 : Oyunu yeniden yükler; maçtan çıkmana neden olabilir.
-  Alt+F4    : Etkin pencereyi kapatır. Sunucu seçim penceresinde uygulamadan çıkar.
-  Ctrl+L/T/N/P vb. tarayıcı sekme/adres/yazdırma kısayolları engellenir.
+YEREL OYUN
+1. Oyun klasörünün yolunu kontrol et. Masaüstündeki mmofps-online
+   klasörü mevcutsa otomatik bulunur; gerekirse Klasör seç ile değiştir.
+2. Sunucuyu başlat düğmesine bas. Sunucu zaten açıksa ikinci kez başlatmaz.
+3. Kontrol et düğmesi HTTP yanıt süresini gösterir (oyun içi ping değildir).
+4. OYNA ile oyuna gir.
 
-FPS KONTROLÜ (BERKAN)
-Oyun ayarlarında FPS sınırını Limitsiz seç, FPS göstergesini aç.
-Aynı harita ve ayarlarda tarayıcıyla karşılaştır. EXE'nin göstergesi
-monitör yenileme hızının üzerine çıkıyor mu? Gerçek görüntü hissi iyi mi?
-Gerekirse kullandığın çözünürlük/ön ayar, harita ve FPS değerini bildir.
-Uygulama kare sınırı ve V-Sync kapatma anahtarlarını açılışta kullanır;
-oyunun kendi FPS sınırı, sürücü ayarı ve donanım performansı ayrıca etkilidir.
+Sunucu oyun dosyalarından çalışır. Kurulum EXE'si oyun varlıklarını veya
+hesap verilerini içermez. Başlatılan yerel sunucu launcher kapatılınca
+çalışmaya devam eder; diğer oyuncuların bağlantısı kapanmaz.
+Sunucuyu kapatmak için oyun klasöründeki mevcut DURDUR.bat aracını kullan.
+Klasör seçimi yalnız güvendiğin kendi NPNG sunucu klasörün için yapılmalı.
 
-ÖNEMLİ SINIRLAR
-- Bu bir istemcidir. Yerel sunucu kapalıysa yerel oyun açılmaz; ekranda
-  adres/sunucu hatası görünür ve yeniden deneyebilirsin.
-- Oyun dosyalarını, hesapları veya kayıtları kurulum paketine kopyalamaz.
-  Sunucudaki güncel oyunu açar; js/css/index/server/assets/lib değiştirilmez.
-- Son başarılı sunucu adresi ve Electron oturum bilgileri kullanıcı
-  profilinde saklanır. Tarayıcı oturumundan ayrı olduğu için ilk kez giriş gerekebilir.
-- Başka siteye yönlendirme, açılır pencere ve indirmeler oyun penceresinde engellenir.
-  Mikrofona erişim sesli sohbet isteğinde sorulur; kamera açılmaz.
-- Bu yerel kurulum dijital imzalı değildir. Ticari imza sertifikası satın alınmadı.
+İNTERNET OYUNU
+İnternet sunucusu seçeneğini işaretle, mevcut oyun linkini yapıştır.
+Kontrol et ile bağlantıyı kontrol et, OYNA'ya bas.
+Giriş ve hesap işlemleri oyunun kendi ekranındadır.
+Sunucu adresi kaydedilir; parola launcher'a yazılmaz.
 
-GELİŞTİRİCİ / YENİDEN DERLEME
-Node.js 22.12+ gereklidir. Komutları electron klasöründe çalıştır:
-  npm ci
-  npm test
-  npm start
-  npm run build
+AYARLAR
+Tam ekran başlat: sonraki oyun açılışında uygulanır.
+Oynarken ekranı açık tut: oyun açıkken ekranın uyumasını engeller;
+oyun kapanınca kaldırılır. Bu ayar GPU hız aşırtması veya güç planı değildir.
 
-Electron 44.7.2 ve electron-builder 26.15.3 sabitlenmiştir.
-İlk çalıştırma/derleme Electron ikilisini ve Windows paketleme araçlarını
-ücretsiz resmi kaynaklardan indirir. npm paketi kurulsa da Electron ikilisi
-henüz indirilmediyse: node node_modules/electron/install.js
+SİSTEM
+İşlemci, bellek, WebGL/GPU durumunu ve etkin istemci anahtarlarını gör.
+Tanı raporunu kaydet ile JSON raporunu istediğin yere kaydedebilirsin.
+Raporda hesap bilgileri, sohbet, sunucu adresi veya kişisel dosya yolu yoktur.
 
-Çıktılar:
-  dist/NPNG-Kurulum-0.1.0-x64.exe  -> tek Windows x64 kurulum dosyası
-  dist/win-unpacked/NPNG.exe       -> kurulumsuz kontrol (yanındaki tüm dosyalar gerekli)
+TUŞLAR
+F11: Tam ekran / pencere.
+Ctrl+W: Oyunu kapat ve launcher'a dön.
+F5 / Ctrl+R: Oyunu yeniden yükle (maçtan çıkmana neden olabilir).
+Alt+F4: Etkin pencereyi kapat.
 
-Otomatik EXE testi (Playwright projenin test ortamında kurulu olmalı):
-  npm run test:smoke
-  Paketlenmiş EXE için NPNG_EXE ortam değişkenine dist/win-unpacked/NPNG.exe yolu ver.
-  TEST_URL ile localhost dışındaki bir TEST sunucusu seçilebilir.
-Sonuçlar ve ekran görüntüleri electron/test-results/ altına yazılır.
+PERFORMANS
+Yüksek performanslı GPU tercihi, Chromium kare sınırını kaldırma ve
+arka plan kısıtlamalarını kapatma istekleri açılışta uygulanır.
+Oyunun kendi FPS sınırı ve sürücü ayarları ayrıca geçerlidir.
+Anahtarın etkin olması, sürücünün mutlaka bu isteği uyguladığı anlamına gelmez.
+Bu sürüm için kanıtlanmış bir FPS artışı oranı yoktur. Sınırsız kare
+çalışması güç tüketimini ve ısıyı artırabilir; oyun ayarlarından sınır seç.
 
-GÜVENLİK / KAYNAKLAR
-Yerel sunucu seçme penceresi dar IPC köprüsü kullanır. İnternet oyunu
-ayrı pencerede sandbox + contextIsolation ile, Node ve preload olmadan çalışır.
-Web güvenliği veya sertifika denetimi kapatılmaz.
-Resmi belgeler:
-https://www.electronjs.org/docs/latest/api/command-line-switches
-https://www.electronjs.org/docs/latest/tutorial/security
-https://www.electron.build/docs/nsis/
+GÜNCELLEME
+Oyun, bağlandığın sunucudaki sürümden yüklenir. Launcher güncellemeleri
+bu test sürümünde yeni kurulum dosyasıyla elle yapılır. Otomatik launcher
+indirme/güncelleme/geri alma bu sürümde yoktur.
+
+SORUN OLURSA
+Sistem sekmesinden tanı raporunu kaydet ve ne yaparken sorun olduğunu yaz.
+Yerel sunucu kaydı launcher kullanıcı klasöründeki local-server.log'dadır.
+Bu test sürümü dağıtım sertifikasıyla imzalanmış bir kamu sürümü değildir.

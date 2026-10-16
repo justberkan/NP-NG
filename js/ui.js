@@ -161,7 +161,7 @@ function bpV(){
  <div class='bprow' style='margin-top:6px'><div class='rowlab fr'>ÜCRETSİZ</div><div class='bp'>${BPF.map((r,n)=>rewardCard(r,n,'f')).join('')}</div></div></div>
  <div class='dr'><div class='pn2'><h3>Sezon 1: İlk Savaş</h3><p>Maç oynayarak XP kazan, ödülleri aç. Premium hat ${fmt(PREM_PRICE)} TL ile açılır; kaplama, karakter ve para ödülleri verir.</p>
  ${SV.pm?'<p class="ms">Premium hat açık</p>':`<button class='btn alt' id='bpp'>PREMİUM AÇ (${fmt(PREM_PRICE)} TL)</button>`}<p class='ms'>${vmsg}</p></div>
- <div class='pn2'><div class='sr'><span>Seviye</span><b>${L} / 20</b></div><div class='sr'><span>XP</span><b>${px} / 200</b></div><div class='bar pbar'><em style='width:${px/2}%'></em></div><button class='btn alt' id='ca'>HEPSİNİ AL</button></div></div>`;
+ <div class='pn2'><div class='sr'><span>Seviye</span><b>${L} / 20</b></div><div class='sr'><span>XP</span><b>${px} / 200</b></div><div class='bar pbar'><em style='width:${px/2}%'></em></div><button class='btn alt' id='ca'>TÜM ÖDÜLLERİ AL (görevler dahil)</button></div></div>`;
 }
 function claim(key){
  if(SV.bp.includes(key))return;
@@ -176,7 +176,7 @@ VIEWS.bp=bpV;
 VIEWWIRE.bp=function(){
  const a=$('av');
  a.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{claim(b.dataset.c);save();bal();view('bp')});
- const ca=$('ca');if(ca)ca.onclick=()=>{for(let n=0;n<20;n++){claim('f'+n);claim('p'+n)}save();bal();view('bp')};
+ const ca=$('ca');if(ca)ca.onclick=()=>{if(typeof claimAll==='function'){vmsg=claimAllMsg(claimAll())}else{for(let n=0;n<20;n++){claim('f'+n);claim('p'+n)}save();bal()}view('bp')};
  const bpp=$('bpp');if(bpp)bpp.onclick=()=>{
   if(SV.tl<PREM_PRICE){vmsg='Yetmiyor';view('bp');return}
   SV.tl-=PREM_PRICE;SV.pm=true;vmsg='';save();bal();view('bp');

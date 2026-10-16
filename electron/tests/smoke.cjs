@@ -21,6 +21,7 @@ const root=path.resolve(__dirname,'..'),out=path.join(root,'test-results');fs.mk
   assert.ok(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().some(w=>w.isFullScreen())));check({name:'fullscreen-and-isolation',pass:true});
   const before=await game.evaluate(()=>location.href);await game.keyboard.press('Control+l');assert.equal(await game.evaluate(()=>location.href),before);assert.ok(!game.isClosed());
   const windows=await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().length);await game.evaluate(()=>window.open('https://example.com/'));await game.waitForTimeout(100);assert.equal(await app.evaluate(({BrowserWindow})=>BrowserWindow.getAllWindows().length),windows);check({name:'popup-blocked',pass:true});
+  if(await game.locator('#legal').isVisible()){await game.locator('#lgck').check();await game.locator('#lgok').click()}
   await game.locator('#go').click();if(await game.locator('#lo-go').isVisible())await game.locator('#lo-go').click();
   await game.waitForFunction(()=>!lobbyOn&&state==='play');
   await game.locator('#c').click({position:{x:500,y:350},force:true});await game.waitForFunction(()=>!!document.pointerLockElement);

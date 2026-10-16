@@ -85,12 +85,31 @@ function questV(){
   }).join('');
  };
  const left=k=>{const n=eNow();return k==='d'?fmtDue((Math.floor(n/DAY)+1)*DAY):k==='w'?fmtDue((Math.floor(n/WEEK)+1)*WEEK):'sezon sonuna kadar'};
- return `<div class='pn2'><div class='tabs'>${[['d','Günlük'],['w','Haftalık'],['s','Sezon']].map(t=>`<button data-qt='${t[0]}' class='${qTab===t[0]?'on':''}'>${t[1]}</button>`).join('')}</div><p class='note'>Yenilenme: ${left(qTab)}</p></div>${mk(qTab)}`;
+ const rd=claimAllCount();
+ return `<div class='pn2'><div class='row' style='justify-content:space-between;margin-bottom:8px'><b>Toplanabilir ödül: ${rd}</b><button class='btn alt' id='qall' style='width:auto;padding:8px 18px'${rd?'':' disabled'}>TÜM ÖDÜLLERİ AL</button></div>${qAllMsg?`<p class='ms'>${qAllMsg}</p>`:''}<div class='tabs'>${[['d','Günlük'],['w','Haftalık'],['s','Sezon']].map(t=>`<button data-qt='${t[0]}' class='${qTab===t[0]?'on':''}'>${t[1]}</button>`).join('')}</div><p class='note'>Yenilenme: ${left(qTab)}</p></div>${mk(qTab)}`;
 }
+/* Tek tuşla toplama: günlük + haftalık + sezon görevleri, ardından battle pass (görev XP'si yeni seviye açabilir) */
+let qAllMsg='';
+function claimAllCount(){
+ let n=typeof questsReady==='function'?questsReady():0;
+ if(typeof BPF!=='undefined'&&typeof lvl==='function'){const L=lvl();for(let i=0;i<20;i++){if(i<L&&BPF[i]&&!SV.bp.includes('f'+i))n++;if(SV.pm&&i<L&&BPP[i]&&!SV.bp.includes('p'+i))n++}}
+ return n;
+}
+function claimAll(){
+ const tl0=SV.tl,bp0=SV.bp.length;let q=0;
+ for(let pass=0;pass<3;pass++){ /* görev XP'si seviye atlatırsa yeni BP ödülleri de alınsın */
+  for(const k of['d','w','s']){const[defs,st]=questList(k);defs.forEach(d=>{const x=st.find(z=>z.id===d.id);if(x&&!x.c&&x.p>=d.n){questClaim(k,d.id);q++}})}
+  if(typeof claim==='function')for(let i=0;i<20;i++){claim('f'+i);claim('p'+i)}
+ }
+ const b=SV.bp.length-bp0;save();bal();
+ return {q,b,tl:SV.tl-tl0};
+}
+function claimAllMsg(r){return r.q+r.b?`${r.q} görev + ${r.b} battle pass ödülü alındı${r.tl>0?' · +'+fmt(r.tl)+' TL':''}`:'Alınacak ödül yok'}
 VIEWS.quest=questV;
 VIEWWIRE.quest=function(){
  const a=$('av');
- a.querySelectorAll('[data-qt]').forEach(b=>b.onclick=()=>{qTab=b.dataset.qt;view('quest')});
+ const qa=$('qall');if(qa)qa.onclick=()=>{qAllMsg=claimAllMsg(claimAll());view('quest')};
+ a.querySelectorAll('[data-qt]').forEach(b=>b.onclick=()=>{qTab=b.dataset.qt;qAllMsg='';view('quest')});
  a.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{const[k,id]=b.dataset.q.split(':');questClaim(k,id);bal();view('quest')});
 };
 
