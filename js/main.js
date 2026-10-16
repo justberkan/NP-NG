@@ -39,11 +39,28 @@ function pauseUI(){
 }
 function resume(){state='play';igsOpen(false);$('ov').classList.add('off');if(!touch&&!(mode==='ow'&&AUTO.on))try{$('c').requestPointerLock()}catch(e){}}
 function startMatch(){
+ /* ses sistemi ilk vuruşta değil maç başlarken (tıklamayla) açılsın: ilk hasarda yaşanan takılmayı önler */
+ try{if(!ac)ac=new AudioContext();if(ac.state==='suspended')ac.resume()}catch(e){}
  if(typeof cmbReset==='function')cmbReset();
  if(selMode!=='ow'&&typeof loOpen==='function'&&!LO.ok){loOpen(()=>startMatch());return}
  if((selMode==='tdm'||selMode==='tm')&&typeof mapNeed==='function'&&mapNeed(()=>startMatch()))return;
  if((selMode==='mp'||selMode==='tm'||selMode==='zo')&&!MPL.ready){if(!MPL.authed)mpOpenDialog(()=>startMatch());else mpJoin(()=>startMatch());return}
- mode=(selMode==='tm'||selMode==='zo')?'mp':selMode;setLobby(false);begin();resume()}
+ mode=(selMode==='tm'||selMode==='zo')?'mp':selMode;setLobby(false);begin();shaderWarm();resume()}
+/* İlk ateşte/ilk efektte gölgelendirici (shader) derlemesi oyunu bir anlık donduruyordu: maç başlarken önceden derlenir */
+function shaderWarm(){
+ try{
+  const g=new THREE.Group(),bx=new THREE.BoxGeometry(.01,.01,.01),tx=new THREE.DataTexture(new Uint8Array([255,255,255,255]),1,1);
+  const add=m=>g.add(new THREE.Mesh(bx,m));
+  add(new THREE.MeshBasicMaterial({transparent:true}));
+  add(new THREE.MeshBasicMaterial({transparent:true,side:THREE.DoubleSide}));
+  add(new THREE.MeshBasicMaterial({map:tx,transparent:true,side:THREE.DoubleSide}));
+  add(new THREE.MeshBasicMaterial({vertexColors:true}));
+  add(new THREE.MeshLambertMaterial({transparent:true}));
+  add(new THREE.MeshLambertMaterial({map:tx}));
+  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(),V3(0,.01,0)]),new THREE.LineBasicMaterial({transparent:true})));
+  g.position.set(0,-80,0);S.add(g);R.compile(S,cam);S.remove(g);
+ }catch(e){console.warn('shader ön derleme',e)}
+}
 $('autob').onclick=()=>{if(mode==='ow'){toggleAuto(true);resume()}};
 function toLobby(){
  if(mode==='ow'&&OW.on)owExit();
@@ -79,6 +96,20 @@ function boot(){
 boot();
 
 const FIX_DT=1/120;let accP=0;
+/* Performans: botların/mobların/oyuncuların animasyonu fizik alt adımlarının içinde çağrılıyordu (60 FPS'te karede 2, 30 FPS'te 4 kez;
+   düşük FPS'te iş yükü artıp FPS'i daha da düşürüyordu). Alt adımlar sırasında gelen animasyon istekleri biriktirilir,
+   karede bir kez (son durum + toplam süre) uygulanır. */
+const ANQ={on:false,m:new Map()};
+const _anReal=animHuman;
+animHuman=function(h,c,dt){
+ if(ANQ.on&&h){const q=ANQ.m.get(h);if(q){q.c=c;q.dt+=dt}else ANQ.m.set(h,{c,dt});return}
+ _anReal(h,c,dt);
+};
+function anqFlush(){
+ ANQ.on=false;if(!ANQ.m.size)return;
+ for(const [h,q] of ANQ.m){try{_anReal(h,q.c,q.dt)}catch(e){console.warn('animasyon',e)}}
+ ANQ.m.clear();
+}
 let last=performance.now();
 /* Mantık adımı: çizimden bağımsız (arka plan simülasyonu da bunu kullanır) */
 function tick(dt){
@@ -90,7 +121,9 @@ function tick(dt){
   /* Sabit zaman adımı: fizik her zaman 1/120 sn'lik adımlarla işlenir (FPS'ten bağımsız hız, zıplama, bhop) */
   accP+=dt;let nSub=0;
   // 144 Hz gibi oranlarda yuvarlama hatası tam bir fizik adımını geciktirmesin.
-  while(accP+1e-10>=FIX_DT&&state==='play'&&nSub<8){p.ox=p.x;p.oy=p.y;p.oz=p.z;stepPlayer(FIX_DT);accP=Math.max(0,accP-FIX_DT);nSub++}
+  ANQ.on=true;
+  try{while(accP+1e-10>=FIX_DT&&state==='play'&&nSub<8){p.ox=p.x;p.oy=p.y;p.oz=p.z;stepPlayer(FIX_DT);accP=Math.max(0,accP-FIX_DT);nSub++}}
+  finally{anqFlush()}
   if(nSub>=8)accP=0;
  }else{accP=0;if(mode==='mp')mpUpdate(dt)}
  if(state==='play'&&!touch&&!document.pointerLockElement&&PL.fail)edgeLook(dt);
@@ -106,13 +139,23 @@ function tick(dt){
  updDn(dt);cmbTick(dt);
  if(mode==='ow'&&!window.BGMODE){owVisual(dt);skVisual(dt)}
 }
+let _loopErrN=0,shLast=0;
+function loopErr(e){
+ _loopErrN++;
+ if(_loopErrN<=3||_loopErrN%600===0)console.error('Oyun döngüsü hatası (#'+_loopErrN+'):',e);
+ if(_loopErrN===1){const m=$('msg');if(m){m.textContent='Bir hata oluştu ama oyun devam ediyor. Sorun sürerse F12 > Console ekran görüntüsünü gönder.';setTimeout(()=>{if(m.textContent.indexOf('Bir hata')===0)m.textContent=''},6000)}}
+}
 function loop(now){
  requestAnimationFrame(loop);
  if(fpsSkip(now))return;
  fpsTick(now);
  const dt=Math.min(.05,(now-last)/1000);last=now;
- if(lobbyOn){clock+=dt;ecoLoop(dt);lobbyUpdate(dt);R.render(LS,LC);return}
- tick(dt);
+ if(lobbyOn){clock+=dt;ecoLoop(dt);lobbyUpdate(dt);R.shadowMap.autoUpdate=true;R.render(LS,LC);return}
+ /* güvenlik: oyun mantığında bir hata çıksa bile çizim sürer, ekran donmaz; hata konsola ve bir kez ekrana yazılır */
+ try{tick(dt)}catch(e){loopErr(e)}
+ /* gölge açıksa gölge haritası saniyede en fazla 60 kez yenilenir (500 FPS'te her karede yeniden çizmek boşa iş) */
+ if(typeof glbCullPass==='function')glbCullPass();
+ if(R.shadowMap.enabled){R.shadowMap.autoUpdate=false;if(now-shLast>=16){shLast=now;R.shadowMap.needsUpdate=true}}
  R.render(S,cam);
 }
 requestAnimationFrame(loop);

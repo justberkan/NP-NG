@@ -171,6 +171,20 @@ function glideCanopy(h,w){
  h.cano.rotation.x=-h.hips.rotation.x-h.spine.rotation.x*.2-.1;
 }
 
+/* ----- İskelet pozu seyreltme (CPU kazandırır) -----
+   Uzak ve/veya kamera arkasındaki varlıklarda animHuman çağrısını azalt; ekranda fark edilmez.
+   Dönüş: 0 = bu kareyi atla; >0 = animHuman'a verilecek dt çarpanı (birikmiş zaman telafi edilir,
+   yürüyüş fazı ve geçişler hızlanıp yavaşlamaz). */
+function poseRate(e,dx,dz){
+ if(typeof p==='undefined'||!p)return 1;
+ e.skN=(e.skN||0)+1;
+ const d2=dx*dx+dz*dz;
+ const behind=Math.sin(p.yaw)*dx+Math.cos(p.yaw)*dz>0;
+ if(d2>900)return behind?(e.skN%3?0:3):(e.skN%2?0:2); /* 30 m üstü: önde 1/2, arkada 1/3 */
+ if(behind&&d2>100)return e.skN%3?0:3;                 /* 10 m üstü arkada: 1/3 */
+ return 1;
+}
+
 /* ===== Ragdoll (Verlet noktaları + kemik uzunluğu kısıtları) ===== */
 const RAGS=[];
 const RN=['head','neck','shL','shR','elL','elR','haL','haR','pel','hpL','hpR','knL','knR','anL','anR'];

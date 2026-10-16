@@ -422,7 +422,8 @@ function mpUpdate(dt){
   e.yaw=angLerp(e.yaw,e.tyaw,Math.min(1,8*dt));e.g.rotation.y=e.yaw;
   e.vx=(q.x-px)/Math.max(dt,.001);e.vz=(q.z-pz)/Math.max(dt,.001);
   if(e.atk>0)e.atk-=dt;e.flinch=Math.max(0,e.flinch-dt*4);
-  animHuman(e.rig,{t:clock+e.ph0,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin((clock+e.ph0)*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt);
+  const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+  if(_pr>0)animHuman(e.rig,{t:clock+e.ph0,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin((clock+e.ph0)*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt*_pr);
  }
  for(const e of MPL.ents.values()){
   const q=e.g.position;
@@ -438,15 +439,11 @@ function mpUpdate(dt){
   if(e.swU>=0){e.swU+=dt/Math.max(.25,w.rate);if(e.swU>=1)e.swU=-1}
   e.kR*=Math.pow(.0005,dt);e.kL*=Math.pow(.0005,dt);e.flash-=dt;e.flashL-=dt;e.flinch=Math.max(0,e.flinch-dt*4);
   e.adsT+=((w.melee?0:e.ad)-e.adsT)*Math.min(1,10*dt);
-  /* Kamera arkasındaki uzak oyuncular (zaten ekranda görünmüyorlar): iskelet pozu 3 karede bir
-     hesaplanır (dt*3 ile), CPU kazandırır; konum yumuşatma ve isim etiketi her karede sürer. */
-  e.skN=(e.skN||0)+1;
-  const _dx=q.x-p.x,_dz=q.z-p.z,_d2=_dx*_dx+_dz*_dz;
-  const _behind=_d2>400&&(Math.sin(p.yaw)*_dx+Math.cos(p.yaw)*_dz>0);
-  if(!_behind||e.skN%3===0)
+  const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+  if(_pr>0)
   animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:(e.fl&2)?1:0,
    pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:e.adsT,kick:Math.max(e.kR,e.kL),kickR:e.kR,kickL:e.kL,
-   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:e.rq,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:e.flash,flashL:e.flashL,lr:0},_behind?dt*3:dt);
+   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:e.rq,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:e.flash,flashL:e.flashL,lr:0},dt*_pr);
   // isim etiketi
   if(e.tag){
    _mpv.set(q.x,q.y+2.2,q.z).project(cam);

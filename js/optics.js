@@ -70,7 +70,7 @@ function optHud(adsT){
  if(!_oh){optHudInit()}
  const o=optCur(),on=optLong();
  const a=on?adsT:0;
- if(a<.05){if(_oh.style.display!=='none')_oh.style.display='none';return}
+ if(a<.05){if(_oh._v!==0){_oh._v=0;_oh.style.display='none'}return}
  const ds=+(SET.dotSize||1),k=o.id+(optScoped()?'s':'')+ds;
  if(k!==_ot){
   _ot=k;const sc=optScoped();
@@ -79,5 +79,6 @@ function optHud(adsT){
   const svg=o.ty==='dot'?`<circle cx="50" cy="50" r="${(1.5*ds).toFixed(2)}" fill="#ff2a2a" stroke="#000" stroke-opacity=".35" stroke-width=".3"/>`:(OPT_SVG[o.ty]||'');
   _oh.innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
  }
- _oh.style.display='block';_oh.style.opacity=Math.min(1,a*(optScoped()?1.15:1));
+ if(_oh._v!==1){_oh._v=1;_oh.style.display='block'}
+ const op=Math.round(Math.min(1,a*(optScoped()?1.15:1))*50)/50;if(op!==_oh._o){_oh._o=op;_oh.style.opacity=op}
 }

@@ -370,8 +370,9 @@ function fxPart(x,y,z,col,vy,life,size){
 /* ekran parlaması ve kenar ışıması */
 function fxFlash(col,a){
  const e=$('fxo');if(!e||window.BGMODE)return;
- e.style.transition='none';e.style.background='radial-gradient(circle,'+col+'00 25%,'+col+' 130%)';e.style.opacity=a;
- void e.offsetWidth;e.style.transition='opacity .35s';e.style.opacity=0;
+ /* performans: offsetWidth ile zorla sayfa düzenlemesi yerine Web Animations (her çağrıda takılma yok) */
+ e.style.transition='none';e.style.background='radial-gradient(circle,'+col+'00 25%,'+col+' 130%)';e.style.opacity=0;
+ if(e.animate){if(e._fa)e._fa.cancel();e._fa=e.animate([{opacity:a},{opacity:0}],{duration:350,easing:'ease'})}
 }
 let camRollK=0;
 function camKick(v){camRollK=v}

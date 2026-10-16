@@ -355,8 +355,10 @@ function updBot(e,dt){
  }
  e.adsT+=(adsGoal-e.adsT)*Math.min(1,8*dt);
  e.kk*=Math.pow(.0005,dt);e.flash-=dt;e.flashL-=dt;e.flinch=Math.max(0,e.flinch-dt*4);
+ const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+ if(_pr>0)
  animHuman(e.rig,{t,speed:speedOut,fwd,pitch,lookYaw,flinch:e.flinch,ads:e.adsT,kick:e.kk,kickR:e.kk,kickL:e.kk,
-  rq:e.rl>0?1-e.rl/w.rel:-1,flash:e.flash,flashL:e.flashL,bob:clamp(speedOut/7,0,1),lr:0,sw:1},dt);
+  rq:e.rl>0?1-e.rl/w.rel:-1,flash:e.flash,flashL:e.flashL,bob:clamp(speedOut/7,0,1),lr:0,sw:1},dt*_pr);
 }
 function updZombie(e,dt){
  const q=e.g.position,px=q.x,pz=q.z,t=clock+e.ph0;
@@ -368,7 +370,9 @@ function updZombie(e,dt){
  if(e.atk>0)e.atk-=dt;
  if(d<1.7&&p.y<2.5&&e.cd<=0&&p.dead<=0){e.cd=.9;e.atk=.5;hurt(10,q)}
  e.flinch=Math.max(0,e.flinch-dt*4);
- animHuman(e.rig,{t,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin(t*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt);
+ const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+ if(_pr>0)
+ animHuman(e.rig,{t,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin(t*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt*_pr);
 }
 
 /* ----- Mod yönetimi ----- */
@@ -387,7 +391,7 @@ function setupMode(){
  if(OW.on&&mode!=='ow')owLeave();
  if(typeof mapApply==='function')mapApply((mode==='tdm'||(mode==='mp'&&MPL.kind==='tm'))?MAPS.sel:'arena');
  E.forEach(e=>S.remove(e.g));E.length=0;clearRags();clearDn();pRagdoll=null;
- tk={1:0,2:0};wave=0;waveCd=1.5;lastT='';
+ tk={1:0,2:0};wave=0;waveCd=1.5;lastT='';zPend=0;zPT=0;
  $('hp').style.display=mode==='aim'?'none':'block';
  $('msg').textContent=mode==='zom'?'Zombiler geliyor':'';
  p.hp=100;hudHp();
@@ -395,21 +399,27 @@ function setupMode(){
  if(mode==='ow')owStart();
  if(mode==='mp')mpStart();
 }
+let zPend=0,zPT=0;
 function updE(dt){
  if(mode==='ow'){owUpdate(dt);return}
  if(mode==='mp'){mpUpdate(dt);return}
  if(p.dead>0){p.dead-=dt;if(p.dead<=0){p.hp=100;p.x=0;p.z=24;p.y=0;p.vx=p.vz=0;if(mode==='tdm')tdmRespawn();hudHp();$('msg').textContent='';pRagdoll=null}}
- if(mode==='zom'&&!E.some(e=>e.hp>0)){
+ /* performans: dalgadaki zombiler tek karede değil, ~1/40 sn arayla tek tek doğar (büyük dalgada 100+ ms donma olmasın) */
+ if(mode==='zom'&&zPend>0){
+  zPT-=dt;
+  if(zPT<=0){zPT=.025;zPend--;
+   let x,z,k=0;
+   do{const a=Math.random()*6.28;x=clamp(p.x+Math.cos(a)*22,-28,28);z=clamp(p.z+Math.sin(a)*22,-28,28)}while(hitBox(x,z,0)&&++k<10);
+   const e=mkE('z',2,x,z);e.hp=e.max=60+wave*8;e.sp=2.6+Math.min(2,wave*.25)+Math.random();
+  }
+ }
+ else if(mode==='zom'&&!E.some(e=>e.hp>0)){
   waveCd-=dt;
   if(waveCd<=0){
    for(let i=E.length-1;i>=0;i--){S.remove(E[i].g);E.splice(i,1)}
    wave++;waveCd=3;p.hp=Math.min(100,p.hp+30);hudHp();hudT();
    $('msg').textContent='Dalga '+wave;setTimeout(()=>{if(mode==='zom')$('msg').textContent=''},1500);
-   for(let i=0;i<3+wave*2;i++){
-    let x,z,k=0;
-    do{const a=Math.random()*6.28;x=clamp(p.x+Math.cos(a)*22,-28,28);z=clamp(p.z+Math.sin(a)*22,-28,28)}while(hitBox(x,z,0)&&++k<10);
-    const e=mkE('z',2,x,z);e.hp=e.max=60+wave*8;e.sp=2.6+Math.min(2,wave*.25)+Math.random();
-   }
+   zPend=3+wave*2;zPT=0;
   }
  }
  for(const e of E){if(e.hp<=0)continue;if(e.kind==='z')updZombie(e,dt);else updBot(e,dt)}

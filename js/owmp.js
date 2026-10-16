@@ -99,8 +99,11 @@ function ownTick(dt){
   if(e.swU>=0){e.swU+=dt/Math.max(.25,w.rate||.6);if(e.swU>=1)e.swU=-1}
   e.flinch=Math.max(0,e.flinch-dt*4);
   e.g.visible=e.hp>0;
-  if(!window.BGMODE&&e.hp>0)animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:0,pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:0,kick:0,kickR:0,kickL:0,
-   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:-1,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:0,flashL:0,lr:0},dt);
+  if(!window.BGMODE&&e.hp>0){
+   const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+   if(_pr>0)animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:0,pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:0,kick:0,kickR:0,kickL:0,
+   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:-1,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:0,flashL:0,lr:0},dt*_pr);
+  }
   if(e.tag){
    _owv.set(q.x,q.y+2.2,q.z).project(cam);
    const d=Math.hypot(q.x-p.x,q.z-p.z);

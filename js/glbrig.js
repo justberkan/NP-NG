@@ -79,10 +79,45 @@ function glbPrep(scene,pf){
   tab['rdFA'+s]=P0['ha'+s].clone().sub(P0['fa'+s]).normalize();
  }
  if(pf.skinFix)glbFixSkin(scene,pf,B,P0);
+ try{pf.merged=glbMergeParts(scene)}catch(e){console.warn('parça birleştirme atlandı',e)}
  const prof={id:pf.id,prefix:pf.prefix,bones:pf.bones,tab,tpl:scene,palm,len,skinFixed:pf.skinFixed||0,skinIslands:pf.skinIslands||[]};
  GLBR.P[pf.id]=prof;
  if(pf.id==='soldier'){GLBR.tab=tab;GLBR.tpl=scene;GLBR.palm=palm;GLBR.len=len}
  return prof;
+}
+/* Performans: aynı malzemeyi (aynı doku) + aynı iskeleti + aynı bağlama matrisini kullanan parçalar tek mesh'te birleştirilir.
+   Askerde 11 cep, 2 göz, 2 kask, 2 ceket parçası ayrıydı: 23 çizim çağrısı → 13. Köşe verisi aynen kopyalanır (uzay değişmez),
+   forma sistemi parça adını (userData.part) ve dokuyu aynen görür. Morph hedefli ya da öznitelik tipi farklı parçalar birleştirilmez. */
+function glbMergeParts(scene){
+ const groups=new Map();
+ scene.traverse(o=>{
+  if(!o.isSkinnedMesh||!o.visible)return;const g=o.geometry,m=o.material;
+  if(!g.index||Object.keys(g.morphAttributes||{}).length||Array.isArray(m))return;
+  const k=[o.userData.part,m.map?m.map.uuid:'-',m.transparent,m.opacity,m.side,m.alphaTest,m.color.getHexString(),o.skeleton.bones.map(b=>b.uuid).join(','),o.bindMatrix.elements.map(v=>v.toFixed(6)).join(','),
+   Object.keys(g.attributes).sort().map(n=>{const a=g.attributes[n];return n+a.itemSize+a.array.constructor.name+a.normalized}).join('|')].join('#');
+  if(!groups.has(k))groups.set(k,[]);groups.get(k).push(o);
+ });
+ let saved=0;
+ for(const list of groups.values()){
+  if(list.length<2)continue;
+  const g0=list[0].geometry,names=Object.keys(g0.attributes);
+  let nv=0,ni=0;for(const o of list){nv+=o.geometry.attributes.position.count;ni+=o.geometry.index.count}
+  const geo=new THREE.BufferGeometry();
+  for(const n of names){
+   const a0=g0.attributes[n],arr=new a0.array.constructor(nv*a0.itemSize);let off=0;
+   for(const o of list){const a=o.geometry.attributes[n];
+    if(a.isInterleavedBufferAttribute){for(let i=0;i<a.count;i++)for(let c=0;c<a.itemSize;c++)arr[off+i*a.itemSize+c]=a.getComponent?a.getComponent(i,c):[a.getX(i),a.getY(i),a.getZ(i),a.getW(i)][c]}
+    else arr.set(a.array,off);
+    off+=a.count*a.itemSize}
+   geo.setAttribute(n,new THREE.BufferAttribute(arr,a0.itemSize,a0.normalized));
+  }
+  const I=nv>65535?new Uint32Array(ni):new Uint16Array(ni);let oi=0,ov=0;
+  for(const o of list){const ix=o.geometry.index;for(let i=0;i<ix.count;i++)I[oi+i]=ix.getX(i)+ov;oi+=ix.count;ov+=o.geometry.attributes.position.count}
+  geo.setIndex(new THREE.BufferAttribute(I,1));
+  const keep=list[0];keep.geometry=geo;
+  for(let i=1;i<list.length;i++){list[i].parent.remove(list[i]);saved++}
+ }
+ return saved;
 }
 /* Hatalı skin ağırlığı onarımı: bel/kalça kumaşı ve kılıf gibi gövdeye ait AYRI mesh parçalarının (bağlantılı "adalar") köşeleri,
    bind pozunda elin yanında durdukları için kol kemiklerine de bağlanmış; kol kalkınca kumaşı da çekiyor ve kumaş şeritler halinde uzuyor.
@@ -366,14 +401,34 @@ function kitApply(mdl,PF,cols){
 /* boşta önceden çiz: kuşanılı karakter + forma (ilk giyildiğinde takılma olmasın) */
 function kitPrebake(){try{if(typeof SV==='undefined'||!SV||!SV.eq||!SV.eq.f)return;const f=FORMS.find(x=>x.id===SV.eq.f),c=CHAR(SV.eq.c),pid=c.glb===1?'soldier':c.glb;if(f&&GLBR.P[pid])kitApply(null,GLBR.P[pid],{kit:f.kit})}catch(e){}}
 
+/* Performans: modeldeki parçalar (askerde 23) aynı kemik listesini kullanıyor ama klonlarda her parça ayrı iskelet alıyordu;
+   kemik matrisleri ve kemik dokusu her karede parça sayısı kadar hesaplanıp ekran kartına yükleniyordu. Aynı kemik listesi + aynı
+   bağlama matrisleri olan parçalar tek iskeleti paylaşır (görüntü birebir aynı). */
+function glbShareSkel(root){
+ const seen=[];
+ root.traverse(o=>{
+  if(!o.isSkinnedMesh||!o.skeleton)return;
+  const s=o.skeleton;
+  for(const t of seen){
+   if(t===s)return;
+   if(t.bones.length!==s.bones.length)continue;
+   let ok=true;for(let i=0;i<s.bones.length&&ok;i++)if(t.bones[i]!==s.bones[i]||!t.boneInverses[i].equals(s.boneInverses[i]))ok=false;
+   if(ok){o.skeleton=t;return}
+  }
+  seen.push(s);
+ });
+ return root;
+}
 function mkHumanGLB(cols,PF,zombie){
  const h=_mkHuman0(cols,!!zombie);
  h.root.traverse(o=>{if(o.isMesh)o.visible=false}); // kutular görünmez ama isabet kutusu olarak kalır
- const mdl=THREE.SkeletonUtils.clone(PF.tpl);
+ const mdl=glbShareSkel(THREE.SkeletonUtils.clone(PF.tpl));
  if(cols.tint){ // renk varyantı: aynı model/doku, malzeme kopyası çarpanla boyanır (şablon bozulmaz)
   mdl.traverse(o=>{if(o.isSkinnedMesh&&o.material){o.material=o.material.clone();o.material.color.r*=cols.tint[0];o.material.color.g*=cols.tint[1];o.material.color.b*=cols.tint[2]}});
  }
  if(cols.kit)kitApply(mdl,PF,cols); /* taraftar forması */
+ /* performans: ekran dışında gizlenen modelin ~114 kemiğinin dünya matrisi her karede boşuna hesaplanmasın */
+ mdl.updateMatrixWorld=function(force){if(this.visible)THREE.Object3D.prototype.updateMatrixWorld.call(this,force)};
  h.root.add(mdl);
  const t={};
  for(const k of GL_DRIVEN){
@@ -598,14 +653,54 @@ function glbSync(h,c){
  }
 }
 const _animHuman0=animHuman;
+/* Performans: kamera görüş alanı dışındaki karakterlerin GLB kemik/IK hesabı yapılmaz ve çizilmez.
+   Mantık iskeleti (isabet kutuları) her karede güncellenmeye devam eder; vuruş testi etkilenmez.
+   Animasyon sırasında bir önceki karenin görüş alanı kullanılır; çizimden hemen önce (glbCullPass) GÜNCEL kamerayla
+   yeniden bakılır: hızlı dönüşte görüşe giren karakter aynı karede kemikleri güncellenip görünür (gecikmeli belirme olmaz). */
+const _cullF=new THREE.Frustum(),_cullM=new THREE.Matrix4(),_cullS=new THREE.Sphere();let _cullOk=false;
+const GLBH=new Set();
+function glbFrustum(){cam.updateMatrixWorld();_cullM.multiplyMatrices(cam.projectionMatrix,cam.matrixWorldInverse);_cullF.setFromProjectionMatrix(_cullM);_cullOk=true}
+function glbInView(h){
+ if((typeof lobbyOn!=='undefined'&&lobbyOn)||R.shadowMap.enabled)return true;
+ if(!_cullOk)glbFrustum();
+ h.root.getWorldPosition(_cullS.center);_cullS.center.y+=1;_cullS.radius=2.5;
+ return _cullF.intersectsSphere(_cullS);
+}
+function glbFail1(h,e){
+ console.warn('GLB animasyon hatası, küp karaktere dönüldü',e);
+ h.glb.visible=false;for(const m of h.gd.boxes)m.visible=true;h.gd=null;h.glbFail=1;
+}
+/* görüşe yeni giren karakterin bekleyen pozunu uygula */
+function glbStale(h){
+ h._stale=0;
+ if(h.gd){try{glbSync(h,h._lc);if(typeof fngSync==='function')fngSync(h)}catch(e){glbFail1(h,e)}}
+ else if(h.gm&&h._gdt){h.gm.mx.update(h._gdt);h._gdt=0}
+}
+/* her çizimden hemen önce: güncel kamerayla kimin görüneceğine karar ver */
+function glbCullPass(){
+ if(typeof lobbyOn!=='undefined'&&lobbyOn)return;
+ glbFrustum();
+ const all=R.shadowMap.enabled;
+ for(const h of GLBH){
+  const o=h.gd?h.glb:(h.gm?h.gm.w:null);
+  if(!o||!h.root.parent){GLBH.delete(h);continue}
+  if(h.root.visible===false)continue;
+  const vis=all||glbInView(h);
+  if(vis&&h._stale)glbStale(h);
+  if(o.visible!==vis)o.visible=vis;
+ }
+}
 animHuman=function(h,c,dt){
  _animHuman0(h,c,dt);
  if(h.gd&&h.root.visible!==false){
-  try{glbSync(h,c)}
-  catch(e){ // güvenli yedek: bu karakteri küp görünüme döndür
-   console.warn('GLB animasyon hatası, küp karaktere dönüldü',e);
-   h.glb.visible=false;for(const m of h.gd.boxes)m.visible=true;h.gd=null;h.glbFail=1;
-  }
+  if(!(typeof lobbyOn!=='undefined'&&lobbyOn))GLBH.add(h);
+  if(!glbInView(h)){h._stale=1;h._lc=c;return}
+  h._stale=0;if(!h.glb.visible)h.glb.visible=true;
+  /* uzaktaki karakterlerin kemikleri daha seyrek güncellenir (35 m+: 60 Hz, 70 m+: 30 Hz); yakındakiler her karede */
+  const dx=_cullS.center.x-cam.position.x,dz=_cullS.center.z-cam.position.z,d2=dx*dx+dz*dz;
+  const iv=d2>4900?1/30:d2>1225?1/60:0;
+  h._gT=(h._gT||0)+(dt||0);if(h._gT<iv&&h._gS)return;h._gT=0;h._gS=1;
+  try{glbSync(h,c)}catch(e){glbFail1(h,e)} // güvenli yedek: bu karakteri küp görünüme döndür
  }
 };
 
@@ -635,7 +730,7 @@ spawnRagdoll=(function(prev){return function(h,vel,hitPt,hitDir,power){
  const g=new THREE.Group();
  h.root.updateWorldMatrix(true,false);
  h.root.matrixWorld.decompose(g.position,g.quaternion,g.scale);
- const mdl=THREE.SkeletonUtils.clone(h.glb);g.add(mdl);
+ const mdl=glbShareSkel(THREE.SkeletonUtils.clone(h.glb));g.add(mdl);
  S.add(g);setShadow(g);g.updateMatrixWorld(true);
  // klon için sürülen kemik tablosu (gSet kullanır)
  const t={};for(const k of GL_DRIVEN){const b=mdl.getObjectByName(PF.prefix+PF.bones[k]);if(!b)return prev(h,vel,hitPt,hitDir,power);t[k]=Object.assign({b,cur:new THREE.Quaternion()},PF.tab[k])}

@@ -62,10 +62,13 @@ function fngSync(h){
   else if(mel&&W.g2)pl=FNG_POSE.fist;
   if(h.holdingMag)pl=FNG_POSE.lGrip;
  }
+ /* performans: parmak kemiklerine başka kod dokunmadığı için poz yalnızca değişince yeniden uygulanır */
+ if(d._fpr===pr&&d._fpl===pl)return;
+ d._fpr=pr;d._fpl=pl;
  fngApply(h,'R',pr);fngApply(h,'L',pl);
 }
 const _animHuman1=animHuman;
 animHuman=function(h,c,dt){
  _animHuman1(h,c,dt);
- if(h.gd&&h.root.visible!==false)fngSync(h);
+ if(h.gd&&h.root.visible!==false&&!h._stale)fngSync(h);
 };

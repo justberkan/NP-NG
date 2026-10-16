@@ -133,7 +133,7 @@ const SEL={
  light:[[0,'Düz (en hızlı)'],[1,'Güneş ışığı'],[2,'Güneş ışığı (güçlü)']],
  fog:[[0,'Kapalı'],[1,'Yakın'],[2,'Orta'],[3,'Uzak']],
  fx:[[0,'Düşük (izsiz, az ragdoll)'],[1,'Orta'],[2,'Yüksek']],
- fpsCap:[[0,'Limitsiz'],[30,'30'],[60,'60'],[90,'90'],[120,'120'],[144,'144'],[240,'240']],
+ fpsCap:[[0,'Limitsiz'],[30,'30'],[60,'60'],[90,'90'],[120,'120'],[144,'144'],[165,'165'],[240,'240'],[360,'360'],[500,'500']],
  preset:[['ultra','Çok düşük'],['low','Düşük'],['mid','Orta'],['high','Yüksek'],['custom','Özel']]
 };
 const cRange=(l,k,mn,mx,st,u)=>`<div class='sr2'><span>${l}</span><input type='range' data-k='${k}' min='${mn}' max='${mx}' step='${st}' value='${SET[k]}'><b data-v='${k}'>${SET[k]}${u||''}</b></div>`;
@@ -172,7 +172,8 @@ function setV(ig){
   cSel('Işık kalitesi','light',SEL.light)+cCheck('Gölgeler (yavaş PC\'de kapalı tut)','shadow')+cSel('Sis ve çizim mesafesi','fog',SEL.fog)+cSel('Efekt kalitesi','fx',SEL.fx)+
   cSel('FPS sınırı','fpsCap',SEL.fpsCap)+cCheck('FPS göstergesi','fpsShow')+
   `<p class='note'>Doku: modeller şimdilik doku kullanmıyor, renkli yüzeylerle çiziliyor. Silah skin dokuları gelince doku kalitesi ayarı da eklenecek.</p>
-  <p class='note'>FPS sınırı "Limitsiz" = yapay sınır yok. V-Sync tarayıcıda otomatik açık ve kapatılamıyor: üst sınır ekranının yenileme hızıdır (örn. 144 Hz ekranda en fazla 144 FPS). Sınır seçince sistem ısınmasını ve fan sesini azaltırsın; Limitsiz'de mümkün olan en yüksek değeri alırsın. EXE sürümünde V-Sync açılıp kapanabilecek.</p>`;
+  <p class='note'>FPS sınırı "Limitsiz" = yapay sınır yok. V-Sync tarayıcıda otomatik açık ve kapatılamıyor: üst sınır ekranının yenileme hızıdır (örn. 144 Hz ekranda en fazla 144 FPS). Sınır seçince sistem ısınmasını ve fan sesini azaltırsın; Limitsiz'de mümkün olan en yüksek değeri alırsın. Ekranın yenileme hızının üstüne (ör. 300-500 FPS) çıkmak için oyunu klasördeki <b>OYNA-SINIRSIZ-FPS.bat</b> ile aç: Chrome/Edge V-Sync kapalı açılır. EXE sürümünde de bu ayar kapalı gelecek.</p>
+  <p class='note'>Zayıf bilgisayar: "Çok düşük" ön ayarını seç. En çok FPS kazandıran ayar çözünürlük ölçeğidir.</p>`;
  }else if(setTab==='mob')b=cRange('Dokunmatik bakış hassasiyeti','touchSens',.4,2.5,.05,'x')+`<div class='row' style='margin-top:10px'><button class='btn alt' id='tle2'>Tuş düzenini değiştir</button></div><p class='note'>Düğmeleri sürükleyip yerleştirir, boyutlarını ayarlarsın. Dokunmatik cihazda en rahat çalışır.</p>`;
  else if(setTab==='cr')b=creditsHTML();
  else if(setTab==='mk'){

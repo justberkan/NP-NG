@@ -15,7 +15,7 @@ const PRESETS={
  low:{res:50,light:0,shadow:false,fog:0,fx:0},
  mid:{res:85,light:1,shadow:false,fog:1,fx:1},
  high:{res:100,light:2,shadow:true,fog:2,fx:2},
- ultra:{res:25,light:0,shadow:false,fog:0,fx:0}
+ ultra:{res:25,light:0,shadow:false,fog:1,fx:0} /* sis açık = kısa çizim mesafesi: zayıf PC'de daha az nesne çizilir */
 };
 const FOGFAR=[0,70,110,170],OWFOG=[0,110,170,260],HEMI=S.children.find(o=>o.isHemisphereLight);
 function pixelRatio(){return Math.max(.25,Math.min(devicePixelRatio,1.5)*SET.res/100)}
@@ -75,6 +75,8 @@ function fpsTick(now){
 }
 function fpsSkip(now){
  if(!SET.fpsCap)return false;
- if(now-fpsLast<1000/SET.fpsCap-2)return true;
- fpsLast=now;return false;
+ /* hedef zaman ızgarası: sınır ortalamada tutturulur (eski hali 360/500 gibi yüksek sınırlarda hiç çalışmıyordu) */
+ const iv=1000/SET.fpsCap;
+ if(now-fpsLast<iv-Math.min(2,iv*.2))return true;
+ fpsLast=(now-fpsLast<2*iv)?fpsLast+iv:now;return false;
 }

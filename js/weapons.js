@@ -22,7 +22,7 @@ function mergeBoxes(parts){
  G.setAttribute('normal',new THREE.BufferAttribute(nor,3));
  G.setAttribute('color',new THREE.BufferAttribute(col,3));
  G.setIndex(new THREE.BufferAttribute(idx,1));
- G.computeBoundingSphere();
+ G.computeBoundingSphere();G.userData.own=1; /* bu geometri tek nesneye ait: nesne silinince güvenle atılabilir */
  return new THREE.Mesh(G,VCMAT);
 }
 const boxMesh=(w,h,d,x,y,z,c)=>mergeBoxes([{w,h,d,x,y,z,c}]);
