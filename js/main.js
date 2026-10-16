@@ -42,7 +42,7 @@ function startMatch(){
  /* ses sistemi ilk vuruşta değil maç başlarken (tıklamayla) açılsın: ilk hasarda yaşanan takılmayı önler */
  try{if(!ac)ac=new AudioContext();if(ac.state==='suspended')ac.resume()}catch(e){}
  if(typeof cmbReset==='function')cmbReset();
- if(selMode!=='ow'&&typeof loOpen==='function'&&!LO.ok){loOpen(()=>startMatch());return}
+ if(selMode!=='ow'&&selMode!=='aim'&&typeof loOpen==='function'&&!LO.ok){loOpen(()=>startMatch());return} /* aim: loadout sormadan, tabancayla girilir */
  if((selMode==='tdm'||selMode==='tm')&&typeof mapNeed==='function'&&mapNeed(()=>startMatch()))return;
  if((selMode==='mp'||selMode==='tm'||selMode==='zo')&&!MPL.ready){if(!MPL.authed)mpOpenDialog(()=>startMatch());else mpJoin(()=>startMatch());return}
  mode=(selMode==='tm'||selMode==='zo')?'mp':selMode;setLobby(false);begin();shaderWarm();resume()}
@@ -139,6 +139,7 @@ function tick(dt){
  if(slowT>0&&!window.BGMODE){slowT-=dt;dt*=.3}
  clock+=dt;ecoLoop(dt);
  moveTargets(clock,dt);
+ if(typeof rangeUpdate==='function')rangeUpdate(dt); /* aim test/ısınma alanı: mankenler + etkileşim taraması */
  if(state==='play'){
   /* Sabit zaman adımı: fizik her zaman 1/120 sn'lik adımlarla işlenir (FPS'ten bağımsız hız, zıplama, bhop) */
   accP+=dt;let nSub=0;

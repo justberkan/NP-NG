@@ -97,7 +97,12 @@ const vwMid=()=>(typeof vw==='string'&&vw.startsWith('m:'))?vw.slice(2):null;
 const WM_HIDE=new Set(['m_moz']);
 const wmOn=m=>!WM_HIDE.has(m.id);
 /* sınıf anahtarı → seçili model kimliği (çift tabanca, tabanca modelini kullanır) */
-const modId=cls=>{const c=cls==='dual'?'pistol':cls;const id=(typeof LO!=='undefined'&&LO.on&&(c in LO.mod))?LO.mod[c]:(SV&&SV.mod&&SV.mod[c]);return id&&WMID[id]&&!WM_HIDE.has(id)?id:null};
+const modId=cls=>{
+ const c=cls==='dual'?'pistol':cls;
+ let id=(typeof LO!=='undefined'&&LO.on&&(c in LO.mod))?LO.mod[c]:null;
+ if(!id&&typeof RANGE_MOD!=='undefined'&&typeof mode!=='undefined'&&mode==='aim'&&RANGE_MOD[c])id=RANGE_MOD[c]; /* aim range: duvardan alınan model (oturumluk) */
+ if(!id&&SV&&SV.mod)id=SV.mod[c];
+ return id&&WMID[id]&&!WM_HIDE.has(id)?id:null};
 const modOf=cls=>{const id=modId(cls);return id?WMID[id]:null};
 
 /* Sınıf WP kaydının model uygulanmış kopyası (yalnızca yerel oyuncu için) */

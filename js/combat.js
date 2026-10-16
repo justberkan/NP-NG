@@ -93,8 +93,7 @@ function setW(k,silent){
  reload=0;swU=-1;ads=false;swT=0;
  if(VM.h)holderSet(VM.h,k,undefined,modId(k));
  if(pRigGet())holderSet(pRigGet(),k,undefined,modId(k));
- if(mode==='ow'){SV.ow.mw=k}else SV.eq.w=k;
- save();
+ if(mode==='ow'){SV.ow.mw=k}else if(mode!=='aim'){SV.eq.w=k;save()} /* aim test alanı kuşanmayı kaydetmez */
  hudWeapons();upd();
  if(!silent)snd(250,.05);
 }
@@ -384,7 +383,9 @@ function begin(){
  gr=null;grCd=0;grLine.visible=false;
  T.forEach(t=>{t.visible=mode==='aim';t.userData.dead=mode==='aim'?0:1e9});
  WKEYS.forEach(k=>wa[k]=WP[k].mag||0);
- wk=null;setW(SV.eq.w,true);
+ wk=null;
+ if(mode==='aim'){WKEYS.forEach(k=>wa[k]=9999);setW('pistol',true)} /* test alanı: tüm silahlar sınırsız, tabancayla başla */
+ else setW(SV.eq.w,true);
  setupMode();upd();
 }
 function setupMode(){
@@ -398,6 +399,7 @@ function setupMode(){
  if(mode==='tdm')tdmSetup();
  if(mode==='ow')owStart();
  if(mode==='mp')mpStart();
+ if(typeof rangeStart==='function'){if(mode==='aim')rangeStart();else rangeStop()}
 }
 let zPend=0,zPT=0;
 function updE(dt){

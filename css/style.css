@@ -623,3 +623,7 @@ body.mow #lohud{display:none}
 .kb2 b.kbb.alt{opacity:.75;border-style:dashed}
 .kb2 b.kbb.wait{border-color:#ffb020;color:#ffb020}
 body.kb-cap{cursor:crosshair}
+
+/* Aim test/ısınma alanı: etkileşim ipucu */
+#rhint{position:fixed;left:50%;bottom:18%;transform:translateX(-50%);padding:8px 16px;border-radius:8px;background:#0d1420d9;border:1px solid #27e0ff66;color:#dbe9f4;font:600 14px system-ui;pointer-events:none;z-index:60;white-space:nowrap}
+#rhint:empty{display:none}
