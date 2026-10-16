@@ -147,21 +147,31 @@ const BPF=[{tl:50},{tl:50},{i:'g2'},{tl:100},{i:'x1'},{tl:100},{i:'g6'},{tl:150}
 const BPP=[{i:'g8'},{tl:200},{i:'c5'},{tl:300},{i:'g7'},{tl:300},{i:'x3'},{i:'g4'},{tl:400},{i:'c3'},{tl:400},{i:'g1'},{tl:500},{i:'x4'},{tl:500},{i:'c4'},{tl:600},{tl:600},{tl:700},{tl:1000}];
 const PREM_PRICE=1500;
 function bpMigrate(){SV.bp=(SV.bp||[]).map(x=>typeof x==='number'?'f'+x:x)}
+/* Battle Pass v2: kartlar (ücretsiz mavi / premium altın), seviye şeridi, premium avantaj paneli */
 function rewardCard(r,n,track){
- const key=track+n,done=SV.bp.includes(key),ok=lvl()>n&&(track==='f'||SV.pm);
+ const key=track+n,done=SV.bp.includes(key),L=lvl(),open=L>n,ok=open&&(track==='f'||SV.pm),cur=ok&&!done;
  let ico,lab,rr='common';
  if(r.tl){ico=coinicon();lab=fmt(r.tl)+' TL'}
  else{const it=itemById(r.i);ico=iconOf(r.i,['rifle','smg','pistol','rifle'][n%4]);lab=it.n;rr=it.r}
- const btn=done?'✓ alındı':ok?`<button data-c='${key}'>AL</button>`:(track==='p'&&!SV.pm?'':'');
- return `<div class='tr${track==='p'?' pm':''}${done?' done':''} r-${rr}'><span class='lv'>${n+1}</span>${ok||done?'':"<span class='lock'>🔒</span>"}${ico}${lab}<br>${btn}</div>`;
+ const st=done?`<div class='st ok'>✓ ALINDI</div>`:ok?`<button data-c='${key}'>AL</button>`:track==='p'&&!SV.pm&&open?`<div class='st lk'>👑 PREMIUM</div>`:`<div class='st lk'>🔒 SEVİYE ${n+1}</div>`;
+ return `<div class='tr${track==='p'?' pm':''}${done?' done':''}${cur?' cur':''} r-${rr}'><span class='lv'>${n+1}</span>${ok||done?'':"<span class='lock'>🔒</span>"}<div class='ico'>${ico}</div><div class='nm'>${lab}</div>${st}</div>`;
 }
 function bpV(){
- const L=lvl(),px=L>=20?200:SV.xp%200;
- return `<div class='pn2'><div class='bprow'><div class='rowlab pm'>PREMİUM</div><div class='bp'>${BPP.map((r,n)=>rewardCard(r,n,'p')).join('')}</div></div>
- <div class='bprow' style='margin-top:6px'><div class='rowlab fr'>ÜCRETSİZ</div><div class='bp'>${BPF.map((r,n)=>rewardCard(r,n,'f')).join('')}</div></div></div>
- <div class='dr'><div class='pn2'><h3>Sezon 1: İlk Savaş</h3><p>Maç oynayarak XP kazan, ödülleri aç. Premium hat ${fmt(PREM_PRICE)} TL ile açılır; kaplama, karakter ve para ödülleri verir.</p>
- ${SV.pm?'<p class="ms">Premium hat açık</p>':`<button class='btn alt' id='bpp'>PREMİUM AÇ (${fmt(PREM_PRICE)} TL)</button>`}<p class='ms'>${vmsg}</p></div>
- <div class='pn2'><div class='sr'><span>Seviye</span><b>${L} / 20</b></div><div class='sr'><span>XP</span><b>${px} / 200</b></div><div class='bar pbar'><em style='width:${px/2}%'></em></div><button class='btn alt' id='ca'>TÜM ÖDÜLLERİ AL (görevler dahil)</button></div></div>`;
+ const L=lvl(),px=L>=20?200:SV.xp%200,rd=typeof claimAllCount==='function'?claimAllCount():0;
+ const buy=SV.pm?`<div class='bp-pmon'>👑 PREMIUM AÇIK</div>`:`<button class='bp-buy' id='bpp'>👑 PREMIUM SATIN AL · ${fmt(PREM_PRICE)} TL</button>`;
+ const panel=SV.pm?'':`<div class='bp-buy-panel'><div class='bp-art'><h2>SEZON 1</h2><p>Yeni sezon. Yeni tehditler. Hazır ol.</p></div>
+  <div class='bp-benefits'><h3>PREMIUM AVANTAJLARI</h3>
+  <div class='bp-ben'><i>🔫</i><div><b>Özel kaplamalar</b><span>Premium hattaki sezon kaplamaları.</span></div></div>
+  <div class='bp-ben'><i>🧍</i><div><b>Özel karakterler</b><span>Yalnız premium hatta çıkan karakterler.</span></div></div>
+  <div class='bp-ben'><i>💰</i><div><b>Daha fazla para</b><span>Her seviyede ek TL ödülü.</span></div></div>
+  <button class='bp-buy' id='bpp2'>👑 PREMIUM AL · ${fmt(PREM_PRICE)} TL</button></div></div>`;
+ return `<div class='bp-wrap'>
+ <div class='bp-head'><div class='bp-title'>SEZON 1 · <span style='color:var(--cy)'>NO PAIN</span><small>Savaşmaya devam. Ödül kazan.</small></div><div style='text-align:right'>${buy}<div class='bp-time'>${vmsg||'20 kademe · maç oynayarak XP kazan'}</div></div></div>
+ <div class='bp-prog'><div class='bp-lvl'><div class='bp-lvlnum'>${L}</div><div style='flex:1'><div style='font:700 15px system-ui'>Seviye <span style='color:var(--cy)'>${L}</span> / 20</div><div class='bp-bar' style='margin-top:6px'><em style='width:${px/2}%'></em></div><div class='bp-xp'>XP ${px} / 200${L<20?` · sonraki seviye ${200-px} XP`:' · sezon tamamlandı'}</div></div>
+  <button class='btn alt' id='ca' style='width:auto;padding:10px 16px'${rd?'':' disabled'}>TÜM ÖDÜLLERİ AL${rd?` (${rd})`:''}</button></div></div>
+ <div class='bp-tracks'><div class='bp-row'><div class='bp-lab fr'>🎁 ÜCRETSİZ</div><div class='bp'>${BPF.map((r,n)=>rewardCard(r,n,'f')).join('')}</div></div>
+ <div class='bp-row'><div class='bp-lab pm'>👑 PREMİUM</div><div class='bp'>${BPP.map((r,n)=>rewardCard(r,n,'p')).join('')}</div></div></div>
+ ${panel}</div>`;
 }
 function claim(key){
  if(SV.bp.includes(key))return;
@@ -177,7 +187,7 @@ VIEWWIRE.bp=function(){
  const a=$('av');
  a.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{claim(b.dataset.c);save();bal();view('bp')});
  const ca=$('ca');if(ca)ca.onclick=()=>{if(typeof claimAll==='function'){vmsg=claimAllMsg(claimAll())}else{for(let n=0;n<20;n++){claim('f'+n);claim('p'+n)}save();bal()}view('bp')};
- const bpp=$('bpp');if(bpp)bpp.onclick=()=>{
+ const bpp=$('bpp'),bpp2=$('bpp2');if(bpp2)bpp2.onclick=()=>bpp.onclick();if(bpp)bpp.onclick=()=>{
   if(SV.tl<PREM_PRICE){vmsg='Yetmiyor';view('bp');return}
   SV.tl-=PREM_PRICE;SV.pm=true;vmsg='';save();bal();view('bp');
  };
