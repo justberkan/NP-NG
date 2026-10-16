@@ -2,7 +2,7 @@
 /* ===== Lobi arayüzü: gezinme, mağaza, envanter, battle pass, mod seçimi, ayarlar ===== */
 const RK=['Er','Onbaşı','Çavuş','Üstçavuş','Teğmen','Yüzbaşı','Binbaşı','Albay','General','Mareşal'];
 const VIEWS={},VIEWWIRE={};
-const NAV=[['home','lobi'],['stock','borsa'],['bank','beko bank'],['bp','battle pass'],['quest','görevler'],['shop','mağaza'],['inv','envanter'],['market','pazar'],['owc','açık dünya'],['casino','kumarhane'],['settings','ayarlar']];
+const NAV=[['home','lobi'],['stock','borsa'],['bank','beko bank'],['bp','battle pass'],['quest','görevler'],['shop','mağaza'],['inv','envanter'],['owc','açık dünya'],['casino','kumarhane'],['settings','ayarlar']];
 let curView='home',vt='w',vs=null,vm='shop',vmsg='',vw='rifle';
 
 /* ----- Simgeler (SVG) ----- */
@@ -258,7 +258,7 @@ function initTouchEdit(){
 function initUI(){
  $('lt').innerHTML=NAV.map(([k,t])=>`<button data-p='${k}' ${(k==='home'||VIEWS[k])?'':'disabled'}>${t}</button>`).join('');
  document.querySelectorAll('#lt [data-p]').forEach(b=>b.onclick=()=>view(b.dataset.p));
- document.querySelectorAll('.mode').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.mode:not(.soon)').forEach(b=>b.onclick=()=>{
   selMode=b.dataset.m;
   document.querySelectorAll('.mode').forEach(x=>x.classList.toggle('sel',x===b));
   if(typeof mapSelUI==='function')mapSelUI();

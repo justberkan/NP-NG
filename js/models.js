@@ -108,9 +108,21 @@ function mdlMake(id,len){
 }
 
 /* ----- Sığdırma: uzunluğu Z ekseninde olan nesneyi Y etrafında ang kadar döndürüp kameraya sığdırır ----- */
+/* kutu: iskeletli (skinned) mesh'lerde geometri bağlama pozunda ve başka birimde (asker: santimetre) durduğu için
+   Box3.setFromObject yanlış (100 kat büyük) çıkıyordu → kamera çok uzağa gidip küçük resim boş kalıyordu.
+   İskeletli parçalarda kemiklerin gerçek konumları kullanılır. */
+function mdlBox(obj){
+ const b=new THREE.Box3(),v=new THREE.Vector3(),bb=new THREE.Box3();let sk=false;
+ obj.traverse(o=>{
+  if(o.isSkinnedMesh&&o.skeleton){sk=true;for(const bn of o.skeleton.bones)b.expandByPoint(v.setFromMatrixPosition(bn.matrixWorld))}
+  else if(o.isMesh||o.isLine||o.isPoints){const g=o.geometry;if(!g)return;if(!g.boundingBox)g.computeBoundingBox();if(g.boundingBox.isEmpty())return;bb.copy(g.boundingBox).applyMatrix4(o.matrixWorld);b.union(bb)}
+ });
+ if(sk&&!b.isEmpty()){const s=b.getSize(v);b.expandByScalar(Math.max(s.x,s.y,s.z)*.06)}
+ return b;
+}
 function mdlFit(obj,ang,aspect,fov,pad){
  obj.updateMatrixWorld(true);
- const b=new THREE.Box3().setFromObject(obj),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
+ const b=mdlBox(obj),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
  const sa=Math.abs(Math.sin(ang)),ca=Math.abs(Math.cos(ang)),th=Math.tan(fov*Math.PI/360);
  const needW=(sz.x*ca+sz.z*sa)*(pad||1.1),needH=sz.y*(pad||1.1);
  const dist=Math.max(needW/(2*th*aspect),needH/(2*th))+(sz.x*sa+sz.z*ca)/2;
@@ -154,6 +166,7 @@ function mdlIconPump(){
    const ang=view==='front'?-.45:Math.PI/2-.5;
    _ir.setSize(w,h);_ic.aspect=w/h;
    const f=mdlFit(pv,ang,w/h,_ic.fov,view==='front'?1.06:1.02);
+   if(!(f.sz.x+f.sz.y+f.sz.z>0)){try{cb(null)}catch(e){}return setTimeout(mdlIconPump,0)} /* boş model (henüz yüklenmemiş): boş resmi önbelleğe yazma */
    pv.position.set(-f.c.x,-f.c.y,-f.c.z);
    const o=new THREE.Group();o.add(pv);o.rotation.y=ang;_is.add(o);
    _ic.position.set(0,view==='front'?.1*f.sz.y:.2*f.sz.y,f.dist);_ic.lookAt(0,0,0);_ic.updateProjectionMatrix();

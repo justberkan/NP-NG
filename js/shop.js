@@ -63,6 +63,9 @@ function shIconFor(i,el,cb){
  if(i.t==='m')return mdlIcon(i.m.mid,440,200,cb);
  if(i.t==='ws')return mdlIcon(SWMOD[i.sid].mid,440,200,cb);
  const boxW=(k,sk)=>done=>{const W=buildWeapon(k,sk);if(W.flash)W.g.remove(W.flash);done(W.g)};
+ /* klasik silah/kaplama: GLB model yüklenmeden çizilirse boş kalıyordu → önce modeli yükle */
+ const need=k=>{const sp=typeof mdlSpec==='function'?mdlSpec(k,null):null;return sp&&!MDL.cache[sp.mid]&&!MDL.fail[sp.mid]?sp.mid:null};
+ if((i.t==='w'||i.t==='g')&&need(i.t==='w'?i.w:vw))return mdlLoad(need(i.t==='w'?i.w:vw),()=>shIconFor(i,el,cb));
  if(i.t==='w')return mdlIconObj('cw:'+i.w+':'+(SV.sk[i.w]||'g0'),440,200,boxW(i.w,skinOf(i.w)),cb,'sidel');
  if(i.t==='g')return mdlIconObj('sk:'+vw+':'+i.id,440,200,boxW(vw,SKIN(i.id)),cb,'sidel');
  if(i.t==='c'){
@@ -155,6 +158,8 @@ function shStageObj(it,cb){
  const boxW=(k,sk)=>{const W=buildWeapon(k,sk,undefined,true);if(W.flash)W.g.remove(W.flash);return W.g};
  if(it.t==='m')return mdlLoad(it.m.mid,m=>cb(m?mdlMake(it.m.mid,2):null,'side'));
  if(it.t==='ws')return mdlLoad(SWMOD[it.sid].mid,m=>cb(m?mdlMake(SWMOD[it.sid].mid,2.2):null,'side'));
+ const sp=(it.t==='w'||it.t==='g')&&typeof mdlSpec==='function'?mdlSpec(it.t==='w'?it.w:vw,null):null;
+ if(sp&&!MDL.cache[sp.mid]&&!MDL.fail[sp.mid])return mdlLoad(sp.mid,()=>shStageObj(it,cb));
  if(it.t==='w')return cb(boxW(it.w,skinOf(it.w)),'sidel');
  if(it.t==='g')return cb(boxW(vw,SKIN(it.id)),'sidel');
  if(it.t==='op')return cb(optModel(it.id).g,'sidel');

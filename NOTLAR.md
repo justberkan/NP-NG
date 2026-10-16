@@ -3,7 +3,7 @@
 Bu dosya projede çalışan her yapay zekâ (Claude, ChatGPT/Codex) ve insan için ortak hafızadır.
 **İşe başlamadan önce oku. İş bitince "Değişiklik günlüğü" bölümüne kısa bir kayıt ekle.**
 
-Son güncelleme: 17.10.2026, Kimi (build `202610170300 · kontroller-v1`)
+Son güncelleme: 17.10.2026, Kimi — Claude'un yasal-v1 patch'i entegre edildi (build `202610170400 · yasal-v1`)
 
 ---
 
@@ -102,6 +102,8 @@ Referans ölçümler (değişiklikten sonra bunlar bozulmamalı):
 ## 7. Değişiklik günlüğü
 
 Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunulan dosyalar.
+
+- 16.10.2026 08:59 · Kimi (Claude'un patch'i) · `202610170400 yasal-v1` · **Claude'un `claude-bekleyen.patch` dosyası uygulandı** (Masaüstü'den, Kimi entegre etti): lobi arka planına neon "KAPALI BETA" yazısı; ilk açılışta yasal bilgilendirme onayı (cihaz başına bir kez, `npng_legal_v1`); kumarhaneye 18 yaş onayı (hesap verisinde `SV.casOk`); market/pazar sekmesi gezinme ve ayarlardan gizlendi; silah kaplamaları artık GLB modellere de uygulanıyor (`skinTint`); iskeletli modellerde ikon sığdırma düzeltildi (`mdlBox` — kemik konumlarına göre kutu, boş model önbelleğe yazılmıyor); mağaza ikonları GLB yüklenmeden çizilmiyor. **Birleştirme notu:** patch kontroller-v1 öncesi tabana göre hazırlandığı için `views.js` (Pazar sekmesi kaldırılırken Kontroller sekmesi korundu) ve `css/style.css` (kb2 stilleri korundu) elle birleştirildi; `tests/lobby-atmosphere.cjs`'e yasal kapı adımı eklendi (Claude smoke.cjs'i güncellemişti, bu testi atlamıştı). Doğrulama: tests/run.cjs 19 PASS / 0 FAIL; tarayıcıda yasal kapı, kumarhane onayı + kalıcılık, neon yazı, Kontroller sekmesinin durduğu doğrulandı. · index.html, css/style, main, casino, models, shop, ui, views, weapons, tests/smoke.cjs, tests/lobby-atmosphere.cjs
 
 - 16.10.2026 06:05 · Kimi · `202610170300 kontroller-v1` · **Kontroller (tuş atama) özelliği** (Berkan'ın 05:48 onayıyla): Ayarlar'a "Kontroller" sekmesi; 31 eylem için ana + yedek tuş, fare tuşları dahil; aynı tuş birden çok eyleme verilirse uyarı; "Varsayılana dön"; localStorage'a kalıcı kayıt (`mmofps_kb`). Tuş okuma artık `js/controls.js` eşlemesinden yapılıyor; oyun davranışı değişmedi. Yedekler `_yedek/kontroller/` altında. Doğrulama: tests/run.cjs 19 PASS / 0 FAIL; başsız tarayıcıda atama, çakışma uyarısı, fare tuşu, kalıcılık, varsayılana dönüş test edildi. Not: main/ui/mp/maps/glbrig'te klavye okuması yok ya da sistem tuşu (Escape, giriş ekranı Enter) olduğundan dokunulmadı; ateş/nişan farede sabit kaldı; ayarlar altındaki HELP metni güncellenmedi. · controls.js (yeni), player, skills, chat, loadout, ow2, views, index.html, css/style
 

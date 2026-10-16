@@ -149,6 +149,22 @@ function mkFlash(mz){
  const m=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,.1),new THREE.MeshBasicMaterial({color:0xffd070,transparent:true,opacity:.95}));
  m.position.set(mz[0],mz[1],mz[2]+.05);m.visible=false;return m;
 }
+/* kaplama (skin) GLB modele uygulanır: eskiden yalnız kutu modeli boyuyordu, GLB silahlarda tüm kaplamalar aynı görünüyordu.
+   Ana renk dokuyla çarpılır (doku deseni korunur); koyu kaplamalarda vurgu rengi hafif parıltı olarak eklenir. Malzemeler model+kaplama başına bir kez kopyalanır. */
+const _SKM=new Map();
+function skinTint(root,sk){
+ /* dokular çok koyu olduğu için renkle çarpmak görünmüyordu: kaplamada doku kaldırılır, silah kaplama rengine boyanır.
+    Koyu tabanlı (desenli) kaplamalarda vurgu rengi karıştırılır ve hafif parıltı verilir. */
+ const c=new THREE.Color(sk.c),a=new THREE.Color(sk.a),l=c.getHSL({}).l;
+ const base=(l<.12?c.clone().lerp(a,.45):c.clone()).multiplyScalar(.55); /* modeller parlak ışıkta beyaza kaçıyordu */
+ root.traverse(o=>{
+  if(!o.isMesh||!o.material)return;
+  const tint=m=>{const key=m.uuid+'|'+sk.id;let n=_SKM.get(key);
+   if(!n){n=m.clone();n.map=null;if(n.color)n.color.copy(base);if(n.emissive)n.emissive.copy(l<.12?a:c).multiplyScalar(.06);n.needsUpdate=true;_SKM.set(key,n)}
+   return n};
+  o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);
+ });
+}
 function buildWeapon(k,sk,mid,own){
  sk=sk||SKIN('g0');
  const d=WP[k],parts=wparts(k,sk.c,sk.a);
@@ -156,7 +172,7 @@ function buildWeapon(k,sk,mid,own){
  /* GLB model varsa kutu modelin yerine kullanılır (catalog.js: mdlSpec/mdlPlace) */
  const sp=typeof mdlSpec==='function'?mdlSpec(k,mid):null;
  const mm=sp?mdlBuild(sp):null,pl=mm?mdlPlace(mm,k,d,sp):null;
- if(mm)g.add(mm); /* kutu (klasik) silah modeli kaldırıldı: GLB yüklenene kadar boş durur */
+ if(mm){if(sk&&sk.id&&sk.id!=='g0')skinTint(mm,sk);g.add(mm)} /* kutu (klasik) silah modeli kaldırıldı: GLB yüklenene kadar boş durur */
  const gR=d.gR,gL=pl&&pl.gL?pl.gL:d.gL,mz=pl?pl.mz:d.mz;
  const W={g,g2:null,mag:null,mag2:null,flash:null,flash2:null,gR:V3(...gR),gL:gL?V3(...gL):V3(),well:d.mg?V3(...d.well):V3(),mz:V3(...mz),sh:pl?pl.sh:d.sh,hideMag:!!mm,adsZ:pl&&pl.adsz||0,bk:pl&&pl.bk!=null?pl.bk:null};
  W.support=pl&&pl.support?pl.support.map(p=>V3(...p)):null;

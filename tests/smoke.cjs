@@ -32,6 +32,8 @@ fs.mkdirSync(out,{recursive:true});
     await page.goto(baseURL,{waitUntil:'networkidle'});
     await page.screenshot({path:path.join(out,'lobby.png')});
     // Mevcut loadout akışından gerçek düğmelerle geç; testte oyun işlevini değiştirme.
+    // İlk açılış yasal bilgilendirmesi (yeni profilde her zaman çıkar)
+    if(await page.locator('#legal').isVisible()){await page.locator('#lgck').check();await page.locator('#lgok').click()}
     await page.locator('#go').click();
     if(await page.locator('#lo-go').isVisible())await page.locator('#lo-go').click();
     await page.waitForFunction(()=>!lobbyOn&&mode==='aim');

@@ -93,7 +93,29 @@ function boot(){
  setLobby(true);
  save();
 }
-boot();
+/* İlk açılışta (cihaz başına bir kez) kısa yasal bilgilendirme; onaylanınca bir daha gösterilmez */
+function legalGate(){
+ let ok=false;try{ok=localStorage.getItem('npng_legal_v1')==='1'}catch(e){}
+ if(ok)return;
+ const d=document.createElement('div');d.id='legal';
+ d.innerHTML=`<div class='lgc'><h2>N.P.N.G. · Kapalı Beta</h2>
+ <p>Hoş geldin! Başlamadan önce kısa bir bilgilendirme:</p>
+ <ul>
+ <li>Oyun <b>kapalı beta</b> aşamasındadır. Hatalar, veri sıfırlamaları ve kesintiler olabilir; ilerleme ve eşyalar garanti edilmez.</li>
+ <li>Oyundaki para (TL), eşyalar, borsa ve kumarhane tamamen <b>sanaldır</b>. Gerçek parayla satın alınamaz, gerçek paraya çevrilemez, satılamaz ve devredilemez; hiçbir parasal değeri yoktur.</li>
+ <li>Oyun "olduğu gibi" sunulur. Kesinti, veri kaybı ya da hatalardan doğan zararlardan geliştirici sorumlu tutulamaz.</li>
+ <li>Hile, açık istismarı, başka oyunculara hakaret ve taciz yasaktır; bu durumlarda hesap kapatılabilir.</li>
+ <li>Hesap için yalnızca kullanıcı adı ve şifre tutulur. Şifreni başka yerde kullandığın bir şifre seçme.</li>
+ <li>Oyunda yer alan marka, kulüp ve kişi adları ya da renkleri yalnızca eğlence amaçlıdır; ilgili kurumlarla resmi bir bağlantı yoktur. Kullanılan 3B modeller ve lisansları Ayarlar &gt; Krediler'de listelenir.</li>
+ </ul>
+ <label class='cgck'><input type='checkbox' id='lgck'> Okudum ve kabul ediyorum.</label>
+ <button class='btn' id='lgok' disabled>Devam</button></div>`;
+ document.body.appendChild(d);
+ const ck=d.querySelector('#lgck'),b=d.querySelector('#lgok');
+ ck.onchange=()=>{b.disabled=!ck.checked};
+ b.onclick=()=>{try{localStorage.setItem('npng_legal_v1','1')}catch(e){}d.remove()};
+}
+boot();legalGate();
 
 const FIX_DT=1/120;let accP=0;
 /* Performans: botların/mobların/oyuncuların animasyonu fizik alt adımlarının içinde çağrılıyordu (60 FPS'te karede 2, 30 FPS'te 4 kez;
@@ -148,14 +170,18 @@ function loopErr(e){
 function loop(now){
  requestAnimationFrame(loop);
  if(fpsSkip(now))return;
- fpsTick(now);
- const dt=Math.min(.05,(now-last)/1000);last=now;
+ const fms=now-last;fpsTick(now,fms);
+ const dt=Math.min(.05,fms/1000);last=now;
  if(lobbyOn){clock+=dt;ecoLoop(dt);lobbyUpdate(dt);R.shadowMap.autoUpdate=true;R.render(LS,LC);return}
  /* güvenlik: oyun mantığında bir hata çıksa bile çizim sürer, ekran donmaz; hata konsola ve bir kez ekrana yazılır */
+ const _t0=performance.now();
  try{tick(dt)}catch(e){loopErr(e)}
+ const _t1=performance.now();
  /* gölge açıksa gölge haritası saniyede en fazla 60 kez yenilenir (500 FPS'te her karede yeniden çizmek boşa iş) */
  if(typeof glbCullPass==='function')glbCullPass();
  if(R.shadowMap.enabled){R.shadowMap.autoUpdate=false;if(now-shLast>=16){shLast=now;R.shadowMap.needsUpdate=true}}
  R.render(S,cam);
+ fpsSpike(fms,_pt,_pr);_pt=_t1-_t0;_pr=performance.now()-_t1; /* önceki karenin süresi bu karenin bekleme aralığına denk gelir */
 }
+let _pt=0,_pr=0;
 requestAnimationFrame(loop);
