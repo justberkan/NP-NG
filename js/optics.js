@@ -28,9 +28,16 @@ function optModel(id){
   if(m&&typeof mdlMake==='function'){
    const len=OPTGLEN[o.mid]||.18,o2=mdlMake(o.mid,len);
    if(o2){
-    if(o.mid==='op_holosight')o2.rotation.y=Math.PI; /* model arkaya dönük geliyor: çevir */
+    if(o.mid==='op_holosight'){o2.rotation.y=Math.PI;o2.rotation.z=Math.PI} /* model arkaya dönük ve baş aşağı geliyor: çevir */
     const bb=new THREE.Box3().setFromObject(o2),bh=bb.max.y-bb.min.y;
-    o2.position.y=-bb.min.y;g.add(o2);return {g,cy:bh*.55}
+    o2.position.y=-bb.min.y;g.add(o2);
+    if(o.ty==='holo'){ /* holografik retikül: pencerenin ortasında kırmızı nokta + halka */
+     const cy=bh*.68,rm=new THREE.MeshBasicMaterial({color:0xff2a2a,transparent:true,opacity:.9,depthWrite:false});
+     const dm=new THREE.Mesh(new THREE.CircleGeometry(.0011,10),rm);dm.position.set(0,cy,.03);
+     const rg=new THREE.Mesh(new THREE.RingGeometry(.0046,.0053,28),rm);rg.position.set(0,cy,.03);
+     dm.renderOrder=rg.renderOrder=5;dm.userData.holoRet=rg.userData.holoRet=1;g.add(dm,rg);return {g,cy,dot:dm}
+    }
+    return {g,cy:bh*.55}
    }
   }
   if(typeof mdlLoad==='function'&&m===undefined&&!MDL.fail[o.mid])mdlLoad(o.mid,()=>{}); /* modeli önceden yükle (mdlPreload da yapar) */
@@ -68,7 +75,7 @@ function optModel(id){
 }
 
 /* ----- Nişan alırken ekran katmanı: artı + kararma ----- */
-let _oh=null,_ot='';
+let _oh=null,_ot='',_ohS=null,_ohW=null;
 function optHudInit(){
  if(_oh)return;
  _oh=document.createElement('div');_oh.id='opt';document.body.appendChild(_oh);
@@ -86,6 +93,9 @@ function optHud(adsT){
  if(!_oh){optHudInit()}
  const o=optCur(),on=optLong();
  const a=on?adsT:0;
+ /* 3B holografik retikül nişanda gizlenir: ekranda tek retikül (ortadaki SVG) kalsın */
+ {const show=a<.3,hw=typeof VM!=='undefined'&&VM.h?(VM.h.W||null):null,rt=typeof VM!=='undefined'?VM.root:null;
+  if(rt&&(show!==_ohS||hw!==_ohW)){_ohS=show;_ohW=hw;rt.traverse(q=>{if(q.userData.holoRet)q.visible=show})}}
  if(a<.05){if(_oh._v!==0){_oh._v=0;_oh.style.display='none'}return}
  const ds=+(SET.dotSize||1),k=o.id+(optScoped()?'s':'')+ds;
  if(k!==_ot){

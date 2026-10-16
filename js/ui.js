@@ -64,7 +64,7 @@ const RMAP=[0,'common','common','rare','epic','legendary'];
 function listFor(){
  if(vt==='o')return SWD.map(s=>({id:'ow:'+s.id,sid:s.id,n:s.n+(swLv(s.id)?' +'+swLv(s.id):''),p:s.p,t:'ws',r:RMAP[s.r]})).concat(Object.keys(ITM).filter(id=>!ITM[id].special&&invHave(id)>0).map(id=>({id:'oi:'+id,iid:id,n:ITM[id].n+' ×'+invHave(id),p:ITM[id].p,t:'oi',r:RMAP[ITM[id].r]})));
  if(vt==='w')return WKEYS.map(k=>({id:'w:'+k,w:k,n:WP[k].n,p:0,t:'w',r:'common'}));
- if(vt==='k')return vm==='shop'?[{id:'k1',n:'Bronz kasa',p:100,t:'k',r:'rare'},{id:'k2',n:'Altın kasa',p:250,t:'k',r:'epic'}]:[];
+ if(vt==='k')return vm==='shop'?[{id:'k1',n:'Bronz kasa',p:1000,t:'k',r:'rare'},{id:'k2',n:'Altın kasa',p:2500,t:'k',r:'epic'}]:[];
  if(vt==='c')return CHARS.filter(c=>!c.ch).map(c=>({id:c.id,n:c.n,p:c.p,t:'c',r:c.r,c:c.j}));
  if(vt==='h')return CHARS.filter(c=>c.ch).map(c=>({id:c.id,n:c.n,p:c.p,t:'c',r:c.r,c:c.j,ch:1}));
  if(vt==='g')return SKINS.map(s=>({id:s.id,n:s.n,p:s.p,t:'g',r:s.r,c:s.c,a:s.a}));
@@ -77,7 +77,7 @@ function cellIcon(i){
  if(i.t==='g')return wicon(vwCls(),i.c,i.a);
  if(i.t==='c')return cicon(i.c);
  if(i.t==='x')return xicon(i.c);
- return crateicon(i.id==='k2'?'#c98a10':'#8a5a2a');
+ return (typeof crateArt==='function'&&crateArt(i.id))||crateicon(i.id==='k2'?'#c98a10':'#8a5a2a');
 }
 function dsc(i){
  if(i.t==='ws'){const s=SWID[i.sid];return s.d+' Açık dünyada kullanılır. Hasar '+s.dmg+', menzil '+s.range+' m. Yükseltme için açık dünyadaki Demirci Kaan ya da lobideki Açık Dünya Merkezi.'}
@@ -190,7 +190,7 @@ function view(n){
  curView=n;
  $('lb').classList.toggle('sub',n!=='home');
  document.querySelectorAll('#lt [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===n));
- lobbySetView(n==='home'?'home':'sub');
+ // lobbySetView, #sa olusturulduktan sonra cagrilir.
  if(n==='shop'||n==='inv')vm=n;
  if(n==='home')$('av').innerHTML=homeHTML();
  else{
@@ -198,6 +198,7 @@ function view(n){
   $('av').innerHTML=`<div id='sv'><div id='sa'></div><div id='scn'>${f()}</div></div>`;
   (VIEWWIRE[n]||(()=>{}))();
  }
+ lobbySetView(n==='home'?'home':'sub');
  bal();
 }
 

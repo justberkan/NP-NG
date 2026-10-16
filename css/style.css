@@ -654,3 +654,19 @@ body.kb-cap{cursor:crosshair}
 #cmphud .ct b{font-size:20px}#cmphud .ct.bm{background:#7a1010cc;animation:cbm 1s infinite}@keyframes cbm{50%{background:#c01818cc}}
 #cmphud .csub{font:600 11px system-ui;color:#c9d4dc;margin-top:3px}#cmphud .ccash{margin-top:4px;color:#7dffb0;font-size:16px}#cmphud .ccash small{color:#e2bc67;font-size:11px}
 #cmphud .chint{margin-top:6px;color:#ffcf6a}#cmphud .cact{margin:8px auto 0;width:240px}#cmphud .cact i{display:block;height:6px;background:#0008;border-radius:3px;overflow:hidden;margin-top:3px}#cmphud .cact u{display:block;height:100%;background:#ffb020}
+
+/* LOBI-ALAN-001: menu ve karakter icin birbirinden ayri alanlar. */
+#lb.sub #sa{display:block;width:clamp(130px,25vw,440px);min-width:0;flex:none;pointer-events:none}
+#lb.sub #scn{min-width:0}
+@media(max-width:760px){
+ #lb.sub #sa{width:clamp(76px,21vw,160px)}
+ #lb.sub #sv{gap:8px}
+ #lb.sub #av{margin-right:0}
+ #lb.sub #fr{display:none}
+ #lb.sub #fx{display:none}
+ #lb.sub #scn .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #lb.sub #scn table{font-size:11px}
+}
+
+/* Kasa görselleri (tasarım v1) */
+.crart{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 8px #0008);pointer-events:none}

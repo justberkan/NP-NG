@@ -57,10 +57,22 @@ function lobbyRefresh(){LB.slots.forEach((s,i)=>{if(s.d.me)lobbyBuildSlot(i)})}
 function lobbyLayout(){
  LC.aspect=innerWidth/innerHeight;LC.updateProjectionMatrix();
  const avail=1-204/Math.max(innerWidth,400);
+ // DOM olustuktan sonra gercek onizleme alanini olc; her karede olcum yapma.
+ const lane=document.getElementById('sa');
+ const rect=lobbyView!=='home'&&lane?lane.getBoundingClientRect():null;
+ const laneOK=rect&&rect.width>0;
+ const laneF=laneOK?(rect.left+rect.width/2)/innerWidth:.165;
+ const halfW=Math.tan(LC.fov*Math.PI/360)*(LB.camDist+.4)*LC.aspect;
+ // Silah ve platform icin 2.8 dunya birimlik guvenli genislik birak.
+ const fit=laneOK?Math.min(1,rect.width*.82/(2.8*innerWidth/(2*halfW))):1;
  LB.slots.forEach((s,i)=>{
   const sub=lobbyView!=='home',on=s.d.on!==false,n=LB.slots.filter(z=>z.d.on!==false).length,idx=LB.slots.filter(z=>z.d.on!==false).indexOf(s);
-  const f=sub?(s.d.me?.165:.5):(.13+.7*(n<2?.5:idx/(n-1)))*avail/.87;
-  const x=worldX(f);
+  const f=sub?(s.d.me?laneF:.5):(.13+.7*(n<2?.5:idx/(n-1)))*avail/.87;
+  // Alt gorunumde z=-.4 oldugundan ekran merkezi icin ayni derinligi kullan.
+  const x=sub?(f-.5)*2*halfW:worldX(f);
+  const scale=sub&&s.d.me?fit:1;
+  s.plat.scale.setScalar(scale);
+  if(s.rig)s.rig.root.scale.setScalar(scale);
   s.plat.position.set(x,0,s.d.me?(sub?-.4:.5):0);
   if(s.rig){s.rig.root.position.set(x,.1,s.d.me?(sub?-.4:.5):0);s.rig.root.rotation.y=s.d.yaw}
   const vis=on&&(!sub||s.d.me);

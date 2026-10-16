@@ -81,7 +81,7 @@ function shIconFor(i,el,cb){
  }
  if(i.t==='op'){const o=typeof OPTID!=='undefined'?OPTID[i.id]:null;if(o&&o.mid&&!MDL.cache[o.mid]&&!MDL.fail[o.mid])return mdlLoad(o.mid,()=>shIconFor(i,el,cb));return mdlIconObj('op:'+i.id,440,200,done=>done(optModel(i.id).g),cb,'sidel')}
  if(i.t==='x'){el.innerHTML=xicon(i.c);return cb('svg')}
- if(i.t==='k'){el.innerHTML=crateicon(i.cr.col);return cb('svg')}
+ if(i.t==='k'){el.innerHTML=crateArt(i.id)||crateicon(i.cr.col);return cb('svg')}
  if(i.t==='oi'){el.innerHTML=`<span class='em'>${ITM[i.iid].ic}</span>`;return cb('svg')}
  cb(null);
 }
@@ -176,7 +176,7 @@ function shStageSet(it){
  const key=SH.selKey;
  if(it.t==='x'||it.t==='k'||it.t==='oi'){
   cv.classList.add('off');big.classList.remove('off');
-  big.innerHTML=it.t==='x'?xicon(it.c):it.t==='k'?crateicon(it.cr.col):`<span class='em'>${ITM[it.iid].ic}</span>`;
+  big.innerHTML=it.t==='x'?xicon(it.c):it.t==='k'?(crateArt(it.id)||crateicon(it.cr.col)):`<span class='em'>${ITM[it.iid].ic}</span>`;
   return;
  }
  big.classList.add('off');cv.classList.remove('off');
