@@ -118,3 +118,4 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 16.10.2026 · Eşitleme · Berkan'ın yerel son hâli (Claude güncellemeleri: glbrig, models, weapons, catalog, fingers.js, index.html) depoya alındı · fingers yeni dosya
 - 16.10.2026 · Kimi · `202610170103 fps-v1` · FPS sınırına Limitsiz + 240 seçeneği; çözünürlük ölçeği %25'e indi (pixelRatio tabanı .25); stencil tamponu kapalı · views, settings, core
 - 16.10.2026 · Claude · `202610170104 fps-v1+donma-fix` · Goblin ölümü ragdoll yerine devrilip kayma (gobDeadStep); bozuk ölü beden artık oyunu dondurmuyor (try/catch) · glbrig
+- 16.10.2026 · Kimi · `202610170105 avatar-v1` · Xbox tarzı geçici profil resimleri: 16 SVG avatar (js/avatars.js yeni), arkadaşlar kutusunda ◀▶ seçici, arkadaş/istek/aktif listesinde avatar, sunucu `save.av` ile eşitler; frRender girişsiz yüklenmede SV null hatası düzeltildi · avatars, owmp, server, css

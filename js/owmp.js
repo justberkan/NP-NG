@@ -211,8 +211,10 @@ const frEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 function frRender(){
  const el=$('fr');if(!el)return;
  const keep=el.querySelector('#frin'),val=keep?keep.value:'',foc=keep&&document.activeElement===keep;
+ const avNow=(typeof SV!=='undefined'&&SV&&SV.av)||'a0';
+ const me='<div class="fim">'+avSVG(avNow,30)+'<span>Profil resmin: <b>'+avName(avNow)+'</b></span><b data-a="avp" title="Önceki resim">◀</b><b data-a="avn" title="Sonraki resim">▶</b></div>';
  if(!MPL.authed){
-  el.innerHTML='<div class="frp"><div class="frh">Arkadaşlar</div><div class="frs">Arkadaş eklemek ve diğer oyuncuları görmek için çevrimiçi hesabına giriş yap.</div><button class="chip" data-a="login">Giriş yap</button></div><div class="frp"><div class="frh">Aktif oyuncular</div><div class="frs">—</div></div>';
+  el.innerHTML=me+'<div class="frp"><div class="frh">Arkadaşlar</div><div class="frs">Arkadaş eklemek ve diğer oyuncuları görmek için çevrimiçi hesabına giriş yap.</div><button class="chip" data-a="login">Giriş yap</button></div><div class="frp"><div class="frh">Aktif oyuncular</div><div class="frs">—</div></div>';
   return;
  }
  const st=n=>n[1]?'<i class="on"></i>':'<i></i>';
@@ -220,15 +222,15 @@ function frRender(){
  top+='<div class="frad"><input id="frin" maxlength="14" placeholder="oyuncu adı" autocomplete="off"><button data-a="send">+</button></div>';
  if(FR.msg)top+='<div class="frm">'+frEsc(FR.msg)+'</div>';
  let lst='';
- for(const q of FR.rq)lst+='<div class="fi2 rq"><span>'+frEsc(q)+'<small>istek</small></span><b data-a="acc" data-n="'+frEsc(q)+'">✓</b><b data-a="rej" data-n="'+frEsc(q)+'">✕</b></div>';
+ for(const q of FR.rq)lst+='<div class="fi2 rq"><u class="fav">'+avSVG('a0')+'</u><span>'+frEsc(q)+'<small>istek</small></span><b data-a="acc" data-n="'+frEsc(q)+'">✓</b><b data-a="rej" data-n="'+frEsc(q)+'">✕</b></div>';
  const frs=FR.fr.slice().sort((a,b)=>b[1]-a[1]);
- for(const f of frs)lst+='<div class="fi2">'+st(f)+'<span>'+frEsc(f[0])+(f[1]?'<small>'+frEsc(f[2])+'</small>':'<small>çevrimdışı</small>')+'</span><b data-a="del" data-n="'+frEsc(f[0])+'" title="Arkadaşlıktan çıkar">✕</b></div>';
+ for(const f of frs)lst+='<div class="fi2"><u class="fav">'+avSVG(f[3]||'a0')+'</u>'+st(f)+'<span>'+frEsc(f[0])+(f[1]?'<small>'+frEsc(f[2])+'</small>':'<small>çevrimdışı</small>')+'</span><b data-a="del" data-n="'+frEsc(f[0])+'" title="Arkadaşlıktan çıkar">✕</b></div>';
  if(!lst)lst='<div class="frs">Henüz arkadaşın yok. Aşağıdaki aktif oyunculardan ya da isim yazarak ekle.</div>';
  let bot='<div class="frh">Aktif oyuncular <small>'+FR.act.length+'</small></div>';
  let al='';
- for(const a of FR.act)al+='<div class="fi2"><i class="on"></i><span>'+frEsc(a[0])+'<small>'+frEsc(a[1])+'</small></span>'+(a[2]?'<em>arkadaş</em>':'<b data-a="add" data-n="'+frEsc(a[0])+'" title="Arkadaş ekle">+</b>')+'</div>';
+ for(const a of FR.act)al+='<div class="fi2"><u class="fav">'+avSVG(a[3]||'a0')+'</u><i class="on"></i><span>'+frEsc(a[0])+'<small>'+frEsc(a[1])+'</small></span>'+(a[2]?'<em>arkadaş</em>':'<b data-a="add" data-n="'+frEsc(a[0])+'" title="Arkadaş ekle">+</b>')+'</div>';
  if(!al)al='<div class="frs">Şu an başka aktif oyuncu yok.</div>';
- el.innerHTML='<div class="frp">'+top+'<div class="frl">'+lst+'</div></div><div class="frp">'+bot+'<div class="frl">'+al+'</div></div>';
+ el.innerHTML=me+'<div class="frp">'+top+'<div class="frl">'+lst+'</div></div><div class="frp">'+bot+'<div class="frl">'+al+'</div></div>';
  const ni=el.querySelector('#frin');if(ni){ni.value=val;if(foc)ni.focus()}
 }
 (function(){
@@ -237,6 +239,8 @@ function frRender(){
   const b=e.target.closest('[data-a]');if(!b)return;
   const a=b.dataset.a,n=b.dataset.n;
   if(a==='login'){if(typeof mpOpenDialog==='function')mpOpenDialog();return}
+  if(a==='avp'){avCycle(-1);frRender();return}
+  if(a==='avn'){avCycle(1);frRender();return}
   if(a==='send'){const i=el.querySelector('#frin');const v=i?i.value.trim():'';if(v){mpSend({t:'fadd',n:v});i.value=''}return}
   if(a==='add')mpSend({t:'fadd',n:n});
   else if(a==='acc')mpSend({t:'facc',n:n});

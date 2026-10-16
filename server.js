@@ -513,9 +513,10 @@ setInterval(() => {
 /* ---------- Arkadaşlar ve aktif oyuncular ---------- */
 const where = c => c.ow ? 'Açık Dünya' : c.joined ? (c.rm && c.rm.kind === 'tm' ? '5v5 Online' : c.rm && c.rm.kind === 'zo' ? 'Zombi Co-op' : 'Arena') : 'Lobi';
 function flFor(c) {
-  const a = c.acc, fr = (a.fr || []).map(k => { const o = users.get(k); return [ACC[k] ? ACC[k].name : k, o && o.sock.writable ? 1 : 0, o ? where(o) : '']; });
+  const a = c.acc, av = k => { const s = ACC[k] && ACC[k].save; return (s && s.av) || 'a0'; };
+  const fr = (a.fr || []).map(k => { const o = users.get(k); return [ACC[k] ? ACC[k].name : k, o && o.sock.writable ? 1 : 0, o ? where(o) : '', av(k)]; });
   const rq = (a.rq || []).map(k => ACC[k] ? ACC[k].name : k), act = [];
-  for (const [k, o] of users) { if (o === c || !o.acc || !o.sock.writable) continue; act.push([o.acc.name, where(o), (a.fr || []).includes(k) ? 1 : 0]); if (act.length >= 40) break; }
+  for (const [k, o] of users) { if (o === c || !o.acc || !o.sock.writable) continue; act.push([o.acc.name, where(o), (a.fr || []).includes(k) ? 1 : 0, av(k)]); if (act.length >= 40) break; }
   return { t: 'fl', fr, rq, act };
 }
 function sendFl(c) { if (!c.acc) return; const o = flFor(c), s = JSON.stringify(o); if (c.flS === s) return; c.flS = s; send(c, o); }
