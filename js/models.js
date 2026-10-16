@@ -6,7 +6,7 @@ const MDL={cache:{},wait:{},icons:{},fail:{}};
 /* Yön düzeltmeleri (otomatik tahmin yanlışsa): z:-1 uç/namlu yönünü çevirir, y:-1 yukarıyı çevirir */
 const MDLFIX={};
 /* Baş aşağı gelen modeller (otomatik tespit yetmezse elle): P90 kabza/tutamak üstte geliyordu */
-const MDLFLIPY={lg_fn_p90:1};
+const MDLFLIPY={lg_fn_p90:1,lg_s12p8:1};
 
 function mdlScript(id,cb){
  if(window.NPNG_G&&NPNG_G[id])return cb(true);
