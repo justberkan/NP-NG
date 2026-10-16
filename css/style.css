@@ -581,3 +581,30 @@ body.lo-on #wbar{display:none}
 body.mow #lohud{display:none}
 .mpt.ally{background:#0a6a3acc;color:#bfffd8}
 #mpb .ally{color:#8dffbd}
+
+/* İstanbul saatine bağlı lobi atmosferi; menü açılınca yalnız bu küçük panel büyür. */
+.lobby-atmosphere{position:absolute;left:20px;bottom:190px;z-index:12;width:280px;max-width:calc(100vw - 40px);color:#e5e9de;font:12px/1.5 Arial,sans-serif;border:1px solid #7f8c795e;border-radius:5px;background:#111c1be8;box-shadow:0 8px 24px #0003}
+.lobby-atmosphere[hidden]{display:none}
+.lobby-atmosphere summary{padding:10px 12px;cursor:pointer;letter-spacing:.1em;font-size:10px;color:#d6c59c}
+.lobby-atmosphere summary span{display:block;letter-spacing:0;color:#b6c3be;font-size:11px;margin-top:3px}
+.la-controls{padding:0 12px 12px;display:grid;gap:8px}
+.la-controls label{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.la-controls select{width:155px;background:#202d2c;border:1px solid #50605a;color:#f1f2e9;border-radius:3px;padding:5px;font:12px Arial,sans-serif}
+.la-controls small{color:#aab8b2;font-size:10px}
+.la-controls button{padding:6px;background:#35433b;border:1px solid #7c8b71;color:#eee8d7;border-radius:3px;cursor:pointer}
+@media(max-width:700px){.lobby-atmosphere{left:10px;bottom:175px;width:225px;max-width:calc(100vw - 30px)}.lobby-atmosphere summary{padding:7px 10px}.la-controls select{width:130px}}
+
+/* Yakında gelecek modlar: tıklanmaz, soluk, köşede rozet */
+.mode.soon{cursor:default;opacity:.55;filter:grayscale(.5);background:linear-gradient(160deg,#1c2430,#0c1016)}
+.mode.soon:after{content:'YAKINDA';position:absolute;top:10px;right:-6px;padding:3px 10px;border-radius:4px;background:#ffb020;color:#111;font:800 11px system-ui;letter-spacing:1px}
+.mode.soon[data-s=race]:before{content:'🏎️'}.mode.soon[data-s=bump]:before{content:'🚗'}.mode.soon[data-s=dog]:before{content:'✈️'}
+.mode.soon[data-s=surv]:before{content:'🏕️'}.mode.soon[data-s=cod]:before{content:'🧟‍♂️'}
+.mode[data-m=zo]{background:linear-gradient(170deg,#2e4a2a,#101a0e)}.mode[data-m=zo]:before{content:'🤝'}
+.mode[data-m=tm]{background:linear-gradient(120deg,#2b4f6e,#6e4a2f)}.mode[data-m=tm]:before{content:'🏆'}
+.mode[data-m=ow]{background:linear-gradient(160deg,#2c5a3a,#163040)}.mode[data-m=ow]:before{content:'🗺️'}
+/* Kontroller sekmesi (tuş atama) */
+.kb2 b.kbb{min-width:86px;text-align:center;cursor:pointer;background:#101a24;border:1px solid var(--ln);border-radius:5px;padding:5px 8px;font-size:12px;font-weight:600}
+.kb2 b.kbb:hover{border-color:var(--ac,#27e0ff)}
+.kb2 b.kbb.alt{opacity:.75;border-style:dashed}
+.kb2 b.kbb.wait{border-color:#ffb020;color:#ffb020}
+body.kb-cap{cursor:crosshair}

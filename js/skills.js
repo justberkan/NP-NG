@@ -216,7 +216,7 @@ function skUpdChain(dt){
 /* ----- Dash ----- */
 function skDash(){
  if(mode!=='ow'||state!=='play'||p.dead>0||SK.chain||SK.dCd>0)return false;
- let mx=(key.KeyD?1:0)-(key.KeyA?1:0)+joy.x,mz=(key.KeyW?1:0)-(key.KeyS?1:0)-joy.y;
+ let mx=(kDown('right')?1:0)-(kDown('left')?1:0)+joy.x,mz=(kDown('fwd')?1:0)-(kDown('back')?1:0)-joy.y;
  if(AUTO.on&&(aiIn.wx||aiIn.wz)){SK.dX=aiIn.wx;SK.dZ=aiIn.wz}
  else{
   if(Math.hypot(mx,mz)<.15){mx=0;mz=1}

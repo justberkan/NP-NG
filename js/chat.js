@@ -20,11 +20,11 @@ function chInRoom(){return !!chMyId()}
  inp.addEventListener('keyup',e=>e.stopPropagation());
  addEventListener('keydown',e=>{
   if(CH.typing)return;
-  if((e.code==='Enter'||e.code==='NumpadEnter')&&(state==='play'||state==='pause')&&chInRoom()&&!e.repeat){
+  if(kMatch(e,'chat')&&(state==='play'||state==='pause')&&chInRoom()&&!e.repeat){
    e.preventDefault();e.stopImmediatePropagation();chOpen();return}
-  if(e.code==='KeyB'&&!e.repeat&&CH.mode===1&&state==='play'){CH.ptt=true;chMic()}
+  if(kMatch(e,'ptt')&&!e.repeat&&CH.mode===1&&state==='play'){CH.ptt=true;chMic()}
  },true);
- addEventListener('keyup',e=>{if(e.code==='KeyB'&&CH.ptt){CH.ptt=false;chMic()}});
+ addEventListener('keyup',e=>{if(typeof kMatch==='function'&&kMatch(e,'ptt')&&CH.ptt){CH.ptt=false;chMic()}});
  setInterval(chShow,500);
 })();
 function chOpen(){
