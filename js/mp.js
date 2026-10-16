@@ -104,7 +104,7 @@ const MP_SLOTS=[0,2,3];
 function mpSend(o){const w=MPL.ws;if(w&&w.readyState===1)try{w.send(JSON.stringify(o))}catch(e){}}
 function mpJoin(cb){
  MPL.cb=cb||null;
- const sk={};for(const k of WKEYS)if(SV.sk&&SV.sk[k])sk[k]=SV.sk[k];
+ const sk={};if(SV.sk)for(const k in SV.sk)if(SV.sk[k]&&(WKEYS.includes(k)||k.indexOf('m:')===0))sk[k]=SV.sk[k];
  const mods={};for(const k of['rifle','smg','pistol','knife']){const id=modId(k);if(id)mods[k]=id}
  MPL.want=selMode==='tm'?'tm':selMode==='zo'?'zo':'ar';
  mpSend({t:'join',room:MPL.want,map:MAPS.sel,ch:chWithKit(SV.eq.c),w:SV.eq.w,sk,mods});
@@ -210,7 +210,8 @@ function mpAddRemote(info){
  if(MPL.ents.has(info.id))return MPL.ents.get(info.id);
  const w=WP[info.w]?info.w:'rifle';
  const rig=mkHuman(CHAR(info.ch),false);
- holderSet(rig,w,SKIN((info.sk&&info.sk[w])||'g0'),mpModOf(info.mods,w));
+ const md0=mpModOf(info.mods,w);
+ holderSet(rig,w,SKIN((info.sk&&(md0&&info.sk['m:'+md0]||info.sk[w]))||'g0'),md0);
  rig.root.position.set(info.x,info.y,info.z);S.add(rig.root);setShadow(rig.root);
  const tag=document.createElement('div');tag.className='mpt'+((MPL.kind==='zo'||(MPL.kind==='tm'&&info.team===MPL.team))?' ally':'');tag.textContent=info.name;mpTagLayer().appendChild(tag);
  const tm=MPL.kind==='tm',e={rig,g:rig.root,ch:info.ch,kind:'r',team:(MPL.kind==='zo'||(tm&&info.team===MPL.team))?1:2,mods:info.mods||{},hp:info.hp==null?100:info.hp,max:100,mp:info.id,name:info.name,wk:w,sk:info.sk||{},
@@ -324,7 +325,7 @@ function mpMsg(m){
    const inf=MPL.info.get(id);if(inf){inf.x=s[1];inf.y=s[2];inf.z=s[3];inf.yaw=s[4];inf.w=s[12]}
    const e=MPL.ents.get(id);if(!e||e.hp<=0)continue;
    e.tx=s[1];e.ty=s[2];e.tz=s[3];e.tyaw=s[4];e.pitch=s[5];e.pvx=s[6];e.pvz=s[7];e.fl=s[8];e.pq=s[9];e.psw=s[10];e.pcb=s[11];e.ad=s[13];
-   if(WP[s[12]]&&e.wk!==s[12]){e.wk=s[12];holderSet(e.rig,e.wk,SKIN(e.sk[e.wk]||'g0'),mpModOf(e.mods,e.wk));e.swU=-1;e.rq=-1}
+   if(WP[s[12]]&&e.wk!==s[12]){e.wk=s[12];const md1=mpModOf(e.mods,e.wk);holderSet(e.rig,e.wk,SKIN((md1&&e.sk['m:'+md1]||e.sk[e.wk])||'g0'),md1);e.swU=-1;e.rq=-1}
    if(e.psw>=0&&e.swU<0&&e.swGate!==true){e.swU=0;e.combo=e.pcb&3;e.grip=e.pcb>>2} // fx olayı kaçtıysa savuruşu başlat
    e.swGate=e.psw>=0; // aynı savuruş için tekrar başlatma
   }
@@ -334,7 +335,7 @@ function mpMsg(m){
   if(m.k==='f'){
    if(m.side===2){e.kL=1;e.flashL=.05}else{e.kR=1;e.flash=.05}
    if(e.rig.W&&WP[m.w]){
-    if(e.wk!==m.w){e.wk=m.w;holderSet(e.rig,m.w,SKIN(e.sk[m.w]||'g0'),mpModOf(e.mods,m.w))}
+    if(e.wk!==m.w){e.wk=m.w;const md2=mpModOf(e.mods,m.w);holderSet(e.rig,m.w,SKIN((md2&&e.sk['m:'+md2]||e.sk[m.w])||'g0'),md2)}
     muzzleWorld(e.rig,_mz,m.side===2?2:1);_mpt.set(m.pt[0],m.pt[1],m.pt[2]);tracer(_mz,_mpt);
    }
    if(Math.hypot(e.g.position.x-p.x,e.g.position.z-p.z)<45)snd(150,.06,.03);

@@ -62,12 +62,13 @@ function shLabel(i){
 function shIconFor(i,el,cb){
  if(i.t==='m')return mdlIcon(i.m.mid,440,200,cb);
  if(i.t==='ws')return mdlIcon(SWMOD[i.sid].mid,440,200,cb);
- const boxW=(k,sk)=>done=>{const W=buildWeapon(k,sk);if(W.flash)W.g.remove(W.flash);done(W.g)};
+ const boxW=(k,sk,mid)=>done=>{const W=buildWeapon(k,sk,mid);if(W.flash)W.g.remove(W.flash);done(W.g)};
  /* klasik silah/kaplama: GLB model yüklenmeden çizilirse boş kalıyordu → önce modeli yükle */
- const need=k=>{const sp=typeof mdlSpec==='function'?mdlSpec(k,null):null;return sp&&!MDL.cache[sp.mid]&&!MDL.fail[sp.mid]?sp.mid:null};
- if((i.t==='w'||i.t==='g')&&need(i.t==='w'?i.w:vw))return mdlLoad(need(i.t==='w'?i.w:vw),()=>shIconFor(i,el,cb));
+ const need=(k,mid)=>{const sp=typeof mdlSpec==='function'?mdlSpec(k,mid):null;return sp&&!MDL.cache[sp.mid]&&!MDL.fail[sp.mid]?sp.mid:null};
+ if(i.t==='w'&&need(i.w,null))return mdlLoad(need(i.w,null),()=>shIconFor(i,el,cb));
+ if(i.t==='g'&&need(vwCls(),vwMid()))return mdlLoad(need(vwCls(),vwMid()),()=>shIconFor(i,el,cb));
  if(i.t==='w')return mdlIconObj('cw:'+i.w+':'+(SV.sk[i.w]||'g0'),440,200,boxW(i.w,skinOf(i.w)),cb,'sidel');
- if(i.t==='g')return mdlIconObj('sk:'+vw+':'+i.id,440,200,boxW(vw,SKIN(i.id)),cb,'sidel');
+ if(i.t==='g')return mdlIconObj('sk:'+vw+':'+i.id,440,200,boxW(vwCls(),SKIN(i.id),vwMid()),cb,'sidel');
  if(i.t==='c'){
   const cc=CHAR(i.id);
   if(typeof glbCharReady==='function'&&!glbCharReady(cc)){glbLoadChar(cc.glb);return cb(null)} /* model yüklenince shFill yeniden çizer */
@@ -129,7 +130,7 @@ function shopNew(){
  const it=L.find(x=>x.id===SH.sel)||null;
  const tabs=SH_TABS.filter(t=>!(inv&&t[0]==='k')).map(t=>`<button data-t='${t[0]}' class='${SH.tab===t[0]?'on':''}'>${t[1]}</button>`).join('');
  const chips=SH.tab==='w'?`<div class='sh-sub'>${SH_SUB.map(c=>`<button data-sub='${c[0]}' class='${SH.sub===c[0]?'on':''}'>${c[1]}</button>`).join('')}</div>`
-  :SH.tab==='g'?`<div class='sh-sub'>${WKEYS.map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${WP[k].n}</button>`).join('')}</div>`:'';
+  :SH.tab==='g'?`<div class='sh-sub'>${WKEYS.map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${WP[k].n}</button>`).join('')}${WMOD.filter(wmOn).map(m=>`<button data-w='m:${m.id}' class='${vw==='m:'+m.id?'on':''}'>${m.n}</button>`).join('')}</div>`:'';
  const cards=L.map(shCard).join('')||`<div class='sh-empty'>${inv?'Bu sekmede henüz eşyan yok. Mağazadan alabilirsin.':'Bu sekmede eşya yok.'}</div>`;
  return `<div class='sh'>
   <div class='sh-main'>
@@ -155,13 +156,13 @@ function shSide(it){
 
 /* ----- Vitrin: dönen 3B model ----- */
 function shStageObj(it,cb){
- const boxW=(k,sk)=>{const W=buildWeapon(k,sk,undefined,true);if(W.flash)W.g.remove(W.flash);return W.g};
+ const boxW=(k,sk,mid)=>{const W=buildWeapon(k,sk,mid,undefined,true);if(W.flash)W.g.remove(W.flash);return W.g};
  if(it.t==='m')return mdlLoad(it.m.mid,m=>cb(m?mdlMake(it.m.mid,2):null,'side'));
  if(it.t==='ws')return mdlLoad(SWMOD[it.sid].mid,m=>cb(m?mdlMake(SWMOD[it.sid].mid,2.2):null,'side'));
- const sp=(it.t==='w'||it.t==='g')&&typeof mdlSpec==='function'?mdlSpec(it.t==='w'?it.w:vw,null):null;
+ const sp=(it.t==='w'||it.t==='g')&&typeof mdlSpec==='function'?mdlSpec(it.t==='w'?it.w:vwCls(),it.t==='g'?vwMid():null):null;
  if(sp&&!MDL.cache[sp.mid]&&!MDL.fail[sp.mid])return mdlLoad(sp.mid,()=>shStageObj(it,cb));
  if(it.t==='w')return cb(boxW(it.w,skinOf(it.w)),'sidel');
- if(it.t==='g')return cb(boxW(vw,SKIN(it.id)),'sidel');
+ if(it.t==='g')return cb(boxW(vwCls(),SKIN(it.id),vwMid()),'sidel');
  if(it.t==='op')return cb(optModel(it.id).g,'sidel');
  if(it.t==='c'){try{return cb(mkHuman(CHAR(chWithKit(it.id)),false).root,'frontl')}catch(e){return cb(null)}}
  if(it.t==='f'){try{return cb(mkHuman(CHAR(chWithKit(SV.eq.c,it.id)),false).root,'frontl')}catch(e){return cb(null)}}

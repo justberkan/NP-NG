@@ -89,6 +89,9 @@ const WMOD=WM_RAW.map(r=>{
  return {id,mid,n,cat,cls:b.cls,r:rar,p,k,cs:{dmg,rate,mag,kick,spread,auto:st.auto,rel:st.rel,pel:st.pel,mel},st:bar,sub:WM_SUB[cat]};
 });
 const WMID={};WMOD.forEach(m=>WMID[m.id]=m);
+/* Kaplamalar sekmesi: 'm:<modelId>' anahtarlı çipler için vw çözümleme (model silahlar da ayrı kaplanır) */
+const vwCls=()=>(typeof vw==='string'&&vw.startsWith('m:')&&WMID[vw.slice(2)])?WMID[vw.slice(2)].cls:vw;
+const vwMid=()=>(typeof vw==='string'&&vw.startsWith('m:'))?vw.slice(2):null;
 /* Oyundan kaldırılan modeller: elleri silaha oturmuyor (Mozambique: tutuş noktası güveni 0,3, sol el havada).
    Kayıt silinmez (envanter/pazar bozulmasın) ama satılmaz, kasadan çıkmaz, seçilemez; kuşanan varsayılan modele düşer. */
 const WM_HIDE=new Set(['m_moz']);

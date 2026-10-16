@@ -64,6 +64,8 @@ const SKINS=[
 ];
 const SKIN=id=>SKINS.find(s=>s.id===id)||SKINS[0];
 const skinOf=k=>SKIN((SV.sk&&SV.sk[k])||'g0');
+/* kuşanılan model silaha özel kaplama varsa o öncelikli (anahtar 'm:<modelId>'), yoksa slotun kaplaması */
+const skinFor=(k,mid)=>SKIN((mid&&SV.sk&&SV.sk['m:'+mid])||(SV.sk&&SV.sk[k])||'g0');
 const CHARS=[
  {id:'c0',glb:1,tint:[0.62,0.72,0.95],n:'Gece Mavisi',r:'common',p:0,j:0x2f6fd0,j2:0x2a5fb8,pa:0x27324a,v:0x1e2a3a,v2:0x1a232f,h:0x1b2432,gl:0x161b22,sk:0xe8c9a0,bo:0x14181d},
  {id:'c1',glb:1,tint:[0.85,1.0,0.78],n:'Orman Kamuflaj',r:'common',p:300,j:0x4f7a3a,j2:0x44692f,pa:0x3d4a2c,v:0x2f3a22,v2:0x28321d,h:0x2b3520,gl:0x1d2418,sk:0xd9b48c,bo:0x1d2014},
@@ -235,7 +237,7 @@ function mkHolder(parent,aimPos,p0R,p0L,cols,fp){
 }
 function holderSet(h,k,skin,mid){
  if(h.W){h.aim.remove(h.W.g);if(h.W.g2)h.aim.remove(h.W.g2);if(h.W.mag)h.aim.remove(h.W.mag);if(h.W.mag2)h.aim.remove(h.W.mag2)}
- h.W=buildWeapon(k,skin||skinOf(k),mid,h.optOn);h.wk=k;h.mid=mid||null;h.dropped=false;
+ h.W=buildWeapon(k,skin||skinFor(k,mid),mid,h.optOn);h.wk=k;h.mid=mid||null;h.dropped=false;
  if(typeof mdlWant==='function')mdlWant(k,mid,()=>{if(h.wk===k&&h.mid===(mid||null)&&h.W)holderSet(h,k,skin,mid)});
  h.aim.add(h.W.g);if(h.W.g2)h.aim.add(h.W.g2);if(h.W.mag)h.aim.add(h.W.mag);if(h.W.mag2)h.aim.add(h.W.mag2);
 }

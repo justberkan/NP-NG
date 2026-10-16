@@ -14,25 +14,13 @@ const SLOTDEF=[
 function worldX(f){const hw=Math.tan(LC.fov*Math.PI/360)*LB.camDist*LC.aspect;return(f-.5)*2*hw}
 
 function initLobby3D(){
- LS.add(new THREE.HemisphereLight(0x8fa0d8,0x0a0c14,.95));
- const d=new THREE.DirectionalLight(0xffffff,.7);d.position.set(2,6,5);LS.add(d);
- const pc=new THREE.PointLight(0x27e0ff,1.2,14);pc.position.set(-5,3,3);LS.add(pc);
- const pm=new THREE.PointLight(0xff4fd8,1,14);pm.position.set(5,3,3);LS.add(pm);
- const fl=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshLambertMaterial({color:0x10141c}));
- fl.rotation.x=-Math.PI/2;LS.add(fl);
- const gridH=new THREE.GridHelper(40,40,0x1f3a4d,0x151f2a);gridH.position.y=.01;LS.add(gridH);
- const wall=new THREE.Mesh(new THREE.BoxGeometry(40,10,.4),new THREE.MeshLambertMaterial({color:0x121722}));
- wall.position.set(0,5,-7);LS.add(wall);
- [[3.2,0x27e0ff],[4.2,0xff4fd8],[5.2,0x27e0ff]].forEach(([y,c])=>{
-  const s=new THREE.Mesh(new THREE.BoxGeometry(18,.07,.07),new THREE.MeshBasicMaterial({color:c}));s.position.set(0,y,-6.7);LS.add(s)});
+ LB.atmosphere=LobbyAtmosphere.create(LS,LC,R);
 
  SLOTDEF.forEach((d,i)=>{
   const g=new THREE.Group();
   g.add(new THREE.Mesh(new THREE.CylinderGeometry(.8,.85,.12,28),new THREE.MeshLambertMaterial({color:0x181e2a})));
   const ring=new THREE.Mesh(new THREE.TorusGeometry(.82,.03,6,40),new THREE.MeshBasicMaterial({color:d.color}));
   ring.rotation.x=Math.PI/2;ring.position.y=.07;g.add(ring);
-  const beam=new THREE.Mesh(new THREE.CylinderGeometry(.78,.78,2.4,20,1,true),new THREE.MeshBasicMaterial({color:d.color,transparent:true,opacity:.07,side:THREE.DoubleSide,depthWrite:false}));
-  beam.position.y=1.25;g.add(beam);
   LS.add(g);
   const nt=document.createElement('div');nt.className='nt';nt.style.borderLeftColor=hex(d.color);
   nt.innerHTML=d.name+(d.vip?"<span class='vip'>VIP</span>":'');
@@ -59,7 +47,7 @@ function lobbyBuildSlot(i){
  const s=LB.slots[i],d=s.d;
  if(s.rig)LS.remove(s.rig.root);
  if(d.on===false){s.rig=null;return}
- const cid=d.me?chWithKit(LB.prev||SV.eq.c,LB.prevK):d.ch,wkey=d.me?(LB.pw||SV.eq.w):d.w,skin=d.me?skinOf(wkey):SKIN(d.sk);
+ const cid=d.me?chWithKit(LB.prev||SV.eq.c,LB.prevK):d.ch,wkey=d.me?(LB.pw||SV.eq.w):d.w,skin=d.me?skinFor(wkey,(LB.pw?LB.pm:modId(wkey))):SKIN(d.sk);
  const ch=CHAR(cid);
  s.rig=mkHuman(ch,false);holderSet(s.rig,wkey,skin,d.me?(LB.pw?LB.pm:modId(wkey)):null);
  LS.add(s.rig.root);
@@ -83,6 +71,7 @@ function lobbyLayout(){
 function lobbySetView(v){lobbyView=v;lobbyLayout()}
 const _lv=V3();
 function lobbyUpdate(dt){
+ if(LB.atmosphere)LB.atmosphere.update(dt);
  const t=clock;
  LC.position.x+=(lmx*.5-LC.position.x)*Math.min(1,2*dt);LC.lookAt(0,1.1,0);
  LB.slots.forEach((s,i)=>{

@@ -74,7 +74,7 @@ function cellIcon(i){
  if(i.t==='ws')return swIcon(i.sid);
  if(i.t==='oi')return `<span style='font-size:34px;line-height:60px'>${ITM[i.iid].ic}</span>`;
  if(i.t==='w'){const s=skinOf(i.w);return wicon(i.w,s.c,s.a)}
- if(i.t==='g')return wicon(vw,i.c,i.a);
+ if(i.t==='g')return wicon(vwCls(),i.c,i.a);
  if(i.t==='c')return cicon(i.c);
  if(i.t==='x')return xicon(i.c);
  return crateicon(i.id==='k2'?'#c98a10':'#8a5a2a');
@@ -99,7 +99,7 @@ function shopV(){
  });
  while(cells.length<10)cells.push(`<div class='cell em'>boş</div>`);
  const st=it&&it.t==='w'?WP[it.w].st:null;
- const chips=vt==='g'?`<div class='tabs'>${WKEYS.map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${WP[k].n}</button>`).join('')}</div>`:'';
+ const chips=vt==='g'?`<div class='tabs'>${WKEYS.map(k=>`<button data-w='${k}' class='${vw===k?'on':''}'>${WP[k].n}</button>`).join('')}${WMOD.filter(wmOn).map(m=>`<button data-w='m:${m.id}' class='${vw==='m:'+m.id?'on':''}'>${m.n}</button>`).join('')}</div>`:'';
  return `<div class='pn2'><div class='tabs'>${TABS.map(t=>`<button data-t='${t[1]}' class='${vt===t[1]?'on':''}'>${t[0]}</button>`).join('')}</div>${chips}<div class='grid'>${cells.join('')}</div></div>
  <div class='dr'><div class='pn2'><h3>${it?it.n:'-'}</h3><p>${it?dsc(it):'Bu sekmede eşya yok.'}</p><p class='ms'>${vmsg}</p></div>
  <div class='pn2'>${st?['Hasar','İsabet','Tepme','Atış hızı','Mermi'].map((l,j)=>`<div class='sr'><span>${l}</span><span class='bar'><em class='c${j}' style='width:${Math.min(100,st[j]*(j===4?3:1))}%'></em></span><b>${j===4?(WP[it.w].mag||'-'):st[j]}</b></div>`).join(''):`<p>${it?'Bu eşya hasar ya da can vermez. Sadece görünüm.':''}</p>`}</div></div>`;
