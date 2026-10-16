@@ -134,7 +134,7 @@ const SEL={
  fog:[[0,'Kapalı'],[1,'Yakın'],[2,'Orta'],[3,'Uzak']],
  fx:[[0,'Düşük (izsiz, az ragdoll)'],[1,'Orta'],[2,'Yüksek']],
  fpsCap:[[0,'Limitsiz'],[30,'30'],[60,'60'],[90,'90'],[120,'120'],[144,'144'],[240,'240']],
- preset:[['low','Düşük'],['mid','Orta'],['high','Yüksek'],['custom','Özel']]
+ preset:[['ultra','Çok düşük'],['low','Düşük'],['mid','Orta'],['high','Yüksek'],['custom','Özel']]
 };
 const cRange=(l,k,mn,mx,st,u)=>`<div class='sr2'><span>${l}</span><input type='range' data-k='${k}' min='${mn}' max='${mx}' step='${st}' value='${SET[k]}'><b data-v='${k}'>${SET[k]}${u||''}</b></div>`;
 const cCheck=(l,k)=>`<label class='sr2'><span>${l}</span><input type='checkbox' data-k='${k}' ${SET[k]?'checked':''}></label>`;

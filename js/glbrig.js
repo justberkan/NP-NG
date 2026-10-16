@@ -20,7 +20,7 @@ const GL_ANC={hip:null,pelvis:'hip',waist:'hip',sp1:'waist',sp2:'sp1',head:'sp2'
  uaR:'sp2',faR:'uaR',haR:'faR',uaL:'sp2',faL:'uaL',haL:'faL'};
 const GL_DRIVEN=Object.keys(GL_ANC);
 
-const _gq1=new THREE.Quaternion(),_gq2=new THREE.Quaternion(),_gq3=new THREE.Quaternion(),_gq4=new THREE.Quaternion(),_gq5=new THREE.Quaternion();
+const _gq1=new THREE.Quaternion(),_gq2=new THREE.Quaternion(),_gq3=new THREE.Quaternion(),_gq4=new THREE.Quaternion(),_gq5=new THREE.Quaternion(),_gq6=new THREE.Quaternion(),_gq7=new THREE.Quaternion();
 const _gv1=V3(),_gv2=V3(),_gv3=V3(),_gv4=V3(),_gv5=V3(),_gv6=V3(),_gv7=V3(),_gs=V3();
 const _ge=new THREE.Euler(),_gm=new THREE.Matrix4(),_gm2=new THREE.Matrix4();
 const _RXN90=new THREE.Quaternion().setFromAxisAngle(V3(1,0,0),-Math.PI/2);
@@ -572,9 +572,9 @@ function glbSync(h,c){
  let QwR=null,QwL=null,modeR='f',modeL='f';
  if(hasW){
   _gq1.copy(hq).multiply(sq).multiply(h.aim.quaternion);                // aim yönelimi (rig)
-  QwR=new THREE.Quaternion().copy(_gq1).multiply(W.g.quaternion);      // silah yönelimi (aim uzayında hesaplanmıştı)
+  QwR=_gq6.copy(_gq1).multiply(W.g.quaternion);                        // silah yönelimi (aim uzayında hesaplanmıştı) — havuzlu geçici, kare başına nesne üretme
   modeR='w';
-  if(W.g2){QwL=new THREE.Quaternion().copy(_gq1).multiply(W.g2.quaternion);modeL='w';d.lrifle=false}
+  if(W.g2){QwL=_gq7.copy(_gq1).multiply(W.g2.quaternion);modeL='w';d.lrifle=false}
   else if(typeof P!=='undefined'&&P.lhOn){QwL=QwR;modeL='w';d.lrifle=true}
  }
  const reloadL=hasW&&!W.g2&&c.rq>=0;

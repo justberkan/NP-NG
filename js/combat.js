@@ -61,17 +61,24 @@ function hitFeel(heavy){
 }
 function hurtFx(){const v=$('vig');v.style.opacity='.65';setTimeout(()=>v.style.opacity='0',90)}
 
-/* ----- İz (tracer) ----- */
-const trs=[];
+/* ----- İz (tracer): havuzlu — çatışmada her atışta nesne üretip silmek FPS düşürür ----- */
+const trs=[],trPool=[];
 function tracer(a,b){
  if(!SET.fx||window.BGMODE)return;
- const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a.clone(),b.clone()]),new THREE.LineBasicMaterial({color:0xffe28a,transparent:true,opacity:.9}));
- l.frustumCulled=false;S.add(l);trs.push({l,t:.09});
+ let l=trPool.pop();
+ if(!l){
+  if(trs.length>=48)return; // iz yağmuru sınırı (yalnız görsel)
+  l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(),V3()]),new THREE.LineBasicMaterial({color:0xffe28a,transparent:true,opacity:.9}));
+  l.frustumCulled=false;
+ }
+ const ps=l.geometry.attributes.position;
+ ps.setXYZ(0,a.x,a.y,a.z);ps.setXYZ(1,b.x,b.y,b.z);ps.needsUpdate=true;
+ l.material.opacity=.9;S.add(l);trs.push({l,t:.09});
 }
 function updTracers(dt){
  for(let i=trs.length-1;i>=0;i--){
   const r=trs[i];r.t-=dt;r.l.material.opacity=Math.max(0,r.t/.09);
-  if(r.t<=0){S.remove(r.l);r.l.geometry.dispose();r.l.material.dispose();trs.splice(i,1)}
+  if(r.t<=0){S.remove(r.l);trs.splice(i,1);trPool.push(r.l)}
  }
 }
 
@@ -136,8 +143,9 @@ function shoot(){
  bloom=Math.min(.004,bloom+.0006);
  const NP=cw.pel?7:1;
  for(let pi=0;pi<NP;pi++){
+ /* tek mermi tam olarak nişangâhın baktığı noktaya gider (dağılma yok); saçmalı yalnızca saçmada (pellet) kalır */
  const spp=NP>1?sp*2.2+.012:sp;
- rc.setFromCamera({x:(Math.random()-.5)*spp*2,y:(Math.random()-.5)*spp*2},cam);
+ rc.setFromCamera(NP>1?{x:(Math.random()-.5)*spp*2,y:(Math.random()-.5)*spp*2}:{x:0,y:0},cam);
  rc.far=100;
  let hit=rc.intersectObjects(targetObjs(),true)[0];
  let pt=hit?hit.point:rc.ray.at(60,_ev);
@@ -224,7 +232,7 @@ function hurt(d,from){
  if(p.dead>0||state!=='play')return;
  if(p.inv>0)return;
  if(mode==='ow'){d*=clsRed();d=skAbsorb(d);if(d<=.01)return}
- p.hp-=d;cmbHurt();hudHp();snd(90,.1,.06);hurtFx();p.shk=Math.max(p.shk||0,Math.min(.06,.012+d*.0012));
+ p.hp-=d;cmbHurt();hudHp();snd(90,.1,.06);hurtFx(); /* kamera sarsıntısı kaldırıldı (hasar anında görüşü kaybetme yok) */
  if(mode==='ow')OW.hitT=0;
  if(p.hp<=0){
   const h=pRigGet();

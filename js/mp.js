@@ -335,7 +335,7 @@ function mpMsg(m){
    if(m.side===2){e.kL=1;e.flashL=.05}else{e.kR=1;e.flash=.05}
    if(e.rig.W&&WP[m.w]){
     if(e.wk!==m.w){e.wk=m.w;holderSet(e.rig,m.w,SKIN(e.sk[m.w]||'g0'),mpModOf(e.mods,m.w))}
-    muzzleWorld(e.rig,_mz,m.side===2?2:1);tracer(_mz,V3(m.pt[0],m.pt[1],m.pt[2]));
+    muzzleWorld(e.rig,_mz,m.side===2?2:1);_mpt.set(m.pt[0],m.pt[1],m.pt[2]);tracer(_mz,_mpt);
    }
    if(Math.hypot(e.g.position.x-p.x,e.g.position.z-p.z)<45)snd(150,.06,.03);
   }else if(m.k==='s'){e.swU=0;e.combo=(m.cb|0)&3;e.grip=(m.cb|0)>>2;e.swGate=true;if(Math.hypot(e.g.position.x-p.x,e.g.position.z-p.z)<20)snd(220,.08,.03)}
@@ -402,7 +402,7 @@ function mpHit(e,d,info){
 }
 
 /* ---------- Her karede ---------- */
-const _mpv=V3();
+const _mpv=V3(),_mpt=V3();
 function mpUpdate(dt){
  if(!MPL.ready)return;
  // kendi durumumuzu yolla (20 Hz)
@@ -438,9 +438,15 @@ function mpUpdate(dt){
   if(e.swU>=0){e.swU+=dt/Math.max(.25,w.rate);if(e.swU>=1)e.swU=-1}
   e.kR*=Math.pow(.0005,dt);e.kL*=Math.pow(.0005,dt);e.flash-=dt;e.flashL-=dt;e.flinch=Math.max(0,e.flinch-dt*4);
   e.adsT+=((w.melee?0:e.ad)-e.adsT)*Math.min(1,10*dt);
+  /* Kamera arkasındaki uzak oyuncular (zaten ekranda görünmüyorlar): iskelet pozu 3 karede bir
+     hesaplanır (dt*3 ile), CPU kazandırır; konum yumuşatma ve isim etiketi her karede sürer. */
+  e.skN=(e.skN||0)+1;
+  const _dx=q.x-p.x,_dz=q.z-p.z,_d2=_dx*_dx+_dz*_dz;
+  const _behind=_d2>400&&(Math.sin(p.yaw)*_dx+Math.cos(p.yaw)*_dz>0);
+  if(!_behind||e.skN%3===0)
   animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:(e.fl&2)?1:0,
    pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:e.adsT,kick:Math.max(e.kR,e.kL),kickR:e.kR,kickL:e.kL,
-   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:e.rq,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:e.flash,flashL:e.flashL,lr:0},dt);
+   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:e.rq,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:e.flash,flashL:e.flashL,lr:0},_behind?dt*3:dt);
   // isim etiketi
   if(e.tag){
    _mpv.set(q.x,q.y+2.2,q.z).project(cam);
