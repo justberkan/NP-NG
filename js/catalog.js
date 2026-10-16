@@ -189,6 +189,7 @@ function mdlPreload(){
   ['rifle','smg','pistol','knife'].forEach(k=>{const m=modOf(k);if(m)ids.push(m.mid)});
   const sw=SWMOD[SV.ow.mw];if(sw)ids.push(sw.mid);
   (SV.ow.sw||[]).forEach(s=>{if(SWMOD[s])ids.push(SWMOD[s].mid)});
+  if(typeof optCur==='function'){const oc=optCur();if(oc&&oc.mid)ids.push(oc.mid)} /* GLB'li nişangah */
   ids.forEach(id=>mdlLoad(id,()=>{}));
  }catch(e){}
 }

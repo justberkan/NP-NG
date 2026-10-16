@@ -346,6 +346,7 @@ function updPlayerView(dt){
  }else if(tp&&alive)pRigGet();
  if((p.shk||0)>.0008&&!tp){cam.rotation.x+=(Math.random()-.5)*p.shk;cam.rotation.y+=(Math.random()-.5)*p.shk;p.shk*=Math.pow(.0004,dt)}else p.shk=0;
  optHud(adsT);
+ if(typeof thermScan==='function')thermScan(optCur().th&&optLong()&&adsT>.5&&!p.dead);
  if(window.DBGCAM)window.DBGCAM(cam,p);
  if(gr){
   cam.updateMatrixWorld();
