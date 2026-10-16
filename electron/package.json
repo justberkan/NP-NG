@@ -1,0 +1,69 @@
+{
+  "name": "npng-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "N.P.N.G. masaüstü oyun istemcisi",
+  "author": "Berkan / N.P.N.G.",
+  "license": "UNLICENSED",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/policy.cjs",
+    "test:smoke": "node tests/smoke.cjs",
+    "prepack": "node tools/make-icon.cjs && node node_modules/electron/install.js",
+    "pack": "electron-builder --win --x64 --dir --publish never",
+    "prebuild": "node tools/make-icon.cjs && node node_modules/electron/install.js",
+    "build": "electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.15.3",
+    "playwright": "1.62.1"
+  },
+  "build": {
+    "appId": "com.npng.desktop",
+    "productName": "NPNG",
+    "asar": true,
+    "electronDist": "node_modules/electron/dist",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.cjs",
+      "policy.cjs",
+      "preload.cjs",
+      "launcher/**",
+      "build/icon.ico",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "NPNG-Kurulum-${version}-${arch}.${ext}",
+      "requestedExecutionLevel": "asInvoker"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "NPNG",
+      "runAfterFinish": false,
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": [
+        "tr_TR",
+        "en_US"
+      ],
+      "language": "1055"
+    }
+  }
+}

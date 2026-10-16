@@ -1,0 +1,27 @@
+✔ 21 rütbe boşluksuz ve çakışmasız; son kademe açık uçlu (2.4857ms)
+✔ İlk dört maç gizli; beşinci tamamlanan maç rütbe açar (0.6087ms)
+✔ Rütbesiz XP/TL verir; rekabetçi durumun her alanı byte düzeyinde aynı kalır (0.7191ms)
+✔ Genel hesap seviyesi Elo sonucunu ve rütbeyi değiştirmez (0.1354ms)
+✔ Beklenen kazanma olasılığı yalnız kilitli beşli Elo ortalamasına bağlı (0.2346ms)
+✔ Normal galibiyetler +15..+30, mağlubiyetler -15..-25 (0.9915ms)
+✔ Aynı rakip/performance ile 16-0, 16-14 galibiyetinden fazla kazandırır (0.1459ms)
+✔ Güçlü rakibi yenmek daha çok; favori kaybetmek daha pahalı (0.0875ms)
+✔ Performans çarpanı sınırlı; iyi performans galibiyete ek puan sağlar (0.213ms)
+✔ Mağlup EBO daha az kaybeder; kaybettiği için pozitif Elo alamaz (0.1354ms)
+✔ EBO tek oyuncu; bağ eşitliğinde deterministik, AFK/ayrılan hariç (0.1871ms)
+✔ 15-15 beraberlik Elo 0; placement sayılır; geçersiz final skorları reddedilir (0.2181ms)
+✔ 0 Elo tabanı: nominal kayıp ile gerçek uygulanan kayıp ayrıdır (0.0936ms)
+✔ Eşik geçişleri anlık; gizli placement sırasında rozet gösterilmez (0.0917ms)
+✔ Yeni sezon 5 placement, soft reset; hesap ve yaşam boyu sayaçlar korunur (0.2461ms)
+✔ Maç terk etmek -25; placement ilerlemez, XP/TL vermez; rütbesizde Elo etkisi yok (0.1447ms)
+✔ Sunucu iptali hiçbir hesap/Elo alanını değiştirmez (0.1004ms)
+✔ Tekrar sonuç: tek XP/TL/Elo ödemesi; çelişen sonuç ayrı admin revizyonu ister (0.3496ms)
+✔ Yuvarlama C#/JSON sözleşmesi: yarımlar sıfırdan uzağa (0.0681ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 78.4193

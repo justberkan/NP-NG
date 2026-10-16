@@ -1,0 +1,25 @@
+✔ Kullanıcı şartı: para, 27 öğe, beş kategori, fiyatlar ve istisnalar (1.5574ms)
+✔ Her takım/kategori en fazla beş öğe + altıncı geri dilimine sığar (0.9913ms)
+✔ Standart zafer 3250; bomba patlatma/çözme galibi 3500 (0.2737ms)
+✔ Seri 1400/1900/2400/2900/3400/3400; galibiyet sıfırlar (0.143ms)
+✔ Kurulu bomba ile kaybeden her T +800; beşinci kayıp 4200 (0.1259ms)
+✔ Süre doldu: canlı T sıfır, ölü T seri ödülü, CT 3250; T seri yine artar (0.0787ms)
+✔ Bomba kurulduktan sonra normal süre/eliminasyon CT galibiyeti üretemez (0.3333ms)
+✔ Kill ödülleri ve P90/seri tabanca/AWP istisnaları (0.1605ms)
+✔ 16000 tavanı, gerçek eklenen tutar ve tam TL doğrulaması (0.1831ms)
+✔ Ölü, yanlış takım/bölge, süre/faz ve parasız satın alma reddedilir (0.4066ms)
+✔ Başlangıç tabancası/bıçak tekrar ücretsiz alınamaz; kit yalnız CT (0.2322ms)
+✔ 800 TL tabanca raundunda yelek sonrası 150 kalır; fazla harcama olmaz (0.1514ms)
+✔ Zırh 650/1000, kask yükseltmesi 350 ve mevcut kask tamiri 650 (0.1989ms)
+✔ En fazla dört bomba, iki flaş; başka türler bir adet (0.6682ms)
+✔ Silah değişimi eski silahı düşürür; reddedilen işlem para/envanter değiştirmez (0.2222ms)
+✔ Tekrar gelen istek bir kez keser; aynı anahtarla farklı ürün reddedilir (0.3543ms)
+✔ SQLite şeması ve 27 katalog satırı: FK, cüzdan tavanı, çift olay ve atomik geri alma (3.1213ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.6378

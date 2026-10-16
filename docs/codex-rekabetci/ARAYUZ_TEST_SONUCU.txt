@@ -1,0 +1,1 @@
+PASS: Yerel HTML açıldı; mod seçimi, placement durumu, 21 SVG rozet, profil ve satın alma görseli doğrulandı. Sayfa hatası: 0.

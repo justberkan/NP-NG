@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>N.P.N.G - No Pain No Gain</title>
+<link rel="stylesheet" href="css/style.css?v=202610171301">
+</head><body>
+<canvas id="c"></canvas>
+<div id="fps" class="off"></div>
+
+<div id="tc">
+ <div id="joy"></div><div id="look"></div><div id="knob"></div>
+ <div class="tb" id="bf">ATEŞ</div><div class="tb" id="bj">ZIPLA</div><div class="tb" id="br">ŞARJÖR</div>
+ <div class="tb" id="bs">KAY</div><div class="tb" id="bq">KANCA</div><div class="tb" id="bk">II</div>
+ <div class="tb" id="ba">NİŞAN</div><div class="tb" id="bw">SİLAH</div>
+ <div class="tb owonly sk" id="k1"></div><div class="tb owonly sk" id="k2"></div><div class="tb owonly sk" id="k3"></div><div class="tb owonly sk" id="k4"></div><div class="tb owonly sk" id="k5"></div><div class="tb owonly sk dash" id="bd"></div><div class="tb owonly" id="be">E</div>
+ <div class="tb owonly" id="bo">OTO</div><div class="tb owonly" id="bh">İYİLEŞ</div><div class="tb owonly" id="bm">HARİTA</div>
+</div>
+
+<div id="hud" class="off">
+ <div id="top"><span id="tm">60</span><span id="scr">Skor 0</span><span id="acc">%0</span></div>
+ <div id="dn"></div><div id="kf"></div><div id="vig"></div>
+ <div id="cmb" class="off"></div>
+ <div id="ch"></div><div id="msg"></div>
+ <div id="hp"><div class="hpt"><span id="hpc"></span><b id="hpn">100</b><small id="hpm">/ 100</small><em id="hps2"></em></div><div class="hpb"><i id="hpg"></i><i id="hpf"></i><u id="hps"></u><s></s></div></div><div id="spd"></div><div id="stb"><i id="sti"></i></div>
+ <div id="wbar"></div><div id="ammo"></div>
+ <div id="owhud" class="off">
+  <canvas id="mm" width="150" height="150"></canvas>
+  <div id="owp"><b id="owlv">Lv 1</b><span id="owxt"></span><i><u id="owxp"></u></i><em id="owmed"></em></div>
+  <div id="owl"></div>
+  <div id="ab" class="off">OTOMATİK SAVAŞ AÇIK<small>kapatmak için F (ya da bir hareket tuşu)</small></div>
+  <div id="bigmap" class="off"><canvas id="bm2" width="560" height="560"></canvas><p>Haritayı kapat: M · Renkler: gri çok düşük, yeşil düşük, sarı eşit, turuncu yüksek, kırmızı çok yüksek, mor elit</p></div>
+ </div>
+</div>
+
+<div id="ov" class="off"><div class="card">
+ <h1 id="ttl">N.P.N.G</h1>
+ <p id="sub"></p>
+ <div id="res"></div>
+ <button class="btn" id="play">OYNA</button><br>
+ <button class="btn alt off" id="autob">OTOMATİK SAVAŞ</button><button class="btn alt" id="igsb">AYARLAR</button><button class="btn alt" id="lob">LOBİ</button>
+ <div id="igs" class="off"></div>
+ <p id="help"></p>
+</div></div>
+
+<div id="lb">
+ <div id="betaneon" aria-hidden="true">KAPALI BETA</div>
+ <div id="tp">
+  <div id="lt"></div>
+  <div id="bal"></div>
+ </div>
+ <div id="av"></div>
+ <div id="nts"></div>
+ <div id="fr"></div>
+ <button id="fx">»</button>
+ <div id="lbt">
+  <div id="mb">
+   <button id="msel"><small>Seçili mod</small><span id="mn">Aim Training</span></button>
+   <button class="btn" id="go">OYNA</button>
+  </div>
+ </div>
+ <div id="mp" class="off">
+  <p class="mh"><b>Mod seçme ekranı</b></p>
+  <div id="lm">
+   <button class="mode sel" data-m="aim">Aim Training<small>60 sn hareketli hedef</small></button>
+   <button class="mode" data-m="zom">Zombi Direnişi<small>Dalga dalga zombi, hayatta kal</small></button>
+   <button class="mode" data-m="tdm">5v5 (botlarla)<small>3 dakika, takımı en çok öldüren kazanır</small></button>
+   <button class="mode" data-m="zo">Zombi Co-op Online<small>Arkadaşlarınla birlikte dalga dalga zombi, hayatta kal</small></button>
+   <button class="mode" data-m="tm">5v5 Online<small>Gerçek oyuncularla 5'e 5, harita seç (Arena / Dust2 / Minecraft), ilk 30 öldürme</small></button>
+   <button class="mode" data-m="mp">Çevrimiçi Arena<small>Sunucuya bağlan, gerçek oyuncularla savaş (ilk 20 öldürme)</small></button>
+   <button class="mode" data-m="cmp">Rekabetçi<small>5v5 bombalı raunt modu · Rütbesiz (botlarla) / Rütbeli</small></button>
+   <button class="mode" data-m="ow">Açık Dünya<small>Dev arazi, zombi ve mutant grupları, kılıç, yetenek, item, demirci, otomatik savaş (AFK)</small></button>
+   <div class="mode soon" data-s="race">Yarış<small>Pistlerde araç yarışı</small></div>
+   <div class="mode soon" data-s="bump">Çarpışan Araba<small>Arenada çarp, devir, son kalan kazanır</small></div>
+   <div class="mode soon" data-s="dog">İt Dalaşı<small>Uçaklarla hava savaşı</small></div>
+   <div class="mode soon" data-s="surv">Zombi: Hayatta Kalma<small>Açık dünyada topla, inşa et, hayatta kal</small></div>
+   <div class="mode soon" data-s="cod">Zombi Direnişi 2<small>Yeni büyük harita, kapı açma, silah duvarı, tuzaklar (CoD Zombies tarzı)</small></div>
+  </div>
+  <p class="mh">Seçmek için üzerine bas</p>
+ </div>
+</div>
+
+<script src="lib/three.min.js"></script>
+<script src="lib/GLTFLoader.js"></script>
+<script src="lib/SkeletonUtils.js"></script>
+<script src="js/core.js?v=202610171301"></script>
+<script src="js/settings.js?v=202610171301"></script>
+<script src="js/controls.js?v=202610171301"></script>
+<script src="js/weapons.js?v=202610171301"></script>
+<script src="js/swords.js?v=202610171301"></script>
+<script src="js/optics.js?v=202610171301"></script>
+<script src="js/models.js?v=202610171301"></script>
+<script src="js/catalog.js?v=202610171301"></script>
+<script src="js/clips.js?v=202610171301"></script>
+<script src="js/rig.js?v=202610171301"></script>
+<script src="js/model_soldier.js?v=202610171301"></script>
+<script src="js/glbrig.js?v=202610171301"></script>
+<script src="js/fingers.js?v=202610171301"></script>
+<script src="js/combat.js?v=202610171301"></script>
+<script src="js/range.js?v=202610171301"></script>
+<script src="js/player.js?v=202610171301"></script>
+<script src="js/world.js?v=202610171301"></script>
+<script src="js/newchars.js?v=202610171301"></script>
+<script src="js/auto.js?v=202610171301"></script>
+<script src="js/owui.js?v=202610171301"></script>
+<script src="js/skills.js?v=202610171301"></script>
+<script src="js/trees.js?v=202610171301"></script>
+<script src="js/ow2.js?v=202610171301"></script>
+<script src="js/lobby-atmosphere.js?v=202610171301"></script>
+<script src="js/lobby3d.js?v=202610171301"></script>
+<script src="js/eco.js?v=202610171301"></script>
+<script src="js/ui.js?v=202610171301"></script>
+<script src="js/shop.js?v=202610171301"></script>
+<script src="js/crates.js?v=202610171301"></script>
+<script src="js/mapcol.js?v=202610171301"></script>
+<script src="js/maps.js?v=202610171301"></script>
+<script src="js/loadout.js?v=202610171301"></script>
+<script src="js/casino.js?v=202610171301"></script>
+<script src="js/views.js?v=202610171301"></script>
+<script src="js/combo.js?v=202610171301"></script>
+<script src="js/mp.js?v=202610171301"></script>
+<script src="js/avatars.js?v=202610171301"></script>
+<script src="js/owmp.js?v=202610171301"></script>
+<script src="js/chat.js?v=202610171301"></script>
+<script src="js/classes.js?v=202610171301"></script>
+<script src="js/admin.js?v=202610171301"></script>
+<script src="js/main.js?v=202610171301"></script>
+<script src="js/compet.js?v=202610171301"></script>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99999;font:10px monospace;color:#8f8;opacity:.7;pointer-events:none">build 202610171301 · nisan-v1</div></body></html>

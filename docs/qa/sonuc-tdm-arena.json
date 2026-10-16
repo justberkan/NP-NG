@@ -1,0 +1,22 @@
+{
+ "build": "build 202610170204 · anitkabir-lobi-v1+fps-v3",
+ "px": "1600x900",
+ "pr": 1,
+ "fps": 119.7,
+ "p1ms": 31.6,
+ "maxms": 54.2,
+ "kare": 2634,
+ "hit50": 2,
+ "hit100": 0,
+ "hit50At": [
+  3491,
+  3553
+ ],
+ "hit100At": [],
+ "cizimOrt": 137,
+ "varlikOrt": 9,
+ "ad": "tdm-arena",
+ "mod": "tdm",
+ "harita": "arena",
+ "hatalar": []
+}

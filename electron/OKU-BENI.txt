@@ -1,0 +1,70 @@
+N.P.N.G. — WINDOWS EXE İSTEMCİSİ (C1)
+====================================
+
+OYUNCU İÇİN
+1. dist klasöründeki NPNG-Kurulum-0.1.0-x64.exe dosyasını aç.
+2. Kurulum klasörünü seçip kurulumu tamamla; masaüstündeki NPNG kısayolunu aç.
+3. Aynı bilgisayardaki oyun için önce mmofps-online klasöründe
+   SUNUCU-BASLAT.bat dosyasını çalıştır. EXE oyun sunucusunu içermez/açmaz.
+4. "Bu bilgisayardaki oyun" seçiliyken BAĞLAN VE OYNA'ya bas.
+   Varsayılan adres: http://localhost:3000/
+5. İnternetteki oyun için "İnternet / arkadaş linki" seçip HTTP/HTTPS
+   sunucu linkini yapıştır. Hesabına oyunun kendi giriş ekranından gir.
+
+Tuşlar:
+  F11       : Gerçek tam ekran / pencere arasında geçiş.
+  Esc       : Oyunun fare kilidini / duraklatma menüsünü yönetir.
+  Ctrl+W    : Oyun penceresini kapatıp sunucu seçimine döner.
+  Ctrl+R/F5 : Oyunu yeniden yükler; maçtan çıkmana neden olabilir.
+  Alt+F4    : Etkin pencereyi kapatır. Sunucu seçim penceresinde uygulamadan çıkar.
+  Ctrl+L/T/N/P vb. tarayıcı sekme/adres/yazdırma kısayolları engellenir.
+
+FPS KONTROLÜ (BERKAN)
+Oyun ayarlarında FPS sınırını Limitsiz seç, FPS göstergesini aç.
+Aynı harita ve ayarlarda tarayıcıyla karşılaştır. EXE'nin göstergesi
+monitör yenileme hızının üzerine çıkıyor mu? Gerçek görüntü hissi iyi mi?
+Gerekirse kullandığın çözünürlük/ön ayar, harita ve FPS değerini bildir.
+Uygulama kare sınırı ve V-Sync kapatma anahtarlarını açılışta kullanır;
+oyunun kendi FPS sınırı, sürücü ayarı ve donanım performansı ayrıca etkilidir.
+
+ÖNEMLİ SINIRLAR
+- Bu bir istemcidir. Yerel sunucu kapalıysa yerel oyun açılmaz; ekranda
+  adres/sunucu hatası görünür ve yeniden deneyebilirsin.
+- Oyun dosyalarını, hesapları veya kayıtları kurulum paketine kopyalamaz.
+  Sunucudaki güncel oyunu açar; js/css/index/server/assets/lib değiştirilmez.
+- Son başarılı sunucu adresi ve Electron oturum bilgileri kullanıcı
+  profilinde saklanır. Tarayıcı oturumundan ayrı olduğu için ilk kez giriş gerekebilir.
+- Başka siteye yönlendirme, açılır pencere ve indirmeler oyun penceresinde engellenir.
+  Mikrofona erişim sesli sohbet isteğinde sorulur; kamera açılmaz.
+- Bu yerel kurulum dijital imzalı değildir. Ticari imza sertifikası satın alınmadı.
+
+GELİŞTİRİCİ / YENİDEN DERLEME
+Node.js 22.12+ gereklidir. Komutları electron klasöründe çalıştır:
+  npm ci
+  npm test
+  npm start
+  npm run build
+
+Electron 44.7.2 ve electron-builder 26.15.3 sabitlenmiştir.
+İlk çalıştırma/derleme Electron ikilisini ve Windows paketleme araçlarını
+ücretsiz resmi kaynaklardan indirir. npm paketi kurulsa da Electron ikilisi
+henüz indirilmediyse: node node_modules/electron/install.js
+
+Çıktılar:
+  dist/NPNG-Kurulum-0.1.0-x64.exe  -> tek Windows x64 kurulum dosyası
+  dist/win-unpacked/NPNG.exe       -> kurulumsuz kontrol (yanındaki tüm dosyalar gerekli)
+
+Otomatik EXE testi (Playwright projenin test ortamında kurulu olmalı):
+  npm run test:smoke
+  Paketlenmiş EXE için NPNG_EXE ortam değişkenine dist/win-unpacked/NPNG.exe yolu ver.
+  TEST_URL ile localhost dışındaki bir TEST sunucusu seçilebilir.
+Sonuçlar ve ekran görüntüleri electron/test-results/ altına yazılır.
+
+GÜVENLİK / KAYNAKLAR
+Yerel sunucu seçme penceresi dar IPC köprüsü kullanır. İnternet oyunu
+ayrı pencerede sandbox + contextIsolation ile, Node ve preload olmadan çalışır.
+Web güvenliği veya sertifika denetimi kapatılmaz.
+Resmi belgeler:
+https://www.electronjs.org/docs/latest/api/command-line-switches
+https://www.electronjs.org/docs/latest/tutorial/security
+https://www.electron.build/docs/nsis/

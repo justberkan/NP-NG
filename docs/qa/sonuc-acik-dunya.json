@@ -1,0 +1,19 @@
+{
+ "build": "build 202610170204 · anitkabir-lobi-v1+fps-v3",
+ "px": "1600x900",
+ "pr": 1,
+ "fps": 120.1,
+ "p1ms": 13.2,
+ "maxms": 25.1,
+ "kare": 2642,
+ "hit50": 0,
+ "hit100": 0,
+ "hit50At": [],
+ "hit100At": [],
+ "cizimOrt": 99,
+ "varlikOrt": 43.4,
+ "ad": "acik-dunya",
+ "mod": "ow",
+ "harita": "arena",
+ "hatalar": []
+}

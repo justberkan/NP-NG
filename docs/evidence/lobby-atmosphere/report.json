@@ -1,0 +1,187 @@
+{
+  "date": "2026-10-16T01:41:28.847Z",
+  "evidence": [
+    {
+      "name": "summer-day",
+      "snapshot": {
+        "options": {
+          "season": "summer",
+          "weather": "auto",
+          "time": "day"
+        },
+        "state": {
+          "year": 2026,
+          "month": 10,
+          "day": 16,
+          "hour": 12.815576701400984,
+          "season": "summer",
+          "weather": "clear",
+          "elevation": 39.16878632060945,
+          "daylight": 1,
+          "twilight": 0,
+          "sun": [
+            0,
+            0.6316070334935703,
+            -0.7752886915475112
+          ]
+        },
+        "monument": "ready",
+        "flag": "ready",
+        "errors": [],
+        "rain": false,
+        "snow": false,
+        "rainCount": 0,
+        "snowCount": 0
+      },
+      "calls": 32,
+      "triangles": 49059,
+      "programs": 15
+    },
+    {
+      "name": "summer-sunset",
+      "snapshot": {
+        "options": {
+          "season": "summer",
+          "weather": "clear",
+          "time": "sunset"
+        },
+        "state": {
+          "year": 2026,
+          "month": 10,
+          "day": 16,
+          "hour": 18.08830394514229,
+          "season": "summer",
+          "weather": "clear",
+          "elevation": 1.6487814790350226,
+          "daylight": 0.34213105751416284,
+          "twilight": 0.9664097018380656,
+          "sun": [
+            -0.9675330829364588,
+            0.028772693976968702,
+            -0.2511013052629942
+          ]
+        },
+        "monument": "ready",
+        "flag": "ready",
+        "errors": [],
+        "rain": false,
+        "snow": false,
+        "rainCount": 0,
+        "snowCount": 0
+      },
+      "calls": 32,
+      "triangles": 49059,
+      "programs": 15
+    },
+    {
+      "name": "winter-snow",
+      "snapshot": {
+        "options": {
+          "season": "winter",
+          "weather": "auto",
+          "time": "day"
+        },
+        "state": {
+          "year": 2026,
+          "month": 10,
+          "day": 16,
+          "hour": 12.815576701400984,
+          "season": "winter",
+          "weather": "snow",
+          "elevation": 39.16878632060945,
+          "daylight": 1,
+          "twilight": 0,
+          "sun": [
+            0,
+            0.6316070334935703,
+            -0.7752886915475112
+          ]
+        },
+        "monument": "ready",
+        "flag": "ready",
+        "errors": [],
+        "rain": false,
+        "snow": true,
+        "rainCount": 0,
+        "snowCount": 450
+      },
+      "calls": 33,
+      "triangles": 49059,
+      "programs": 16
+    },
+    {
+      "name": "autumn-rain",
+      "snapshot": {
+        "options": {
+          "season": "autumn",
+          "weather": "auto",
+          "time": "day"
+        },
+        "state": {
+          "year": 2026,
+          "month": 10,
+          "day": 16,
+          "hour": 12.815576701400984,
+          "season": "autumn",
+          "weather": "rain",
+          "elevation": 39.16878632060945,
+          "daylight": 1,
+          "twilight": 0,
+          "sun": [
+            0,
+            0.6316070334935703,
+            -0.7752886915475112
+          ]
+        },
+        "monument": "ready",
+        "flag": "ready",
+        "errors": [],
+        "rain": true,
+        "snow": false,
+        "rainCount": 650,
+        "snowCount": 0
+      },
+      "calls": 33,
+      "triangles": 49059,
+      "programs": 16
+    },
+    {
+      "name": "night",
+      "snapshot": {
+        "options": {
+          "season": "summer",
+          "weather": "clear",
+          "time": "night"
+        },
+        "state": {
+          "year": 2026,
+          "month": 10,
+          "day": 16,
+          "hour": 0,
+          "season": "summer",
+          "weather": "clear",
+          "elevation": -56.99397437424598,
+          "daylight": 0,
+          "twilight": 0,
+          "sun": [
+            -0.2087922557608426,
+            -0.8386132852493965,
+            0.5031237936507407
+          ]
+        },
+        "monument": "ready",
+        "flag": "ready",
+        "errors": [],
+        "rain": false,
+        "snow": false,
+        "rainCount": 0,
+        "snowCount": 0
+      },
+      "calls": 32,
+      "triangles": 49059,
+      "programs": 16
+    }
+  ],
+  "errors": [],
+  "fallback": true
+}

@@ -1,0 +1,71 @@
+diff --git a/css/style.css b/css/style.css
+index 5d67114..843f95b 100644
+--- a/css/style.css
++++ b/css/style.css
+@@ -654,3 +654,16 @@ body.kb-cap{cursor:crosshair}
+ #cmphud .ct b{font-size:20px}#cmphud .ct.bm{background:#7a1010cc;animation:cbm 1s infinite}@keyframes cbm{50%{background:#c01818cc}}
+ #cmphud .csub{font:600 11px system-ui;color:#c9d4dc;margin-top:3px}#cmphud .ccash{margin-top:4px;color:#7dffb0;font-size:16px}#cmphud .ccash small{color:#e2bc67;font-size:11px}
+ #cmphud .chint{margin-top:6px;color:#ffcf6a}#cmphud .cact{margin:8px auto 0;width:240px}#cmphud .cact i{display:block;height:6px;background:#0008;border-radius:3px;overflow:hidden;margin-top:3px}#cmphud .cact u{display:block;height:100%;background:#ffb020}
++
++/* LOBI-ALAN-001: menu ve karakter icin birbirinden ayri alanlar. */
++#lb.sub #sa{display:block;width:clamp(130px,25vw,440px);min-width:0;flex:none;pointer-events:none}
++#lb.sub #scn{min-width:0}
++@media(max-width:760px){
++ #lb.sub #sa{width:clamp(76px,21vw,160px)}
++ #lb.sub #sv{gap:8px}
++ #lb.sub #av{margin-right:0}
++ #lb.sub #fr{display:none}
++ #lb.sub #fx{display:none}
++ #lb.sub #scn .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
++ #lb.sub #scn table{font-size:11px}
++}
+diff --git a/js/lobby3d.js b/js/lobby3d.js
+index df4951f..9449649 100644
+--- a/js/lobby3d.js
++++ b/js/lobby3d.js
+@@ -57,10 +57,22 @@ function lobbyRefresh(){LB.slots.forEach((s,i)=>{if(s.d.me)lobbyBuildSlot(i)})}
+ function lobbyLayout(){
+  LC.aspect=innerWidth/innerHeight;LC.updateProjectionMatrix();
+  const avail=1-204/Math.max(innerWidth,400);
++ // DOM olustuktan sonra gercek onizleme alanini olc; her karede olcum yapma.
++ const lane=document.getElementById('sa');
++ const rect=lobbyView!=='home'&&lane?lane.getBoundingClientRect():null;
++ const laneOK=rect&&rect.width>0;
++ const laneF=laneOK?(rect.left+rect.width/2)/innerWidth:.165;
++ const halfW=Math.tan(LC.fov*Math.PI/360)*(LB.camDist+.4)*LC.aspect;
++ // Silah ve platform icin 2.8 dunya birimlik guvenli genislik birak.
++ const fit=laneOK?Math.min(1,rect.width*.82/(2.8*innerWidth/(2*halfW))):1;
+  LB.slots.forEach((s,i)=>{
+   const sub=lobbyView!=='home',on=s.d.on!==false,n=LB.slots.filter(z=>z.d.on!==false).length,idx=LB.slots.filter(z=>z.d.on!==false).indexOf(s);
+-  const f=sub?(s.d.me?.165:.5):(.13+.7*(n<2?.5:idx/(n-1)))*avail/.87;
+-  const x=worldX(f);
++  const f=sub?(s.d.me?laneF:.5):(.13+.7*(n<2?.5:idx/(n-1)))*avail/.87;
++  // Alt gorunumde z=-.4 oldugundan ekran merkezi icin ayni derinligi kullan.
++  const x=sub?(f-.5)*2*halfW:worldX(f);
++  const scale=sub&&s.d.me?fit:1;
++  s.plat.scale.setScalar(scale);
++  if(s.rig)s.rig.root.scale.setScalar(scale);
+   s.plat.position.set(x,0,s.d.me?(sub?-.4:.5):0);
+   if(s.rig){s.rig.root.position.set(x,.1,s.d.me?(sub?-.4:.5):0);s.rig.root.rotation.y=s.d.yaw}
+   const vis=on&&(!sub||s.d.me);
+diff --git a/js/ui.js b/js/ui.js
+index 35a3b19..59fcf0b 100644
+--- a/js/ui.js
++++ b/js/ui.js
+@@ -190,7 +190,7 @@ function view(n){
+  curView=n;
+  $('lb').classList.toggle('sub',n!=='home');
+  document.querySelectorAll('#lt [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===n));
+- lobbySetView(n==='home'?'home':'sub');
++ // lobbySetView, #sa olusturulduktan sonra cagrilir.
+  if(n==='shop'||n==='inv')vm=n;
+  if(n==='home')$('av').innerHTML=homeHTML();
+  else{
+@@ -198,6 +198,7 @@ function view(n){
+   $('av').innerHTML=`<div id='sv'><div id='sa'></div><div id='scn'>${f()}</div></div>`;
+   (VIEWWIRE[n]||(()=>{}))();
+  }
++ lobbySetView(n==='home'?'home':'sub');
+  bal();
+ }
+ 

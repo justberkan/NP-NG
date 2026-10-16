@@ -1,0 +1,1 @@
+C# DTO derleme ve başlangıç/placement kontrolü PASS

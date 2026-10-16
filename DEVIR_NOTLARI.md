@@ -3,6 +3,21 @@ Tarih: 15.10.2026 (Europe/Istanbul)
 Depo: https://github.com/justberkan/NP-NG
 Yerel oyun: C:\Users\berkan\Desktop\mmofps-online
 
+
+## LOBI-001 — Codex teslimi (16 Ekim 2026, UTC+3)
+- Durum: OTOMATIK_TEST_GECTI → KARSILIKLI_INCELEME / INSAN_GORSEL_TESTI_BEKLIYOR.
+- Dal: codex/lobby-anitkabir; taban: 96db5b1 (temizlik dalı; Kimi da9be24 üzerine).
+- Build: 202610170203 · anitkabir-lobi-v1. Yerelde daha yeni 202610170202 FPS/poz işleri bulundu; bunlar korunarak kuruldu. Git dalı bu yayınlanmamış yerel FPS/poz değişikliklerini kapsamaz.
+- İş: Uzak Anıtkabir GLB, Türk bayrağı, açık askeri hangar; gerçek UTC+3/İstanbul güneş döngüsü; dört mevsim/elle hava-ışık seçimi; yağmur/kar, düşük bütçe ve toplu hangar çizimi; model hatasında silüet yedeği.
+- Dosyalar: js/lobby-atmosphere.js, js/lobby3d.js, index.html, css/style.css, js/views.js (yalnız krediler); assets/lobby/; tests/lobby-atmosphere.cjs, tests/run.cjs; README ve docs/LOBI_ATMOSFERI.md.
+- Gerçek doğrulama: node tests/run.cjs → 17 hareket testi PASS, 5 HTTP PASS, 45 HTTP dosyası birebir, 133 JS sözdizimi, lobi/Aim Training PASS; UTC+3/mevsim/ışık, kalıcılık, kontrol menüsü, mobil bütçe, gölge, model hata yedeği ve dispose PASS. Hem Git sürümü hem canlı yerel klasör test edildi.
+- Performans kanıtı: Git sürümünde 1600×900 headless Chrome, açık/gün batımı/gece 45 draw call, yağmur/kar 46; ~49 bin toplam üçgen (karakter dahil). Bunlar FPS garantisi değildir.
+- Canlı http://127.0.0.1:3000/: build 202610170203 ve yeni JS/iki GLB HTTP 200 doğrulandı; sunucu kodu/restart gerekmedi.
+- Kanıt: docs/evidence/lobby-atmosphere/; tam yeniden üretim çıktıları test-results/lobby-atmosphere/. Kurulum/API: docs/LOBI_ATMOSFERI.md.
+- Geri alma: yerelde _yedek/20261016_lobby_atmosphere/ değiştirilen mevcut dosyaları saklar. Yeni modül script'ini çıkarıp eski lobby3d.js geri yüklenebilir; hesaplara dokunulmadı.
+- Sınırlamalar: hava meteoroloji API'sinden değil takvim senaryosudur; ıslak zemin çevre parıltısı kullanır, tam sahne aynası değildir. Seçilmeyen büyük Anıtkabir modeli ve ZIP Downloads'ta bırakıldı.
+- Sıradaki tek görev: Claude/Kimi aynı dalı bağımsız incelesin; Berkan kendi ekranda gece/gün batımı kompozisyonunu ve akıcılığı değerlendirsin.
+
 ## Gerçek durum
 - Bu belge Codex tarafından oluşturuldu. Claude'un teslim aldığı henüz doğrulanmadı; otomatik Claude bağlantısı yok.
 - Yerel oyun klasörü Git deposu değil. GitHub metadata size=0 döndü; oyun kaynakları GitHub'da henüz doğrulanmadı.
@@ -39,6 +54,10 @@ Yerel oyun: C:\Users\berkan\Desktop\mmofps-online
 | T006 | Claude | Kılıç komboları ve vuruş pencereleri; ağdan görünen animasyonlar | Önceki adım sonrası |
 | T007 | Codex | Aim Training rafları/gerçek hedefler; loadout yalnız zom/zo; diğer modlara regresyon kontrolü | Önceki adım sonrası |
 | T008 | Ortak | 5v5 ve online altyapı; önce Berkan'dan satın alma ekranı referansı | Önceki adım sonrası |
+| T009 | Kimi | Berkan'ın isteği: açık dünyada otomatik savaş/kılıç menzili yetmiyordu. Kılıç menzili +1 m (10 kılıç), auto: menzilli hedefe dash, auto vuruş menzili +0.3. Ayrıca newchars.js `_animHuman1` çakışması düzeltildi (goblin animasyonları ölüydü). Berkan'ın yerel son hâli depoya eşitlendi | KOD_HAZIR → OTOMATIK_TEST_GECTI (17/17 hareket, 5/5 HTTP, 43 dosya açılış; menzil kanıtı: 4.5 m ve 4.9 m isabet, 5.5 m ıskar). İnsan testi: Berkan |
+| T010 | Kimi + Claude | Berkan'ın isteği: FPS limitine "Limitsiz" ayarı + fps kazandıran iyileştirmeler (çözünürlük %25'e indi, pixelRatio tabanı .25, stencil tamponu kapalı, 240 seçeneği). Claude: goblin ölüm donması düzeltmesi (gobDeadStep + try/catch, build 202610170104) | OTOMATIK_TEST_GECTI (18 PASS + HTTP 5/5; fpsSkip 30/60/240/Limitsiz davranışı başsız tarayıcıda doğrulandı). İnsan testi: Berkan |
+| T011 | Kimi | Berkan'ın isteği: lobi/arkadaş sistemi incelendi + Xbox tarzı geçici profil resimleri (16 el-çizimi SVG avatar, id a0–a15; arkadaşlar kutusunda ◀▶ ile değiştirilebilir; arkadaş/istek/aktif listesinde görünür; sunucu `save.av` üzerinden otomatik eşitler, şema değişmedi). Lobide davet sistemi YOK (odalar açık katılımlı) — sonraki iş. Ayrıca frRender'da girişsiz yüklenmede `SV` nullken `.av` okuma hatası düzeltildi | OTOMATIK_TEST_GECTI (17/17 hareket, 5/5 HTTP, 44 dosya açılış; avatar doğrulaması: 16 SVG bozuksuz, döngü a1→a2→a1, panelde seçici + SVG var, sayfa hatası yok). İnsan testi: Berkan |
+| T012 | Kimi | Berkan'ın isteği: (1) tek mermi artık tam olarak nişangâhın baktığı noktaya gider (rastgele dağılma kalktı; saçmada pellet saçılımı korundu; geri tepme nişangâhı oynattığı için etki sürüyor), (2) hasar alınca kamera sarsıntısı kaldırıldı (hurt() içindeki p.shk; MP 5v5'te zaten yoktu), (3) FPS: iz (tracer) havuzu + 48 iz sınırı, kamera arkası >20 m oyuncularda iskelet pozu 3 karede bir (görünmedikleri için farksız), glbSync kare başına Quaternion üretimi kapatıldı, ön ayarlara "Çok Düşük" (%25) eklendi, Düşük %50'ye çekildi | OTOMATIK_TEST_GECTI (17/17 hareket, 5/5 HTTP, 44 dosya açılış, sayfa hatası yok). İnsan testi: Berkan |
 
 Önerilen sahiplik henüz Claude tarafından kabul edilmedi. Büyük modlar, MMO, yarış, ekonomi, profil, TR/EN ve mobil işlerin tam kapsamı TALEP_ORIJINAL.txt dosyasında korunur; tek teslimde bitmiş sayılmaz.
 

@@ -1,0 +1,22 @@
+{
+ "build": "build 202610170204 · anitkabir-lobi-v1+fps-v3",
+ "px": "1600x900",
+ "pr": 1,
+ "fps": 151.7,
+ "p1ms": 14.7,
+ "maxms": 69.4,
+ "kare": 3338,
+ "hit50": 2,
+ "hit100": 0,
+ "hit50At": [
+  657,
+  9605
+ ],
+ "hit100At": [],
+ "cizimOrt": 49,
+ "varlikOrt": 4.8,
+ "ad": "zombi",
+ "mod": "zom",
+ "harita": "arena",
+ "hatalar": []
+}

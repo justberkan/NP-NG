@@ -1,0 +1,44 @@
+✔ Kullanıcı şartı: para, 27 öğe, beş kategori, fiyatlar ve istisnalar (1.3205ms)
+✔ Her takım/kategori en fazla beş öğe + altıncı geri dilimine sığar (0.7222ms)
+✔ Standart zafer 3250; bomba patlatma/çözme galibi 3500 (0.2513ms)
+✔ Seri 1400/1900/2400/2900/3400/3400; galibiyet sıfırlar (0.1298ms)
+✔ Kurulu bomba ile kaybeden her T +800; beşinci kayıp 4200 (0.126ms)
+✔ Süre doldu: canlı T sıfır, ölü T seri ödülü, CT 3250; T seri yine artar (0.0804ms)
+✔ Bomba kurulduktan sonra normal süre/eliminasyon CT galibiyeti üretemez (0.3496ms)
+✔ Kill ödülleri ve P90/seri tabanca/AWP istisnaları (0.1771ms)
+✔ 16000 tavanı, gerçek eklenen tutar ve tam TL doğrulaması (0.2021ms)
+✔ Ölü, yanlış takım/bölge, süre/faz ve parasız satın alma reddedilir (0.9504ms)
+✔ Başlangıç tabancası/bıçak tekrar ücretsiz alınamaz; kit yalnız CT (0.311ms)
+✔ 800 TL tabanca raundunda yelek sonrası 150 kalır; fazla harcama olmaz (0.1644ms)
+✔ Zırh 650/1000, kask yükseltmesi 350 ve mevcut kask tamiri 650 (0.1236ms)
+✔ En fazla dört bomba, iki flaş; başka türler bir adet (0.2139ms)
+✔ Silah değişimi eski silahı düşürür; reddedilen işlem para/envanter değiştirmez (0.1477ms)
+✔ Tekrar gelen istek bir kez keser; aynı anahtarla farklı ürün reddedilir (0.2271ms)
+✔ SQLite şeması ve 27 katalog satırı: FK, cüzdan tavanı, çift olay ve atomik geri alma (3.3982ms)
+✔ 21 rütbe boşluksuz ve çakışmasız; son kademe açık uçlu (2.2376ms)
+✔ İlk dört maç gizli; beşinci tamamlanan maç rütbe açar (0.5002ms)
+✔ Rütbesiz XP/TL verir; rekabetçi durumun her alanı byte düzeyinde aynı kalır (0.7195ms)
+✔ Genel hesap seviyesi Elo sonucunu ve rütbeyi değiştirmez (0.1487ms)
+✔ Beklenen kazanma olasılığı yalnız kilitli beşli Elo ortalamasına bağlı (0.2534ms)
+✔ Normal galibiyetler +15..+30, mağlubiyetler -15..-25 (1.0462ms)
+✔ Aynı rakip/performance ile 16-0, 16-14 galibiyetinden fazla kazandırır (0.1121ms)
+✔ Güçlü rakibi yenmek daha çok; favori kaybetmek daha pahalı (0.1125ms)
+✔ Performans çarpanı sınırlı; iyi performans galibiyete ek puan sağlar (0.2112ms)
+✔ Mağlup EBO daha az kaybeder; kaybettiği için pozitif Elo alamaz (0.1527ms)
+✔ EBO tek oyuncu; bağ eşitliğinde deterministik, AFK/ayrılan hariç (0.4441ms)
+✔ 15-15 beraberlik Elo 0; placement sayılır; geçersiz final skorları reddedilir (0.6003ms)
+✔ 0 Elo tabanı: nominal kayıp ile gerçek uygulanan kayıp ayrıdır (0.3149ms)
+✔ Eşik geçişleri anlık; gizli placement sırasında rozet gösterilmez (0.171ms)
+✔ Yeni sezon 5 placement, soft reset; hesap ve yaşam boyu sayaçlar korunur (0.3251ms)
+✔ Maç terk etmek -25; placement ilerlemez, XP/TL vermez; rütbesizde Elo etkisi yok (0.2472ms)
+✔ Sunucu iptali hiçbir hesap/Elo alanını değiştirmez (0.1587ms)
+✔ Tekrar sonuç: tek XP/TL/Elo ödemesi; çelişen sonuç ayrı admin revizyonu ister (0.3604ms)
+✔ Yuvarlama C#/JSON sözleşmesi: yarımlar sıfırdan uzağa (0.063ms)
+ℹ tests 36
+ℹ suites 0
+ℹ pass 36
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 87.0426

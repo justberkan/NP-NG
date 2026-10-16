@@ -1,0 +1,16 @@
+N.P.N.G - MIMARI ENGELLER VE TEKNIK SINIRLAR
+(Masaustune yazma iznim olmadigi icin oyun klasorune yazildi.)
+
+16.10.2026 - FPS hedefi (500 FPS)
+- Tarayici, sayfanin cizim hizini monitorun yenileme hizina kilitler (V-Sync). 144 Hz monitorde normal
+  tarayicida en fazla 144 FPS gorulur; oyunun kodu ne kadar hizli olursa olsun bu kilit kodla acilamaz.
+- Cozum 1 (simdi): OYNA-SINIRSIZ-FPS.bat. Chrome/Edge'i ayri bir profille --disable-frame-rate-limit ve
+  --disable-gpu-vsync bayraklariyla acar. Bu modda 500 FPS ustu mumkun; ekran yirtilmasi (tearing) olabilir.
+  Oyun ici Ayarlar > FPS siniri ile 240/360/500'e sabitlenebilir.
+- Cozum 2 (EXE): Electron'a cevrilirken main surecine su iki satir eklenmeli, yoksa EXE de monitor hizinda kalir:
+    app.commandLine.appendSwitch('disable-frame-rate-limit');
+    app.commandLine.appendSwitch('disable-gpu-vsync');
+- 500 FPS = kare basina 2 ms. Fizik 120 Hz sabit; bot/mob animasyonlari en fazla 120 Hz guncellenir
+  (500 FPS'te kamera ve kendi silahin her karede, diger karakterler 120 Hz). Bu bilincli bir secim.
+- Olcumu ancak gercek ekran kartinda yapabiliriz: test ortamim yazilimla ciziyor; oradaki iyilesme
+  oranlari dogru, mutlak FPS degerleri senin bilgisayarini temsil etmez.

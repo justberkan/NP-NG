@@ -1,0 +1,430 @@
+{
+  "schemaVersion": 1,
+  "id": "npng-competitive-rank",
+  "version": "1.0.0",
+  "status": "design_ready_not_integrated",
+  "menu": {
+    "replaceLabel": "5v5 Online",
+    "label": "Rekabetçi",
+    "defaultSubmode": "unranked",
+    "requireExplicitRankedSelection": true,
+    "modes": [
+      {
+        "id": "competitive_unranked",
+        "label": "Rütbesiz",
+        "subtitle": "5v5 · Pratik · Rütbeni etkilemez",
+        "changesCompetitiveState": false
+      },
+      {
+        "id": "competitive_ranked",
+        "label": "Rütbeli",
+        "subtitle": "5v5 · Elo ve rekabetçi rütbe",
+        "changesCompetitiveState": true
+      }
+    ]
+  },
+  "format": {
+    "playersPerTeam": 5,
+    "regulationHalfRounds": 15,
+    "winRounds": 16,
+    "maxRegulationRounds": 30,
+    "drawScore": [
+      15,
+      15
+    ],
+    "overtime": false,
+    "bombEconomyConfig": "../codex-ekonomi/competitive-economy.v1.json",
+    "economySameForBothSubmodes": true,
+    "accountWalletSeparateFromMatchWallet": true
+  },
+  "rating": {
+    "initialElo": 900,
+    "minElo": 0,
+    "expectedScoreScale": 400,
+    "teamStrength": "arithmetic_mean_of_5_locked_pre_match_elos",
+    "roundMargin": "abs(homeScore-awayScore)/16",
+    "win": {
+      "base": 15,
+      "underdogWeight": 10,
+      "performanceMultiplierMin": 0.9,
+      "performanceMultiplierMax": 1.1,
+      "marginWeight": 3,
+      "minDelta": 15,
+      "maxDelta": 30
+    },
+    "loss": {
+      "base": 15,
+      "favoriteWeight": 8,
+      "marginWeight": 2,
+      "eboMultiplier": 0.8,
+      "minMagnitude": 15,
+      "maxMagnitude": 25
+    },
+    "drawDelta": 0,
+    "rounding": "nearest_integer_half_away_from_zero",
+    "rankDerivation": "from_integer_elo_only_when_placements_complete",
+    "promotionDemotion": "immediate_no_extra_series",
+    "zeroSum": false
+  },
+  "performance": {
+    "kda": {
+      "assistWeight": 0.5,
+      "deathDenominatorMin": 1,
+      "normalization": 3,
+      "weight": 0.5
+    },
+    "damage": {
+      "normalizationAdr": 120,
+      "weight": 0.35,
+      "enemyDamageOnly": true
+    },
+    "objective": {
+      "normalization": 3,
+      "weight": 0.15,
+      "events": [
+        "valid_bomb_plants",
+        "valid_bomb_defuses"
+      ]
+    },
+    "scoreClamp": [
+      0,
+      1
+    ],
+    "ebo": {
+      "team": "losing_team_only",
+      "count": 1,
+      "minRoundParticipation": 0.8,
+      "requirePositiveDamageOrObjective": true,
+      "excludeAbandon": true,
+      "tieBreak": [
+        "performance_desc",
+        "objectives_desc",
+        "enemyDamage_desc",
+        "kills_desc",
+        "deaths_asc",
+        "playerId_asc"
+      ]
+    },
+    "clientMvpFlag": "ignored"
+  },
+  "placements": {
+    "requiredMatches": 5,
+    "counts": [
+      "ranked_completed_win",
+      "ranked_completed_loss",
+      "ranked_completed_draw"
+    ],
+    "excluded": [
+      "unranked",
+      "warmup",
+      "remake",
+      "cancelled",
+      "abandon",
+      "invalidated"
+    ],
+    "ratingUpdatesDuringPlacements": true,
+    "ratingVisible": false,
+    "rankBeforeCompletion": null,
+    "matchmakingUses": "hidden_competitive_elo",
+    "firstRank": "derived_after_fifth_counted_match",
+    "extraPlacementKFactor": false
+  },
+  "season": {
+    "id": "S1",
+    "newSeasonRequiredPlacements": 5,
+    "returningPlayerReset": "round(900 + 0.75 * (previousElo - 900))",
+    "retainPreviousSeasonSnapshot": true,
+    "resetSeasonCounters": true,
+    "retainLifetimeRankedCounters": true,
+    "noXpOrAccountMoneyReset": true
+  },
+  "accountRewards": {
+    "status": "proposed_amounts_not_user_specified",
+    "sameForBothModes": true,
+    "win": {
+      "xp": 500,
+      "tl": 200
+    },
+    "loss": {
+      "xp": 300,
+      "tl": 100
+    },
+    "draw": {
+      "xp": 400,
+      "tl": 150
+    },
+    "abandon": {
+      "xp": 0,
+      "tl": 0
+    },
+    "cancelled": {
+      "xp": 0,
+      "tl": 0
+    },
+    "awardOncePerMatch": true,
+    "matchCashConvertedToAccountTl": false,
+    "rankedWinDoesNotUnlockBoughtWeapons": true
+  },
+  "exceptions": {
+    "abandon": {
+      "disconnectGraceSeconds": 180,
+      "finalizedOnlyByServer": true,
+      "eloPenalty": 25,
+      "countsAsRankedLoss": true,
+      "countsPlacement": false,
+      "performanceProtection": false,
+      "rankedOnly": true,
+      "accountRewards": false
+    },
+    "remake": {
+      "eloDelta": 0,
+      "accountRewards": false,
+      "placementProgress": 0
+    },
+    "invalidatedMatch": {
+      "requiresLedgerCompensation": true,
+      "clientMayRequest": false
+    },
+    "reconnect": {
+      "retainRosterAndRatingSnapshot": true,
+      "doNotSettleAgain": true
+    }
+  },
+  "matchmaking": {
+    "separateQueues": true,
+    "unrankedReadsRankedRating": false,
+    "unrankedSkillEstimate": "optional_separate_hidden_field_never_Competitive_Elo",
+    "rankedMetric": "Competitive_Elo",
+    "initialTeamMeanGap": 100,
+    "expandAfterSeconds": 30,
+    "expandStepElo": 50,
+    "maximumMeanGap": 300,
+    "maximumQueueExpansionSeconds": 120,
+    "partyOwnEloSpreadLimit": 300,
+    "botsInRanked": false,
+    "lockRosterAndRatingsBeforeStart": true,
+    "noAccountLevelToEloConversion": true
+  },
+  "integrity": {
+    "serverAuthoritative": true,
+    "resultEventUniqueBy": [
+      "seasonId",
+      "matchId",
+      "playerId"
+    ],
+    "adminResultRevision": "separate_admin_only_compensating_ledger",
+    "lockedInputs": [
+      "roster",
+      "teamPreMatchElo",
+      "opponentPreMatchElo",
+      "finalScore",
+      "enemyOnlyStats",
+      "participation",
+      "outcome"
+    ],
+    "ignoreClientFields": [
+      "resultRevision",
+      "eloDelta",
+      "MVP",
+      "EBO",
+      "Rank_Tier",
+      "Account_XP",
+      "money"
+    ],
+    "unrankedCompetitiveFields": "read_only_and_byte_identical_after_settlement",
+    "snapshotOldStateBeforeApply": true,
+    "atomicResult": "elo_counters_placements_rank_xp_tl_ledger_in_one_transaction",
+    "configVersionLockedAtMatchStart": true
+  },
+  "ranks": [
+    {
+      "id": "iron_1",
+      "tier": "iron",
+      "tierName": "Demir",
+      "division": 1,
+      "label": "Demir 1",
+      "minElo": 0,
+      "maxElo": 99
+    },
+    {
+      "id": "iron_2",
+      "tier": "iron",
+      "tierName": "Demir",
+      "division": 2,
+      "label": "Demir 2",
+      "minElo": 100,
+      "maxElo": 199
+    },
+    {
+      "id": "iron_3",
+      "tier": "iron",
+      "tierName": "Demir",
+      "division": 3,
+      "label": "Demir 3",
+      "minElo": 200,
+      "maxElo": 299
+    },
+    {
+      "id": "bronze_1",
+      "tier": "bronze",
+      "tierName": "Bronz",
+      "division": 1,
+      "label": "Bronz 1",
+      "minElo": 300,
+      "maxElo": 399
+    },
+    {
+      "id": "bronze_2",
+      "tier": "bronze",
+      "tierName": "Bronz",
+      "division": 2,
+      "label": "Bronz 2",
+      "minElo": 400,
+      "maxElo": 499
+    },
+    {
+      "id": "bronze_3",
+      "tier": "bronze",
+      "tierName": "Bronz",
+      "division": 3,
+      "label": "Bronz 3",
+      "minElo": 500,
+      "maxElo": 599
+    },
+    {
+      "id": "silver_1",
+      "tier": "silver",
+      "tierName": "Gümüş",
+      "division": 1,
+      "label": "Gümüş 1",
+      "minElo": 600,
+      "maxElo": 699
+    },
+    {
+      "id": "silver_2",
+      "tier": "silver",
+      "tierName": "Gümüş",
+      "division": 2,
+      "label": "Gümüş 2",
+      "minElo": 700,
+      "maxElo": 799
+    },
+    {
+      "id": "silver_3",
+      "tier": "silver",
+      "tierName": "Gümüş",
+      "division": 3,
+      "label": "Gümüş 3",
+      "minElo": 800,
+      "maxElo": 899
+    },
+    {
+      "id": "gold_1",
+      "tier": "gold",
+      "tierName": "Altın",
+      "division": 1,
+      "label": "Altın 1",
+      "minElo": 900,
+      "maxElo": 999
+    },
+    {
+      "id": "gold_2",
+      "tier": "gold",
+      "tierName": "Altın",
+      "division": 2,
+      "label": "Altın 2",
+      "minElo": 1000,
+      "maxElo": 1099
+    },
+    {
+      "id": "gold_3",
+      "tier": "gold",
+      "tierName": "Altın",
+      "division": 3,
+      "label": "Altın 3",
+      "minElo": 1100,
+      "maxElo": 1199
+    },
+    {
+      "id": "platinum_1",
+      "tier": "platinum",
+      "tierName": "Platin",
+      "division": 1,
+      "label": "Platin 1",
+      "minElo": 1200,
+      "maxElo": 1299
+    },
+    {
+      "id": "platinum_2",
+      "tier": "platinum",
+      "tierName": "Platin",
+      "division": 2,
+      "label": "Platin 2",
+      "minElo": 1300,
+      "maxElo": 1399
+    },
+    {
+      "id": "platinum_3",
+      "tier": "platinum",
+      "tierName": "Platin",
+      "division": 3,
+      "label": "Platin 3",
+      "minElo": 1400,
+      "maxElo": 1499
+    },
+    {
+      "id": "diamond_1",
+      "tier": "diamond",
+      "tierName": "Elmas",
+      "division": 1,
+      "label": "Elmas 1",
+      "minElo": 1500,
+      "maxElo": 1599
+    },
+    {
+      "id": "diamond_2",
+      "tier": "diamond",
+      "tierName": "Elmas",
+      "division": 2,
+      "label": "Elmas 2",
+      "minElo": 1600,
+      "maxElo": 1699
+    },
+    {
+      "id": "diamond_3",
+      "tier": "diamond",
+      "tierName": "Elmas",
+      "division": 3,
+      "label": "Elmas 3",
+      "minElo": 1700,
+      "maxElo": 1799
+    },
+    {
+      "id": "master_1",
+      "tier": "master",
+      "tierName": "Usta",
+      "division": 1,
+      "label": "Usta 1",
+      "minElo": 1800,
+      "maxElo": 1899
+    },
+    {
+      "id": "master_2",
+      "tier": "master",
+      "tierName": "Usta",
+      "division": 2,
+      "label": "Usta 2",
+      "minElo": 1900,
+      "maxElo": 1999
+    },
+    {
+      "id": "master_3",
+      "tier": "master",
+      "tierName": "Usta",
+      "division": 3,
+      "label": "Usta 3",
+      "minElo": 2000,
+      "maxElo": null
+    }
+  ]
+}

@@ -1,0 +1,728 @@
+{
+  "date": "2026-10-16T22:53:27.271Z",
+  "pass": true,
+  "checks": 45,
+  "errors": [],
+  "results": [
+    {
+      "width": 1920,
+      "menu": "stock",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "bank",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "bp",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "quest",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "shop",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "inv",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "owc",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "casino",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1920,
+      "menu": "settings",
+      "lane": {
+        "left": 16,
+        "right": 456,
+        "width": 440
+      },
+      "content": {
+        "left": 470,
+        "right": 1700,
+        "width": 1230
+      },
+      "scale": 0.6240307836361205,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "stock",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "bank",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "bp",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "quest",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "shop",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "inv",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "owc",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "casino",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1366,
+      "menu": "settings",
+      "lane": {
+        "left": 16,
+        "right": 357.5,
+        "width": 341.5
+      },
+      "content": {
+        "left": 371.5,
+        "right": 1146,
+        "width": 774.5
+      },
+      "scale": 0.4843329832084891,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "stock",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "bank",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "bp",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "quest",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "shop",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "inv",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "owc",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "casino",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 1024,
+      "menu": "settings",
+      "lane": {
+        "left": 16,
+        "right": 272,
+        "width": 256
+      },
+      "content": {
+        "left": 286,
+        "right": 804,
+        "width": 518
+      },
+      "scale": 0.36307245593374293,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "stock",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "bank",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "bp",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "quest",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "shop",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "inv",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "owc",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "casino",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 760,
+      "menu": "settings",
+      "lane": {
+        "left": 16,
+        "right": 175.59375,
+        "width": 159.59375
+      },
+      "content": {
+        "left": 183.59375,
+        "right": 744,
+        "width": 560.40625
+      },
+      "scale": 0.22634412017256164,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "stock",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "bank",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "bp",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "quest",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "shop",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "inv",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "owc",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "casino",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    },
+    {
+      "width": 390,
+      "menu": "settings",
+      "lane": {
+        "left": 16,
+        "right": 97.890625,
+        "width": 81.890625
+      },
+      "content": {
+        "left": 105.890625,
+        "right": 374,
+        "width": 268.109375
+      },
+      "scale": 0.11614152475273114,
+      "visible": true
+    }
+  ]
+}

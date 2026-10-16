@@ -1,0 +1,277 @@
+{
+  "date": "2026-10-15T21:00:53.596Z",
+  "baseURL": "http://127.0.0.1:57159",
+  "build": "build 202610170101 · hareket-test-v1",
+  "rows": [
+    {
+      "name": "run",
+      "x": 0,
+      "y": 0,
+      "z": 9.893749999995894,
+      "speed": 5.249999999945253,
+      "remaining": 9998.00000000003,
+      "fps": 30
+    },
+    {
+      "name": "jump",
+      "x": 0,
+      "y": 0,
+      "z": 20,
+      "speed": 0,
+      "remaining": 9998.00000000003,
+      "fps": 30,
+      "apex": 1.2472222222222213,
+      "jumps": 1,
+      "grounded": true
+    },
+    {
+      "name": "run",
+      "x": 0,
+      "y": 0,
+      "z": 9.893749999995894,
+      "speed": 5.249999999945253,
+      "remaining": 9998.00000000003,
+      "fps": 60
+    },
+    {
+      "name": "jump",
+      "x": 0,
+      "y": 0,
+      "z": 20,
+      "speed": 0,
+      "remaining": 9998.00000000003,
+      "fps": 60,
+      "apex": 1.2472222222222213,
+      "jumps": 1,
+      "grounded": true
+    },
+    {
+      "name": "run",
+      "x": 0,
+      "y": 0,
+      "z": 9.893749999995894,
+      "speed": 5.249999999945253,
+      "remaining": 9998.00000000003,
+      "fps": 120
+    },
+    {
+      "name": "jump",
+      "x": 0,
+      "y": 0,
+      "z": 20,
+      "speed": 0,
+      "remaining": 9998.00000000003,
+      "fps": 120,
+      "apex": 1.2472222222222213,
+      "jumps": 1,
+      "grounded": true
+    },
+    {
+      "name": "run",
+      "x": 0,
+      "y": 0,
+      "z": 9.893749999995894,
+      "speed": 5.249999999945253,
+      "remaining": 9998.00000000003,
+      "fps": 144
+    },
+    {
+      "name": "jump",
+      "x": 0,
+      "y": 0,
+      "z": 20,
+      "speed": 0,
+      "remaining": 9998.00000000003,
+      "fps": 144,
+      "apex": 1.2472222222222213,
+      "jumps": 1,
+      "grounded": true
+    },
+    {
+      "name": "run",
+      "x": 0,
+      "y": 0,
+      "z": 9.893749999995894,
+      "speed": 5.249999999945253,
+      "remaining": 9998.00000000003,
+      "fps": 240
+    },
+    {
+      "name": "jump",
+      "x": 0,
+      "y": 0,
+      "z": 20,
+      "speed": 0,
+      "remaining": 9998.00000000003,
+      "fps": 240,
+      "apex": 1.2472222222222213,
+      "jumps": 1,
+      "grounded": true
+    },
+    {
+      "name": "counter-strafe",
+      "seconds": 0.05833333333333333
+    },
+    {
+      "name": "autohop",
+      "autoHop": false,
+      "jumps": 1
+    },
+    {
+      "name": "autohop",
+      "autoHop": true,
+      "jumps": 5
+    },
+    {
+      "name": "jump-cap",
+      "x": 0.09583333333333333,
+      "y": 0.06097222222222222,
+      "z": 20,
+      "speed": 11.5,
+      "remaining": 9999.991666666667
+    },
+    {
+      "name": "air-cap",
+      "maxSpeed": 13.5
+    },
+    {
+      "name": "crouch",
+      "x": 0,
+      "y": 0,
+      "z": 14.946874999997911,
+      "speed": 2.6249999999726263,
+      "remaining": 9998.00000000003,
+      "crouching": 1
+    },
+    {
+      "name": "climb",
+      "x": -18,
+      "y": 3,
+      "z": -5.273643114889239,
+      "speed": 4.1250763306113456e-8,
+      "remaining": 9998.00000000003,
+      "maxHeight": 3.3604166666666693,
+      "climbed": true,
+      "landedOnTop": true,
+      "climbSeconds": 1.0416666666666654,
+      "grounded": true
+    },
+    {
+      "name": "climb-facing-away",
+      "climbed": false
+    },
+    {
+      "name": "edge-escape",
+      "x": -18,
+      "y": 0.5616666666666668,
+      "z": -0.07376329166666698,
+      "speed": 5.25,
+      "remaining": 9999.200000000012,
+      "landed": 3
+    },
+    {
+      "name": "wallrun",
+      "x": -7.0999546430884,
+      "y": 1.1118577801111418,
+      "z": -16.927634908149216,
+      "speed": 7.421899538542934,
+      "remaining": 9999.200000000012,
+      "wallTime": 0.7999999999999996
+    },
+    {
+      "name": "blur",
+      "key": 0,
+      "jHeld": false,
+      "jPress": false,
+      "sPress": false,
+      "qPress": false,
+      "jBuf": 0,
+      "firing": false,
+      "ads": false
+    },
+    {
+      "name": "long-frame",
+      "simulated": 0.06666666666569654,
+      "accumulator": 0
+    },
+    {
+      "name": "paused",
+      "x": 0,
+      "y": 0,
+      "z": 20,
+      "speed": 0,
+      "remaining": 10000
+    }
+  ],
+  "checks": [
+    {
+      "name": "Tarayıcı çalışma hatası yok",
+      "ok": true
+    },
+    {
+      "name": "Koşu hızı 5.25 m/s",
+      "ok": true
+    },
+    {
+      "name": "30–240 FPS koşu farkı 0.1 mm altında",
+      "ok": true
+    },
+    {
+      "name": "30–240 FPS zıplama yüksekliği farkı 1 cm altında",
+      "ok": true
+    },
+    {
+      "name": "Tek basışta tek zıplama ve yere iniş",
+      "ok": true
+    },
+    {
+      "name": "Karşı tuşla duruş 100 ms altında",
+      "ok": true
+    },
+    {
+      "name": "Otomatik bhop seçeneği",
+      "ok": true
+    },
+    {
+      "name": "Zıplama anında hız sınırı 11.5",
+      "ok": true
+    },
+    {
+      "name": "Hava strafe sınırı 13.5",
+      "ok": true
+    },
+    {
+      "name": "Çömelme hızı yarı yarıya",
+      "ok": true
+    },
+    {
+      "name": "3 metrelik kutunun üstüne tırmanıp basma",
+      "ok": true
+    },
+    {
+      "name": "Duvara bakmadan tırmanmama",
+      "ok": true
+    },
+    {
+      "name": "Kutu kenarına iniş ve çıkış",
+      "ok": true
+    },
+    {
+      "name": "Yan duvarda koşma",
+      "ok": true
+    },
+    {
+      "name": "Odak kaybında tüm eylemler temizlenir",
+      "ok": true
+    },
+    {
+      "name": "Uzun karede en fazla 8 fizik adımı",
+      "ok": true
+    },
+    {
+      "name": "Duraklatıldığında fizik ilerlemez",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

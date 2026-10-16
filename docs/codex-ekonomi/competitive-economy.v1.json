@@ -1,0 +1,727 @@
+{
+  "schemaVersion": 1,
+  "id": "npng-competitive-tl",
+  "version": "1.0.0",
+  "status": "design_ready_not_integrated",
+  "currency": {
+    "code": "TRY",
+    "label": "TL",
+    "symbol": "₺",
+    "locale": "tr-TR",
+    "fractionDigits": 0,
+    "storage": "integer_lira"
+  },
+  "wallet": {
+    "scope": "match_half",
+    "start": 800,
+    "cap": 16000,
+    "persistentWallet": "forbidden",
+    "bankTransfer": false,
+    "playerTradeMoney": false,
+    "reconnect": "retain_server_wallet",
+    "lateJoin": "800_once_per_half_next_spawn",
+    "sideSwitch": "reset_cash_inventory_and_loss_streak"
+  },
+  "rewards": {
+    "win": 3250,
+    "bombObjectiveWinExtra": 250,
+    "loss": [
+      1400,
+      1900,
+      2400,
+      2900,
+      3400
+    ],
+    "lossStreakMax": 5,
+    "lossStreakOnWin": "reset_to_zero",
+    "plantLossBonusT": 800,
+    "plantIndividualBonus": 0,
+    "defuseIndividualBonus": 0,
+    "tAliveOnUnplantedTimeout": 0,
+    "killDefaults": {
+      "rifle": 300,
+      "pistol": 300,
+      "lmg": 300,
+      "smg": 600,
+      "shotgun": 900,
+      "melee": 1500,
+      "grenade": 300
+    },
+    "killExceptions": {
+      "pistol_auto": 100,
+      "sniper_heavy": 100,
+      "smg_capacity": 300
+    },
+    "friendlyKillReward": 0,
+    "suicideReward": 0,
+    "environmentReward": 0
+  },
+  "outcomes": [
+    {
+      "reason": "ct_eliminated",
+      "winner": "T",
+      "bombPlanted": "either",
+      "winExtra": 0
+    },
+    {
+      "reason": "t_eliminated",
+      "winner": "CT",
+      "bombPlanted": false,
+      "winExtra": 0
+    },
+    {
+      "reason": "time_expired",
+      "winner": "CT",
+      "bombPlanted": false,
+      "winExtra": 0
+    },
+    {
+      "reason": "bomb_detonated",
+      "winner": "T",
+      "bombPlanted": true,
+      "winExtra": 250
+    },
+    {
+      "reason": "bomb_defused",
+      "winner": "CT",
+      "bombPlanted": true,
+      "winExtra": 250
+    }
+  ],
+  "purchases": {
+    "serverAuthoritative": true,
+    "allowedPhases": [
+      "freeze",
+      "live"
+    ],
+    "clockOrigin": "freeze_start",
+    "buySeconds": 30,
+    "requireAlive": true,
+    "requireTeamBuyZone": true,
+    "requireConnected": true,
+    "maxGrenades": 4,
+    "grenadeTypeCaps": {
+      "he": 1,
+      "flash": 2,
+      "smoke": 1,
+      "fire": 1,
+      "decoy": 1
+    },
+    "primarySlots": 1,
+    "secondarySlots": 1,
+    "replaceWeapon": "drop_old_in_same_transaction",
+    "ammoIncluded": true,
+    "refunds": false,
+    "resale": false,
+    "duplicateRequest": "return_previous_result_without_reapplying",
+    "defaultItems": "grant_at_spawn_only_if_slot_empty",
+    "armor": {
+      "fullVestHelmetUpgrade": 350,
+      "damagedVestHelmetBundle": 1000,
+      "damagedArmorWithHelmetRepair": 650,
+      "fullArmorRebuy": "reject"
+    },
+    "droppedWeaponSideLock": false,
+    "droppedKitUsableBy": "CT"
+  },
+  "suggestedMatchDefaults": {
+    "freezeSeconds": 15,
+    "liveRoundSeconds": 115,
+    "bombSeconds": 40,
+    "plantSeconds": 3.2,
+    "defuseSeconds": 10,
+    "defuseWithKitSeconds": 5,
+    "respawnDuringRound": false,
+    "resetAtHalf": true,
+    "note": "Bunlar belirtilmeyen alanlar için önerilen varsayımlardır; fiyat/ödüller kullanıcı şartıdır."
+  },
+  "radial": {
+    "openKey": "B",
+    "closeKey": "B",
+    "backKeys": [
+      "Escape",
+      "0"
+    ],
+    "autoBuy": false,
+    "reBuy": false,
+    "sectorCount": 6,
+    "startAngleDegrees": -90,
+    "direction": "clockwise",
+    "centerDeadZonePixels": 24,
+    "outerRadiusPixels": 210,
+    "purchaseOn": "explicit_click_or_number_confirm",
+    "hover": "preview_only",
+    "rootSlots": [
+      "pistols",
+      "heavy_smg",
+      "rifles",
+      "equipment",
+      "grenades",
+      "close"
+    ],
+    "subcategoryBackSlot": 6,
+    "itemsFilter": "team_before_layout",
+    "centerText": "Geri",
+    "show": [
+      "price",
+      "killReward",
+      "wallet",
+      "buyTimeRemaining",
+      "owned",
+      "unaffordable",
+      "wrongTeam",
+      "capacityReached"
+    ],
+    "disableFireWhileOpen": true,
+    "phaseExit": "close_and_reject_late_request",
+    "legacyStorePrices": "never_use"
+  },
+  "categories": [
+    {
+      "id": "pistols",
+      "name": "Tabancalar",
+      "key": 1
+    },
+    {
+      "id": "heavy_smg",
+      "name": "SMG / Pompalı",
+      "key": 2
+    },
+    {
+      "id": "rifles",
+      "name": "Tüfekler",
+      "key": 3
+    },
+    {
+      "id": "equipment",
+      "name": "Ekipman",
+      "key": 4
+    },
+    {
+      "id": "grenades",
+      "name": "Bombalar",
+      "key": 5
+    }
+  ],
+  "items": [
+    {
+      "id": "t_default",
+      "name": "T Başlangıç Tabancası",
+      "category": "pistols",
+      "teams": [
+        "T"
+      ],
+      "price": 0,
+      "killReward": 300,
+      "slot": "secondary",
+      "role": "default",
+      "modelBinding": {
+        "catalogId": "m_g17",
+        "status": "visual_candidate_only"
+      },
+      "purchasePolicy": "spawn_only"
+    },
+    {
+      "id": "ct_default",
+      "name": "CT Başlangıç Tabancası",
+      "category": "pistols",
+      "teams": [
+        "CT"
+      ],
+      "price": 0,
+      "killReward": 300,
+      "slot": "secondary",
+      "role": "default",
+      "modelBinding": {
+        "catalogId": "m_p9",
+        "status": "visual_candidate_only"
+      },
+      "purchasePolicy": "spawn_only"
+    },
+    {
+      "id": "pistol_standard",
+      "name": "Standart Tabanca",
+      "category": "pistols",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 300,
+      "killReward": 300,
+      "slot": "secondary",
+      "role": "standard",
+      "modelBinding": {
+        "catalogId": "m_p2020",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "pistol_piercing",
+      "name": "Zırh Delici Tabanca",
+      "category": "pistols",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 500,
+      "killReward": 300,
+      "slot": "secondary",
+      "role": "armor_piercing",
+      "modelBinding": {
+        "catalogId": "m_57",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "pistol_auto",
+      "name": "Seri Tabanca",
+      "category": "pistols",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 600,
+      "killReward": 100,
+      "slot": "secondary",
+      "role": "automatic",
+      "modelBinding": {
+        "catalogId": null,
+        "candidateVisualCatalogId": "m_g17",
+        "status": "requires_gameplay_variant"
+      }
+    },
+    {
+      "id": "pistol_heavy",
+      "name": "Ağır Tabanca",
+      "category": "pistols",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 700,
+      "killReward": 300,
+      "slot": "secondary",
+      "role": "heavy",
+      "modelBinding": {
+        "catalogId": "m_deagle",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "smg_budget",
+      "name": "Ekonomik SMG",
+      "category": "heavy_smg",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 1050,
+      "killReward": 600,
+      "slot": "primary",
+      "role": "budget_smg",
+      "modelBinding": {
+        "catalogId": "m_skor",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "t_smg",
+      "name": "T Hücum SMG",
+      "category": "heavy_smg",
+      "teams": [
+        "T"
+      ],
+      "price": 1200,
+      "killReward": 600,
+      "slot": "primary",
+      "role": "main_smg",
+      "modelBinding": {
+        "catalogId": "m_ump",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "ct_smg",
+      "name": "CT Hücum SMG",
+      "category": "heavy_smg",
+      "teams": [
+        "CT"
+      ],
+      "price": 1400,
+      "killReward": 600,
+      "slot": "primary",
+      "role": "main_smg",
+      "modelBinding": {
+        "catalogId": "m_mp7",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "smg_capacity",
+      "name": "Yüksek Şarjörlü SMG",
+      "category": "heavy_smg",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 2350,
+      "killReward": 300,
+      "slot": "primary",
+      "role": "p90_equivalent",
+      "modelBinding": {
+        "catalogId": "m_p90",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "shotgun_basic",
+      "name": "Temel Pompalı",
+      "category": "heavy_smg",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 1200,
+      "killReward": 900,
+      "slot": "primary",
+      "role": "shotgun",
+      "modelBinding": {
+        "catalogId": "m_xma",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "t_budget_rifle",
+      "name": "T Ekonomik Tüfek",
+      "category": "rifles",
+      "teams": [
+        "T"
+      ],
+      "price": 2000,
+      "killReward": 300,
+      "slot": "primary",
+      "role": "budget_rifle",
+      "modelBinding": {
+        "catalogId": "m_galil",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "ct_budget_rifle",
+      "name": "CT Ekonomik Tüfek",
+      "category": "rifles",
+      "teams": [
+        "CT"
+      ],
+      "price": 2250,
+      "killReward": 300,
+      "slot": "primary",
+      "role": "budget_rifle",
+      "modelBinding": {
+        "catalogId": "m_famas",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "t_main_rifle",
+      "name": "T Ana Tüfek",
+      "category": "rifles",
+      "teams": [
+        "T"
+      ],
+      "price": 2700,
+      "killReward": 300,
+      "slot": "primary",
+      "role": "ak_equivalent",
+      "modelBinding": {
+        "catalogId": "m_ak556",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "ct_main_rifle",
+      "name": "CT Ana Tüfek",
+      "category": "rifles",
+      "teams": [
+        "CT"
+      ],
+      "price": 3100,
+      "killReward": 300,
+      "slot": "primary",
+      "role": "m4_equivalent",
+      "modelBinding": {
+        "catalogId": "m_m4",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "sniper_light",
+      "name": "Hafif Keskin Nişancı",
+      "category": "rifles",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 1700,
+      "killReward": 300,
+      "slot": "primary",
+      "role": "scout_equivalent",
+      "modelBinding": {
+        "catalogId": "m_m24",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "sniper_heavy",
+      "name": "Ağır Keskin Nişancı",
+      "category": "rifles",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 4750,
+      "killReward": 100,
+      "slot": "primary",
+      "role": "awp_equivalent",
+      "modelBinding": {
+        "catalogId": "m_awm",
+        "status": "visual_candidate_only"
+      }
+    },
+    {
+      "id": "armor_vest",
+      "name": "Yelek",
+      "category": "equipment",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 650,
+      "killReward": 0,
+      "slot": "armor",
+      "role": "armor",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "maxPerPlayer": 1,
+      "armorValue": 100
+    },
+    {
+      "id": "armor_helmet",
+      "name": "Yelek + Kask",
+      "category": "equipment",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 1000,
+      "killReward": 0,
+      "slot": "armor",
+      "role": "armor_helmet",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "maxPerPlayer": 1,
+      "armorValue": 100,
+      "helmet": true
+    },
+    {
+      "id": "defuse_kit",
+      "name": "İmha Kiti",
+      "category": "equipment",
+      "teams": [
+        "CT"
+      ],
+      "price": 400,
+      "killReward": 0,
+      "slot": "defuse",
+      "role": "defuse",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "maxPerPlayer": 1
+    },
+    {
+      "id": "knife",
+      "name": "Savaş Bıçağı",
+      "category": "equipment",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 0,
+      "killReward": 1500,
+      "slot": "melee",
+      "role": "melee",
+      "modelBinding": {
+        "catalogId": "m_kcom",
+        "status": "visual_candidate_only"
+      },
+      "purchasePolicy": "spawn_only",
+      "maxPerPlayer": 1
+    },
+    {
+      "id": "grenade_he",
+      "name": "El Bombası",
+      "category": "grenades",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 300,
+      "killReward": 300,
+      "slot": "grenade",
+      "role": "he",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "grenadeType": "he",
+      "maxPerPlayer": 1
+    },
+    {
+      "id": "grenade_flash",
+      "name": "Flaş Bombası",
+      "category": "grenades",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 200,
+      "killReward": 300,
+      "slot": "grenade",
+      "role": "flash",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "grenadeType": "flash",
+      "maxPerPlayer": 2
+    },
+    {
+      "id": "grenade_smoke",
+      "name": "Sis Bombası",
+      "category": "grenades",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 300,
+      "killReward": 300,
+      "slot": "grenade",
+      "role": "smoke",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "grenadeType": "smoke",
+      "maxPerPlayer": 1
+    },
+    {
+      "id": "t_molotov",
+      "name": "Molotof",
+      "category": "grenades",
+      "teams": [
+        "T"
+      ],
+      "price": 400,
+      "killReward": 300,
+      "slot": "grenade",
+      "role": "incendiary",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "grenadeType": "fire",
+      "maxPerPlayer": 1
+    },
+    {
+      "id": "ct_incendiary",
+      "name": "Yanıcı Bomba",
+      "category": "grenades",
+      "teams": [
+        "CT"
+      ],
+      "price": 600,
+      "killReward": 300,
+      "slot": "grenade",
+      "role": "incendiary",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "grenadeType": "fire",
+      "maxPerPlayer": 1
+    },
+    {
+      "id": "grenade_decoy",
+      "name": "Yem Bombası",
+      "category": "grenades",
+      "teams": [
+        "T",
+        "CT"
+      ],
+      "price": 50,
+      "killReward": 300,
+      "slot": "grenade",
+      "role": "decoy",
+      "modelBinding": {
+        "catalogId": null,
+        "status": "requires_implementation"
+      },
+      "grenadeType": "decoy",
+      "maxPerPlayer": 1
+    }
+  ],
+  "serverContract": {
+    "purchaseRequestFields": [
+      "matchId",
+      "roundId",
+      "requestId",
+      "itemId"
+    ],
+    "ignoreClientFields": [
+      "price",
+      "money",
+      "team",
+      "alive",
+      "killReward",
+      "winner"
+    ],
+    "transaction": "validate_deduct_grant_log_atomically",
+    "roundSettlement": "one_server_event_per_round_all_players_atomically",
+    "killAttribution": "weapon_at_damage_event_not_currently_held",
+    "spectatorRewards": false,
+    "disconnectReward": "preserve_round_participation_and_actual_alive_state",
+    "grenadeInventoryAuthority": "server",
+    "ledger": [
+      "eventId",
+      "matchId",
+      "roundId",
+      "playerId",
+      "reason",
+      "requestedDelta",
+      "appliedDelta",
+      "balanceAfter",
+      "configVersion"
+    ],
+    "persistAcrossServerRestart": "restore_committed_match_snapshot_and_event_ids"
+  },
+  "integration": {
+    "mode": "new_bomb_5v5_not_existing_kill_limit_tm",
+    "existingAccountCurrency": "SV.tl_must_not_be_used",
+    "modelBindings": "visual_candidates_no_existing_shop_price_or_stats_override",
+    "pendingGameplay": [
+      "bomb_round_state_machine",
+      "team_buy_zones",
+      "server_match_wallets",
+      "armor_and_defuse_effects",
+      "grenade_behaviors",
+      "automatic_pistol_variant",
+      "competitive_weapon_balance"
+    ]
+  }
+}
