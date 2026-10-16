@@ -20,7 +20,7 @@ function shList(){
   L=SWD.map(s=>({id:'ow:'+s.id,sid:s.id,n:s.n+(swLv(s.id)?' +'+swLv(s.id):''),p:s.p,t:'ws',r:RMAP[s.r]}));
   if(inv)L=L.concat(Object.keys(ITM).filter(id=>!ITM[id].special&&invHave(id)>0).map(id=>({id:'oi:'+id,iid:id,n:ITM[id].n+' ×'+invHave(id),p:ITM[id].p,t:'oi',r:RMAP[ITM[id].r]})));
  }else if(t==='c')L=CHARS.filter(c=>!c.ch).map(c=>({id:c.id,n:c.n,p:c.p,t:'c',r:c.r,c:c.j}));
- else if(t==='h')L=CHARS.filter(c=>c.ch).map(c=>({id:c.id,n:c.n,p:c.p,t:'c',r:c.r,c:c.j,ch:1}));
+ else if(t==='h')L=CHARS.filter(c=>c.ch&&!c.off).map(c=>({id:c.id,n:c.n,p:c.p,t:'c',r:c.r,c:c.j,ch:1}));
  else if(t==='f')L=[{id:'f0',n:'Formasız',p:0,t:'f',r:'common',c:0x555d68}].concat(FORMS.map(f=>({id:f.id,n:f.n,p:f.p,t:'f',r:f.r,c:f.c})));
  else if(t==='g')L=SKINS.map(s=>({id:s.id,n:s.n,p:s.p,t:'g',r:s.r,c:s.c,a:s.a}));
  else if(t==='p')L=OPT.map(o=>({id:o.id,n:o.n,p:o.p,t:'op',r:o.r,o}));
