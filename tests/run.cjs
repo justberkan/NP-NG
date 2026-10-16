@@ -17,7 +17,7 @@ const cwd=path.resolve(__dirname,'..');
       },25);
       server.once('error',e=>{clearInterval(poll);reject(e)});
     });
-    const commands=[['--test','tests/http.cjs'],['tests/movement.cjs'],['tests/smoke.cjs']];
+    const commands=[['--test','tests/http.cjs'],['tests/movement.cjs'],['tests/smoke.cjs'],['tests/lobby-atmosphere.cjs']];
     for(const args of commands){
       const result=spawnSync(process.execPath,args,{cwd,windowsHide:true,stdio:'inherit',env:{...process.env,TEST_URL:`http://127.0.0.1:${port}`}});
       if(result.status!==0){process.exitCode=1;}

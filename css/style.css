@@ -581,3 +581,14 @@ body.lo-on #wbar{display:none}
 body.mow #lohud{display:none}
 .mpt.ally{background:#0a6a3acc;color:#bfffd8}
 #mpb .ally{color:#8dffbd}
+/* İstanbul saatine bağlı lobi atmosferi; menü açılınca yalnız bu küçük panel büyür. */
+.lobby-atmosphere{position:absolute;left:20px;bottom:190px;z-index:12;width:280px;max-width:calc(100vw - 40px);color:#e5e9de;font:12px/1.5 Arial,sans-serif;border:1px solid #7f8c795e;border-radius:5px;background:#111c1be8;box-shadow:0 8px 24px #0003}
+.lobby-atmosphere[hidden]{display:none}
+.lobby-atmosphere summary{padding:10px 12px;cursor:pointer;letter-spacing:.1em;font-size:10px;color:#d6c59c}
+.lobby-atmosphere summary span{display:block;letter-spacing:0;color:#b6c3be;font-size:11px;margin-top:3px}
+.la-controls{padding:0 12px 12px;display:grid;gap:8px}
+.la-controls label{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.la-controls select{width:155px;background:#202d2c;border:1px solid #50605a;color:#f1f2e9;border-radius:3px;padding:5px;font:12px Arial,sans-serif}
+.la-controls small{color:#aab8b2;font-size:10px}
+.la-controls button{padding:6px;background:#35433b;border:1px solid #7c8b71;color:#eee8d7;border-radius:3px;cursor:pointer}
+@media(max-width:700px){.lobby-atmosphere{left:10px;bottom:175px;width:225px;max-width:calc(100vw - 30px)}.lobby-atmosphere summary{padding:7px 10px}.la-controls select{width:130px}}

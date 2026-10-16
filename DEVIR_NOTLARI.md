@@ -3,6 +3,21 @@ Tarih: 15.10.2026 (Europe/Istanbul)
 Depo: https://github.com/justberkan/NP-NG
 Yerel oyun: C:\Users\berkan\Desktop\mmofps-online
 
+
+## LOBI-001 — Codex teslimi (16 Ekim 2026, UTC+3)
+- Durum: OTOMATIK_TEST_GECTI → KARSILIKLI_INCELEME / INSAN_GORSEL_TESTI_BEKLIYOR.
+- Dal: codex/lobby-anitkabir; taban: 96db5b1 (temizlik dalı; Kimi da9be24 üzerine).
+- Build: 202610170203 · anitkabir-lobi-v1. Yerelde daha yeni 202610170202 FPS/poz işleri bulundu; bunlar korunarak kuruldu. Git dalı bu yayınlanmamış yerel FPS/poz değişikliklerini kapsamaz.
+- İş: Uzak Anıtkabir GLB, Türk bayrağı, açık askeri hangar; gerçek UTC+3/İstanbul güneş döngüsü; dört mevsim/elle hava-ışık seçimi; yağmur/kar, düşük bütçe ve toplu hangar çizimi; model hatasında silüet yedeği.
+- Dosyalar: js/lobby-atmosphere.js, js/lobby3d.js, index.html, css/style.css, js/views.js (yalnız krediler); assets/lobby/; tests/lobby-atmosphere.cjs, tests/run.cjs; README ve docs/LOBI_ATMOSFERI.md.
+- Gerçek doğrulama: node tests/run.cjs → 17 hareket testi PASS, 5 HTTP PASS, 45 HTTP dosyası birebir, 133 JS sözdizimi, lobi/Aim Training PASS; UTC+3/mevsim/ışık, kalıcılık, kontrol menüsü, mobil bütçe, gölge, model hata yedeği ve dispose PASS. Hem Git sürümü hem canlı yerel klasör test edildi.
+- Performans kanıtı: Git sürümünde 1600×900 headless Chrome, açık/gün batımı/gece 45 draw call, yağmur/kar 46; ~49 bin toplam üçgen (karakter dahil). Bunlar FPS garantisi değildir.
+- Canlı http://127.0.0.1:3000/: build 202610170203 ve yeni JS/iki GLB HTTP 200 doğrulandı; sunucu kodu/restart gerekmedi.
+- Kanıt: docs/evidence/lobby-atmosphere/; tam yeniden üretim çıktıları test-results/lobby-atmosphere/. Kurulum/API: docs/LOBI_ATMOSFERI.md.
+- Geri alma: yerelde _yedek/20261016_lobby_atmosphere/ değiştirilen mevcut dosyaları saklar. Yeni modül script'ini çıkarıp eski lobby3d.js geri yüklenebilir; hesaplara dokunulmadı.
+- Sınırlamalar: hava meteoroloji API'sinden değil takvim senaryosudur; ıslak zemin çevre parıltısı kullanır, tam sahne aynası değildir. Seçilmeyen büyük Anıtkabir modeli ve ZIP Downloads'ta bırakıldı.
+- Sıradaki tek görev: Claude/Kimi aynı dalı bağımsız incelesin; Berkan kendi ekranda gece/gün batımı kompozisyonunu ve akıcılığı değerlendirsin.
+
 ## Gerçek durum
 - Bu belge Codex tarafından oluşturuldu. Claude'un teslim aldığı henüz doğrulanmadı; otomatik Claude bağlantısı yok.
 - Yerel oyun klasörü Git deposu değil. GitHub metadata size=0 döndü; oyun kaynakları GitHub'da henüz doğrulanmadı.

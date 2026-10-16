@@ -21,9 +21,14 @@ Testler ayrı bir portta sunucu açar, geçici hesap dizini kullanır ve sonunda
 
 - HTTP testleri: yeni/değişen dosyalar, özel dizinlerin korunması, bozuk URL, HEAD ve yöntem sınırı.
 - Hareket: gerçek tarayıcıdaki `tick` ve `stepPlayer` ile 30/60/120/144/240 FPS zamanlaması, koşu, zıplama, bhop, eğilme, kenar, tırmanma, duvarda koşma ve odak kaybı.
-- Açılış: 42 istemci dosyasının HTTP içeriği, JS sözdizimi, build tutarlılığı, lobi ve Aim Training ekranı.
+- Açılış: 45 istemci dosyasının HTTP içeriği, JS sözdizimi, build tutarlılığı, lobi ve Aim Training ekranı.
+- Lobi atmosferi: UTC+3 takvimi, mevsim/gün-gece önizlemeleri, mobil efekt bütçesi, model hata yedeği ve kaynak temizliği.
 
 FPS testleri aynı makinede farklı render zaman adımlarını simüle eder; fiziksel 240 Hz monitör, gerçek ağ gecikmesi veya insanın hareket hissini değerlendirmez.
+
+## Anıtkabir lobisi
+
+Anıtkabir ve Türk bayrağı, açık askeri hangar arkasında gösterilir. Sol alttaki **ATMOSFER** menüsünden mevsim, hava ve ışığı seçebilirsin; otomatik mod Türkiye saati UTC+3 ve aya göre çalışır. Mevsimsel efektler canlı hava tahmini değildir. Adım adım kurulum, modül API'si ve performans sınırları: [docs/LOBI_ATMOSFERI.md](docs/LOBI_ATMOSFERI.md).
 
 ## Claude / Codex devri
 

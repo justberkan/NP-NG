@@ -140,6 +140,8 @@ const cRange=(l,k,mn,mx,st,u)=>`<div class='sr2'><span>${l}</span><input type='r
 const cCheck=(l,k)=>`<label class='sr2'><span>${l}</span><input type='checkbox' data-k='${k}' ${SET[k]?'checked':''}></label>`;
 const cSel=(l,k,o)=>`<div class='sr2'><span>${l}</span><select data-k='${k}'>${o.map(x=>`<option value='${x[0]}' ${String(SET[k])===String(x[0])?'selected':''}>${x[1]}</option>`).join('')}</select></div>`;
 const CREDITS=[
+ ['ANITKABİR 2','adasamli','https://sketchfab.com/3d-models/anitkabir-2-cfd9c518c550400b9cfd92dbc009663d','Lobi Anıtkabir modeli · CC BY 4.0 · ölçek, yön ve malzeme uyarlandı'],
+ ['Turkish Flag - Türk Bayrağı','Veysel Gök','https://sketchfab.com/3d-models/turkish-flag-turk-bayrag-e94fdd812b3a4265ad6b3ca063c52088','Lobi bayrağı · CC BY 4.0 · ölçek ve dalgalanma uyarlandı'],
  ['Soldier Full Tactical Gear','DanlyVostok','https://sketchfab.com/3d-models/soldier-full-tactical-gear-850593a8c7114c188395ba1849a66eb9','Oyuncu / bot karakter modeli'],
  ['10 Genshin Impact Inspired Sword 3D Models','Anime 3D (Anime_CG)','https://sketchfab.com/3d-models/10-genshin-impact-inspired-sword-3d-models-a25cde4706d04e4cb5ea7ff89ceb5dd9','Açık dünya kılıç modelleri'],
  ['Low Poly Knife Collection','BUttERflY_Bee','https://sketchfab.com/3d-models/low-poly-knife-collection-000c0c7c9ee740a28469e3c393ae133d','Bıçak modelleri'],
