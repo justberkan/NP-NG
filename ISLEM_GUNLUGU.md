@@ -233,3 +233,12 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Dosyalar: js/athletic-motion.js, js/combat.js, js/world.js, js/mp.js, js/owmp.js, js/weapons.js, js/compet.js, js/loadout.js, js/main.js, css/style.css, index.html, tests/audit.cjs, tests/run.cjs, package.json, docs/HATA_DENETIMI_20261017.md, IS_PLANI.md
 - Test: tests/run.cjs + audit.cjs tümü PASS, 39/39 (HTTP 5, hareket 17, smoke, lobi atmosferi, audit 7 mod × 2 + lobi). Doku sayısı 4 turda sabit (önce TDM +9, rekabetçi +11, açık dünya +17/maç). Gerçek ekran kartında FPS ölçülmedi (A-07 Kimi).
 - Yedek: _yedek/claude-denetim-1808/
+
+### 2026-10-17 23:45 · Claude · kural (build değişmedi: 202610171808)
+- İşlem: Berkan'ın yasası IS_PLANI.md'nin en üstüne yazıldı: Claude onayı olmadan hiçbir iş uygulanmaz; önce plan, onay, dal + PR, npm test, Claude birleştirir. Onay metni "ONAY · <hata no> · <kapsam>" başlığını taşır.
+- Eklendi: IS_PLANI.md "YASA" bölümü
+- Değişti: yok (oyun kodu değişmedi)
+- Çıkarıldı: yok
+- Dosyalar: IS_PLANI.md, ISLEM_GUNLUGU.md
+- Test: gerekmez (yalnız belge)
+- Yedek: _yedek/claude-denetim-1808/IS_PLANI.md (önceki hali)

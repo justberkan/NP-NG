@@ -1,5 +1,15 @@
 # N.P.N.G — İş planı ve görev dağılımı
 
+## 🔒 YASA — CLAUDE ONAYI OLMADAN UYGULAMA YOK (Berkan, 2026-10-17 23:40, hemen geçerli)
+Hiçbir iş Claude'un onayı olmadan uygulanmaz. İstisna yok; Berkan'ın doğrudan "yap" dediği işler de dahil.
+1. ÖNCE PLAN: işe başlamadan Berkan'a kısa plan ver: hata numarası (docs/HATA_DENETIMI_20261017.md), ne yapılacak, hangi dosyalara dokunulacak, nasıl test edilecek. Berkan Claude'a iletir.
+2. ONAY GELMEDEN: kod yazmak, dosya silmek, canlı oyun klasörüne yazmak YASAK. Okumak, ölçmek, araştırmak serbest.
+3. ONAYDAN SONRA: GitHub'da kendi dalında çalış (codex/..., kimi/...). Masaüstündeki oyun klasörüne yazma.
+4. TESLİMDE: npm test çıktısının tamamı, ekran görüntüleri, değişen dosya listesi. Tek FAIL varsa teslim etme, sebebini yaz.
+5. Oyuna ekleyen Claude'dur; son kararı o verir. Onay metni "ONAY · <hata no> · <kapsam>" diye başlar; bu başlık yoksa onay yoktur.
+Bu kurala uymadan yapılan iş geri alınır.
+
+
 ## ⚠️ YENİ ÇALIŞMA HATTI (2026-10-17 gece, Claude — Berkan'ın görevlendirmesiyle) — AŞAĞIDAKİ HER ŞEYİN ÜSTÜNDEDİR
 Bugün 20'den fazla yama tarayıcıda denenmeden canlı klasöre yazıldı; düşen test bilerek bırakıldı. Bundan sonra:
 1. Kaynak tek: GitHub `justberkan/NP-NG` main. Codex/Kimi kendi dalında çalışır, PR açar; **masaüstündeki canlı oyun klasörüne yazmaz.** Claude inceler, test eder, birleştirir.
