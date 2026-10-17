@@ -1,4 +1,11 @@
 # N.P.N.G — İş planı ve görev dağılımı
+
+## ZORUNLU KAYIT KURALI (2026-10-17, Berkan)
+Her AI, oyun klasöründe yaptığı HER değişiklikten sonra `ISLEM_GUNLUGU.md` dosyasının en altına kayıt ekler:
+saat (Türkiye), ajan adı, build, ne yapıldı, Eklendi / Değişti / Çıkarıldı (yoksa "yok"), dosyalar, test sonucu, yedek yeri.
+Kayıt yazılmadan iş bitmiş sayılmaz. Eski kayıtlar silinmez. NOTLAR.md günlüğü de tutulmaya devam eder.
+GitHub (justberkan/NP-NG main) güncellemesini Claude yapar; Codex/Kimi kendi işleri için dal açabilir.
+
 Tarih: 16.10.2026 · Karar: Berkan
 
 ## Temel kural: oyun kodu tek elden
@@ -80,3 +87,12 @@ Kanıt (ekran görüntüsü, test çıktısı, konsol hatası):
 - Oyunun tam güncel hali `justberkan/NP-NG` reposunun **main** dalında. Hesap verileri (`data/`), `.env`, `cloudflared.exe`, `_yedek/`, electron `dist/` ve `node_modules/` repoya girmez.
 - Claude her oyun güncellemesinden sonra main'i günceller (commit mesajında build etiketi olur).
 - Codex / Kimi: yerel klasöre bağlı kalmak zorunda değil. `git clone https://github.com/justberkan/NP-NG` ile en güncel kodu alın, kendi işinizi kendi dalınızda (`codex/...`, `kimi/...`) yapıp PR açın. Oyun kodunu (js/css/index.html) yine yalnız Claude değiştirir.
+
+## 17.10.2026 — Berkan'ın doğrudan müdahale yetkisi / Codex teslimi
+Berkan animasyonu Codex'e devretti ve ardından Ada Wong/Samus kaldırma, Battle Pass görsel iyileştirme, süzülme/tırmanma/kayma, 5v5 bomba ve kamera düzenlemelerini doğrudan oyun dosyalarına istedi. Bu kapsam 202610171402 hareket-bomba-v1 olarak işlendi. Ayrıntı: docs/CODEX_DEVIR_20261017.md. Claude/Kimi eski animasyon/BP paketlerini bu sürümün üzerine yazmadan önce bu devri okuyun. server.js için yeniden başlatma gerekli.
+
+## 17.10.2026 — Son kullanıcı yönlendirmesi / 202610171404
+Çatılar erişilebilir kalacak; yalnız kenarlardan düşüş ve tavan üstüne çıkış engellenecek. Codex son hali buna göre değiştirdi; önceki nav/+3.2m çatı kısıtı kaldırıldı. Rekabetçi giriş/Tab/satın alma ve Holosight çift nokta düzeltmeleriyle birlikte devir: docs/codex-1403/DEVIR.md. NOTLAR.md son kaydı esas alınmalı.
+
+## 17.10.2026 — 1405 yeni koridor modu ve Dust2 geri düzeltmesi
+Berkan'ın yeni mod paketiyle doğrudan entegrasyon: docs/codex-koridor/DEVIR.md. Dust2 görünmez duvar/tavan talebi geri alındı; 1404 notları bu konuda geçersiz. Yeni co-op modunun sunucu bağımlılığı server-wavecorridor.js dosyasıdır; dağıtımda unutmayın.

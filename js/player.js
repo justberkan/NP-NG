@@ -56,7 +56,7 @@ addEventListener('keydown',e=>{
  if(kMatch(e,'reload'))startReload();
  const wi=[0,1,2,3,4,5,6].find(i=>kMatch(e,'slot'+(i+1)));
  if(wi!=null){const kk=LO.on?LO.keys[wi]:WKEYS[wi];if(kk)setW(kk)}
- if(kMatch(e,'tp'))tp=!tp;
+ if(kMatch(e,'tp')&&mode!=='cmp'&&!(mode==='mp'&&MPL.kind==='tm'))tp=!tp;
  if(kMatch(e,'grip')&&!e.repeat&&cw.melee&&cw.hold!=='gsword'){const ok=cw.hold==='knife'?[0,1]:[0,1,2];SET.grip=ok[(ok.indexOf(SET.grip)+1)%ok.length]||0;saveSet();const gm=$('msg');if(gm){gm.textContent='Tutuş: '+['Düz (tek el)','Ters (tek el)','Çift el'][SET.grip];setTimeout(()=>{if(gm.textContent.indexOf('Tutuş')===0)gm.textContent=''},1200)}}
  if(kMatch(e,'jump')){e.preventDefault();if(!e.repeat)jPress=true;jHeld=true}
  if(kMatch(e,'crouch')&&!e.repeat){sPress=true;e.preventDefault()}
@@ -238,7 +238,7 @@ function stepPlayer(dt){
  grCd-=dt;
  canMove.keep=false;const nx=p.x+p.vx*dt;if(canMove(nx,p.z))p.x=nx;else if(!canMove.keep)p.vx=0;
  canMove.keep=false;const nz=p.z+p.vz*dt;if(canMove(p.x,nz))p.z=nz;else if(!canMove.keep)p.vz=0;
- const bd=OW.on?OWH-3:(MAPS.cur?MAPS.cur.ext:29.5);p.x=clamp(p.x,-bd,bd);p.z=clamp(p.z,-bd,bd);
+ const bd=mode==='wc'?WC.totalRounds*WC.gap+40:OW.on?OWH-3:(MAPS.cur?MAPS.cur.ext:29.5);p.x=clamp(p.x,-bd,bd);p.z=clamp(p.z,-bd,bd);
  const gy=groundAt(p.x,p.z,p.y);
  p.vy-=22*dt;
  /* tırmanma kameranın duvara bakmasına göre (W+A gibi çapraz tuşlar artık tırmandırmaz) */
@@ -286,6 +286,7 @@ p.wr=0;if(!wall||p.g)p.wrT=0;
  if(p.y<=gy&&p.vy<=0){p.y=gy;p.vy=0;p.g=true}
  else if(p.y>gy+.05){if(OW.on&&p.g&&p.vy<=0&&p.y-gy<.45&&!gr){p.y=gy;p.vy=0}else p.g=false}
 
+
  const as=mode==='ow'?skAtkSpd():1;
  fireCd-=dt*as;swT=Math.min(1,swT+dt);
  if(((firing&&!auto)||(auto&&aiIn.fire))&&!dead&&!SK.chain)shoot();
@@ -300,6 +301,7 @@ p.wr=0;if(!wall||p.g)p.wrT=0;
 /* ----- Kamera ve görünür modeller ----- */
 const _eu=new THREE.Euler(0,0,0,'YXZ'),_cv=V3();
 function updPlayerView(dt){
+ const firstPersonOnly=mode==='cmp'||(mode==='mp'&&MPL.kind==='tm');if(firstPersonOnly)tp=false;
  const spd=Math.hypot(p.vx,p.vz);
  p.eye+=((p.slide>0?1:p.cr?CROUCH_EYE:1.6)-p.eye)*Math.min(1,15*dt);
  adsT+=((ads&&!cw.melee?1:0)-adsT)*Math.min(1,12*dt);
@@ -307,7 +309,7 @@ function updPlayerView(dt){
  const latN=p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0;p.lt=(p.lt||0)+(latN-(p.lt||0))*Math.min(1,7*dt);
  const fv=baseFov/(1+(optZoom()-1)*adsT); // hızda FOV genişlemesi kapalı; yakınlaştırma nişangaha göre
  if(Math.abs(fv-cam.fov)>.1){cam.fov+=(fv-cam.fov)*Math.min(1,8*dt);cam.updateProjectionMatrix()}
- const chO=cw.melee?1:Math.max(0,1-adsT*1.6); /* nişan alınca (sağ tık) ana artı tamamen kaybolur; tabancada da (iki nişangah olmasın) */if(chO!==lastCh){lastCh=chO;$('ch').style.opacity=chO}
+ const chO=cw.melee?1:(ads||adsT>=.05?0:1);if(chO!==lastCh){lastCh=chO;$('ch').style.opacity=chO}
  const si=Math.round(spd),gk=grCd>0?Math.ceil(grCd):0,tx=si+' m/s · kanca '+(gr?'bağlı':gk?gk+' sn':'hazır');
  if(tx!==lastSpd){lastSpd=tx;$('spd').textContent=tx}
  const sp100=Math.max(0,Math.round(p.st/ST*100));if(sp100!==lastSt){lastSt=sp100;$('sti').style.width=sp100+'%'}
@@ -315,9 +317,9 @@ function updPlayerView(dt){
  const play=state==='play'||state==='pause'||state==='end';
  const alive=p.dead<=0;
  const rq=reload>0?1-reload/cw.rel:-1,swv=swU>=0?swU:null,sw=swT>=.25?1:swT/.25;
- const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr,glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0};
+ const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr,glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0,wallrun:p.wr||0,climb:!!p.climb};
 
- if(p.dead>0&&pRagdoll){
+ if(p.dead>0&&pRagdoll&&!firstPersonOnly){
   const t=pRagdoll.pts.pel.p;
   _cv.set(t.x+2.2,t.y+2.4,t.z+3);cam.position.lerp(_cv,Math.min(1,4*dt));cam.lookAt(t);
  }else if(tp){

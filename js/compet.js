@@ -11,7 +11,7 @@
 const CMPC={
  start:800,cap:16000,win:3250,objWin:3500,plantBonus:800,lossLadder:[1400,1900,2400,2900,3400],
  freeze:15,buyTime:30,live:115,bomb:40,plant:3.2,defuse:10,defuseKit:5,endPause:5,half:15,winRounds:16,
- siteR:4.2,defuseR:1.8
+ siteR:3.5,defuseR:1.8,blastRadius:28,blastPeak:500,blastScale:10.8
 };
 /* ürünler: [id, ad, kategori, takımlar, fiyat, kill ödülü, slot, model] */
 const CMPI=[
@@ -93,21 +93,22 @@ function cmpRanksView(){
 }
 
 /* ----- Harita: bomba bölgeleri ----- */
+const CMP_SITE_LAYOUTS={dust2:[{n:'A',x:43,z:-22},{n:'B',x:-35,z:-27}]};
 function cmpSites(){
- const m=MAPS.cur;
- if(!m||!m.nav)return [{n:'A',x:-18,z:-14,y:0},{n:'B',x:16,z:-12,y:0}];
- const N=m.nav,a=avg(N.spA),b=avg(N.spB),dx=b.x-a.x,dz=b.z-a.z,L=Math.hypot(dx,dz)||1,ux=dx/L,uz=dz/L;
- const y0=Math.min(a.y,b.y)-2.5,y1=Math.max(a.y,b.y)+4,C=[];
- for(let i=0;i<N.n;i+=2){const x=N.X[i],z=N.Z[i],y=N.Y[i],t=((x-a.x)*ux+(z-a.z)*uz)/L;if(t<.55||t>.88||y<y0||y>y1)continue;C.push([i,(x-a.x)*(-uz)+(z-a.z)*ux])}
- C.sort((p,q)=>p[1]-q[1]);
- const ok=i=>N.path(b.x,b.z,N.X[i],N.Z[i],b.y,null)&&N.path(a.x,a.z,N.X[i],N.Z[i],a.y,null);
- const pickFrom=(k0,dir)=>{for(let k=k0;k>=0&&k<C.length;k+=dir)if(ok(C[k][0]))return C[k][0];return null};
- /* uç değerler harita kenarına/dışına düşebiliyor: %20 içeriden başla, iki spawn'dan da yürünebilen noktayı al */
- const best=C.length?[pickFrom(Math.floor(C.length*.8),-1),pickFrom(Math.floor(C.length*.2),1)]:[null,null];
- const mk=(i,n,f)=>i==null?{n,x:a.x+dx*.72+f*-uz*8,z:a.z+dz*.72+f*ux*8,y:b.y}:{n,x:N.X[i],z:N.Z[i],y:N.Y[i]};
- return [mk(best[0],'A',1),mk(best[1],'B',-1)];
- function avg(L){let x=0,z=0,y=0;for(const p of L){x+=p.x;z+=p.z;y+=p.y}return {x:x/L.length,z:z/L.length,y:y/L.length}}
+ const m=MAPS.cur;if(!m||!m.nav)return[{n:'A',x:-18,z:-14,y:0,r:3.5},{n:'B',x:16,z:-12,y:0,r:3.5}];
+ const N=m.nav,avg=L=>{const q={x:0,y:0,z:0};for(const p of L){q.x+=p.x;q.y+=p.y;q.z+=p.z}q.x/=L.length;q.y/=L.length;q.z/=L.length;return q},a=avg(N.spA),b=avg(N.spB),dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz)||1;
+ const goals=CMP_SITE_LAYOUTS[m.id]||[{n:'A',x:a.x+dx*.68-dz/len*14,z:a.z+dz*.68+dx/len*14},{n:'B',x:a.x+dx*.68+dz/len*14,z:a.z+dz*.68-dx/len*14}];
+ const result=[];
+ for(const goal of goals){
+  const candidates=[];for(let i=0;i<N.n;i++){const x=N.X[i],z=N.Z[i],d=Math.hypot(x-goal.x,z-goal.z);if(Math.hypot(x-a.x,z-a.z)<12||Math.hypot(x-b.x,z-b.z)<12||result.some(q=>Math.hypot(x-q.x,z-q.z)<14))continue;candidates.push({i,d})}
+  candidates.sort((a,b)=>a.d-b.d);let best=null,score=-Infinity;
+  for(const c of candidates.slice(0,160)){const i=c.i,x=N.X[i],z=N.Z[i],y=N.Y[i];let clear=0;for(let k=0;k<8;k++){const xx=x+Math.cos(k*Math.PI/4)*2.8,zz=z+Math.sin(k*Math.PI/4)*2.8,j=N.near(xx,zz,y,1);if(j>=0&&Math.hypot(N.X[j]-xx,N.Z[j]-zz)<1.6&&Math.abs(N.Y[j]-y)<.65)clear++}const value=clear*2-c.d;if(value>score){score=value;best={n:goal.n,x,z,y,r:3.5}}}
+  if(!best)throw new Error('Haritada guvenli bomba bolgesi bulunamadi: '+m.id);
+  result.push(best);
+ }
+ return result;
 }
+
 function cmpSpawn(side,i){
  const m=MAPS.cur;
  if(!m){const t=side==='T';return {x:-8+i*4,z:t?26:-26,y:0,yaw:t?0:Math.PI}}
@@ -117,7 +118,7 @@ function cmpSpawn(side,i){
 function cmpMarkers(){
  for(const o of CMP.meshes)S.remove(o);CMP.meshes.length=0;
  for(const s of CMP.sites){
-  const r=new THREE.Mesh(new THREE.RingGeometry(CMPC.siteR-.25,CMPC.siteR,40),new THREE.MeshBasicMaterial({color:0xffb020,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));
+  const r=new THREE.Mesh(new THREE.RingGeometry((s.r||CMPC.siteR)-.15,s.r||CMPC.siteR,40),new THREE.MeshBasicMaterial({color:0xffb020,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));
   r.rotation.x=-Math.PI/2;r.position.set(s.x,(s.y||0)+.06,s.z);S.add(r);CMP.meshes.push(r);
   const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.font='900 96px system-ui';x.textAlign='center';x.textBaseline='middle';x.fillStyle='#ffb020';x.strokeStyle='#000';x.lineWidth=6;x.strokeText(s.n,64,68);x.fillText(s.n,64,68);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));sp.scale.set(1.6,1.6,1);sp.position.set(s.x,(s.y||0)+3.2,s.z);S.add(sp);CMP.meshes.push(sp);
@@ -132,11 +133,13 @@ function cmpBombMesh(){
 
 /* ----- Kurulum ve raunt ----- */
 function cmpSetup(){
- CMP.on=true;CMP.round=0;CMP.score={T:0,CT:0};CMP.side1='T';CMP.streak={T:0,CT:0};CMP.stats={k:0,d:0,dmg:0,obj:0};
+ CMP.on=true;tp=false;CMP.round=0;CMP.score={T:0,CT:0};CMP.side1='T';CMP.streak={T:0,CT:0};CMP.stats={k:0,d:0,dmg:0,obj:0};
  if(!CMP.loSave)CMP.loSave={ok:LO.ok,keys:LO.keys.slice(),mod:Object.assign({},LO.mod)};
- CMP.sites=cmpSites();cmpMarkers();
+ CMP.sites=cmpSites();cmpMarkers();CMP.boardOpen=false;CMP.stats.a=0;
  for(let i=0;i<4;i++)mkE('a',1,0,0,'pistol');
  for(let i=0;i<5;i++)mkE('e',2,0,0,'pistol');
+ for(const e of E){e.cmpStats={k:0,d:0,a:0};e.cmpHits=new Map()}
+ CMP.playerHits=new Map();
  cmpHalfReset();cmpNewRound();
 }
 function cmpHalfReset(){
@@ -176,17 +179,20 @@ function cmpBotBuy(e){
  if(!e.inv.pri&&!e.inv.sec&&e.cash>=700&&Math.random()<.4)e.inv.sec=pick(['pistol_heavy']);
 }
 function cmpNewRound(){
+ if(CMP.playerHits)CMP.playerHits.clear();cmpBoard(false);
  CMP.round++;CMP.phase='freeze';CMP.t=CMPC.freeze;CMP.buyT=CMPC.buyTime;CMP.bomb=null;CMP.act=null;CMP.actT=0;
  if(typeof clearRags==='function')clearRags();
  /* oyuncu */
  const s1=cmpSpawn(CMP.side1,0);
  if(p.dead>0){p.dead=0;CMP.inv.pri=null;CMP.inv.sec=null;CMP.inv.armor=0;CMP.inv.helmet=false;CMP.inv.kit=false}
  p.hp=100;p.x=s1.x;p.z=s1.z;p.y=s1.y;p.yaw=s1.yaw;p.pitch=0;p.vx=p.vz=p.vy=0;pRagdoll=null;hudHp();
+ if(MAPS.cur)MAPS.cur.safePos={x:p.x,y:p.y,z:p.z};
  cmpApplyPlayer();
  /* botlar */
  const idx={T:1,CT:0};idx[CMP.side1]=1;
  const cnt={1:1,2:0};
  for(const e of E){
+  e.cmpHits.clear();
   const side=cmpSide(e.team),q=cmpSpawn(side,e.team===1?cnt[1]++:cnt[2]++);
   if(e.hp<=0){e.inv.pri=null;e.inv.sec=null;e.inv.armor=0;e.inv.kit=false}
   e.hp=e.max=100;e.rig.root.visible=true;e.g.position.set(q.x,q.y,q.z);e.sx=q.x;e.sz=q.z;e.sy=q.y;
@@ -198,6 +204,7 @@ function cmpNewRound(){
  CMP.carrier=CMP.side1==='T'?'p':tb[Math.floor(Math.random()*tb.length)]||null;
  cmpMsg(CMP.round===CMPC.half+1?'Taraf değişti! Artık '+CMP.side1+' tarafındasın':'Raunt '+CMP.round+' · Satın alma: B',3);
  cmpHud();
+ cmpMenu(true);
 }
 function cmpMsg(t,s){$('msg').textContent=t;CMP.msgT=s||3}
 function cmpAlive(side){
@@ -226,6 +233,7 @@ function cmpEndRound(winner,why){
 }
 function cmpTick(dt){
  if(!CMP.on||state!=='play')return;
+ cmpFxTick(dt);
  if(CMP.msgT>0){CMP.msgT-=dt;if(CMP.msgT<=0&&CMP.phase!=='end')$('msg').textContent=''}
  CMP.buyT-=dt;
  if(CMP.menu&&(CMP.buyT<=0||p.dead>0))cmpMenu(false);
@@ -253,7 +261,11 @@ function cmpTick(dt){
  cmpHud();
 }
 /* ----- Bomba ----- */
-function cmpSiteAt(x,z){for(const s of CMP.sites)if(Math.hypot(x-s.x,z-s.z)<CMPC.siteR)return s;return null}
+function cmpSiteAt(x,z,y){
+ for(const s of CMP.sites){if(Math.hypot(x-s.x,z-s.z)>(s.r||CMPC.siteR)||y!=null&&Math.abs(y-s.y)>.65)continue;
+  const m=MAPS.cur;if(m&&m.nav){const N=m.nav,i=N.near(x,z,y==null?s.y:y,1);if(i<0||Math.hypot(N.X[i]-x,N.Z[i]-z)>1.35||Math.abs(N.Y[i]-s.y)>.65)continue}return s;
+ }return null;
+}
 function cmpPlantLogic(dt){
  /* yerdeki bomba: T oyuncu/bot üstüne gelince alır */
  if(CMP.bomb&&CMP.bomb.dropped){
@@ -262,12 +274,13 @@ function cmpPlantLogic(dt){
   else for(const e of E)if(cmpSide(e.team)==='T'&&e.hp>0&&Math.hypot(e.g.position.x-b.x,e.g.position.z-b.z)<1.3){CMP.carrier=e;cmpCleanBomb();break}
  }
  if(CMP.carrier==='p'){
-  const s=cmpSiteAt(p.x,p.z),hold=typeof kDown==='function'?kDown('interact'):key.KeyE===1;
+  const s=cmpSiteAt(p.x,p.z,p.y),hold=typeof kDown==='function'?kDown('interact'):key.KeyE===1;
   if(s&&hold&&p.g&&Math.hypot(p.vx,p.vz)<1){CMP.act='plant';CMP.actT+=dt;if(CMP.actT>=CMPC.plant){cmpPlant(p.x,p.y,p.z,s,'Sen')}}
   else if(CMP.act==='plant'){CMP.act=null;CMP.actT=0}
  }
 }
 function cmpPlant(x,y,z,s,who){
+ if(!s||cmpSiteAt(x,z,y)!==s)return false;
  const m=cmpBombMesh();m.position.set(x,y+.08,z);S.add(m);
  CMP.bomb={planted:true,x,y,z,site:s.n,mesh:m};CMP.carrier=null;CMP.phase='bomb';CMP.t=CMPC.bomb;CMP.act=null;CMP.actT=0;
  if(who==='Sen')CMP.stats.obj++;
@@ -278,17 +291,33 @@ function cmpDropBomb(x,y,z){
  const m=cmpBombMesh();m.position.set(x,(y||0)+.08,z);S.add(m);CMP.bomb={dropped:true,x,y,z,mesh:m};CMP.carrier=null;
 }
 function cmpCleanBomb(){if(CMP.bomb&&CMP.bomb.mesh)S.remove(CMP.bomb.mesh);if(CMP.bomb&&CMP.bomb.dropped)CMP.bomb=null}
+function cmpBlastDamage(distance){return distance>=CMPC.blastRadius?0:Math.round(CMPC.blastPeak*Math.exp(-Math.pow(Math.max(0,distance)/CMPC.blastScale,2)))}
+const CMP_FX=[];
+function cmpDisposeFx(f){S.remove(f.g);f.g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}
+function cmpBlastVisual(b){
+ const g=new THREE.Group();g.position.set(b.x,b.y+.12,b.z);S.add(g);
+ const flash=new THREE.Mesh(new THREE.SphereGeometry(1,16,10),new THREE.MeshBasicMaterial({color:0xffbf55,transparent:true,opacity:.95,depthWrite:false}));g.add(flash);
+ const ring=new THREE.Mesh(new THREE.RingGeometry(.93,1,48),new THREE.MeshBasicMaterial({color:0xffd596,transparent:true,opacity:.8,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;g.add(ring);
+ const smoke=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),new THREE.MeshBasicMaterial({color:0x423e39,transparent:true,opacity:.45,depthWrite:false}));g.add(smoke);
+ const light=new THREE.PointLight(0xffad4a,7,32,2);g.add(light);
+ const count=SET.fx===0?20:64,pos=new Float32Array(count*3),velocity=new Float32Array(count*3);for(let i=0;i<count;i++){const a=Math.random()*Math.PI*2,v=3+Math.random()*7;velocity[i*3]=Math.cos(a)*v;velocity[i*3+1]=2+Math.random()*7;velocity[i*3+2]=Math.sin(a)*v}
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.BufferAttribute(pos,3));const sparks=new THREE.Points(geo,new THREE.PointsMaterial({color:0xffbb55,size:.10,transparent:true,opacity:1,depthWrite:false}));g.add(sparks);
+ CMP_FX.push({g,flash,ring,smoke,light,sparks,pos,velocity,t:0});
+}
+function cmpFxTick(dt){for(let i=CMP_FX.length-1;i>=0;i--){const f=CMP_FX[i];f.t+=dt;if(f.t>2.2){cmpDisposeFx(f);CMP_FX.splice(i,1);continue}const t=f.t;f.flash.scale.setScalar(1+t*14);f.flash.material.opacity=Math.max(0,.95-t*2.8);f.ring.scale.setScalar(1+t*24);f.ring.material.opacity=Math.max(0,.8-t);f.smoke.scale.setScalar(1+t*3);f.smoke.position.y=t*1.2;f.smoke.material.opacity=Math.max(0,.45*(1-t/2.2));f.light.intensity=Math.max(0,7-t*15);for(let j=0;j<f.pos.length;j+=3){f.pos[j]+=f.velocity[j]*dt;f.velocity[j+1]-=9*dt;f.pos[j+1]+=f.velocity[j+1]*dt;f.pos[j+2]+=f.velocity[j+2]*dt}f.sparks.geometry.attributes.position.needsUpdate=true;f.sparks.material.opacity=Math.max(0,1-t)}}
 function cmpExplode(){
- const b=CMP.bomb;snd(60,1.2,.12);
- if(typeof hitFlash==='function')hitFlash('kill');
- if(p.dead<=0&&Math.hypot(p.x-b.x,p.z-b.z)<14){hurt(500,V3(b.x,b.y,b.z))}
- for(const e of E)if(e.hp>0&&Math.hypot(e.g.position.x-b.x,e.g.position.z-b.z)<14)killEnemy(e,{pt:V3(b.x,1,b.z),dir:V3(e.g.position.x-b.x,.5,e.g.position.z-b.z).normalize(),power:9});
+ const b=CMP.bomb;if(!b||b.exploded)return;b.exploded=true;
+ cmpBlastVisual(b);const origin=V3(b.x,b.y+.1,b.z),distance=Math.hypot(p.x-b.x,p.y+.9-b.y,p.z-b.z);snd(60,1.2,.12*Math.max(.1,1-distance/70));
+ // C4 alan hasari iki takima da uygulanir; duvarlar patlamayi tamamen kesmez.
+ const damage=cmpBlastDamage(distance);if(p.dead<=0&&damage>0)hurt(damage,origin);
+ for(const e of E)if(e.hp>0){const q=e.g.position,d=cmpBlastDamage(Math.hypot(q.x-b.x,q.y+.9-b.y,q.z-b.z));if(!d)continue;let taken=d;if(e.inv&&e.inv.armor>0&&d<200){const absorbed=Math.min(e.inv.armor,d*.5);e.inv.armor-=absorbed;taken-=absorbed*.9}damageEnemy(e,taken,{by:'C4',w:'bomb',pt:origin,dir:V3(q.x-b.x,.5,q.z-b.z).normalize(),power:9})}
  if(b.mesh)S.remove(b.mesh);
 }
+
 function cmpDefuseLogic(dt){
  const b=CMP.bomb;
  if(CMP.side1==='CT'&&p.dead<=0){
-  const near=Math.hypot(p.x-b.x,p.z-b.z)<CMPC.defuseR,hold=typeof kDown==='function'?kDown('interact'):key.KeyE===1;
+  const near=Math.hypot(p.x-b.x,p.y-b.y,p.z-b.z)<CMPC.defuseR,hold=typeof kDown==='function'?kDown('interact'):key.KeyE===1;
   if(near&&hold){CMP.act='defuse';CMP.actT+=dt;if(CMP.actT>=(CMP.inv.kit?CMPC.defuseKit:CMPC.defuse)){CMP.stats.obj++;S.remove(b.mesh);cmpMsg('Bombayı çözdün!',2);return cmpEndRound('CT','defuse')}}
   else if(CMP.act==='defuse'){CMP.act=null;CMP.actT=0}
  }
@@ -420,7 +449,7 @@ function cmpHud(){
  const ph=CMP.phase==='freeze'?'Hazırlık':CMP.phase==='bomb'?'BOMBA':CMP.phase==='end'||CMP.phase==='over'?'Raunt sonu':'Raunt';
  const me=CMP.side1,op=me==='T'?'CT':'T';
  const act=CMP.act?`<div class='cact'><span>${CMP.act==='plant'?'Bomba kuruluyor':'Bomba çözülüyor'}</span><i><u style='width:${Math.min(100,CMP.actT/(CMP.act==='plant'?CMPC.plant:(CMP.inv.kit?CMPC.defuseKit:CMPC.defuse))*100)}%'></u></i></div>`:'';
- const hint=CMP.carrier==='p'&&CMP.phase==='live'?(cmpSiteAt(p.x,p.z)?'Bomba sende · E basılı tut: kur':'Bomba sende · A ya da B bölgesine git'):(CMP.phase==='bomb'&&me==='CT'&&p.dead<=0?'Bomba '+CMP.bomb.site+' bölgesinde · yanında E basılı tut: çöz':'');
+ const hint=CMP.carrier==='p'&&CMP.phase==='live'?(cmpSiteAt(p.x,p.z,p.y)?'Bomba sende · E basılı tut: kur':'Bomba sende · A ya da B bölgesine git'):(CMP.phase==='bomb'&&me==='CT'&&p.dead<=0?'Bomba '+CMP.bomb.site+' bölgesinde · yanında E basılı tut: çöz':'');
  const h=`<div class='ctop'><span class='cs ${me==='T'?'me':''}'>T ${CMP.score.T}</span><span class='ct ${CMP.phase==='bomb'?'bm':''}'>${ph}<b>${tt}</b></span><span class='cs ${me==='CT'?'me':''}'>${CMP.score.CT} CT</span></div>
   <div class='csub'>Raunt ${CMP.round}/30 · Sen: ${me} · Canlı ${me} ${cmpAlive(me)} - ${cmpAlive(op)} ${op}</div>
   <div class='ccash'>${fmtTL(CMP.cash)}${CMP.inv.armor?' · 🛡'+(CMP.inv.helmet?'⛑':''):''}${CMP.inv.kit?' · 🔧':''}${CMP.buyT>0&&p.dead<=0?` <small>B: satın al (${Math.ceil(CMP.buyT)} sn)</small>`:''}</div>${act}${hint?`<div class='chint'>${hint}</div>`:''}`;
@@ -438,6 +467,8 @@ function cmpMatchOver(){
  setTimeout(()=>{const r=$('res');if(r)r.innerHTML+=`<br><b>Rekabetçi · Rütbesiz</b> · ${a} - ${b}<br>+${xp} XP · +${fmtTL(tl)} hesap parası<br><span class='note'>Rekabetçi puanın etkilenmedi.</span>`},0);
 }
 function cmpLeave(){
+ cmpBoard(false);
+ for(const f of CMP_FX)cmpDisposeFx(f);CMP_FX.length=0;
  CMP.on=false;cmpMenu(false);CMP.menu=false;
  for(const o of CMP.meshes)S.remove(o);CMP.meshes.length=0;
  if(CMP.bomb&&CMP.bomb.mesh)S.remove(CMP.bomb.mesh);CMP.bomb=null;
@@ -460,7 +491,7 @@ updBot=function(e,dt){
  /* bomba kuran / çözen bot */
  if(e.planting>0||e.defusing>0){
   if(cmpEnemyNear(e)){e.planting=e.defusing=0}else{
-   if(e.planting>0){e.planting+=dt;if(e.planting>=CMPC.plant){e.planting=0;const q=e.g.position;cmpPlant(q.x,q.y,q.z,cmpSiteAt(q.x,q.z)||CMP.sites[0],e.name)}}
+   if(e.planting>0){e.planting+=dt;if(e.planting>=CMPC.plant){e.planting=0;const q=e.g.position;cmpPlant(q.x,q.y,q.z,cmpSiteAt(q.x,q.z,q.y)||CMP.sites[0],e.name)}}
    else{e.defusing+=dt;if(e.defusing>=(e.inv.kit?CMPC.defuseKit:CMPC.defuse)){e.defusing=0;if(CMP.bomb&&CMP.bomb.mesh)S.remove(CMP.bomb.mesh);cmpMsg('Bomba çözüldü ('+e.name+')',2);cmpEndRound('CT','defuse')}}
    animHuman(e.rig,{t:clock+e.ph0,speed:0,fwd:1,pitch:-.4,lookYaw:0,ads:0,kick:0,rq:-1,sw:1,crouch:1},dt);return}
  }
@@ -468,7 +499,7 @@ updBot=function(e,dt){
  if(o&&!cmpEnemyNear(e)){
   const d=cmpBotMove(e,o,dt);
   if(o===CMP.bomb&&CMP.phase==='bomb'&&d<CMPC.defuseR)e.defusing=.001;
-  else if(CMP.carrier===e&&o!==CMP.bomb&&cmpSiteAt(e.g.position.x,e.g.position.z)&&d<2.5)e.planting=.001;
+  else if(CMP.carrier===e&&o!==CMP.bomb&&cmpSiteAt(e.g.position.x,e.g.position.z,e.g.position.y)&&d<2.5)e.planting=.001;
   return;
  }
  _cmpUpdBot(e,dt);
@@ -478,6 +509,9 @@ killEnemy=function(e,info){
  if(mode!=='cmp')return _cmpKill(e,info);
  if(e.hp<=0&&e.rig.root.visible===false)return;
  const q=e.g.position;
+ if(e.cmpStats){e.cmpStats.d++;const killer=info&&info.player?'p':info&&info.by?E.find(x=>x.name===info.by&&x.team!==e.team):null;
+  if(killer&&killer!=='p'&&killer.cmpStats)killer.cmpStats.k++;
+  if(killer)cmpAssists(e.cmpHits,killer);if(e.cmpHits)e.cmpHits.clear()}
  _cmpKill(e,info);
  if(CMP.carrier===e)cmpDropBomb(q.x,q.y,q.z);
  e.planting=e.defusing=0;
@@ -492,8 +526,12 @@ hurt=function(d,from){
  if(mode!=='cmp')return _cmpHurt(d,from);
  if(p.dead>0||state!=='play'||CMP.phase==='freeze')return;
  if(CMP.inv.armor>0&&d<200){const ab=Math.min(CMP.inv.armor,d*.5);CMP.inv.armor-=ab;d-=ab*.9;if(CMP.inv.armor<=0){CMP.inv.armor=0;CMP.inv.helmet=false}}
+ if(from&&CMP.playerHits&&!(CMP.bomb&&CMP.bomb.exploded)){const who=E.find(e=>e.team===2&&Math.hypot(e.g.position.x-from.x,e.g.position.z-from.z)<.1);if(who){const h=CMP.playerHits.get(who)||{d:0,t:clock};h.d+=Math.min(p.hp,d);h.t=clock;CMP.playerHits.set(who,h)}}
  if(p.hp-d>0){p.hp-=d;cmpHurtFx();return}
  p.hp=0;hudHp();CMP.stats.d++;
+ const killer=from&&!(CMP.bomb&&CMP.bomb.exploded)?E.find(e=>e.team===2&&Math.hypot(e.g.position.x-from.x,e.g.position.z-from.z)<.1):null;
+ if(killer&&killer.cmpStats)killer.cmpStats.k++;
+ if(killer)cmpAssists(CMP.playerHits,killer);CMP.playerHits.clear();
  const h=pRigGet();if(h)pRagdoll=spawnRagdoll(h,V3(p.vx,0,p.vz),from||null,from?V3(p.x-from.x,.3,p.z-from.z).normalize():null,5);
  p.dead=1e9;cmpMenu(false);CMP.act=null;CMP.actT=0;
  if(CMP.carrier==='p')cmpDropBomb(p.x,p.y,p.z);
@@ -524,3 +562,24 @@ loHud=function(){
  h.innerHTML=L.map((s,i)=>`<div class='lh ${s.k===wk?'on':''}' data-k='${s.k}'><b>${i+1}</b><span class='sil'>${loIcon(s)}</span></div>`).join('');
  h.querySelectorAll('.lh').forEach((d,i)=>{d.onclick=()=>setW(L[i].k)});
 };
+
+/* TAB: gerçek maç sayaçları; aynı hedefte 40 hasar ve son 10 saniye asist verir. */
+function cmpAssists(hits,killer){if(!hits)return;for(const [who,h] of hits){if(who===killer||h.d<40||clock-h.t>10)continue;if(who==='p')CMP.stats.a++;else if(who&&who.cmpStats)who.cmpStats.a++}}
+const _cmpDamage=damageEnemy;
+damageEnemy=function(e,d,info){
+ if(mode==='cmp'&&CMP.on&&e.hp>0&&e.cmpHits&&info){const who=info.player?'p':info.by?E.find(x=>x.name===info.by&&x.team!==e.team):null;
+  if(who&&(who!=='p'||e.team===2)){const h=e.cmpHits.get(who)||{d:0,t:clock};h.d+=Math.min(e.hp,d);h.t=clock;e.cmpHits.set(who,h)}}
+ return _cmpDamage(e,d,info);
+};
+function cmpBoard(on){
+ CMP.boardOpen=!!on;let el=$('cmpboard');if(!el&&on){el=document.createElement('div');el.id='cmpboard';el.setAttribute('aria-label','Maç oyuncu tablosu');document.body.appendChild(el)}if(!el)return;
+ el.style.display=on?'flex':'none';if(!on)return;
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const rows=[{name:'Sen',team:1,hp:p.hp,stats:CMP.stats,cash:CMP.cash},...E.map(e=>({name:e.name+' · BOT',team:e.team,hp:e.hp,stats:e.cmpStats||{k:0,d:0,a:0},cash:e.cash}))];
+ el.innerHTML=`<div class="cmpboard-card"><h2>Rekabetçi · Rütbesiz</h2><p>Raunt ${CMP.round} · T ${CMP.score.T} — ${CMP.score.CT} CT</p>${[1,2].map(team=>`<h3>${cmpSide(team)}</h3><table><thead><tr><th>Oyuncu</th><th>K</th><th>D</th><th>A</th><th>K/D</th><th>Durum</th><th>TL</th></tr></thead><tbody>${rows.filter(r=>r.team===team).sort((a,b)=>b.stats.k-a.stats.k).map(r=>`<tr><td>${esc(r.name)}</td><td>${r.stats.k}</td><td>${r.stats.d}</td><td>${r.stats.a||0}</td><td>${(r.stats.k/Math.max(1,r.stats.d)).toFixed(2)}</td><td>${r.hp>0?'Hayatta':'Ölü'}</td><td>${fmtTL(r.cash||0)}</td></tr>`).join('')}</tbody></table>`).join('')}<p class="note">Tab tuşunu bırak: kapat</p></div>`;
+}
+addEventListener('keydown',e=>{if(e.code==='Tab'&&mode==='cmp'&&CMP.on&&state==='play'){e.preventDefault();e.stopImmediatePropagation();cmpBoard(true)}},true);
+addEventListener('keyup',e=>{if(e.code==='Tab')cmpBoard(false)},true);
+addEventListener('blur',()=>cmpBoard(false));
+const _cmpBoardHud=cmpHud;
+cmpHud=function(){_cmpBoardHud();if(CMP.boardOpen)cmpBoard(CMP.on&&mode==='cmp'&&state==='play')};

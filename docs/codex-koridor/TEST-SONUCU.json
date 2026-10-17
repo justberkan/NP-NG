@@ -1,0 +1,61 @@
+{
+  "ammo": {
+    "empty": true,
+    "picked": true,
+    "mag": 12,
+    "reserve": 0
+  },
+  "pickupExpiry": true,
+  "simulation": {
+    "money": 207500,
+    "peak": 6,
+    "count": 22510,
+    "bosses": [
+      1800,
+      3000,
+      4200,
+      5400,
+      6600,
+      7800,
+      9000,
+      10200,
+      11400,
+      12600
+    ],
+    "result": {
+      "win": true,
+      "round": 100,
+      "earned": 207500
+    },
+    "heals": 100,
+    "round": 100
+  },
+  "capacity": {
+    "saturated": {
+      "peak": 11,
+      "queue": 484,
+      "locked": true
+    },
+    "boss": {
+      "count": 1,
+      "boss": true,
+      "locked": true
+    }
+  },
+  "coop": {
+    "code": "0010D0",
+    "peers": 2,
+    "spectate": true,
+    "allDeadEnds": true,
+    "replayNewRoom": true
+  },
+  "dust": {
+    "invisible": false,
+    "roofInfo": {
+      "loops": 8,
+      "triangles": 36
+    },
+    "nav": 3017
+  },
+  "errors": []
+}

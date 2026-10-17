@@ -147,32 +147,26 @@ const BPF=[{tl:50},{tl:50},{i:'g2'},{tl:100},{i:'x1'},{tl:100},{i:'g6'},{tl:150}
 const BPP=[{i:'g8'},{tl:200},{i:'c5'},{tl:300},{i:'g7'},{tl:300},{i:'x3'},{i:'g4'},{tl:400},{i:'c3'},{tl:400},{i:'g1'},{tl:500},{i:'x4'},{tl:500},{i:'c4'},{tl:600},{tl:600},{tl:700},{tl:1000}];
 const PREM_PRICE=1500;
 function bpMigrate(){SV.bp=(SV.bp||[]).map(x=>typeof x==='number'?'f'+x:x)}
-/* Battle Pass v2: kartlar (ücretsiz mavi / premium altın), seviye şeridi, premium avantaj paneli */
+/* Battle Pass v3: eslesmis odul kolonlari; odul/XP/satin alma kurallari aynidir. */
 function rewardCard(r,n,track){
- const key=track+n,done=SV.bp.includes(key),L=lvl(),open=L>n,ok=open&&(track==='f'||SV.pm),cur=ok&&!done;
- let ico,lab,rr='common';
- if(r.tl){ico=coinicon();lab=fmt(r.tl)+' TL'}
- else{const it=itemById(r.i);ico=iconOf(r.i,['rifle','smg','pistol','rifle'][n%4]);lab=it.n;rr=it.r}
- const st=done?`<div class='st ok'>✓ ALINDI</div>`:ok?`<button data-c='${key}'>AL</button>`:track==='p'&&!SV.pm&&open?`<div class='st lk'>👑 PREMIUM</div>`:`<div class='st lk'>🔒 SEVİYE ${n+1}</div>`;
- return `<div class='tr${track==='p'?' pm':''}${done?' done':''}${cur?' cur':''} r-${rr}'><span class='lv'>${n+1}</span>${ok||done?'':"<span class='lock'>🔒</span>"}<div class='ico'>${ico}</div><div class='nm'>${lab}</div>${st}</div>`;
+ const key=track+n,done=SV.bp.includes(key),open=lvl()>n,ok=open&&(track==='f'||SV.pm),ready=ok&&!done;
+ const item=r.i?itemById(r.i):null,rarity=item?item.r:'common',label=r.tl?fmt(r.tl)+' TL':item.n;
+ const category=r.tl?'OYUN PARASI':r.i[0]==='g'?'KAPLAMA':r.i[0]==='x'?'NIŞANGAH RENGİ':'KARAKTER';
+ const art=r.tl?coinicon():iconOf(r.i,['rifle','smg','pistol','rifle'][n%4]);
+ const status=done?"<span class='bp-state claimed'>✓ Alındı</span>":ready?"<button class='bp-claim' data-c='"+key+"' aria-label='"+(n+1)+". kademe "+label+" ödülünü al'>ÖDÜLÜ AL <span>↗</span></button>":"<span class='bp-state'>"+(track==='p'&&!SV.pm?'◇ Premium gerekli':'⌑ Seviye '+(n+1))+"</span>";
+ return "<article class='tr "+(track==='p'?'pm ':'')+(done?'done ':ready?'cur ':'locked ')+"r-"+rarity+"' style='--reward-color:"+RAR[rarity].c+"'><div class='bp-card-top'><span>"+(track==='p'?'PREMIUM':'ÜCRETSİZ')+"</span><span>"+(done?'✓':ready?'●':'⌑')+"</span></div><div class='ico'>"+art+"</div><span class='bp-category'>"+category+"</span><div class='nm'>"+label+"</div><span class='bp-rarity'>"+(r.tl?'TL BAKİYESİ':RAR[rarity].n)+"</span>"+status+"</article>";
 }
 function bpV(){
- const L=lvl(),px=L>=20?200:SV.xp%200,rd=typeof claimAllCount==='function'?claimAllCount():0;
- const buy=SV.pm?`<div class='bp-pmon'>👑 PREMIUM AÇIK</div>`:`<button class='bp-buy' id='bpp'>👑 PREMIUM SATIN AL · ${fmt(PREM_PRICE)} TL</button>`;
- const panel=SV.pm?'':`<div class='bp-buy-panel'><div class='bp-art'><h2>SEZON 1</h2><p>Yeni sezon. Yeni tehditler. Hazır ol.</p></div>
-  <div class='bp-benefits'><h3>PREMIUM AVANTAJLARI</h3>
-  <div class='bp-ben'><i>🔫</i><div><b>Özel kaplamalar</b><span>Premium hattaki sezon kaplamaları.</span></div></div>
-  <div class='bp-ben'><i>🧍</i><div><b>Özel karakterler</b><span>Yalnız premium hatta çıkan karakterler.</span></div></div>
-  <div class='bp-ben'><i>💰</i><div><b>Daha fazla para</b><span>Her seviyede ek TL ödülü.</span></div></div>
-  <button class='bp-buy' id='bpp2'>👑 PREMIUM AL · ${fmt(PREM_PRICE)} TL</button></div></div>`;
- return `<div class='bp-wrap'>
- <div class='bp-head'><div class='bp-title'>SEZON 1 · <span style='color:var(--cy)'>NO PAIN</span><small>Savaşmaya devam. Ödül kazan.</small></div><div style='text-align:right'>${buy}<div class='bp-time'>${vmsg||'20 kademe · maç oynayarak XP kazan'}</div></div></div>
- <div class='bp-prog'><div class='bp-lvl'><div class='bp-lvlnum'>${L}</div><div style='flex:1'><div style='font:700 15px system-ui'>Seviye <span style='color:var(--cy)'>${L}</span> / 20</div><div class='bp-bar' style='margin-top:6px'><em style='width:${px/2}%'></em></div><div class='bp-xp'>XP ${px} / 200${L<20?` · sonraki seviye ${200-px} XP`:' · sezon tamamlandı'}</div></div>
-  <button class='btn alt' id='ca' style='width:auto;padding:10px 16px'${rd?'':' disabled'}>TÜM ÖDÜLLERİ AL${rd?` (${rd})`:''}</button></div></div>
- <div class='bp-tracks'><div class='bp-row'><div class='bp-lab fr'>🎁 ÜCRETSİZ</div><div class='bp'>${BPF.map((r,n)=>rewardCard(r,n,'f')).join('')}</div></div>
- <div class='bp-row'><div class='bp-lab pm'>👑 PREMİUM</div><div class='bp'>${BPP.map((r,n)=>rewardCard(r,n,'p')).join('')}</div></div></div>
- ${panel}</div>`;
+ const L=lvl(),level=Math.min(20,L),px=L>=20?200:SV.xp%200,rd=typeof claimAllCount==='function'?claimAllCount():0,claimed=SV.bp.filter(k=>/^[fp]([0-9]|1[0-9])$/.test(k)).length;
+ const purchase=SV.pm?"<span class='bp-active'>✓ PREMIUM AKTİF</span>":"<button class='bp-buy' id='bpp'><span>◇ PREMIUM'A GEÇ</span><b>"+fmt(PREM_PRICE)+" TL ↗</b></button>";
+ return `<section class='bp3'>
+ <header class='bp3-hero'><div class='bp3-contours' aria-hidden='true'></div><div class='bp3-copy'><span class='bp3-kicker'>N.P.N.G. / SEZON 01</span><h2>İZİNİ <em>BIRAK.</em></h2><p>Her mücadele seni bir sonraki ödüle taşısın.</p><div class='bp3-meta'><span>20 KADEME</span><span>40 ÖDÜL</span><span>ÜCRETSİZ + PREMIUM</span></div></div><div class='bp3-insignia' aria-hidden='true'><span>01</span><small>NO PAIN / NO GAIN</small></div><div class='bp3-purchase'>${purchase}<small>${SV.pm?'Premium ödüllerini seviye atladıkça aç.':'Tek satın alma · oyun içi TL ile'}</small></div></header>
+ <div class='bp3-progress'><div class='bp3-level'><small>SEVİYE</small><b>${level.toString().padStart(2,'0')}</b></div><div class='bp3-meter'><div class='bp3-meter-heading'><b>${L>=20?'Tüm kademeler açıldı':'Bir sonraki hedef: seviye '+(L+1)}</b><span>${px} / 200 XP</span></div><div class='bp3-bar' role='progressbar' aria-label='Seviye ilerlemesi' aria-valuemin='0' aria-valuemax='200' aria-valuenow='${px}'><i style='width:${px/2}%'></i></div><small>${L>=20?'Açtığın ödülleri koleksiyonuna ekle.':(200-px)+' XP daha kazan, yeni ödüllerin kilidini aç.'}</small></div><div class='bp3-collected'><b>${claimed}<span> / 40</span></b><small>TOPLANAN ÖDÜL</small></div><button id='ca' class='bp3-collect' ${rd?'':'disabled'}>TÜM ÖDÜLLERİ AL${rd?' · '+rd:''}</button></div>
+ <div class='bp3-section-heading'><div><span class='bp3-kicker'>SEZON KOLEKSİYONU</span><h3>Bir sonraki ödülün seni bekliyor.</h3></div><div class='bp3-navigation'><button id='bp-current'>Seviyeme git</button><button id='bp-prev' aria-label='Önceki ödüller'>←</button><button id='bp-next' aria-label='Sonraki ödüller'>→</button></div></div>
+ <div class='bp3-scroll' id='bp-scroll' tabindex='0' aria-label='20 kademe ücretsiz ve premium ödülleri'><div class='bp3-columns'>${BPF.map((r,n)=>`<section class='bp3-tier ${n===Math.min(19,Math.max(0,L-1))?'current-tier':''}' data-tier='${n}'><div class='bp3-tier-number'><span>KADEME</span><b>${String(n+1).padStart(2,'0')}</b><i></i></div>${rewardCard(r,n,'f')}${rewardCard(BPP[n],n,'p')}</section>`).join('')}</div></div>
+ <footer class='bp3-footer'><span><i></i> Ücretsiz hat herkese açık</span><span><i></i> Premium hat ek koleksiyon ödülleri sunar</span><small>İlerlemen maçlarda kazandığın XP ile artar.</small></footer>${vmsg?`<p class='bp3-message' role='status'>${vmsg}</p>`:''}</section>`;
 }
+
 function claim(key){
  if(SV.bp.includes(key))return;
  const track=key[0],n=+key.slice(1),r=(track==='f'?BPF:BPP)[n];
@@ -184,7 +178,13 @@ function claim(key){
 }
 VIEWS.bp=bpV;
 VIEWWIRE.bp=function(){
- const a=$('av');
+ const a=$('av'),scroll=$('bp-scroll');
+ if(scroll){
+  const move=x=>scroll.scrollBy({left:x,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  $('bp-prev').onclick=()=>move(-360);$('bp-next').onclick=()=>move(360);
+  $('bp-current').onclick=()=>{const card=scroll.querySelector('.current-tier');if(card)scroll.scrollLeft=card.offsetLeft-scroll.querySelector('.bp3-columns').offsetLeft};
+ }
+
  a.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{claim(b.dataset.c);save();bal();view('bp')});
  const ca=$('ca');if(ca)ca.onclick=()=>{if(typeof claimAll==='function'){vmsg=claimAllMsg(claimAll())}else{for(let n=0;n<20;n++){claim('f'+n);claim('p'+n)}save();bal()}view('bp')};
  const bpp=$('bpp'),bpp2=$('bpp2');if(bpp2)bpp2.onclick=()=>bpp.onclick();if(bpp)bpp.onclick=()=>{

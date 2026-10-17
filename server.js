@@ -20,6 +20,7 @@ const WPN = {
   knife: { d: 50, r: .32, m: 2.6 }, sword: { d: 80, r: .6, m: 3.4 }, gsword: { d: 140, r: 1.05, m: 4.2 }
 };
 const SPAWNS = [];
+const WCNET = require('./server-wavecorridor')({send,weapons:WPN});
 for (const x of [-10, -5, 0, 5, 10]) { SPAWNS.push([x, 24]); SPAWNS.push([x, -24]); }
 
 /* ---------- HTTP: oyun dosyalarını sun ---------- */
@@ -72,7 +73,7 @@ server.on('upgrade', (req, sock) => {
   const c = { ip, local: lo, user: null, acc: null, sock, buf: Buffer.alloc(0), frag: null, id: 0, joined: false, seen: Date.now(), msgs: 0, msgT: Date.now() };
   sock.on('data', d => { c.buf = Buffer.concat([c.buf, d]); c.seen = Date.now(); parse(c); });
   conns.add(c);
-  sock.on('close', () => { leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
+  sock.on('close', () => { WCNET.leave(c); leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
   sock.on('error', () => { try { sock.destroy(); } catch (e) { } });
 });
 function parse(c) {
@@ -150,6 +151,7 @@ function onText(c, s) {
   if (++c.msgs > 150) return; // saniyede en fazla 150 mesaj
   let m; try { m = JSON.parse(s); } catch (e) { return; }
   if (!m || typeof m.t !== 'string') return;
+  if (m.t.startsWith('wc_')) return WCNET.handle(c,m,now);
   if (m.t === 'auth') return doAuth(c, m, now);
   if (m.t === 'save') {
     if (!c.acc || !m.data || typeof m.data !== 'object') return;
@@ -198,7 +200,7 @@ function onText(c, s) {
       const dist = Math.hypot(x - c.x, y - c.y, z - c.z);
       if (now > (c.free || 0) && dist > 60 * dt + 4) { send(c, { t: 'fix', x: c.x, y: c.y, z: c.z }); return; } // ışınlanma / aşırı hız
       c.x = x; c.y = y; c.z = z; c.yaw = num(m.yaw, -50, 50); c.pitch = num(m.pitch, -1.6, 1.6);
-      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 63) | 0;
+      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 511) | 0;
       if (WPN[m.w]) c.w = m.w;
       c.rq = num(m.rq, -1, 1, -1); c.sw = num(m.sw, -1, 1, -1); c.cb = num(m.cb, 0, 15) | 0; c.ad = num(m.ad, 0, 1);
       break;
@@ -450,7 +452,7 @@ function owMsg(c, m, now) {
     case 'oquit': owLeave(c); return true;
     case 'ost': {
       c.x = num(m.x, -470, 470); c.y = num(m.y, -5, 120); c.z = num(m.z, -470, 470); c.yaw = num(m.yaw, -50, 50); c.pitch = num(m.pitch, -1.6, 1.6);
-      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 63) | 0; c.w = cleanId(m.w) || c.w;
+      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 511) | 0; c.w = cleanId(m.w) || c.w;
       c.sw = num(m.sw, -1, 1, -1); c.cb = num(m.cb, 0, 15) | 0; c.hpf = num(m.hp, 0, 1, 1); c.lvl = num(m.lvl, 1, 60, c.lvl);
       return true;
     }

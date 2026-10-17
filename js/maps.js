@@ -118,11 +118,15 @@ function mapLoad(id,cb){
      const root=new THREE.Group();root.add(sc);root.scale.setScalar(g.sc);root.position.set(-g.cx*g.sc,-g.y0*g.sc,-g.cz*g.sc);
      root.visible=false;S.add(root);
      root.updateMatrixWorld(true);
-     const col=mcBuild(root),rm=mcRayMesh(col);
+     let col=mcBuild(root);
+     const roofInfo=id==='dust2'?mapRoofCaps(root,col):{loops:0,triangles:0};
+     if(roofInfo.triangles)col=mcBuild(root);
+
+     const rm=mcRayMesh(col);
      const mb=mapMakeBoxes(g),old=mapNav(g,mb.H,mb.W),sd=old.spA[0]||{x:0,z:0,y:0};
      const nav=mcNav(col,sd.x,sd.z,sd.y);
      console.log('harita',id,'üçgen',col.n,'yürüme düğümü',nav.n,'spawnA',nav.spA.length,'spawnB',nav.spB.length);
-     MAPS.cache[id]={id,root,boxes:[],meshes:[rm],bg:null,nav,col,ext:col.ext};
+     MAPS.cache[id]={id,root,boxes:[],meshes:[rm],bg:null,nav,col,ext:col.ext,roofInfo};
      cb(MAPS.cache[id]);
     }catch(e){console.warn('harita hazırlama',id,e);cb(null)}
    },e=>{console.warn('harita glb',id,e);cb(null)});
@@ -146,8 +150,37 @@ function mapApply(id){
  boxes.length=0;m.boxes.forEach(b=>boxes.push(b));
  boxMeshes.length=0;m.meshes.forEach(x=>boxMeshes.push(x));
  BG=null;m.root.visible=true;STEPH=MC_STEP;MAPS.cur=m;MC.cur=m.col;
+ m.safePos=null;
  const d=MAPS.defs[id];S.fog.near=d.fog[0];S.fog.far=d.fog[1];S.background.setHex(d.sky);
 }
+
+/* Dust2 modelindeki açık, yatay üst kenar halkalarını düz taş kapaklarla kapat.
+   Avluların zemini ve alçak kapı/pencere kenarları bu işleme girmez. */
+function mapRoofCaps(root,col){
+ const edges=new Map(),key=v=>v.map(x=>Math.round(x*500)).join(',');
+ for(let i=0;i<col.n;i++){
+  const vs=[0,3,6].map(k=>Array.from(col.T.slice(i*9+k,i*9+k+3)));
+  for(let a=0;a<3;a++){const v=vs[a],w=vs[(a+1)%3],kv=key(v),kw=key(w);if(kv===kw)continue;const k=kv<kw?kv+'|'+kw:kw+'|'+kv,e=edges.get(k);if(e)e.n++;else edges.set(k,{n:1,v,w,kv,kw})}
+ }
+ const by=new Map(),open=[...edges.values()].filter(e=>e.n===1&&e.v[1]>=7.5&&Math.abs(e.v[1]-e.w[1])<.01);
+ for(const e of open)for(const k of [e.kv,e.kw]){if(!by.has(k))by.set(k,[]);by.get(k).push(e)}
+ const used=new Set(),positions=[];let loops=0;
+ for(const e of open){
+  if(used.has(e))continue;let cur=e.kv,first=cur,ps=[],closed=false;
+  for(let n=0;n<4096;n++){const es=(by.get(cur)||[]).filter(q=>!used.has(q));if(!es.length)break;const q=es[0];used.add(q);ps.push(cur===q.kv?q.v:q.w);cur=cur===q.kv?q.kw:q.kv;if(cur===first){closed=true;break}}
+  if(!closed||ps.length<3||new Set(ps.map(key)).size!==ps.length)continue;
+  let area=0;for(let i=0;i<ps.length;i++){const a=ps[i],b=ps[(i+1)%ps.length];area+=a[0]*b[2]-b[0]*a[2]}
+  if(Math.abs(area)*.5<.5||Math.abs(area)*.5>800)continue;
+  const faces=THREE.ShapeUtils.triangulateShape(ps.map(v=>new THREE.Vector2(v[0],v[2])),[]);let count=0;
+  for(const f of faces){const v=f.map(i=>ps[i]),x=(v[0][0]+v[1][0]+v[2][0])/3,z=(v[0][2]+v[1][2]+v[2][2])/3,y=v[0][1];
+   if(mcRayCast(col,x,y+.04,z,0,-1,0,.08))continue;
+   for(const p of v)positions.push(p[0],y,p[2]);count++;
+  }if(count)loops++;
+ }
+ if(positions.length){const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.computeVertexNormals();const cap=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0xb39a76,side:THREE.DoubleSide}));cap.name='Dust2 sealed roofs';cap.applyMatrix4(root.matrixWorld.clone().invert());root.add(cap);root.updateMatrixWorld(true);cap.raycast=()=>{}}
+ return {loops,triangles:positions.length/9};
+}
+
 /* startMatch: seçili harita yüklenmediyse yükle, bitince cb. true dönerse yükleme başladı demektir. */
 function mapNeed(cb){
  const id=MAPS.sel;if(id==='arena'||MAPS.cache[id])return false;

@@ -1,0 +1,202 @@
+{
+  "build": "202610171402",
+  "maps": [
+    {
+      "id": "arena",
+      "sites": [
+        {
+          "site": {
+            "n": "A",
+            "x": -18,
+            "z": -14,
+            "y": 0,
+            "r": 3.5
+          },
+          "valid": true,
+          "wrongFloor": true,
+          "pathA": true,
+          "pathB": true
+        },
+        {
+          "site": {
+            "n": "B",
+            "x": 16,
+            "z": -12,
+            "y": 0,
+            "r": 3.5
+          },
+          "valid": true,
+          "wrongFloor": true,
+          "pathA": true,
+          "pathB": true
+        }
+      ],
+      "invalidRejected": true,
+      "planted": true
+    },
+    {
+      "id": "dust2",
+      "sites": [
+        {
+          "site": {
+            "n": "A",
+            "x": 43.12833023071289,
+            "z": -22.41033172607422,
+            "y": 3.242666721343994,
+            "r": 3.5
+          },
+          "valid": true,
+          "wrongFloor": true,
+          "pathA": true,
+          "pathB": true
+        },
+        {
+          "site": {
+            "n": "B",
+            "x": -35.62166976928711,
+            "z": -27.41033172607422,
+            "y": 3.242666721343994,
+            "r": 3.5
+          },
+          "valid": true,
+          "wrongFloor": true,
+          "pathA": true,
+          "pathB": true
+        }
+      ],
+      "invalidRejected": true,
+      "planted": true
+    },
+    {
+      "id": "mc",
+      "sites": [
+        {
+          "site": {
+            "n": "A",
+            "x": -24.625,
+            "z": 16.125,
+            "y": 0.000024730000973249844,
+            "r": 3.5
+          },
+          "valid": true,
+          "wrongFloor": true,
+          "pathA": true,
+          "pathB": true
+        },
+        {
+          "site": {
+            "n": "B",
+            "x": -0.875,
+            "z": 29.875,
+            "y": 0.000026970159865413734,
+            "r": 3.5
+          },
+          "valid": true,
+          "wrongFloor": true,
+          "pathA": true,
+          "pathB": true
+        }
+      ],
+      "invalidRejected": true,
+      "planted": true
+    }
+  ],
+  "combat": {
+    "curve": [
+      {
+        "distance": 0,
+        "damage": 500
+      },
+      {
+        "distance": 5,
+        "damage": 404
+      },
+      {
+        "distance": 10,
+        "damage": 212
+      },
+      {
+        "distance": 14,
+        "damage": 93
+      },
+      {
+        "distance": 20,
+        "damage": 16
+      },
+      {
+        "distance": 28,
+        "damage": 0
+      },
+      {
+        "distance": 40,
+        "damage": 0
+      }
+    ],
+    "nearHP": 0,
+    "mediumHP": 84,
+    "farHP": 100,
+    "doubleExplosionPrevented": true,
+    "fx": 1,
+    "cash": 800,
+    "flashVisible": true,
+    "sparks": 64,
+    "cleaned": true,
+    "nearPlayerDead": true,
+    "cmpFirstPerson": true,
+    "onlineFirstPerson": true,
+    "otherModesTP": true
+  },
+  "actions": [
+    {
+      "mode": "glide",
+      "finite": true,
+      "hips": 0.95,
+      "canopy": true,
+      "free": true,
+      "glb": true
+    },
+    {
+      "mode": "climb",
+      "finite": true,
+      "hips": 0.9,
+      "canopy": false,
+      "free": true,
+      "glb": true
+    },
+    {
+      "mode": "slide",
+      "finite": true,
+      "hips": 0.540000000095966,
+      "canopy": false,
+      "free": false,
+      "glb": true
+    }
+  ],
+  "network": [
+    {
+      "mode": "arena",
+      "flag": 64
+    },
+    {
+      "mode": "arena",
+      "flag": 128
+    },
+    {
+      "mode": "arena",
+      "flag": 256
+    },
+    {
+      "mode": "ow",
+      "flag": 64
+    },
+    {
+      "mode": "ow",
+      "flag": 128
+    },
+    {
+      "mode": "ow",
+      "flag": 256
+    }
+  ],
+  "errors": []
+}

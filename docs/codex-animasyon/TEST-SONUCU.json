@@ -1,0 +1,374 @@
+{
+  "results": [
+    {
+      "fps": 30,
+      "drift": 8.95090418262362e-16,
+      "glbDrift": 3.1496464554066323e-9,
+      "glbMin": 0.1293026723483981,
+      "groundMin": 0.05999999999999972,
+      "hipMax": 0.47252244754940415,
+      "samples": 41,
+      "glb": true
+    },
+    {
+      "fps": 60,
+      "drift": 1.784146017590271e-15,
+      "glbDrift": 1.6661576810702263e-9,
+      "glbMin": 0.1293026723417865,
+      "groundMin": 0.05999999999999972,
+      "hipMax": 0.5748984115023706,
+      "samples": 87,
+      "glb": true
+    },
+    {
+      "fps": 144,
+      "drift": 1.790180836524724e-15,
+      "glbDrift": 7.751923769363461e-10,
+      "glbMin": 0.12930267234178672,
+      "groundMin": 0.05999999999999972,
+      "hipMax": 0.6442022223776979,
+      "samples": 219,
+      "glb": true
+    },
+    {
+      "fps": 240,
+      "drift": 1.784146017590271e-15,
+      "glbDrift": 4.880363819179928e-10,
+      "glbMin": 0.12930267234101916,
+      "groundMin": 0.059999999999999665,
+      "hipMax": 0.6652842327175569,
+      "samples": 371,
+      "glb": true
+    },
+    {
+      "name": "walk",
+      "wallError": null,
+      "wallHand": null,
+      "ground": true,
+      "glb": true,
+      "hips": 0,
+      "gunVisible": true
+    },
+    {
+      "name": "strafe",
+      "wallError": null,
+      "wallHand": null,
+      "ground": true,
+      "glb": true,
+      "hips": 0,
+      "gunVisible": true
+    },
+    {
+      "name": "jump",
+      "wallError": null,
+      "wallHand": null,
+      "ground": false,
+      "glb": true,
+      "hips": 0,
+      "gunVisible": true
+    },
+    {
+      "name": "wall-right",
+      "wallError": 0.002688278209122745,
+      "wallHand": "R",
+      "ground": false,
+      "glb": true,
+      "hips": 0.23999999999999996,
+      "gunVisible": true
+    },
+    {
+      "name": "wall-left",
+      "wallError": 0.003191272975164562,
+      "wallHand": "L",
+      "ground": false,
+      "glb": true,
+      "hips": -0.23999999999999996,
+      "gunVisible": true
+    },
+    {
+      "matrix": [
+        {
+          "id": "c1",
+          "axis": "forward",
+          "speed": 1.5,
+          "drift": 9.314964231500604e-10,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "c1",
+          "axis": "forward",
+          "speed": 5.25,
+          "drift": 2.6606173497899373e-9,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "c1",
+          "axis": "back",
+          "speed": 1.5,
+          "drift": 9.478179572382137e-10,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "c1",
+          "axis": "back",
+          "speed": 5.25,
+          "drift": 2.572028742749936e-9,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "c1",
+          "axis": "left",
+          "speed": 1.5,
+          "drift": 0.002049637093507399,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "c1",
+          "axis": "left",
+          "speed": 5.25,
+          "drift": 3.516168158427729e-9,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "c1",
+          "axis": "right",
+          "speed": 1.5,
+          "drift": 0.002766395255766685,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "c1",
+          "axis": "right",
+          "speed": 5.25,
+          "drift": 3.4844536538396126e-9,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "forward",
+          "speed": 1.5,
+          "drift": 0.010844416876335977,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "forward",
+          "speed": 5.25,
+          "drift": 1.7798229048217483e-15,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "back",
+          "speed": 1.5,
+          "drift": 0.010929132749054112,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "back",
+          "speed": 5.25,
+          "drift": 1.784146017590271e-15,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "left",
+          "speed": 1.5,
+          "drift": 0.007641596406691115,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "left",
+          "speed": 5.25,
+          "drift": 9.710485573708405e-16,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "right",
+          "speed": 1.5,
+          "drift": 0.009109137671456503,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h19",
+          "axis": "right",
+          "speed": 5.25,
+          "drift": 3.3766115072321297e-16,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "forward",
+          "speed": 1.5,
+          "drift": 4.972820174300706e-16,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "forward",
+          "speed": 5.25,
+          "drift": 1.7798229048217483e-15,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "back",
+          "speed": 1.5,
+          "drift": 4.577566798522237e-16,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "back",
+          "speed": 5.25,
+          "drift": 8.989550626504553e-16,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "left",
+          "speed": 1.5,
+          "drift": 0.004597414047357577,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "left",
+          "speed": 5.25,
+          "drift": 1.8013347191190246e-15,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "right",
+          "speed": 1.5,
+          "drift": 0.006035352523587276,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h22",
+          "axis": "right",
+          "speed": 5.25,
+          "drift": 9.457282200365136e-16,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "forward",
+          "speed": 1.5,
+          "drift": 5.244261588236206e-16,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "forward",
+          "speed": 5.25,
+          "drift": 1.7979101253009106e-15,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "back",
+          "speed": 1.5,
+          "drift": 9.036560719766055e-16,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "back",
+          "speed": 5.25,
+          "drift": 1.7798229048217483e-15,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "left",
+          "speed": 1.5,
+          "drift": 0.00567294431149652,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "left",
+          "speed": 5.25,
+          "drift": 9.10873547778187e-16,
+          "samples": 36,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "right",
+          "speed": 1.5,
+          "drift": 0.0071151601419919335,
+          "samples": 49,
+          "glb": true
+        },
+        {
+          "id": "h23",
+          "axis": "right",
+          "speed": 5.25,
+          "drift": 9.155133597044475e-16,
+          "samples": 36,
+          "glb": true
+        }
+      ]
+    },
+    {
+      "network": "PASS Arena + Acik Dunya, sag/sol bayraklari iki gercek WebSocket istemci arasinda korundu"
+    },
+    {
+      "localPhysicsToPose": {
+        "active": 80,
+        "contact": 80,
+        "hand": "L",
+        "wallrun": -1,
+        "model": true
+      }
+    },
+    {
+      "weaponRestoration": {
+        "onWall": {
+          "parentLeft": true,
+          "secondHidden": true
+        },
+        "primaryRight": true,
+        "secondVisible": true,
+        "wallHand": null
+      }
+    }
+  ],
+  "errors": [],
+  "port": 58246
+}

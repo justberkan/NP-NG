@@ -104,7 +104,6 @@ const CHARS=[
  {id:'h5',ch:1,glb:'demiradam',n:'Demir Adam',r:'legendary',p:1600,j:0xb3262a,j2:0xb3262a,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h6',ch:1,glb:'orumcek',n:'Örümcek Adam',r:'legendary',p:1500,j:0xc8202a,j2:0xc8202a,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h7',ch:1,glb:'bsamuray',n:'Beyaz Samuray',r:'legendary',p:1400,j:0xd8dde4,j2:0xd8dde4,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
- {id:'h8',ch:1,glb:'ada',n:'Ada Wong',r:'epic',p:1000,j:0x9a1a24,j2:0x9a1a24,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h9',ch:1,glb:'karadul',n:'Kara Dul',r:'epic',p:1000,j:0x1a1b20,j2:0x1a1b20,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h10',ch:1,glb:'leon',n:'Leon',r:'epic',p:900,j:0x4a5a3a,j2:0x4a5a3a,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h11',ch:1,glb:'siber',n:'Siber Savaşçı',r:'epic',p:900,j:0x6a3ac0,j2:0x6a3ac0,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
@@ -119,7 +118,6 @@ const CHARS=[
  {id:'h20',ch:1,glb:'goblin',n:'Goblin',r:'rare',p:600,j:0x3a6a2a,j2:0x315c24,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h21',ch:1,glb:'kb',n:'KB',r:'epic',p:900,j:0x6a5a2a,j2:0x5a4c22,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h22',ch:1,glb:'lara',n:'Lara',r:'epic',p:1000,j:0x4a7a8a,j2:0x3e6876,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
- {id:'h23',ch:1,glb:'samus',n:'Samus',r:'legendary',p:1500,j:0xb97a2a,j2:0xa06a22,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1}
 ];
 /* Formalar: karakterden bağımsız kuşanılan aksesuar (glbrig.js: KITS). Her karaktere giyilir, çıkarılabilir. */
 const FORMS=[
@@ -129,7 +127,7 @@ const FORMS=[
  {id:'f4',kit:'ayyildiz',n:'Ay-Yıldız Forması',r:'legendary',p:1200,c:0xc8102e}
 ];
 const CHAR0=id=>CHARS.find(c=>c.id===id)||CHARS[0],_CHK={};
-/* karakter kimliği forma ekiyle gelebilir: 'h8x1' = Ada + 1. forma (sunucu 8 harfe kadar kimlik kabul ediyor, sunucuya dokunmadan ağda taşınır) */
+/* karakter kimliği forma ekiyle gelebilir: 'c1x1' = asker + 1. forma (sunucu 8 harfe kadar kimlik kabul ediyor, sunucuya dokunmadan ağda taşınır) */
 const CHAR=id=>{const m=/^([a-z]+\d+)x(\d)$/i.exec(id||'');if(!m)return CHAR0(id);const f=FORMS[+m[2]-1],b=CHAR0(m[1]);if(!f)return b;const k=b.id+'x'+m[2];return _CHK[k]||(_CHK[k]=Object.assign({},b,{kit:f.kit}))};
 /* kuşanılı forma ile karakter kimliği; fid verilirse o forma ile (mağaza önizlemesi), 'f0' = formasız */
 function chWithKit(c,fid){const f=fid!==undefined?fid:(typeof SV!=='undefined'&&SV&&SV.eq?SV.eq.f:null);const i=FORMS.findIndex(x=>x.id===f);return c+(i>=0?'x'+(i+1):'')}

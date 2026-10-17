@@ -37,13 +37,14 @@ function pauseUI(){
  $('igsb').classList.remove('off');igsOpen(false);
  $('ov').classList.remove('off');
 }
-function resume(){state='play';igsOpen(false);$('ov').classList.add('off');if(!touch&&!(mode==='ow'&&AUTO.on))try{$('c').requestPointerLock()}catch(e){}}
+function resume(){state='play';igsOpen(false);$('ov').classList.add('off');if(!touch&&!(mode==='ow'&&AUTO.on)&&!(typeof CMP!=='undefined'&&CMP.menu))try{$('c').requestPointerLock()}catch(e){}}
 function startMatch(){
+ if(selMode==='wc'&&typeof wcOpen==='function'&&!WCG.chosen){wcOpen(()=>startMatch());return}
  /* ses sistemi ilk vuruşta değil maç başlarken (tıklamayla) açılsın: ilk hasarda yaşanan takılmayı önler */
  try{if(!ac)ac=new AudioContext();if(ac.state==='suspended')ac.resume()}catch(e){}
  if(typeof cmbReset==='function')cmbReset();
  if(selMode==='cmp'&&typeof cmpOpen==='function'&&!CMP.chosen){cmpOpen(()=>startMatch());return} /* rekabetçi: önce Rütbesiz/Rütbeli seçimi */
- if(selMode!=='ow'&&selMode!=='aim'&&selMode!=='cmp'&&typeof loOpen==='function'&&!LO.ok){loOpen(()=>startMatch());return} /* aim: loadout sormadan, tabancayla girilir */
+ if(selMode!=='ow'&&selMode!=='aim'&&selMode!=='cmp'&&selMode!=='wc'&&typeof loOpen==='function'&&!LO.ok){loOpen(()=>startMatch());return}
  if((selMode==='tdm'||selMode==='tm'||selMode==='cmp')&&typeof mapNeed==='function'&&mapNeed(()=>startMatch()))return;
  if((selMode==='mp'||selMode==='tm'||selMode==='zo')&&!MPL.ready){if(!MPL.authed)mpOpenDialog(()=>startMatch());else mpJoin(()=>startMatch());return}
  mode=(selMode==='tm'||selMode==='zo')?'mp':selMode;setLobby(false);begin();shaderWarm();resume();if(typeof CMP!=='undefined')CMP.chosen=false}

@@ -93,7 +93,7 @@ function setW(k,silent){
  reload=0;swU=-1;ads=false;swT=0;
  if(VM.h)holderSet(VM.h,k,undefined,modId(k));
  if(pRigGet())holderSet(pRigGet(),k,undefined,modId(k));
- if(mode==='ow'){SV.ow.mw=k}else if(mode!=='aim'){SV.eq.w=k;save()} /* aim test alanı kuşanmayı kaydetmez */
+ if(mode==='ow'){SV.ow.mw=k}else if(mode!=='aim'&&mode!=='wc'){SV.eq.w=k;save()} /* aim test alanı kuşanmayı kaydetmez */
  hudWeapons();upd();
  if(!silent)snd(250,.05);
 }
@@ -157,7 +157,8 @@ function shoot(){
   if(o){
    const hd=!!hit.object.userData.head,bd=cw.dmg/NP,dmg=hd?bd*2:bd;
    if(pi===0)hits++;_dir.copy(rc.ray.direction);
-   if(o.userData.e)damageEnemy(o.userData.e,dmg,{player:true,pt:hit.point.clone(),dir:_dir.clone(),head:hd});
+   if(o.userData.spawner&&mode==='wc')wcSpawnerDamage(dmg);
+   else if(o.userData.e)damageEnemy(o.userData.e,dmg,{player:true,pt:hit.point.clone(),dir:_dir.clone(),head:hd});
    else{cmbHit(true);score+=Math.round((hd?200:100)*cmbMul());dmgNum(hit.point,dmg,hd,false);o.visible=false;o.userData.dead=1;hitSound(hd,true)}
    hitFlash(hd?'head':'hit');
   }
@@ -361,14 +362,17 @@ function updBot(e,dt){
   rq:e.rl>0?1-e.rl/w.rel:-1,flash:e.flash,flashL:e.flashL,bob:clamp(speedOut/7,0,1),lr:0,sw:1},dt*_pr);
 }
 function updZombie(e,dt){
+ if(e.frozen)return;
  const q=e.g.position,px=q.x,pz=q.z,t=clock+e.ph0;
- const dx=p.x-q.x,dz=p.z-q.z,d=Math.hypot(dx,dz)||1;
+ const target=mode==='wc'?wcZombieTarget(e):{position:p,alive:p.dead<=0};
+ if(!target)return;
+ const tp0=target.position,dx=tp0.x-q.x,dz=tp0.z-q.z,d=Math.hypot(dx,dz)||1;
  e.yaw=angLerp(e.yaw,Math.atan2(dx,dz),Math.min(1,6*dt));e.g.rotation.y=e.yaw;
- if(p.dead<=0&&d>1.3)stepE(e,dx/d*e.sp*dt,dz/d*e.sp*dt);
+ if(target.alive&&d>1.3)stepE(e,dx/d*e.sp*dt,dz/d*e.sp*dt);
  e.vx=(q.x-px)/dt;e.vz=(q.z-pz)/dt;
  e.cd-=dt;
  if(e.atk>0)e.atk-=dt;
- if(d<1.7&&p.y<2.5&&e.cd<=0&&p.dead<=0){e.cd=.9;e.atk=.5;hurt(10,q)}
+ if(d<1.7&&(tp0.y||0)<2.5&&e.cd<=0&&target.alive){e.cd=.9;e.atk=.5;if(mode==='wc')wcDamagePlayer(target,e.damage||10,q);else hurt(10,q)}
  e.flinch=Math.max(0,e.flinch-dt*4);
  const _pr=poseRate(e,q.x-p.x,q.z-p.z);
  if(_pr>0)

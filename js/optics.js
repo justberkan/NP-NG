@@ -28,6 +28,7 @@ function optModel(id){
   if(m&&typeof mdlMake==='function'){
    const len=OPTGLEN[o.mid]||.18,o2=mdlMake(o.mid,len);
    if(o2){
+    o2.traverse(q=>{if(q.isMesh&&/reticle/i.test(q.name))q.userData.holoRet=1});
     if(o.mid==='op_holosight'){o2.rotation.y=Math.PI;o2.rotation.z=Math.PI} /* model arkaya dönük ve baş aşağı geliyor: çevir */
     const bb=new THREE.Box3().setFromObject(o2),bh=bb.max.y-bb.min.y;
     o2.position.y=-bb.min.y;g.add(o2);
@@ -50,7 +51,7 @@ function optModel(id){
  if(o.ty==='dot'||o.ty==='ring'){
   const fp=[rail(.07),{w:.04,h:.01,d:.06,x:0,y:.011,z:0,c:B},{w:.006,h:.045,d:.04,x:-.018,y:.035,z:0,c:B},{w:.006,h:.045,d:.04,x:.018,y:.035,z:0,c:B},{w:.04,h:.006,d:.04,x:0,y:.06,z:0,c:B}];
   const fr=mergeBoxes(fp);if(id==='o0')fr.scale.setScalar(SET.opticSize||1);g.add(fr);
-  const dm=new THREE.Mesh(new THREE.BoxGeometry(.003,.003,.002),new THREE.MeshBasicMaterial({color:0xff2222}));dm.position.set(0,.035,.0);dm.scale.setScalar(id==='o0'?(SET.dotSize||1):1);g.add(dm);
+  const dm=new THREE.Mesh(new THREE.BoxGeometry(.003,.003,.002),new THREE.MeshBasicMaterial({color:0xff2222}));dm.position.set(0,.035,.0);dm.scale.setScalar(id==='o0'?(SET.dotSize||1):1);dm.userData.holoRet=1;g.add(dm);
   cy=.035;if(o.ty==='ring'){const rg=new THREE.Mesh(new THREE.TorusGeometry(.011,.0012,6,18),new THREE.MeshBasicMaterial({color:0xff2222}));rg.position.set(0,.035,.0);g.add(rg)}
   return {g,cy,dot:dm};
  }
@@ -94,8 +95,8 @@ function optHud(adsT){
  const o=optCur(),on=optLong();
  const a=on?adsT:0;
  /* 3B holografik retikül nişanda gizlenir: ekranda tek retikül (ortadaki SVG) kalsın */
- {const show=a<.3,hw=typeof VM!=='undefined'&&VM.h?(VM.h.W||null):null,rt=typeof VM!=='undefined'?VM.root:null;
-  if(rt&&(show!==_ohS||hw!==_ohW)){_ohS=show;_ohW=hw;rt.traverse(q=>{if(q.userData.holoRet)q.visible=show})}}
+ {const show=a<.05,hw=typeof VM!=='undefined'&&VM.h?(VM.h.W||null):null,rt=typeof VM!=='undefined'?VM.root:null;
+  if(rt){_ohS=show;_ohW=hw;rt.traverse(q=>{if(q.userData.holoRet)q.visible=show})}}
  if(a<.05){if(_oh._v!==0){_oh._v=0;_oh.style.display='none'}return}
  const ds=+(SET.dotSize||1),k=o.id+(optScoped()?'s':'')+ds;
  if(k!==_ot){

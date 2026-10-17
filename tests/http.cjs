@@ -18,6 +18,7 @@ const request=(url,method='GET')=>new Promise((resolve,reject)=>{
 test.before(async()=>{
   root=fs.mkdtempSync(path.join(os.tmpdir(),'npng-http-'));
   fs.copyFileSync(path.join(__dirname,'../server.js'),path.join(root,'server.js'));
+  fs.copyFileSync(path.join(__dirname,'../server-wavecorridor.js'),path.join(root,'server-wavecorridor.js'));
   for(const [name,body] of Object.entries({'index.html':'<h1>NPNG fixture</h1>','js/test.js':'window.fixture=1;','assets/model.glb':'fixture-model','.git/config':'private-git','data/accounts.json':'{}','_yedek/private.txt':'private-backup','.env':'private-env','NOTLAR.md':'private-notes','tests/private.txt':'private-test','assets/.env':'private-nested'})){
     const file=path.join(root,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,body);
   }

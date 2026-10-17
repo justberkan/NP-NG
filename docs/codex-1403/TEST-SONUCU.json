@@ -1,0 +1,70 @@
+{
+  "maps": [
+    {
+      "map": "arena",
+      "mode": "cmp",
+      "phase": "freeze",
+      "bots": 9,
+      "sites": 2,
+      "cash": 800,
+      "plantExplosionNextRound": true
+    },
+    {
+      "map": "dust2",
+      "mode": "cmp",
+      "phase": "freeze",
+      "bots": 9,
+      "sites": 2,
+      "cash": 800,
+      "roofInfo": {
+        "loops": 8,
+        "triangles": 36,
+        "walls": 268,
+        "ceiling": 16.470666885375977,
+        "boundaryTriangles": 546
+      },
+      "nav": 3017,
+      "guard": {
+        "edgeChecks": 368,
+        "roofs": 36,
+        "roofAllowed": true,
+        "high": true,
+        "fallRecovered": true,
+        "roof": {
+          "loops": 8,
+          "triangles": 36,
+          "walls": 268,
+          "ceiling": 16.470666885375977,
+          "boundaryTriangles": 546
+        }
+      },
+      "plantExplosionNextRound": true
+    },
+    {
+      "map": "mc",
+      "mode": "cmp",
+      "phase": "freeze",
+      "bots": 9,
+      "sites": 2,
+      "cash": 800,
+      "roofInfo": {
+        "loops": 0,
+        "triangles": 0
+      },
+      "nav": 6188,
+      "plantExplosionNextRound": true
+    }
+  ],
+  "errors": [],
+  "kda": {
+    "kill": 1,
+    "death": 1,
+    "assist": 1
+  },
+  "reticle": {
+    "total": 3,
+    "shown": 0,
+    "screen": "block",
+    "ch": "0"
+  }
+}
