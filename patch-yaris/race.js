@@ -811,11 +811,18 @@ function raceOpen(cb){
  d.querySelector('#ritems').onclick=()=>{items=!items;render()};
  d.querySelector('#rno').onclick=()=>{raceCloseUI()};
  d.querySelector('#rgo').onclick=()=>{
+  if(window.RACELOADING){const b=d.querySelector('#rgo');b.textContent='Modeller yükleniyor…';return}
   RACE.cfg={veh:sel,laps:laps,items:items};
   RACE.picked=true;
   raceCloseUI();
   cb();
  };
+ if(!window.RACELOADED){ // hazır GLB modeller bir kez önyüklenir (9 sn sonra prosedüre düşer)
+  window.RACELOADING=true;
+  raceLoadModels(()=>{window.RACELOADED=true;window.RACELOADING=false;
+   const b=d.querySelector('#rgo');if(b)b.textContent='YARIŞA BAŞLA';
+   RACE.pvId=null});
+ }
  RACE.pvId=null;
 }
 function raceCloseUI(){

@@ -129,13 +129,96 @@ function rmBuildPlane(id){
  return{g,wh,stW,prop,glw,wing};
 }
 
-/* ---------- Araç kataloğu ---------- */
+/* ---------- Araç kataloğu ----------
+   glb: assets/race/ altındaki hazır model dosyası. Yüklenemezse prosedürel modele düşer. */
+const RACEGLB={
+ falcon:{f:'sport39.glb',len:4.4},
+ viper:{f:'muscle10.glb',len:4.5},
+ apex:{f:'lamb.glb',len:4.3},
+ mammoth:{f:'monster15.glb',len:4.9},
+ rally:{f:'rally.glb',len:4.4},
+ polis:{f:'police.glb',len:4.5},
+ armor:{f:'armor.glb',len:4.6},
+ swift:{f:'airplane1.glb',len:7.2}
+};
 const RACECARS={
- falcon:{n:'Beko Falcon GT',k:'Spor araba',type:'car',col:0xe8b621,spd:78,hp:70,grip:75,diff:30,desc:'Dengeli güç. Yeni başlayanlar için ideal spor coupe.'},
- viper:{n:'Yılan S',k:'Drift aracı',type:'car',col:0x9b1c31,spd:72,hp:60,grip:45,diff:65,desc:'Kuyruk atan canavar. Virajda el freniyle yana yatır.'},
- apex:{n:'Apex F1',k:'Yarış arabası',type:'car',col:0xd7263d,spd:95,hp:40,grip:90,diff:80,desc:'Çıplak hız. Pist kralı ama darbe dayanımı zayıf.'},
- mammoth:{n:'Mastodon 4x4',k:'Pickup',type:'car',col:0x2e6e4e,spd:60,hp:100,grip:55,diff:25,desc:'Tank gibi. Çarpmadan çekinmez, yavaş gider.'},
- swift:{n:'Swift Kanat',k:'Yarış uçağı',type:'plane',col:0x27e0ff,spd:80,hp:55,grip:70,diff:45,desc:'Çevik ve hafif. Halkaların arasından süzül.'},
+ falcon:{n:'Sport GT-39',k:'Spor araba',type:'car',col:0xe8b621,spd:78,hp:70,grip:75,diff:30,desc:'Dengeli güç. Yeni başlayanlar için ideal spor coupe.'},
+ viper:{n:'Kaslı V10',k:'Drift / muscle',type:'car',col:0x9b1c31,spd:72,hp:65,grip:45,diff:60,desc:'Kaslı gövde, gevşek arka aks. Virajda el freniyle yana yatır.'},
+ apex:{n:'Boğa V12',k:'Süper spor',type:'car',col:0xd7263d,spd:95,hp:45,grip:88,diff:80,desc:'Çıplak hız. Pist kralı ama darbe dayanımı zayıf.'},
+ mammoth:{n:'Canavar 4x4',k:'Canavar kamyonet',type:'car',col:0x2e6e4e,spd:58,hp:105,grip:50,diff:30,desc:'Tank gibi. Çarpmadan çekinmez, yavaş gider.'},
+ rally:{n:'Rampage Rally',k:'Rally',type:'car',col:0xe07b1f,spd:74,hp:60,grip:70,diff:55,desc:'Tozlu yol köpeği. İncecik gövde, sert süspansiyon.'},
+ polis:{n:'Kobra İnterseptör',k:'Polis aracı',type:'car',col:0x2456c9,spd:82,hp:66,grip:72,diff:40,desc:'Asayiş şahini. Takip etmek için üretilmiş, yakalamak kolay değil.'},
+ armor:{n:'Armadillo',k:'Zırhlı araç',type:'car',col:0x4a5560,spd:50,hp:125,grip:40,diff:20,desc:'Hareketli sur. Mermi gibi sağlam, kaplumbağa gibi yavaş.'},
+ swift:{n:'Gökyüzü-1',k:'Yarış uçağı',type:'plane',col:0x27e0ff,spd:80,hp:55,grip:70,diff:45,desc:'Klasik pervaneli uçak. Halkaların arasından süzül.'},
  raptor:{n:'Raptor X',k:'Savaş uçağı',type:'plane',col:0x4a5560,spd:88,hp:85,grip:60,diff:70,desc:'Zırhlı jet. Binalara biraz daha dayanıklı.'}
 };
-function raceBuildModel(id){const d=RACECARS[id];return d.type==='car'?rmBuildCar(id):rmBuildPlane(id)}
+/* ---------- GLB yükleme (assets/race) ----------
+   Her şablon: {root, wheelNames, fanName} — klonlama sırasında yeniden sarılır. */
+const RACEGLB_TPL={};
+function racePrepGlb(scene,id){
+ const root=new THREE.Group();root.add(scene);
+ const bb=new THREE.Box3().setFromObject(root);
+ root.position.y-=bb.min.y;                                  // zemin y=0
+ const sz=new THREE.Vector3();bb.getSize(sz);
+ const L=Math.max(sz.x,sz.z)||1;
+ root.scale.multiplyScalar(RACEGLB[id].len/L);               // standart boy
+ root.traverse(o=>{
+  if(o.isMesh){o.castShadow=true;if(o.material&&o.material.map&&THREE.SRGBColorSpace)o.material.map.colorSpace=THREE.SRGBColorSpace;
+   const ms=Array.isArray(o.material)?o.material:[o.material];
+   for(const mt of ms){if(mt&&'emissive'in mt&&mt.color){mt.emissive=mt.emissive||new THREE.Color();mt.emissive.copy(mt.color).multiplyScalar(.45)}} // karanlık sahnede silikleşmesin
+  }
+ });
+ const wheelNames=[],fanName={n:null};
+ root.traverse(o=>{
+  if(!o.name)return;
+  if(/tire|wheel/i.test(o.name))wheelNames.push(o.name);
+  else if(/fan|prop/i.test(o.name))fanName.n=o.name;
+ });
+ return{root,wheelNames,fan:fanName.n};
+}
+function raceLoadModels(cb){ // tüm GLB'ler önyüklenir; hata/timeout'ta prosedüre düşülür
+ const ids=Object.keys(RACEGLB);let done=0,fin=false;
+ const end=()=>{if(!fin){fin=true;window.RACELOADING=false;cb&&cb()}};
+ const to=setTimeout(end,9000);
+ ids.forEach(id=>{
+  try{new THREE.GLTFLoader().load('assets/race/'+RACEGLB[id].f,g=>{
+    try{RACEGLB_TPL[id]=racePrepGlb(g.scene,id)}catch(e){}
+    if(++done===ids.length){clearTimeout(to);end()}
+   },undefined,()=>{if(++done===ids.length){clearTimeout(to);end()}})}
+  catch(e){if(++done===ids.length){clearTimeout(to);end()}}
+ });
+}
+function raceGlbClone(tpl,id){ // şablondan yarış aracı örneği üret
+ const g=new THREE.Group(),root=tpl.root.clone(true);g.add(root);
+ const wh=[],stW=[];let prop=null;
+ const wheels=[],fan=[];
+ root.traverse(o=>{ // önce topla; traverse sırasında remove() yapmak diziyi bozar
+  if(!o.name)return;
+  if(tpl.wheelNames.includes(o.name))wheels.push(o);
+  else if(tpl.fan&&o.name===tpl.fan)fan.push(o);
+ });
+ for(const o of wheels){ // dönüş için sar
+  const w=new THREE.Group();
+  o.parent.updateWorldMatrix(true,false);
+  const wp=new THREE.Vector3();o.getWorldPosition(wp);
+  g.add(w);w.position.copy(g.worldToLocal(wp));
+  o.parent.remove(o);w.add(o);o.position.set(0,0,0);o.quaternion.identity();
+  wh.push(w);if(wp.z>0)stW.push(w);
+ }
+ for(const o of fan){
+  prop=new THREE.Group();
+  o.parent.updateWorldMatrix(true,false);
+  const wp=new THREE.Vector3();o.getWorldPosition(wp);
+  g.add(prop);prop.position.copy(g.worldToLocal(wp));
+  o.parent.remove(o);prop.add(o);o.position.set(0,0,0);o.quaternion.identity();
+ }
+ if(prop){const flame=new THREE.Mesh(new THREE.ConeGeometry(.16,.8,8),new THREE.MeshBasicMaterial({color:0x66baff,transparent:true,opacity:.75,blending:THREE.AdditiveBlending,depthWrite:false}));flame.rotation.x=Math.PI/2;prop.add(flame)}
+ const glw=new THREE.Mesh(new THREE.PlaneGeometry(RACEGLB[id].len*.55,RACEGLB[id].len),new THREE.MeshBasicMaterial({color:0x27e0ff,transparent:true,opacity:.15,blending:THREE.AdditiveBlending,depthWrite:false}));
+ glw.rotation.x=-Math.PI/2;glw.position.y=.04;g.add(glw);
+ return{g,wh,stW,prop,glw,wing:null};
+}
+function raceBuildModel(id){
+ const d=RACECARS[id];
+ if(RACEGLB_TPL[id])return raceGlbClone(RACEGLB_TPL[id],id); // hazır model varsa onu kullan
+ return d.type==='car'?rmBuildCar(id):rmBuildPlane(id);       // yoksa prosedürel yedek
+}

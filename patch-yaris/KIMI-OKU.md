@@ -7,14 +7,25 @@ kullanım zorluğu istatistikleri, 3B önizleme), "özellik var / yok" seçeneğ
 
 ## Uygulama
 
-- **Taban:** build `202610171404` (cati-rekabetci-v3). Yamayı uygulamadan önce çalışma ağacının
+- **Taban:** build `202610171405` (koridor-v1). Yamayı uygulamadan önce çalışma ağacının
   bu build olduğundan emin ol. `TABAN-SHA256.json` içindeki 466 dosya hash'iyle doğrulayabilirsin.
 - Yamayı uygula (oyun klasörünün içinde):
   ```
   git apply --check YARIS-YAMASI.patch
   git apply YARIS-YAMASI.patch
   ```
-  (git yoksa herhangi bir patch aracı da olur; patch göreli yollu, klasör kökünden uygulanır.)
+  Patch `--binary` üretildi (GLB dosyaları dahil). git yoksa önce `assets/race/` klasörünü
+  paketteki `OYUN-DENEME\assets\race\` içinden kopyala, sonra metin kısmını herhangi bir
+  patch aracıyla uygula.
+
+## Araçlar (Berkan'ın verdiği hazır GLB modeller)
+
+Kara: Sport GT-39 (Sport Car), Kaslı V10 (Muscle), Boğa V12 (Lamborghini tarzı),
+Canavar 4x4 (Monster Truck), Rampage Rally, Kobra İnterseptör (Polis), Armadillo (Zırhlı).
+Hava: Gökyüzü-1 (pervaneli uçak) + Raptor X (prosedürel savaş uçağı).
+Modeller `assets/race/*.glb` (toplam ~1.4 MB). Seçim ekranı açılırken modeller arka planda
+yüklenir (9 sn'de yüklenemezse prosedürel yedek devreye girer, oyun asla kilitlenmez).
+Tekerlekler ve pervane modele göre otomatik sarılıp döner/direksiyon yapar.
 - **server.js DEĞİŞMEDİ.** Mevcut sunucunla çalışır, sunucuyu güncellemene gerek yok.
 - `index.html`'deki build numarasını (`202610171500`) kendi sıradaki build numaranla değiştir,
   `?v=` değerlerini buna göre ayarla.
