@@ -22,10 +22,13 @@ kullanım zorluğu istatistikleri, 3B önizleme), "özellik var / yok" seçeneğ
 
 Kara: Sport GT-39 (Sport Car), Kaslı V10 (Muscle), Boğa V12 (Lamborghini tarzı),
 Canavar 4x4 (Monster Truck), Rampage Rally, Kobra İnterseptör (Polis), Armadillo (Zırhlı).
-Hava: Gökyüzü-1 (pervaneli uçak) + Raptor X (prosedürel savaş uçağı).
-Modeller `assets/race/*.glb` (toplam ~1.4 MB). Seçim ekranı açılırken modeller arka planda
+Hava: Gökyüzü-1 (pervaneli uçak) + **Mirage 2000** (jet, yönü ve ölçeği doğrulandı).
+Modeller `assets/race/*.glb` (toplam ~7 MB). Seçim ekranı açılırken modeller arka planda
 yüklenir (9 sn'de yüklenemezse prosedürel yedek devreye girer, oyun asla kilitlenmez).
 Tekerlekler ve pervane modele göre otomatik sarılıp döner/direksiyon yapar.
+Not: Berkan'ın gönderdiği MiG-21 GLB'si bu three.js sürümünde gövde mesh'lerini
+çizdirmiyor (Sketchfab ihracat sorunu, malzeme/geometri/DoubleSide denemeleri çözmedi);
+pakete alınmadı. Başka bir jet isterse aynı yolla eklenir.
 - **server.js DEĞİŞMEDİ.** Mevcut sunucunla çalışır, sunucuyu güncellemene gerek yok.
 - `index.html`'deki build numarasını (`202610171500`) kendi sıradaki build numaranla değiştir,
   `?v=` değerlerini buna göre ayarla.

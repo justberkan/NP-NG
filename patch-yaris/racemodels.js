@@ -139,7 +139,8 @@ const RACEGLB={
  rally:{f:'rally.glb',len:4.4},
  polis:{f:'police.glb',len:4.5},
  armor:{f:'armor.glb',len:4.6},
- swift:{f:'airplane1.glb',len:7.2}
+ swift:{f:'airplane1.glb',len:7.2},
+ raptor:{f:'mirage.glb',len:8.2,yaw:Math.PI/2} // Sketchfab modeli -X'e bakar: +Z'ye çevir
 };
 const RACECARS={
  falcon:{n:'Sport GT-39',k:'Spor araba',type:'car',col:0xe8b621,spd:78,hp:70,grip:75,diff:30,desc:'Dengeli güç. Yeni başlayanlar için ideal spor coupe.'},
@@ -150,15 +151,17 @@ const RACECARS={
  polis:{n:'Kobra İnterseptör',k:'Polis aracı',type:'car',col:0x2456c9,spd:82,hp:66,grip:72,diff:40,desc:'Asayiş şahini. Takip etmek için üretilmiş, yakalamak kolay değil.'},
  armor:{n:'Armadillo',k:'Zırhlı araç',type:'car',col:0x4a5560,spd:50,hp:125,grip:40,diff:20,desc:'Hareketli sur. Mermi gibi sağlam, kaplumbağa gibi yavaş.'},
  swift:{n:'Gökyüzü-1',k:'Yarış uçağı',type:'plane',col:0x27e0ff,spd:80,hp:55,grip:70,diff:45,desc:'Klasik pervaneli uçak. Halkaların arasından süzül.'},
- raptor:{n:'Raptor X',k:'Savaş uçağı',type:'plane',col:0x4a5560,spd:88,hp:85,grip:60,diff:70,desc:'Zırhlı jet. Binalara biraz daha dayanıklı.'}
+ raptor:{n:'Mirage 2000',k:'Savaş uçağı',type:'plane',col:0x8a93a5,spd:92,hp:85,grip:62,diff:70,desc:'Delta kanatlı Fransız jeti. Hızlı ve sağlam.'}
 };
 /* ---------- GLB yükleme (assets/race) ----------
    Her şablon: {root, wheelNames, fanName} — klonlama sırasında yeniden sarılır. */
 const RACEGLB_TPL={};
 function racePrepGlb(scene,id){
  const root=new THREE.Group();root.add(scene);
+ if(RACEGLB[id].yaw)scene.rotation.y=RACEGLB[id].yaw; // model +X/-X'e bakıyorsa +Z'ye çevir
  const bb=new THREE.Box3().setFromObject(root);
- root.position.y-=bb.min.y;                                  // zemin y=0
+ const c=new THREE.Vector3();bb.getCenter(c);
+ root.position.x-=c.x;root.position.z-=c.z;root.position.y-=bb.min.y; // ortala + zemin y=0
  const sz=new THREE.Vector3();bb.getSize(sz);
  const L=Math.max(sz.x,sz.z)||1;
  root.scale.multiplyScalar(RACEGLB[id].len/L);               // standart boy
