@@ -153,6 +153,7 @@ function wparts(k,B,A){
 }
 function mkFlash(mz){
  const m=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,.1),new THREE.MeshBasicMaterial({color:0xffd070,transparent:true,opacity:.95}));
+ m.geometry.userData.own=1;m.material.userData.own=1; /* namlu alevi bu silaha ait: silah değişince atılır */
  m.position.set(mz[0],mz[1],mz[2]+.05);m.visible=false;return m;
 }
 /* kaplama (skin) GLB modele uygulanır: eskiden yalnız kutu modeli boyuyordu, GLB silahlarda tüm kaplamalar aynı görünüyordu.
@@ -239,8 +240,10 @@ function mkHolder(parent,aimPos,p0R,p0L,cols,fp){
  const aim=new THREE.Group();aim.position.copy(aimPos);parent.add(aim);
  return{aim,armR:mkArm(parent,p0R,cols,-1,fp),armL:mkArm(parent,p0L,cols,1,fp),W:null,wk:null,dropped:false};
 }
+/* yalnız bu silaha ait (userData.own) geometri/malzemeleri bırakır; paylaşılan GLB model parçalarına dokunmaz */
+function weaponFree(W){if(!W)return;for(const o of [W.g,W.g2,W.mag,W.mag2])if(o)o.traverse(q=>{if(q.geometry&&q.geometry.userData.own)q.geometry.dispose();if(q.material&&q.material.userData&&q.material.userData.own)q.material.dispose()})}
 function holderSet(h,k,skin,mid){
- if(h.W){h.aim.remove(h.W.g);if(h.W.g2)h.aim.remove(h.W.g2);if(h.W.mag)h.aim.remove(h.W.mag);if(h.W.mag2)h.aim.remove(h.W.mag2)}
+ if(h.W){h.aim.remove(h.W.g);if(h.W.g2)h.aim.remove(h.W.g2);if(h.W.mag)h.aim.remove(h.W.mag);if(h.W.mag2)h.aim.remove(h.W.mag2);weaponFree(h.W)}
  h.W=buildWeapon(k,skin||skinFor(k,mid),mid,h.optOn);h.wk=k;h.mid=mid||null;h.dropped=false;
  if(typeof mdlWant==='function')mdlWant(k,mid,()=>{if(h.wk===k&&h.mid===(mid||null)&&h.W)holderSet(h,k,skin,mid)});
  h.aim.add(h.W.g);if(h.W.g2)h.aim.add(h.W.g2);if(h.W.mag)h.aim.add(h.W.mag);if(h.W.mag2)h.aim.add(h.W.mag2);

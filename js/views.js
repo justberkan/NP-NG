@@ -172,6 +172,11 @@ const CREDITS=[
  ['de_dust2 CS Map · CS Death Match Map Minecraft','Sketchfab sanatçıları (kullanıcı tarafından sağlandı)','https://sketchfab.com','5v5 haritaları (lisans bilgisi model sayfalarında)'],
  ['AK74U Free Animation','Sketchfab sanatçısı (kullanıcı tarafından sağlandı)','https://sketchfab.com','Silah modeli kaynağı'],
  ['FPS Military Hands','Electrogamer777','https://sketchfab.com/3d-models/fps-military-hands-b0ffdcca876248edadaf8ec864dff544','Birinci şahıs el ve kol modeli'],
+ ['Ammo Boxes [toon - style]','lalit · CC BY 4.0','https://sketchfab.com/3d-models/ammo-boxes-toon-style-bfe1d8b87a8b40e3924547b057fd2c77','Kullanıcının sağladığı mermi kutusu; ölçek ve merkez uyarlandı'],
+ ['Medkit','nicholas.cusinato · CC BY 4.0','https://sketchfab.com/3d-models/medkit-2ee84faec92e4046ab8fd35771a2b280','Kullanıcının sağladığı sağlık paketi; ölçek ve merkez uyarlandı'],
+ ['John Wick (kullanıcının sağladığı model)','SlimDormouse966 · CC BY 4.0','https://sketchfab.com/3d-models/pulltube-for-mac-download-3d-model-john--wick-3ec303f857044bc5b23c099f8bff13c6','Ölçek, yaklaşık iskelet/ağırlık, sabit aksesuar temizliği ve yüzey sadeleştirme uyarlandı.'],
+ ['Laz Torretto (Dominic Toretto modeli)','MEGA_GAMES · CC BY 4.0','https://sketchfab.com/3d-models/dominic-toretto-88a860c2769e45aab5c13251dd903bd3','Oyun içi adı değiştirildi; ölçek, yaklaşık iskelet/ağırlık ve yüzey sadeleştirme uyarlandı.'],
+ ['Minecraft Zombie','JoohnElkes · CC BY 4.0','https://sketchfab.com/3d-models/minecraft-zombie-45037ec52b6a4444a0981f916d0dbd43','Kullanıcının sağladığı model; ölçek, yön ve uzuv animasyonu oyuna uyarlandı. Lisans: https://creativecommons.org/licenses/by/4.0/'],
  ['Apex Guns 01','Alex Borisov','https://sketchfab.com/3d-models/apex-guns-01-fea8987bb7e440eab9a26691ee2e0427','P2020, R-301, R-99, Wingman, Mozambique modelleri']
 ];
 function creditsHTML(){
@@ -179,12 +184,13 @@ function creditsHTML(){
  <div style='display:flex;flex-direction:column;gap:8px;margin-top:8px'>${CREDITS.map(c=>`<div class='sr' style='display:block'><b>${c[0]}</b> · ${c[1]}<br><span class='note'>${c[3]}</span><br><a href='${c[2]}' target='_blank' rel='noopener' style='color:#27e0ff;font-size:12px;word-break:break-all'>${c[2]}</a></div>`).join('')}</div>`;
 }
 function setV(ig){
- const tabs=ig?[['game','Oyun'],['xh','Nişangah'],['vid','Video'],['mob','Mobil'],['ctl','Kontroller']]:[['game','Oyun'],['xh','Nişangah'],['vid','Video'],['mob','Mobil'],['ctl','Kontroller'],['acc','Veri'],['cr','Krediler']];
+ const tabs=ig?[['game','Oyun'],['sens','Hassasiyet'],['xh','Nişangah'],['vid','Video'],['mob','Mobil'],['ctl','Kontroller']]:[['game','Oyun'],['sens','Hassasiyet'],['xh','Nişangah'],['vid','Video'],['mob','Mobil'],['ctl','Kontroller'],['acc','Veri'],['cr','Krediler']];
  if(ig&&!tabs.some(t=>t[0]===setTab))setTab='game';
  let b='';
- if(setTab==='game')b=cRange('Fare hassasiyeti','sens',.2,3,.05,'x')+cRange('Nişan alırken çarpan','adsSens',.2,1.5,.05,'x')+cRange('Görüş açısı (FOV)','fov',60,120,1,'°')+cRange('Nişan yakınlaştırması (0 = yok, 1 = tam)','adsZoom',0,1,.05,'')+cRange('Ses seviyesi','volume',0,1,.05,'')+cCheck('Y ekseni ters (fare)','invY')+cCheck('Otomatik bhop (Space basılı tut)','autoHop')+cCheck('Kasa açılış animasyonunu atla','skipCrate')+`<hr style='border:0;border-top:1px solid #243242'><h3>Açık dünya</h3>`+cSel('Otomatik savaş hedef seçimi','autoPol',[[0,'Güvenli (kendi seviyem ve altı)'],[1,'Dengeli (+2 seviyeye kadar)'],[2,'Cesur (+5 seviyeye kadar)']])+`<p class='note'>Açık dünyada F: otomatik savaş aç/kapat · M: harita · H: ilk yardım çantası. Açık dünyada ateşli silah yok: bıçak, kılıç ve iki elli kılıçla dövüşürsün. Otomatik savaşta karakter hedef arar, yaklaşıp vurur, canı azalınca kaçıp iyileşir. AFK bırakırken sekmeyi kapatma; arka plana atsan da oyun devam eder.</p>`;
+ if(setTab==='game')b=cRange('Fare hassasiyeti','sens',.00001,Math.max(10,SET.sens),.00001,'x')+cRange('Nişan alırken çarpan','adsSens',.2,1.5,.05,'x')+cRange('Görüş açısı (FOV)','fov',60,120,1,'°')+cRange('Nişan yakınlaştırması (0 = yok, 1 = tam)','adsZoom',0,1,.05,'')+cRange('Ses seviyesi','volume',0,1,.05,'')+cCheck('Y ekseni ters (fare)','invY')+cCheck('Otomatik bhop (Space basılı tut)','autoHop')+cCheck('Kasa açılış animasyonunu atla','skipCrate')+`<hr style='border:0;border-top:1px solid #243242'><h3>Açık dünya</h3>`+cSel('Otomatik savaş hedef seçimi','autoPol',[[0,'Güvenli (kendi seviyem ve altı)'],[1,'Dengeli (+2 seviyeye kadar)'],[2,'Cesur (+5 seviyeye kadar)']])+`<p class='note'>Açık dünyada F: otomatik savaş aç/kapat · M: harita · H: ilk yardım çantası. Açık dünyada ateşli silah yok: bıçak, kılıç ve iki elli kılıçla dövüşürsün. Otomatik savaşta karakter hedef arar, yaklaşıp vurur, canı azalınca kaçıp iyileşir. AFK bırakırken sekmeyi kapatma; arka plana atsan da oyun devam eder.</p>`;
+ else if(setTab==='sens')b=sensitivityHTML();
  else if(setTab==='xh')b=`<div class='row' style='align-items:flex-start;gap:16px'><div class='xhp'><div id='xhprev' class='xhs'></div></div><div style='flex:1;min-width:260px'>`+cSel('Nişangah biçimi','xhStyle',SEL.xhStyle)+
-  `<div class='sr2'><span>Renk</span><input type='color' id='xhcol' value='${SET.xhColor||'#ffffff'}'><button class='chip' id='xhrst'>Mağaza rengi</button></div>`+
+  `<div class='sr2'><span>Renk</span><span style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'>${XH.map(x=>{const h='#'+x.c.toString(16).padStart(6,'0');return `<button class='xhsw' data-xh='${h}' title='${x.n}' style='width:22px;height:22px;border-radius:50%;border:2px solid ${(SET.xhColor||'#ffffff').toLowerCase()===h?'#27e0ff':'#243242'};background:${h};cursor:pointer;padding:0'></button>`}).join('')}<input type='color' id='xhcol' value='${SET.xhColor||'#ffffff'}' style='width:36px;height:24px;padding:0;border:1px solid #243242;background:#0b1118;cursor:pointer'></span><button class='chip' id='xhrst'>Varsayılan (beyaz)</button></div>`+
   cRange('Boyut','xhSize',2,30,1,'px')+cRange('Kalınlık','xhThick',1,6,1,'px')+cRange('Merkez boşluğu','xhGap',0,16,1,'px')+cCheck('Orta nokta','xhDot')+cCheck('Siyah kenar çizgisi','xhOutline')+`</div></div>
   <hr style='border:0;border-top:1px solid #243242'><h3>Kırmızı nokta (tüfek ve SMG)</h3>`+cRange('Çerçeve boyutu','opticSize',.3,1.5,.05,'x')+cRange('Nokta boyutu','dotSize',.3,3,.1,'x')+`<p class='note'>Değişiklik silah modeli yenilenince hemen görünür. Nişan alırken (sağ tık) kırmızı nokta kullanılır, normal nişangah silikleşir.</p>`;
  else if(setTab==='vid'){
@@ -236,6 +242,8 @@ function wireSettings(a,view){
   });
  });
  const xc=$('xhcol');if(xc){xc.oninput=()=>{SET.xhColor=xc.value;saveSet();applyCrosshair()};$('xhrst').onclick=()=>{SET.xhColor='';saveSet();applyCrosshair();view('settings')}}
+ a.querySelectorAll('.xhsw').forEach(b=>b.onclick=()=>{SET.xhColor=b.dataset.xh;const ci=$('xhcol');if(ci)ci.value=b.dataset.xh;saveSet();applyCrosshair();a.querySelectorAll('.xhsw').forEach(x=>x.style.borderColor=x===b?'#27e0ff':'#243242')});
+ wireSensitivity(a);
  const t2=$('tle2');if(t2){t2.onclick=()=>startTouchEdit()}
  if(typeof kontrollerWire==='function')kontrollerWire(a);
  a.querySelectorAll('[data-tr]').forEach(c=>c.onchange=()=>{SV.eco.tr[c.dataset.tr]=c.checked;save()});

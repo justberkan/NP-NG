@@ -7,7 +7,8 @@
     "start": "node server.js",
     "test": "node tests/run.cjs",
     "test:http": "node --test tests/http.cjs",
-    "test:movement": "node tests/movement.cjs"
+    "test:movement": "node tests/movement.cjs",
+    "test:audit": "node tests/audit.cjs"
   },
   "devDependencies": { "playwright": "1.62.1" }
 }

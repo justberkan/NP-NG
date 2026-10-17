@@ -1,0 +1,6 @@
+Minecraft Zombie — JoohnElkes
+Source: https://sketchfab.com/3d-models/minecraft-zombie-45037ec52b6a4444a0981f916d0dbd43
+License: CC BY 4.0 — https://creativecommons.org/licenses/by/4.0/
+Attribution and license are embedded in the user-supplied GLB metadata.
+Game modifications: scale, orientation, nearest texture filtering, procedural limb animation. Original mesh retained.
+The cage spawner is code-generated from the user's visual reference; no Minecraft game textures were extracted.

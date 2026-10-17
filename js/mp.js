@@ -183,9 +183,9 @@ addEventListener('beforeunload',()=>{if(MPL.authed&&!MPL.reloading)try{MPL.ws.se
 /* ---------- Uzak oyuncular ---------- */
 function mpClearZ(){
  if(!MPL.zs)MPL.zs=new Map();
- for(const e of MPL.zs.values()){S.remove(e.g);const i=E.indexOf(e);if(i>=0)E.splice(i,1)}
+ for(const e of MPL.zs.values()){freeActor(e.g);const i=E.indexOf(e);if(i>=0)E.splice(i,1)}
  MPL.zs.clear();
- for(let i=E.length-1;i>=0;i--)if(E[i].zid){S.remove(E[i].g);E.splice(i,1)}
+ for(let i=E.length-1;i>=0;i--)if(E[i].zid){freeActor(E[i].g);E.splice(i,1)}
 }
 function mpAddZombie(s){
  const e=mkE('z',2,s[1],s[2]);e.zid=s[0];e.hp=e.max=s[4];e.tx=s[1];e.tz=s[2];e.tyaw=s[3];e.yaw=s[3];e.g.rotation.y=s[3];
@@ -199,7 +199,7 @@ function mpZHit(e,d,info){
 }
 function mpClearEnts(){
  mpClearZ();
- for(const e of MPL.ents.values()){S.remove(e.g);const i=E.indexOf(e);if(i>=0)E.splice(i,1);if(e.tag)e.tag.remove()}
+ for(const e of MPL.ents.values()){freeActor(e.g);const i=E.indexOf(e);if(i>=0)E.splice(i,1);if(e.tag)e.tag.remove()}
  MPL.ents.clear();
 }
 function mpTagLayer(){
@@ -223,7 +223,7 @@ function mpAddRemote(info){
 function mpModOf(mods,w){const c=w==='dual'?'pistol':w;return(mods&&mods[c]&&WMID[mods[c]]&&!WM_HIDE.has(mods[c]))?mods[c]:null}
 function mpRemoveRemote(id){
  const e=MPL.ents.get(id);if(!e)return;
- S.remove(e.g);const i=E.indexOf(e);if(i>=0)E.splice(i,1);if(e.tag)e.tag.remove();MPL.ents.delete(id);
+ freeActor(e.g);const i=E.indexOf(e);if(i>=0)E.splice(i,1);if(e.tag)e.tag.remove();MPL.ents.delete(id);
 }
 function mpStart(){ // setupMode içinden: maç başlarken
  mpClearEnts();

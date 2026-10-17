@@ -162,8 +162,109 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 17.10.2026 · Codex · 202610171402 hareket-bomba-v1 · Berkan'ın doğrudan müdahale talebi: Ada Wong h8 ve Samus h23 + 2 model dosyası kaldırıldı; eski kuşanım askere taşınır. Battle Pass v3 yeni başlık/progress/aynı sütunda eşleşen ücretsiz-premium kartlar, tek kaydırma ve seviye gezintisi; ödül kuralları değişmedi. Süzülme/düz tırmanma/kayma pozları yenilendi, tırmanma ağ biti 256 ve server mask 511. Dust2 A/B sabit hedef + güvenli zemin, kurulumda kat kontrolü, 28m mesafeli C4 hasarı + temizlenen patlama FX. Rekabetçi ve çevrimiçi 5v5 üçüncü şahıs kapalı. Ayrıntı/kanıt/yedek: docs/CODEX_DEVIR_20261017.md. İki özel test ve tests/run.cjs PASS. Sunucu zorla kapatılmadı; server.js yeniden başlatılmalı. Eski paketleri üstüne kopyalamayın.
 
 - 17.10.2026 · Codex · 202610171404 cati-rekabetci-v3 · Berkan'ın son düzeltmesi esas: Dust2 çatılara çıkış SERBEST, 8 kapak + yönlü görünmez kenar duvarları + üst tavan; kanca görünmez duvara takılmaz. Rekabetçi kartı belirginleştirildi, eski 5v5 kartları Ölüm Maçı diye ayrıldı. Her raunt doğuşunda alım, Tab 10 oyuncu/bot gerçek K/D/A tablosu. Holosight GLB içindeki yerleşik retikül ADS'de gizlenerek çift nokta giderildi. 3 harita gerçek menü/bot/alım/Tab/E ile bomba/patlama/sonraki raunt + sınır/tek retikül testleri PASS. Ayrıntı: docs/codex-1403/DEVIR.md. Rütbeli online kuyruk önceki gibi kilitli; yeni online rekabetçi sunucu yok. Önceki +3.2m çatı erişim taslağını GERİ GETİRMEYİN.
-- 202610171500 yaris-v1 (Kimi): Yarış modu yaması hazır (Masaüstü\YARIS YAMASI): kara+hava yarışı, 7 item/3 slot, Berkan'ın verdiği 8 GLB araç modeli entegre (assets/race), AI, seçim ekranı. Taban build 1405 (koridor-v1). Headless doğrulama + tests/run.cjs PASS. Claude uygulayacak.
+- 202610171500 yaris-v1 (Kimi): Yarış modu yaması hazır (Masaüstü\YARIS YAMASI): kara+hava yarışı, 7 item/3 slot, Berkan'ın verdiği 9 GLB araç modeli entegre (assets/race, Mirage 2000 jet dahil; MiG-21 modeli bozuk çıktı, elendi), AI, seçim ekranı. Taban build 1405 (koridor-v1). Headless doğrulama + tests/run.cjs PASS. Claude uygulayacak.
 
 - 17.10.2026 · Codex · 202610171405 koridor-v1 · Berkan'ın gönderdiği WaveCorridor paketi ana oyuna eklendi: Koridor: Dalga Ağacı → solo / kodlu 2–4 co-op, 100 tur/100 doğuş ağacı, her 10 tur tek boss, 12 canlı sınırı/rig havuzu, sınırlı mermi/kutular, canlı iyileştirme, TL ödülleri, co-op izleyici ve toplu ölümde bitiş. Mevcut AI/silah/hasar/ragdoll/hesap kaydı kullanılır. Detay ve test: docs/codex-koridor/DEVIR.md, TEST-SONUCU.json. Yeni co-op oda sahibi simülasyonudur; server.js + server-wavecorridor.js ile sunucu yeniden açılmalı. Açık sunucu zorla kapatılmadı. DUST2 DÜZELTMESİ: Paint isteği gereği 1404 görünmez duvar/tavanı ve özel çatı kısıtları SİLİNDİ; 8 düz kapak kaldı. Önceki devirdeki görünmez duvarları geri getirmeyin. Yedek _yedek/codex-wavecorridor-1405/.
 
 - 2026-10-17 07:10 · Claude · ISLEM_GUNLUGU.md açıldı: bundan sonra her AI saatli kayıt (Eklendi/Değişti/Çıkarıldı) yazar. GitHub main 1405 koridor-v1 ile eşitlendi.
+
+- 17.10.2026 · Codex · 202610171406 koridor-v2 · Berkan'ın referansına göre kafes spawner, arada kullanıcı GLB Minecraft zombisi, dalga/boss bitene kadar duran taş kapı ve yıkılma efekti eklendi. Canlı sınırı 5; 20'lik turda 5/15 → bir ölüm sonrası aynı anda 5/14; eski grup beklemesi kaldırıldı. 5 rig havuzu, ön hazırlama, yalnız aktif spawner çizimi, kısa/bütçeli cesetler. Co-op model ve kapı eşleşmesi PASS; mevcut solo/100 tur/ammo/co-op/regresyon testleri PASS. Ayrıntı: docs/codex-koridor/GUNCELLEME_1406.md. Yeni script wave-corridor-visuals.js ve assets/corridor/minecraft_zombie.glb dağıtıma dahil edilmeli; kaynak/CC BY 4.0 atfı kredilerde. 1405 tabanlı Yarış vb. yamalar index/script sırasını eski sürüme döndürmemeli. Sunucu yeniden başlatma + istemcilerde Ctrl+F5. Yedek _yedek/codex-koridor-1406/.
+
+- 17.10.2026 · Codex · 202610171407 koridor-v3 · Berkan'ın düzeltmesi: Koridor modunda BÜTÜN zombiler ve boss yalnız Minecraft GLB. Asker üreten fabrika, rastgele karışım ve yükleme sırasında asker yedeği kaldırıldı; model yüklenmeden maç başlamaz. Doğuş noktaları uzaklaştırıldı, 5 mob arasında boyuta göre daire teması/itme + oyuncu teması eklendi. Boss erişimi 2.7m; diğer modların 1.7m değeri korunur. Gerçek UI/solo/co-op, asker rig'i 0, boss hasarı, aynı noktadan ve duvar dibinden ayrıştırma, 600 hareket adımı, önceki koridor testleri PASS; genel regresyon PASS. Devir: docs/codex-koridor/GUNCELLEME_1407.md. Ana klasör aynı; istemcide Ctrl+F5 ve build 1407 kontrolü yeterli. 1406 model karışımını geri getirmeyin. Yedek _yedek/codex-koridor-1407/.
+
+
+17.10.2026 · Codex · 202610171408 koridor-v4: sabit ve yerel dönen GLB mermi/can, yakın toplama ve co-op düzeltmesi; açık dünya zombi mermi loot görseli/envanter ganimeti. Güncel devir: docs/codex-koridor/GUNCELLEME_1408.md.
+
+
+17.10.2026 · Codex · 202610171409 koridor-v5: Her 5 turda 10 m parkur boşluğu/3 basamak; gerçek düşme, oyuncu başına 3 düşüş hakkı (3. düşüş elenir), son güvenli noktaya dönüş. Spawner kırılınca savaş köprüsü açılır. 10 turluk Orman/Kış/Cehennem temaları tekrar eder; yalnız aktif çevrenin birleşik dekoru çizilir. Solo gerçek fizik ile 4 atlayış/3 düşüş, co-op düşüş/yeniden eşleşme, önceki 100 tur/5 mob/loot ve genel regresyon PASS. Yeni js/wave-corridor-terrain.js dağıtıma eklenmeli; server-wavecorridor.js negatif Y/kurtarma sıra bilgisi için yeniden başlatılmalı. Yedek _yedek/codex-koridor-1409/.
+
+
+17.10.2026 · Codex · 202610171410 parkur-aim-v1: Ayarlar > Hassasiyet sekmesinde CS2/Apex/Valorant, iki DPI, cm/360/eDPI, kesin hassasiyet ve ham girdi. Parkur/3 düşüş hakkı/temalar da içeride. Testler PASS. Güncel devir docs/codex-koridor/GUNCELLEME_1410.md. Co-op sunucu yeniden açılmalı; istemci Ctrl+F5.
+
+
+17.10.2026 · Codex · 202610171411 koridor-stream-v1: İlerledikçe arkadaki zemin/platform/köprü GPU kaynakları bırakılır; aktif pencere, kısa yan duvarlar ve yalnız aktif spawner. En gerideki canlı oyuncu/güvenli nokta korunur; co-op rear sınırı eşleşir. Testler ve genel regresyon PASS; FPS yüzdesi ölçülmedi. Devir: docs/codex-koridor/GUNCELLEME_1411.md. Yedek _yedek/codex-koridor-1411/.
+
+
+17.10.2026 · Codex · 202610171413 admin-flight-v2: 1412 admin araçları + F6 uçuş/F8 panel, Uçuşa Geç/Oyuna Dön, panelde hover, eski sunucu için yalnız doğrulanmış adminde yerel uyum (God yok). Sunucu eski olduğu için onay gelmiyordu. Tarayıcısız Node testleri PASS; fiziksel mouse/tarayıcı bu turda denenmedi. Devir docs/codex-koridor/GUNCELLEME_1413.md; 1412 genel atmosfer görünürlük testi başarısızlığı not edildi. Canlı sunucu kapatılmadı.
+
+
+17.10.2026 · Codex · 202610171414 turn-steps-v1: Lobi/oyun ortak ContactAnimation içinde yerinde dönüş adımları, tek ayakta ağırlık, ayak kaldırıp basma, GLB ayak dünya yönü düzeltmesi. Fizik/hitbox değişmedi. 4 FPS/iki yön/720 derece/temas/geçiş/GLB heading tarayıcısız testleri PASS; görsel oyun denemesi yapılmadı. Devir docs/codex-koridor/GUNCELLEME_1414.md. Yedek _yedek/codex-turn-1414/.
+
+
+17.10.2026 · Codex · 202610171415 athletic-impact-v1: Kademeli yerde ivmelenme/fren, atletik sprint kolları/gövdesi, hız animasyonu filtresi, silahlı tutuş koruması, zaman durdurmayan yakın dövüş geri bildirimi ve hit işareti önceliği uygulandı. Son hız/hasar/ödül ve parkur dalları korunur. Tarayıcısız hareket/rig/vuruş/dönüş/admin testleri PASS; gerçek görsel oyun testi yapılmadı. Masaüstü ATLETİK KOŞU VE VURUŞ YAMASI + ZIP. Devir docs/codex-koridor/GUNCELLEME_1415.md. Yedek _yedek/codex-athletic-1415/.
+
+
+17.10.2026 · Codex · 202610171416 wick-laz-v1: John Wick h24 / Laz Torretto h25, mağaza Şampiyonlar 0 TL. Kullanıcı statik GLB modellerine yaklaşık 20 kemikli skin/ölçek, Wick gömülü aksesuar temizliği, Laz vertex renkleri; tek mesh/tembel yükleme. Gerçek GLB retarget 5 poz/sayısal skin ve HTTP model testleri PASS; canlı oyun/tutuş görsel testi yok. Sınırlamalar ve üretim: docs/codex-characters-1416/DEVIR.md. Yedek _yedek/codex-characters-1416/.
+
+
+17.10.2026 · Codex · 1416 kalite reddi: Yeni Wick/Laz yaklaşık skin omuz/kolu silah pozunda ciddi geriyor. Ağırlık iyileştirme denemeleri kabul edilmedi ve geri alındı. Görsel üretim kalitesi PASS değildir. Rapor docs/codex-characters-1416/KALITE-INCELEMESI.md. FPS/kumarhane ayrı paket masaüstünde hazır; ana oyuna uygulanmadı.
+
+
+## 2026-10-17 16:20 İstanbul — Codex — Genel hata incelemesi / 1417
+- Değişti: ragdoll koridor sınırı, sınırlı fizik adımı, görünür ceset klonu, kararlı yön tabanı ve klon iskelet temizliği.
+- Değişti: silah görseli hitbox dışında; gizli kapı ışın engeli kaldırıldı; yakın dövüş harita/açık dünya duvar kontrolü.
+- Değişti: lobi atmosfer panelinin anlık gizlenmesi, mağaza kart yazı/görsel daralma düzeni.
+- Eklendi: docs/codex-audit-1417/ testleri, sonuçlar, devir ve dürüst oyun değerlendirmesi.
+- Test: audit, gerçek GLB ragdoll, atletik hareket, dönüş ve admin uçuş Node testleri geçti. Tarayıcı/mouse kullanılmadı.
+- Açık: Wick/Laz eklem ağırlıkları düzelmedi; görsel oyun testi ve tam sunucu vuruş doğrulaması yapılmadı.
+- Yedek: _yedek/codex-audit-1417/. Ana oyun build 202610171417. Sunucu durdurulmadı.
+
+
+## 2026-10-17 17:06 İstanbul — Codex — Animasyon V2 aday / UYGULANMADI
+- Eklendi: masaüstü ANİMASYON YAMASI V2 klasörü ve ZIP; payload/baseline, 19 modelle bağımsız karşılaştırma ekranı, offline hareket GIF/PNG, taşınabilir testler, hash manifesti, Kimi test planı. Kaynak çalışma docs/animation-staging-v2/.
+- Değişti (yalnız adayda): temasla korunan gövde geçişleri, erişime uygun adım süresi/mesafesi, dururken adımı tamamlama, silahsız kol akışı/dinlenme geçişi, yan adım ayak ayrımı, zemin callback; silahsız duvar koşusunda null silah quaternion hatası, duvar ayak hedefinin filtrelenmiş pozla eşleşmesi.
+- Çıkarıldı (yalnız aday katalogdan): h24 John Wick, h25 Laz Torretto. Canlı hesaplar, varlıklar ve katalog korunuyor. Siber/Heetah/Lara görsel inceleme bekler.
+- Reddedildi: topolojiyle otomatik ağırlık onarımı; bazı modellerde bozuk alan oranını büyüttü. Deney sonucu ayrı kayıt, teslim kodunda yok.
+- Test: hareket/yan adım/dönüş dört FPS düzeyinde PASS; 19 model sekiz poz yükleme/sonlu poz PASS, beş model deformasyon kalite incelemesine takıldı. Canlı görsel/GPU testi yok. Tarayıcı/mouse kullanılmadı.
+- Yedek: paket baseline/js/ ve manifest.json. Ana oyunun hedef dosyaları hash kontrolüyle değişmedi; build 1417 kalır. Kimi raporu gelmeden uygulama yok.
+- 202610171800 yaris-v1 (Kimi): Yaris modu OYUNA UYGULANDI (taban 1417 audit-fixes-v1, build 1800). Kara+hava yarisi, 7 item/3 slot, 9 hazir GLB arac (Mirage 2000 dahil), AI, secim ekrani. requestGamePointerLock icinde race kilidi (1417 mimarisiyle birlestirildi). Yedek: _yedek/kimi-yaris-1800/. Dogrulama: headless yaris testi PASS (0 hata) + tests/run.cjs 5/0 GERCEK OYUNDA. server.js degismedi; oyunu/sa sunucuyu yeniden baslat.
+- 202610171801 yaris-xh-v1 (Kimi): Nisangah RENGI magazadan kaldirildi (shop.js SH_TABS'tan 'x' sekmesi). Ayarlar > Nisangah'a 5 hazir renk swatch'i (XH renkleri) + mevcut ozgur renk secici eklendi; sifirlama dugmesi "Varsayilan (beyaz)". views.js xh sekmesi + wireSettings swatch handler. Mevcut XH sahipligi/kusanma kodu dokunulmadi (sahiplik korunur, yeni satin alim yok). Dosyalar: js/shop.js, js/views.js, index.html (build 1801). Dogrulama: headless nisangah testi PASS (5 swatch, tiklama SET.xhColor=#28e0ff, magazada Arti rengi yok, 0 hata) + run.cjs http 5/0. Not: movement.cjs counter-strafe 0.25s>0.1s FAIL — player.js bu yamada HIC degismedi (10:46), mevcut fizik ayariyla onceden var olan durum. Oyunu/sa sunucuyu yeniden baslat.
+
+
+## 2026-10-17 19:37 İstanbul — Codex — 202610171802 animation-v2-arac-v1 / UYGULANDI
+- Yetki: Berkan beklenenin animasyon raporu değil Kimi'nin araba yamasının bitmesi olduğunu açıkladı; animasyon ve araç animasyonlarını uygulamamı istedi.
+- Eklendi: js/race-motion.js; bağımsız direksiyon/aks/gövde animasyonları, fren/gaz/viraj ağırlık aktarımı, pervane/jet ayrımı ve Mirage art yakıcı.
+- Değişti: bekleyen insan Animasyon V2 güncel 1801 üzerine hash eşleşmesiyle uygulandı. GLB araç merkezleme, özgün tekerlek/pervane dönüş-ölçeğini koruma, kaynak temizliği, önizleme ve kamera filtresi.
+- Çıkarıldı: h24/h25 yalnız seçim/mağaza katalog girdileri; kaynak modeller/hesaplar korunur. Başarısız otomatik skin onarımı uygulanmadı.
+- Dosyalar: js/anim-contact.js, glbrig.js, rig.js, weapons.js, racemodels.js, race-motion.js, race.js, index.html. Kimi yarış/nişangâh ve diğer oyun modları korunuyor.
+- Test: dokuz gerçek araç GLB, dört FPS düzeyinde araç/insan hareketi/dönüş; mevcut ragdoll/hitbox/atletik/admin testleri PASS. 19 insan profili sonlu poz testi, beş modelin kalite sorunu not edildi. HTTP 200 + disk eşleşmesi PASS. Tarayıcı/mouse veya GPU testi yok.
+- Yedek: _yedek/codex-animation-live-1802/. Ayrıntı docs/animation-live-1802/DEVIR.md. Masaüstü ANİMASYON VE ARAÇ YAMASI 1802 + ZIP. Canlı sunucu kapatılmadı; Ctrl+F5.
+
+
+## 2026-10-17 20:04 İstanbul — Codex — 202610171804 race-rivals-garage-v1 / UYGULANDI
+- Eklendi: RaceAI (viraj, sollama, savunma, pickup ve slot taktikleri), üç kullanıcı MP3'ü ile RaceAudio, instanced tepeler/ağaç/kaya ve N·Petrol benzinlik dekoru, referansa göre canlı 3B garaj + CSS.
+- Değişti: aynı kara pisti x3 / 1164m / 16.4m yol; gridde başlangıç turu sayımı, geniş start daması, kamera uzaklığı/geri dönüş, ortak bariyer hasarı. Garaj kart/istatistik/gerçek model seçimi eşleşir.
+- Korundu: eşzamanlı eklenen MIG-21 ve model filtreleri, 1802 insan/araç animasyonları, diğer modlar/nişangâh. 1803 numarası MIG işinde kullanıldığı için son sürüm1804.
+- Çıkarıldı: hava botlarına rastgele ücretsiz boost, ilk slot item kilidi, eski kart yığını seçim ekranı.
+- Test: 150sn 6 sürücü +180sn gerçek raceStep/item/hasar; ses yaşam döngüsü test çiftleri + gerçek MP3 dosyaları; garaj handler/Three geometri test çiftleri; 10 gerçek GLB regresyonu, insan dönüş/atletik testleri PASS. 61 script syntax ve9 HTTP/disk eşleşmesi PASS. Tarayıcı/mouse/gerçek ses dinleme/GPU FPS testi yok.
+- Dosyalar: yeni js/race-{ai,audio,world,garage}.js, css/race-garage.css, assets/race/audio; js/race.js/racemodels.js/index.html değişti. Ayrıntı docs/race-upgrade-1803/DEVIR.md; yedek _yedek/codex-race-1803/.
+- Teslim: masaüstü YARIŞ PİST BOT SES GARAJ 1804 + ZIP. Ana oyuna uygulandı; canlı sunucu durdurulmadı. Ctrl+F5.
+
+
+## 2026-10-17 21:34 İstanbul — Codex — 202610171805 garage-controls-fix-v1
+- Değişti: garaj canvası genel fixed kuralından ayrılıp kendi sahnesine absolute bağlandı; taşma/katman sınırları ile üst araç şeridi, oklar, geri ve YARIŞA BAŞLA kontrollerinin örtülmesi düzeltildi.
+- Eklendi: docs/race-upgrade-1803/GARAJ_KONTROL_DUZELTMESI_1805.md. Çıkarıldı: yok.
+- Test: garaj başlat/seçim/iptal handler ve Three geometri testi PASS; HTTP güncel build/CSS eşleşmesi PASS. Canlı tarayıcı/mouse testi yok; önceki test çiftlerinin CSS hatasını yakalamadığı açıkça kaydedildi.
+- Dosyalar css/race-garage.css,index.html; yedek _yedek/codex-garage-controls-1805/. Sunucu kapatılmadı.
+
+## 2026-10-17 21:46 İstanbul — Codex — 202610171806 race-start-fix-v1
+- Değişti: Three.js r128 CanvasTexture.userData tanımsız olduğundan pist tabelası oluşturulurken yarışın yarıda kalması düzeltildi. userData oluşturularak sahiplik/texture temizliği korundu.
+- Eklendi: yarış başlangıç hatasında kaynak temizliği, lobiye dönüş ve yeniden deneme ekranı; docs/race-upgrade-1803/test-startup.cjs, STARTUP-TEST.json, YARIS_BASLATMA_DUZELTMESI_1806.md. Çıkarıldı: yok.
+- Test: düzeltme öncesi aynı TypeError tekrar üretildi. Sonrası gerçek Three/CanvasTexture ve raceSetup ile 5 kurulum, geri sayım, oyuncu/AI hareketi, duraklat/devam/çıkış/yeniden başlatma PASS. Gerçek startMatch-begin-setupMode zinciri ve kasıtlı başlangıç hatasından toparlanma PASS. Garaj, 180sn raceStep, 10 GLB regresyonları PASS. DOM/çizim test çifti; canlı tarayıcı/GPU/mouse testi yok.
+- Dosyalar: js/race-world.js, js/main.js, index.html; test/raporlar docs/race-upgrade-1803 ve mevcut araç test raporları. Yedek: _yedek/codex-race-start-1806/. Sunucu kapatılmadı; Ctrl+F5.
+
+## 2026-10-17 21:53 İstanbul — Codex — 202610171807 alternating-gait-fix-v1
+- Değişti: ayak uzanma/mesafe düzeltmelerinin bağımsız phaseOffset ile iki bacağı aynı faza getirmesi giderildi. Tek saat, sabit yarım döngü sağ-sol farkı; temas/IK korunur.
+- Eklendi: docs/animation-gait-1807/ altında öncesi/sonrası ölçüm, 17 gerçek GLB adım testi ve DEVIR.md. Çıkarıldı: bağımsız ayak phaseOffset; karakter/model çıkarılmadı.
+- Test: önceki hatada 60FPS sprint faz farkı kayboluyor, iki ayak havada süre yüzde88.9. Sonrası yüzde20.3 normal koşu uçuşu; 16 hız/FPS +32 yön/dur-kalk senaryosu sıralı adım PASS. 17 GLB yürüyüş/sprint ters ayak hareketi PASS; mevcut hareket/dönüş regresyonları PASS. Tarayıcı/GPU görsel kabul testi yok. Önceden bilinen skin deformasyonları ayrı raporda korunuyor.
+- Dosyalar: js/anim-contact.js,index.html,test/raporlar. Yedek: _yedek/codex-gait-1807/. Sunucu kapatılmadı; Ctrl+F5.
+
+## 2026-10-17 23:12 İstanbul — Codex — Custom Cars 1 / PAKET, UYGULANMADI
+- Kullanıcı yalnız dosya istedi. Ana oyun runtime dosyaları değiştirilmedi; build1807 kaldı.
+- Eklendi: Masaüstü ARABA UYARLAMA PAKETI.zip (51dosya,121190113bayt):8 orijinal SHA256 yedek,8 düzenlenebilir normalleştirilmiş kaynak,16 optimize GLB, eklenti, kurucu, tekrar üretme araçları ve raporlar.
+- Düzenlendi: +Z yön/ölçek/zemin;4 tekerlek grubu; Doğan mesh parçalama; M3GTR yönü; E30 ön tekerlek hizası; Huracán ayrı glow geometrileri; malzeme bazlı birleştirme;512px dokular; oyuncu/bot ayrı geometri.
+- Ölçüm: kaynak1144458 üçgen/3729 çizim -> yüksek439680/190, düşük179043/189. Yüksek GLB77.9MB->31.0MB.
+- Test:16GLB validator0 hata0 uyarı; gerçek Three r128 yükleme,4tekerlek2direksiyon,fizik,animasyon;3lüyükleme kuyruğu,bot düşükLOD; ayrı klasörde kurucu,hash,yedek PASS. CPU dokulu önizleme incelendi. Canlı WebGL/GPU FPS testi yok. ZIP CRC+SHA256 PASS.
+- Yedek: paketin originals/ ve editable/ klasörleri; kaynak Downloads/arabalar değişmedi. Notlar dışında ana oyuna kurulum yapılmadı.
+
+- 2026-10-17 23:30 · Claude · 202610171808 denetim-v1 · Genel hata denetimi: hareket gerilemesi (1415 kademeli ivme, karşı tuşla duruş 0.25 sn) geri alındı; aktör/silah/rekabetçi işaret GPU sızıntıları kapatıldı; yarışta silah şeridi ve fare kilidi ipucu taşması düzeltildi. Yeni zorunlu test tests/audit.cjs (npm test içinde), 39/39 PASS. Açık işler ve Codex/Kimi promptları: docs/HATA_DENETIMI_20261017.md. IS_PLANI başına yeni çalışma hattı: canlı klasöre ajan yazmaz, tek FAIL = teslim yok.

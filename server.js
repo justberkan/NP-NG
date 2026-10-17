@@ -166,7 +166,7 @@ function onText(c, s) {
   if (m.t === 'quit') { if (c.rm) useRoom(c.rm); leave(c); owLeave(c); return; }
   if (c.rm && c.joined) useRoom(c.rm);
   if (m.t === 'chat' || m.t === 'vj' || m.t === 'vs' || m.t === 'vl') return chatMsg(c, m, now);
-  if (m.t[0] === 'a' && m.t !== 'auth') { if (['alist', 'agive', 'aclr', 'akick'].includes(m.t)) return admMsg(c, m); }
+  if (m.t[0] === 'a' && m.t !== 'auth') { if (['alist', 'agive', 'aclr', 'akick', 'atools', 'aheal'].includes(m.t)) return admMsg(c, m); }
   if (m.t[0] === 'o' && owMsg(c, m, now)) return;
   if (m.t[0] === 'f' && frMsg(c, m)) return;
   if (m.t === 'join') {
@@ -196,9 +196,9 @@ function onText(c, s) {
     case 'st': { // konum + animasyon durumu
       if (!c.alive || CUR.roundOver) return;
       const dt = Math.max(.02, (now - c.lt) / 1000); c.lt = now;
-      const BND = CUR.kind === 'tm' ? 400 : 80; let x = num(m.x, -BND, BND), y = num(m.y, -80, 120), z = num(m.z, -BND, BND);
+      const BND = c.admin&&c.adtools?.noclip?10000:CUR.kind === 'tm' ? 400 : 80; let x = num(m.x, -BND, BND), y = num(m.y, c.admin&&c.adtools?.noclip?-500:-80, c.admin&&c.adtools?.noclip?500:120), z = num(m.z, -BND, BND);
       const dist = Math.hypot(x - c.x, y - c.y, z - c.z);
-      if (now > (c.free || 0) && dist > 60 * dt + 4) { send(c, { t: 'fix', x: c.x, y: c.y, z: c.z }); return; } // ışınlanma / aşırı hız
+      if (!(c.admin&&c.adtools?.noclip) && now > (c.free || 0) && dist > 60 * dt + 4) { send(c, { t: 'fix', x: c.x, y: c.y, z: c.z }); return; } // ışınlanma / aşırı hız
       c.x = x; c.y = y; c.z = z; c.yaw = num(m.yaw, -50, 50); c.pitch = num(m.pitch, -1.6, 1.6);
       c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 511) | 0;
       if (WPN[m.w]) c.w = m.w;
@@ -218,7 +218,7 @@ function onText(c, s) {
     }
     case 'hit': { // hasar iddiası: sunucu doğrular ve uygular
       const W = WPN[m.w], v = players.get(m.id | 0);
-      if (!c.alive || CUR.roundOver || !W || !v || v === c || !v.alive || v.inv > now) return;
+      if (!c.alive || CUR.roundOver || !W || !v || v === c || !v.alive || v.inv > now || (v.admin&&v.adtools?.god)) return;
       if (CUR.kind !== 'ar' && v.team === c.team) return; // dost ateşi yok
       const key = 'h' + m.w, minGap = W.r * 1000 * (W.m ? .5 : .45);
       if (c.last[key] && now - c.last[key] < minGap) return; c.last[key] = now;
@@ -303,6 +303,7 @@ function zStartWave(rm) {
   bcast({ t: 'wave', w: rm.wave, n }); sendBoard();
 }
 function zDamagePlayer(rm, c, d, z) {
+  if(c.admin&&c.adtools?.god)return;
   c.hp -= d;
   if (c.hp > 0) { bcast({ t: 'hp', id: c.id, hp: c.hp, by: 0 }); return; }
   c.hp = 0; c.alive = false; c.d++;
@@ -387,9 +388,11 @@ const ADMINS = new Set(); try { for (const l of fs.readFileSync(path.join(DATA, 
 const BANS = new Map(); // anahtar -> bitiş zamanı
 function debtOf(sv) { let t = 0; if (sv && sv.eco && Array.isArray(sv.eco.debts)) for (const d of sv.eco.debts) t += Math.max(0, (d.total || 0) - (d.paid || 0)); return Math.round(t); }
 function admMsg(c, m) {
-  if (!c.admin || !c.acc) return true;
+  if (!c.admin || !c.acc) {if(m.t==='atools')send(c,{t:'atools',flags:{}});return true;}
   const key = String(m.n || '').trim().toLowerCase(), a = ACC[key], o = users.get(key), now = Date.now();
   switch (m.t) {
+    case 'atools': {const flags={};for(const k of ['noclip','esp','god','ammo'])flags[k]=m.flags?.[k]===true;if(c.adtools?.noclip&&!flags.noclip)c.free=Date.now()+2000;c.adtools=flags;send(c,{t:'atools',flags});return true;}
+    case 'aheal': {c.hp=100;send(c,{t:'aheal',hp:100});if(c.wcroom){const host=c.wcroom.members.get(c.wcroom.host);if(host)send(host,{t:'wc_admin_heal',id:c.wcid})}if(c.joined){useRoom(c.rm);bcast({t:'hp',id:c.id,hp:100,by:0})}return true;}
     case 'alist': {
       const rows = Object.keys(ACC).map(k => { const b = ACC[k], u = users.get(k), live = u && u.sock.writable; return [b.name, live ? 1 : 0, live ? where(u) : '', Math.round((b.save && b.save.tl) || 0), debtOf(b.save), (b.save && b.save.ow && b.save.ow.lvl) || 1, ADMINS.has(k) || (u && u.local) ? 1 : 0]; });
       send(c, { t: 'alist', a: rows }); return true;

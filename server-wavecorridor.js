@@ -21,9 +21,9 @@ module.exports=function({send,weapons}){
   const host=r.members.get(r.host);
   if(m.t==='wc_state'){
    const d=m.d||{},finite=(v,a,b)=>Math.max(a,Math.min(b,Number.isFinite(v)?v:0));
-   send(host,{t:'wc_state',id:c.wcid,d:{x:finite(d.x,-17,17),y:finite(d.y,0,8),z:finite(d.z,-3030,18),yaw:finite(d.yaw,-1000,1000),w:weapons[d.w]?d.w:'rifle'}});
+   send(host,{t:'wc_state',id:c.wcid,d:{x:finite(d.x,-17,17),y:finite(d.y,c.admin&&c.adtools?.noclip?-500:-40,c.admin&&c.adtools?.noclip?500:8),z:finite(d.z,-3030,18),yaw:finite(d.yaw,-1000,1000),w:weapons[d.w]?d.w:'rifle',rescue:finite(d.rescue,0,3),adminGod:!!(c.admin&&c.adtools?.god),adminFly:!!(c.admin&&c.adtools?.noclip)}});
   }else if(m.t==='wc_snapshot'&&c.wcid===r.host){
-   const d=m.d;if(!d||!Array.isArray(d.zombies)||d.zombies.length>12||!Array.isArray(d.players)||d.players.length>4||JSON.stringify(d).length>30000)return true;
+   const d=m.d;if(!d||!Array.isArray(d.zombies)||d.zombies.length>5||!Array.isArray(d.players)||d.players.length>4||JSON.stringify(d).length>30000)return true;
    r.snapshot=d;emit(r,{t:'wc_snapshot',d},c);
   }else if(m.t==='wc_hit'){
    const w=weapons[m.w];if(!w)return true;const last=c.wchit||0;if(now-last<w.r*450)return true;c.wchit=now;

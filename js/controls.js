@@ -23,7 +23,12 @@ const KDEF=[
  ['tp','Üçüncü şahıs görünüm','KeyV',null],
  ['grip','Tutuş değiştir (yakın dövüş)','KeyG',null],
  ['chat','Sohbet / onay','Enter','NumpadEnter'],
- ['ptt','Bas-konuş (mikrofon)','KeyB',null]
+ ['ptt','Bas-konuş (mikrofon)','KeyB',null],
+ ['raceFire','Yarış: özelliği ileri kullan','KeyF',null],
+ ['raceBack','Yarış: özelliği geri kullan','KeyQ',null],
+ ['raceDrop','Yarış: slot özelliğini yere bırak','KeyG',null],
+ ['raceDrift','Yarış: el freni (drift)','Space',null],
+ ['raceBoost','Yarış: nitro / art yakıcı','ShiftLeft',null]
 ];
 let KB={};
 function kReset(){

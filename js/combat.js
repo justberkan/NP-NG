@@ -4,6 +4,10 @@ const rc=new THREE.Raycaster();rc.far=100;
 const rb=new THREE.Raycaster(),vo=V3(),vd=V3(),_mz=V3(),_dir=V3(),_ev=V3(),_to=V3();
 let wave=0,waveCd=0,tk={1:0,2:0},lastT='';
 const E=[];
+/* Sahneden çıkan aktörün iskelet dokusunu (boneTexture) ekran kartından bırakır. Ortak geometri/malzemeye dokunmaz;
+   aynı model tekrar sahneye girerse doku ilk çizimde yeniden kurulur. Eskiden her bot/mob/zombi için bir doku sızıyordu
+   (TDM +9, rekabetçi +11, açık dünya +17 doku/maç; açık dünyada mob her uzaklaşıp yaklaştığında). */
+function freeActor(g){if(!g)return;if(g.parent)g.parent.remove(g);const sk=new Set();g.traverse(o=>{if(o.isSkinnedMesh&&o.skeleton)sk.add(o.skeleton);if(o.geometry&&o.geometry.userData.own)o.geometry.dispose();if(o.material&&o.material.userData&&o.material.userData.own)o.material.dispose()});for(const s of sk)s.dispose()}
 
 /* ----- Aim training hedefleri ----- */
 const T=[],mRed=new THREE.MeshLambertMaterial({color:0xd8342c}),mHead=new THREE.MeshLambertMaterial({color:0xffb020});
@@ -50,14 +54,13 @@ function killfeed(a,b,w,head){
  $('kf').appendChild(el);setTimeout(()=>el.remove(),4000);
  while($('kf').children.length>5)$('kf').firstChild.remove();
 }
-function hitFlash(c){if(window.BGMODE)return;const e=$('ch');e.classList.remove('hit','head','kill');e.classList.add(c);setTimeout(()=>e.classList.remove(c),c==='kill'?200:90)}
-/* vuruş hissi: kısa donma (hit-stop), kamera sarsıntısı, katmanlı ses, FOV vuruşu */
+let hitFlashTimer=0,hitFeedbackRank=0;
+function hitFlash(c){if(window.BGMODE)return;const rank=c==='kill'?3:c==='head'?2:1;if(rank<hitFeedbackRank)return;const e=$('ch');clearTimeout(hitFlashTimer);hitFeedbackRank=rank;e.classList.remove('hit','head','kill');e.classList.add(c);hitFlashTimer=setTimeout(()=>{e.classList.remove('hit','head','kill');hitFeedbackRank=0},c==='kill'?170:c==='head'?130:95)}
+/* Darbe yalnız geri bildirimdir: fizik/oyun saati yavaşlatılmaz. */
 function hitFeel(heavy){
  if(window.BGMODE)return;
- hitStopT=Math.max(hitStopT,heavy?.1:.055);
- p.shk=Math.max(p.shk||0,heavy?.03:.014);
- snd(heavy?95:140,.1,.09,'square');snd(heavy?620:520,.08,.05,'sawtooth');snd(1500,.04,.025,'sine');
- if(typeof camKick==='function')camKick((Math.random()<.5?-1:1)*(heavy?.03:.014));
+ snd(heavy?105:155,.055,heavy?.08:.055,'triangle');snd(heavy?650:850,.035,.025,'sine');
+ kickR=Math.max(kickR,heavy?.18:.10);
 }
 function hurtFx(){const v=$('vig');v.style.opacity='.65';setTimeout(()=>v.style.opacity='0',90)}
 
@@ -101,10 +104,15 @@ function startReload(){
  if(cw.melee||reload>0||ammo===cw.mag||p.dead>0)return;
  reload=cw.rel;reloadSound('magout');
 }
+function combatWorldVisible(o){for(let p=o;p;p=p.parent)if(p.visible===false)return false;return true}
+function combatWorldTargets(){const a=boxMeshes.filter(combatWorldVisible);if(typeof floor!=='undefined'&&floor.position.y> -100&&combatWorldVisible(floor))a.push(floor);if(typeof mode!=='undefined'&&mode==='wc'&&typeof WCT!=='undefined'&&WCT.surface&&combatWorldVisible(WCT.surface))a.push(WCT.surface);return a}
+const meleeWallRay=new THREE.Raycaster();
+function meleeBlocked(origin,direction,distance){meleeWallRay.set(origin,direction);meleeWallRay.near=.015;meleeWallRay.far=Math.max(.015,distance-.18);const targets=combatWorldTargets();if(typeof OW!=='undefined'&&OW.on&&OW.solids){const endX=origin.x+direction.x*distance,endZ=origin.z+direction.z*distance;for(const solid of OW.solids){if(solid.x2<Math.min(origin.x,endX)||solid.x1>Math.max(origin.x,endX)||solid.z2<Math.min(origin.z,endZ)||solid.z1>Math.max(origin.z,endZ))continue;if(solid.m)targets.push(solid.m)}}return meleeWallRay.intersectObjects(targets,true).length>0}
+function actorHitTargets(e){const h=e.rig;if(!h||!h.legs)return[e.g];if(h.gd&&h.gd.boxes?.length)return h.gd.boxes;return[h.head?.children[1],h.hips?.children[0],h.spine?.children[0],h.armR?.sh.children[0],h.armR?.el.children[0],h.armL?.sh.children[0],h.armL?.el.children[0],...h.legs.flatMap(l=>[l.hip.children[0],l.knee.children[0]])].filter(o=>o?.isMesh)}
 function targetObjs(){
- const a=boxMeshes.slice();
+ const a=combatWorldTargets();
  for(const t of T)if(t.visible)a.push(t);
- for(const e of E)if(e.hp>0&&e.team===2&&e.g.visible)a.push(e.g);
+ for(const e of E)if(e.hp>0&&e.team===2&&e.g.visible)a.push(...actorHitTargets(e));
  return a;
 }
 /* ----- Geri tepme: sabit desen (Apex tarzı) + bırakınca toparlanma ----- */
@@ -182,6 +190,7 @@ function applyMelee(){
    const hx=x-cam.position.x,hz=z-cam.position.z,hl=Math.hypot(hx,hz),dl=Math.hypot(_dir.x,_dir.z);
    if(!(hl<2.2&&dl>.05&&(hx*_dir.x+hz*_dir.z)/(hl*dl||1)>=cs&&Math.abs(y-cam.position.y)<3.2))return;
   }
+  if(meleeBlocked(cam.position,_to,d))return;
   any=true;fn(V3(x,y,z));
  };
  for(const e of E){
@@ -208,7 +217,7 @@ function damageEnemy(e,d,info){
  if(e.mp){mpHit(e,d,info);return}
  if(e.mob){owDamage(e,d,info);return}
  if(e.hp<=0)return;
- e.hp-=d;e.flinch=1;
+ e.hp-=d;e.flinch=info?.melee ? .85 : .55;
  if(info&&info.player){dmgNum(info.pt,d,info.head,e.hp<=0);if(!info.melee)hitSound(info.head,e.hp<=0)}
  if(e.hp>0)return;
  killEnemy(e,info);
@@ -372,7 +381,8 @@ function updZombie(e,dt){
  e.vx=(q.x-px)/dt;e.vz=(q.z-pz)/dt;
  e.cd-=dt;
  if(e.atk>0)e.atk-=dt;
- if(d<1.7&&(tp0.y||0)<2.5&&e.cd<=0&&target.alive){e.cd=.9;e.atk=.5;if(mode==='wc')wcDamagePlayer(target,e.damage||10,q);else hurt(10,q)}
+ const attackRange=mode==='wc'&&e.boss?2.7:1.7;
+ if(d<attackRange&&(tp0.y||0)<2.5&&e.cd<=0&&target.alive){e.cd=.9;e.atk=.5;if(mode==='wc')wcDamagePlayer(target,e.damage||10,q);else hurt(10,q)}
  e.flinch=Math.max(0,e.flinch-dt*4);
  const _pr=poseRate(e,q.x-p.x,q.z-p.z);
  if(_pr>0)
@@ -396,7 +406,7 @@ function begin(){
 function setupMode(){
  if(OW.on&&mode!=='ow')owLeave();
  if(typeof mapApply==='function')mapApply((mode==='tdm'||mode==='cmp'||(mode==='mp'&&MPL.kind==='tm'))?MAPS.sel:'arena');
- E.forEach(e=>S.remove(e.g));E.length=0;clearRags();clearDn();pRagdoll=null;
+ E.forEach(e=>freeActor(e.g));E.length=0;clearRags();clearDn();pRagdoll=null;
  tk={1:0,2:0};wave=0;waveCd=1.5;lastT='';zPend=0;zPT=0;
  $('hp').style.display=mode==='aim'?'none':'block';
  $('msg').textContent=mode==='zom'?'Zombiler geliyor':'';
@@ -404,6 +414,8 @@ function setupMode(){
  if(mode==='tdm')tdmSetup();
  if(mode==='ow')owStart();
  if(mode==='mp')mpStart();
+ if(mode==='race'){if(typeof raceSetup==='function')raceSetup()}
+ else if(typeof raceStop==='function')raceStop();
  if(typeof rangeStart==='function'){if(mode==='aim')rangeStart();else rangeStop()}
 }
 let zPend=0,zPT=0;
@@ -423,7 +435,7 @@ function updE(dt){
  else if(mode==='zom'&&!E.some(e=>e.hp>0)){
   waveCd-=dt;
   if(waveCd<=0){
-   for(let i=E.length-1;i>=0;i--){S.remove(E[i].g);E.splice(i,1)}
+   for(let i=E.length-1;i>=0;i--){freeActor(E[i].g);E.splice(i,1)}
    wave++;waveCd=3;p.hp=Math.min(100,p.hp+30);hudHp();hudT();
    $('msg').textContent='Dalga '+wave;setTimeout(()=>{if(mode==='zom')$('msg').textContent=''},1500);
    zPend=3+wave*2;zPT=0;
@@ -440,6 +452,7 @@ function finish(){
   earn=Math.round(score/20);t='Süre doldu';if(typeof MPL!=='undefined'&&MPL.authed)mpSend({t:'aimscore',s:score});r='Skor <b>'+score+'</b> · En iyi <b>'+best+'</b><br>İsabet %'+acc;
  }else if(mode==='zom'){earn=kills*5+wave*20;t='Dalga '+wave+' ile bitti';r='Öldürülen <b>'+kills+'</b> · Skor <b>'+score+'</b>'}
  else if(mode==='mp'&&MPL.kind==='zo'){earn=kills*5+(MPL.wave||0)*20;t='Dalga '+(MPL.wave||0)+' ile bitti';r='Öldürme <b>'+kills+'</b> · Skor <b>'+score+'</b>'}
+ else if(mode==='race'){const q=typeof raceResult==='function'?raceResult():{win:false,earn:60,t:'Yarış bitti',r:''};win=q.win;earn=q.earn;t=q.t;r=q.r}
  else if(mode==='mp'){win=MPL.kind==='tm'?MPL.winTeam===MPL.team:MPL.win===MPL.id;earn=kills*10+(win?100:0);t=MPL.kind==='tm'?(win?'Takımın kazandı!':'Rakip takım kazandı'):win?'Birinci oldun!':(MPL.winName?MPL.winName+' kazandı':'Tur bitti');r='Öldürme <b>'+kills+'</b> · Sıra <b>'+(1+Math.max(0,MPL.board.findIndex(q=>q[0]===MPL.id)))+'/'+MPL.board.length+'</b>'}
  else{win=tk[1]>tk[2];earn=kills*10+(win?100:0);t=win?'Kazandınız!':tk[1]===tk[2]?'Berabere':'Kaybettiniz';r='Skor '+tk[1]+' - '+tk[2]+' · Öldürme <b>'+kills+'</b>'}
  SV.tl+=earn;SV.xp+=Math.max(20,earn);

@@ -1,13 +1,15 @@
 'use strict';
 /* ===== Ayarlar: kayıtlı seçenekler + uygulayıcılar ===== */
 const SETDEF={
- skipCrate:false,sens:1,adsSens:.8,touchSens:1,invY:false,fov:75,volume:1,
+ mouseDpi:800,sourceDpi:800,sourceSens:1,sourceYaw:.022,sensSource:"cs2",rawMouse:true,skipCrate:false,sens:1,adsSens:.8,touchSens:1,invY:false,fov:75,volume:1,
  xhStyle:'cross',xhColor:'',xhSize:9,xhThick:2,xhGap:4,xhDot:false,xhOutline:true,
  opticSize:.85,dotSize:1,adsZoom:.5,autoHop:true,
  preset:'mid',res:100,fpsShow:false,fpsCap:0,light:2,shadow:false,fog:2,fx:2,aa:false,autoPol:1,grip:0
 };
 const SET=Object.assign({},SETDEF);
 try{Object.assign(SET,JSON.parse(localStorage.getItem('mmofps_set'))||{})}catch(e){}
+if(!Number.isFinite(SET.sens)||SET.sens<=0||SET.sens>100)SET.sens=1;
+for(const k of ['mouseDpi','sourceDpi','sourceSens'])if(!Number.isFinite(SET[k])||SET[k]<=0)SET[k]=SETDEF[k];
 SET.fov=+SET.fov||baseFov;baseFov=SET.fov;
 function saveSet(){try{localStorage.setItem('mmofps_set',JSON.stringify(SET));localStorage.setItem('mmofps_fov',SET.fov)}catch(e){}}
 

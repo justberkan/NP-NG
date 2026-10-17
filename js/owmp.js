@@ -14,7 +14,7 @@ function ownLeave(){
  OWN.on=false;OWN.joining=false;ownClear();ownUI();
 }
 function ownClear(){
- for(const e of OWN.ents.values()){S.remove(e.g);if(e.tag)e.tag.remove()}
+ for(const e of OWN.ents.values()){freeActor(e.g);if(e.tag)e.tag.remove()}
  OWN.ents.clear();
  for(const m of OW.mobs){m.net=false;m.nx=null}
 }
@@ -33,7 +33,7 @@ function ownAdd(info){
  ownTag(e);OWN.ents.set(info.id,e);
 }
 function ownTag(e){e.tag.textContent=(e.pvp?'⚔ ':'')+e.name+' · Lv '+e.lvl;e.tag.style.color=e.pvp?'#ff8a7a':'#9dffb4'}
-function ownRemove(id){const e=OWN.ents.get(id);if(!e)return;S.remove(e.g);if(e.tag)e.tag.remove();OWN.ents.delete(id)}
+function ownRemove(id){const e=OWN.ents.get(id);if(!e)return;freeActor(e.g);if(e.tag)e.tag.remove();OWN.ents.delete(id)}
 
 /* ---------- Köyde mi? (PvP köyde kapalı, mod sadece köyde değişir) ---------- */
 const ownVillage=()=>Math.hypot(p.x,p.z)<14;

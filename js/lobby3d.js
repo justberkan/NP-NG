@@ -80,7 +80,7 @@ function lobbyLayout(){
   s.nt.style.display=vis&&!sub?'block':'none';
  });
 }
-function lobbySetView(v){lobbyView=v;lobbyLayout()}
+function lobbySetView(v){lobbyView=v;const panel=document.querySelector('.lobby-atmosphere');if(panel)panel.hidden=v!=='home';lobbyLayout()}
 const _lv=V3();
 function lobbyUpdate(dt){
  if(LB.atmosphere)LB.atmosphere.update(dt);

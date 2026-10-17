@@ -1,0 +1,17 @@
+<!doctype html><html><body style="margin:0;background:#9cc3de"><canvas id=c width=1200 height=800></canvas>
+<script src="lib/three.min.js"></script><script src="lib/GLTFLoader.js"></script>
+<script>
+const R=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});R.setSize(1200,800,false);
+const S=new THREE.Scene();S.background=new THREE.Color(0x9cc3de);S.add(new THREE.HemisphereLight(0xffffff,0x445566,1.2));const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(2,3,1);S.add(dl);
+const cam=new THREE.PerspectiveCamera(50,1.5,.1,100000);
+new THREE.GLTFLoader().load('hands_test.glb',g=>{
+ const o=g.scene;S.add(o);o.updateMatrixWorld(true);
+ const bb=new THREE.Box3().setFromObject(o),sz=bb.getSize(new THREE.Vector3()),c=bb.getCenter(new THREE.Vector3());
+ const info={size:sz.toArray().map(v=>+v.toFixed(3)),center:c.toArray().map(v=>+v.toFixed(3)),min:bb.min.toArray().map(v=>+v.toFixed(3)),max:bb.max.toArray().map(v=>+v.toFixed(3))};
+ let tris=0,meshes=[];o.traverse(m=>{if(m.isMesh){tris+=m.geometry.index?m.geometry.index.count/3:m.geometry.attributes.position.count/3;meshes.push({n:m.name,skinned:!!m.isSkinnedMesh,mat:m.material.name,map:!!m.material.map,verts:m.geometry.attributes.position.count})}});
+ info.tris=tris;info.meshes=meshes;window.INFO=info;
+ const r=Math.max(sz.x,sz.y,sz.z);
+ window.view=(dir)=>{cam.position.copy(c).add(new THREE.Vector3(...dir).normalize().multiplyScalar(r*1.6));cam.lookAt(c);R.render(S,cam)};
+ window.READY=1;
+});
+</script></body></html>

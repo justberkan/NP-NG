@@ -1,6 +1,7 @@
 'use strict';
 /* ===== Açık dünya: eşyalar, düşenler, envanter, NPC'ler (demirci/tüccar), Genshin tarzı panel ===== */
 const ITM={
+ ammo:{n:'Mermi Kutusu',r:2,p:18,ic:'▣',d:'Zombilerden bulunan mühimmat. Tüccara satılabilir.'},
  ore:{n:'Demir Cevheri',r:1,p:4,ic:'⛏️',d:'Kılıç yükseltmenin temel malzemesi.'},
  polish:{n:'Parlatma Taşı',r:2,p:14,ic:'💎',d:'Daha yüksek seviye yükseltmeler için gerekir.'},
  core:{n:'Güç Çekirdeği',r:3,p:45,ic:'🔮',d:'6. seviyeden sonraki yükseltmelerde kullanılır.'},
@@ -46,7 +47,7 @@ function owLootSpawn(id,n,x,z){
  if(window.BGMODE||!OW.on){owLootGive(id,n);return}
  if(!lootG){lootG=new THREE.BoxGeometry(.3,.3,.3);beamG=new THREE.BoxGeometry(.06,2.4,.06)}
  const r=ITM[id].r,g=new THREE.Group();
- g.add(new THREE.Mesh(lootG,lootMat(r)));
+ if(id==='med'||id==='ammo'){const type=id==='med'?'health':'ammo',item=wcItemModel(type);g.add(item);wcLoadItemModels().then(()=>{if(!g.parent)return;g.remove(item);g.add(wcItemModel(type))})}else g.add(new THREE.Mesh(lootG,lootMat(r)));
  if(r>=3){const b=new THREE.Mesh(beamG,new THREE.MeshBasicMaterial({color:LCOL[r],transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false}));b.position.y=1.2;g.add(b)}
  const a=Math.random()*6.28,d=.8+Math.random()*1.4;
  const o={id,n,g,x:x+Math.cos(a)*d,z:z+Math.sin(a)*d,age:0,ph:Math.random()*6,vy:3.5};
@@ -83,6 +84,7 @@ function owDrops(m){
  if(m.tk==='gol'||m.boss){out.push(['plate',1+(m.boss?1:0)]);if(R()<(m.boss?.7:.25))out.push(['redcore',1])}
  if(L>=8&&R()<(m.boss?.35:.03))out.push(['core',1]);
  if(m.boss&&R()<.18)out.push(['gem',1]);
+ if(m.camp.bi===0&&R()<.2)out.push(['ammo',1]);
  const gy=owH(m.x,m.z);
  for(const o of out)owLootSpawn(o[0],o[1],m.x,m.z);
  /* nadiren yeni kılıç düşer */

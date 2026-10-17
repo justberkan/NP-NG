@@ -104,7 +104,7 @@ spawnRagdoll=function(h,vel,hitPt,hitDir,power){
  dir.normalize();
  const r={g,mdl:w,dir,t:0,q0:g.quaternion.clone(),y0:g.position.y,pts:{pel:{p:g.position.clone().setY(g.position.y+.4)}},pw:Math.min(1.6,.9+(power||4)*.08),glb:true};
  GLBDEAD.push(r);
- while(GLBDEAD.length>6){const o=GLBDEAD.shift();S.remove(o.g)}
+ while(GLBDEAD.length>6){const o=GLBDEAD.shift();removeRagdollRoot(o.g)}
  return r;
 };
 setTimeout(gobmLoad,2500);

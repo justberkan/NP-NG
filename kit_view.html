@@ -1,0 +1,19 @@
+<!doctype html><html><body style="margin:0"><canvas id=c width=1400 height=700></canvas>
+<script src="lib/three.min.js"></script><script src="lib/GLTFLoader.js"></script><script src="js/model_soldier.js"></script>
+<script>
+const R=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true,preserveDrawingBuffer:true});R.setSize(1400,700,false);
+const S=new THREE.Scene();S.background=new THREE.Color(0x9cc3de);S.add(new THREE.HemisphereLight(0xffffff,0x556677,1.1));const dl=new THREE.DirectionalLight(0xffffff,.6);dl.position.set(1,2,2);S.add(dl);
+const cam=new THREE.PerspectiveCamera(30,2,1,5000);
+function dec(b){const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer}
+new THREE.GLTFLoader().parse(dec(GLB_SOLDIER_B64),'',g=>{
+ const a=g.scene,b=THREE.SkeletonUtils?null:null;
+ const mk=()=>{const o=g.scene.clone(true);return o};
+ window.M=g.scene;const piv=new THREE.Group();piv.rotation.x=Math.PI/2;piv.add(a);S.add(piv);piv.updateMatrixWorld(true);
+ const bb=new THREE.Box3().setFromObject(piv);window.BB=[bb.min.toArray(),bb.max.toArray()];
+ const names=[];a.traverse(o=>{if(o.isMesh){names.push(o.material.name);o.frustumCulled=false;o.material.side=THREE.DoubleSide}});window.NAMES=names;
+ window.show=(hide,ang)=>{a.traverse(o=>{if(o.isMesh)o.visible=!hide.some(h=>o.material.name.includes(h))});
+  const c=new THREE.Vector3();bb.getCenter(c);const h=bb.max.y-bb.min.y;
+  cam.position.set(c.x+Math.sin(ang)*h*2.2,c.y+h*.1,c.z+Math.cos(ang)*h*2.2);cam.lookAt(c.x,c.y+h*.1,c.z);R.render(S,cam);return R.domElement.toDataURL()};
+ window.READY=1;
+});
+</script></body></html>

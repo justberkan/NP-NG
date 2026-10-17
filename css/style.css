@@ -29,7 +29,8 @@ button{font-family:inherit}
 #ch.kill,#ch.kill *{--xc:#ff3b3b}
 #ch.kill{transform:rotate(45deg) scale(1.4)}
 #fps{position:fixed;right:10px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:40;font:700 12px system-ui;color:#7dff9a;background:#0009;padding:2px 7px;border-radius:3px;pointer-events:none}
-#msg{position:absolute;top:26%;left:0;right:0;text-align:center;font-size:30px}
+#msg{position:absolute;top:26%;left:0;right:0;text-align:center;font-size:30px;padding:0 16px;overflow-wrap:anywhere}
+#msg.plhint{font-size:16px;top:auto;bottom:22%;opacity:.9}
 #hp{position:absolute;left:16px;bottom:calc(44px + env(safe-area-inset-bottom,0px));width:min(300px,52vw);display:none;color:#fff;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
 #spd{position:absolute;left:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));font-size:18px;color:var(--ac)}
 #stb{position:absolute;left:50%;margin-left:-80px;width:160px;height:6px;bottom:calc(14px + env(safe-area-inset-bottom,0px));background:#0007;border-radius:3px;overflow:hidden}
@@ -402,15 +403,15 @@ body.npcnear.mow #be.owonly,body.tedit #be.owonly{display:flex}
 .sc:after{content:'';position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--rc);opacity:.75}
 .sc:hover{transform:translateY(-3px);border-color:var(--rc);box-shadow:0 8px 22px #000a,0 0 18px color-mix(in srgb,var(--rc) 40%,transparent)}
 .sc.on{border-color:var(--cy);box-shadow:0 0 0 1px var(--cy),0 0 22px #27e0ff66}
-.sc-i{position:relative;height:100px;border-radius:8px;background:center/contain no-repeat;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .35s}
+.sc-i{position:relative;height:100px;flex:0 0 100px;border-radius:8px;background:center/contain no-repeat;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .35s}
 .sc-i.ld{opacity:1}
 .sc-i svg{height:84%;width:auto;max-width:100%}
 .sc-i .em,.sh-big .em{font-size:44px}
 .sc:not(.ld) .sc-i:not(.ld){background-image:linear-gradient(100deg,transparent 30%,#ffffff10 50%,transparent 70%);background-size:200% 100%;animation:shim 1.1s infinite;opacity:1}
 @keyframes shim{from{background-position:200% 0}to{background-position:-100% 0}}
-.sc-n{position:relative;font:700 14px system-ui;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
-.sc-s{position:relative;font:500 11px system-ui;color:var(--mut)}
-.sc-f{position:relative;display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto;padding-top:6px}
+.sc-n{position:relative;flex-shrink:0;min-height:20px;font:700 14px/20px system-ui;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.sc-s{position:relative;flex-shrink:0;min-height:16px;font:500 11px system-ui;color:var(--mut)}
+.sc-f{position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:auto;padding-top:6px}
 .sc-f button{background:#0e2b38;border:1px solid var(--cy);color:#bff6ff;border-radius:6px;font:800 11px system-ui;padding:6px 11px;cursor:pointer}
 .sc-f button:hover{background:#13465a;color:#fff}
 .sc.own .sc-f button{background:#102a1c;border-color:#3ddc84;color:#bfffd8}

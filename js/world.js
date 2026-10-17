@@ -250,7 +250,7 @@ function owDeact(m){
  owRingOff(m);
  if(!m.g)return;
  if(OWN.on&&!m.net&&m.state!=='idle'&&m.state!=='dead'&&typeof mpSend==='function')mpSend({t:'omp',m:[ownMobRow(m,0)]});
- S.remove(m.g);
+ freeActor(m.g);
  /* yalnızca bu moba ait geometriler atılır. GLB karakter/goblin/silah modelleri tüm kopyalarca PAYLAŞILIYOR:
     eskiden onlar da atılıyordu, sonraki karede ekran kartına baştan yükleniyordu (mob uzaklaştıkça takılma) */
  m.g.traverse(o=>{if(o.geometry&&o.geometry.userData.own)o.geometry.dispose()});

@@ -115,8 +115,10 @@ function cmpSpawn(side,i){
  const L=side==='T'?m.nav.spA:m.nav.spB,O=side==='T'?m.nav.spB:m.nav.spA,s=L[i%L.length],o=O[0];
  return {x:s.x,z:s.z,y:s.y,yaw:Math.atan2(-(o.x-s.x),-(o.z-s.z))};
 }
+/* bölge halkası/harf: sahneden çıkarken geometri, malzeme ve harf dokusu da bırakılır (her maçta 2 doku sızıyordu) */
+function cmpFreeMeshes(){for(const o of CMP.meshes){S.remove(o);if(o.geometry&&o.geometry.type!=='PlaneGeometry'&&!o.isSprite)o.geometry.dispose();if(o.material){if(o.material.map)o.material.map.dispose();o.material.dispose()}}CMP.meshes.length=0}
 function cmpMarkers(){
- for(const o of CMP.meshes)S.remove(o);CMP.meshes.length=0;
+ cmpFreeMeshes();
  for(const s of CMP.sites){
   const r=new THREE.Mesh(new THREE.RingGeometry((s.r||CMPC.siteR)-.15,s.r||CMPC.siteR,40),new THREE.MeshBasicMaterial({color:0xffb020,transparent:true,opacity:.55,side:THREE.DoubleSide,depthWrite:false}));
   r.rotation.x=-Math.PI/2;r.position.set(s.x,(s.y||0)+.06,s.z);S.add(r);CMP.meshes.push(r);
@@ -470,7 +472,7 @@ function cmpLeave(){
  cmpBoard(false);
  for(const f of CMP_FX)cmpDisposeFx(f);CMP_FX.length=0;
  CMP.on=false;cmpMenu(false);CMP.menu=false;
- for(const o of CMP.meshes)S.remove(o);CMP.meshes.length=0;
+ cmpFreeMeshes();
  if(CMP.bomb&&CMP.bomb.mesh)S.remove(CMP.bomb.mesh);CMP.bomb=null;
  if(CMP.loSave){LO.ok=CMP.loSave.ok;LO.keys=CMP.loSave.keys;LO.mod=CMP.loSave.mod;CMP.loSave=null}
  const h=$('cmphud');if(h)h.style.display='none';

@@ -2,7 +2,7 @@
 /* ===== N.P.N.G: Mağaza + Envanter (sıfırdan) =====
    3B küçük resimli kartlar, canlı dönen vitrin, filtreler, istatistik çubukları, yükleme (loadout) şeridi. */
 const SH={tab:'w',sub:'all',sel:null,msg:'',raf:0,sr:null,ss:null,sc:null,so:null,reg:{},selKey:'',t0:0,stOk:false};
-const SH_TABS=[['w','Silahlar'],['o','Kılıçlar'],['c','Karakterler'],['h','Şampiyonlar'],['f','Formalar'],['g','Kaplamalar'],['p','Nişangah'],['x','Artı rengi'],['k','Kasalar']];
+const SH_TABS=[['w','Silahlar'],['o','Kılıçlar'],['c','Karakterler'],['h','Şampiyonlar'],['f','Formalar'],['g','Kaplamalar'],['p','Nişangah'],['k','Kasalar']];
 const SH_SUB=[['all','Tümü'],['ar','Tüfek'],['sn','Nişancı'],['sg','Pompalı'],['smg','SMG'],['pi','Tabanca'],['kn','Bıçak'],['cls','Klasik']];
 const SH_RN={common:'SIRADIŞI',rare:'NADİR',epic:'DESTANSI',legendary:'EFSANEVİ'};
 

@@ -1,5 +1,15 @@
 # N.P.N.G — İş planı ve görev dağılımı
 
+## ⚠️ YENİ ÇALIŞMA HATTI (2026-10-17 gece, Claude — Berkan'ın görevlendirmesiyle) — AŞAĞIDAKİ HER ŞEYİN ÜSTÜNDEDİR
+Bugün 20'den fazla yama tarayıcıda denenmeden canlı klasöre yazıldı; düşen test bilerek bırakıldı. Bundan sonra:
+1. Kaynak tek: GitHub `justberkan/NP-NG` main. Codex/Kimi kendi dalında çalışır, PR açar; **masaüstündeki canlı oyun klasörüne yazmaz.** Claude inceler, test eder, birleştirir.
+2. Bir iş = bir hata numarası (`docs/HATA_DENETIMI_20261017.md` tablosu). Kapsam dışı değişiklik yok.
+3. Teslimden önce `npm test` (run.cjs + tests/audit.cjs). **Tek FAIL = teslim yok.**
+4. Görsel/animasyon/arayüz işinde gerçek tarayıcı ekran görüntüsü şart; "tarayıcı açılmadı" diyen teslim reddedilir.
+5. Kayıt `ISLEM_GUNLUGU.md` biçiminde. Görsel kabul Berkan'da.
+Hazır görev promptları: `docs/HATA_DENETIMI_20261017.md` bölüm 6.
+
+
 ## ZORUNLU KAYIT KURALI (2026-10-17, Berkan)
 Her AI, oyun klasöründe yaptığı HER değişiklikten sonra `ISLEM_GUNLUGU.md` dosyasının en altına kayıt ekler:
 saat (Türkiye), ajan adı, build, ne yapıldı, Eklendi / Değişti / Çıkarıldı (yoksa "yok"), dosyalar, test sonucu, yedek yeri.
@@ -96,3 +106,46 @@ Berkan animasyonu Codex'e devretti ve ardından Ada Wong/Samus kaldırma, Battle
 
 ## 17.10.2026 — 1405 yeni koridor modu ve Dust2 geri düzeltmesi
 Berkan'ın yeni mod paketiyle doğrudan entegrasyon: docs/codex-koridor/DEVIR.md. Dust2 görünmez duvar/tavan talebi geri alındı; 1404 notları bu konuda geçersiz. Yeni co-op modunun sunucu bağımlılığı server-wavecorridor.js dosyasıdır; dağıtımda unutmayın.
+
+## 17.10.2026 — Koridor v2 / 1406
+Koridorda maksimum 5 canlı, anlık kuyruk tamamlama, kafes spawner, taş kapı ve Minecraft zombi modeli son kullanıcı talimatıdır. Güncel devir: docs/codex-koridor/GUNCELLEME_1406.md. 1405 tabanlı başka AI yamaları yeni script/modeli ve 5 sınırını korumalı.
+
+## 17.10.2026 — 1407 yalnız Minecraft
+Koridor'da asker ve model karışımı kaldırıldı; model yüklenmeden maç açılmaz. Güncel devir: docs/codex-koridor/GUNCELLEME_1407.md. Moblar uzak doğar ve birbirini iter; 5 canlı sınırı sürer. 1406 karışımını geri getirmeyin.
+
+
+17.10.2026 · Codex · 202610171408 koridor-v4: sabit ve yerel dönen GLB mermi/can, yakın toplama ve co-op düzeltmesi; açık dünya zombi mermi loot görseli/envanter ganimeti. Güncel devir: docs/codex-koridor/GUNCELLEME_1408.md.
+
+
+17.10.2026 · Codex · 202610171409 koridor-v5: Her 5 turda 10 m parkur boşluğu/3 basamak; gerçek düşme, oyuncu başına 3 düşüş hakkı (3. düşüş elenir), son güvenli noktaya dönüş. Spawner kırılınca savaş köprüsü açılır. 10 turluk Orman/Kış/Cehennem temaları tekrar eder; yalnız aktif çevrenin birleşik dekoru çizilir. Solo gerçek fizik ile 4 atlayış/3 düşüş, co-op düşüş/yeniden eşleşme, önceki 100 tur/5 mob/loot ve genel regresyon PASS. Yeni js/wave-corridor-terrain.js dağıtıma eklenmeli; server-wavecorridor.js negatif Y/kurtarma sıra bilgisi için yeniden başlatılmalı. Yedek _yedek/codex-koridor-1409/.
+
+
+17.10.2026 · Codex · 202610171410 parkur-aim-v1: Ayarlar > Hassasiyet sekmesinde CS2/Apex/Valorant, iki DPI, cm/360/eDPI, kesin hassasiyet ve ham girdi. Parkur/3 düşüş hakkı/temalar da içeride. Testler PASS. Güncel devir docs/codex-koridor/GUNCELLEME_1410.md. Co-op sunucu yeniden açılmalı; istemci Ctrl+F5.
+
+
+17.10.2026 · Codex · 202610171411 koridor-stream-v1: İlerledikçe arkadaki zemin/platform/köprü GPU kaynakları bırakılır; aktif pencere, kısa yan duvarlar ve yalnız aktif spawner. En gerideki canlı oyuncu/güvenli nokta korunur; co-op rear sınırı eşleşir. Testler ve genel regresyon PASS; FPS yüzdesi ölçülmedi. Devir: docs/codex-koridor/GUNCELLEME_1411.md. Yedek _yedek/codex-koridor-1411/.
+
+
+17.10.2026 · Codex · 202610171413 admin-flight-v2: 1412 admin araçları + F6 uçuş/F8 panel, Uçuşa Geç/Oyuna Dön, panelde hover, eski sunucu için yalnız doğrulanmış adminde yerel uyum (God yok). Sunucu eski olduğu için onay gelmiyordu. Tarayıcısız Node testleri PASS; fiziksel mouse/tarayıcı bu turda denenmedi. Devir docs/codex-koridor/GUNCELLEME_1413.md; 1412 genel atmosfer görünürlük testi başarısızlığı not edildi. Canlı sunucu kapatılmadı.
+
+
+17.10.2026 · Codex · 202610171414 turn-steps-v1: Lobi/oyun ortak ContactAnimation içinde yerinde dönüş adımları, tek ayakta ağırlık, ayak kaldırıp basma, GLB ayak dünya yönü düzeltmesi. Fizik/hitbox değişmedi. 4 FPS/iki yön/720 derece/temas/geçiş/GLB heading tarayıcısız testleri PASS; görsel oyun denemesi yapılmadı. Devir docs/codex-koridor/GUNCELLEME_1414.md. Yedek _yedek/codex-turn-1414/.
+
+
+17.10.2026 · Codex · 202610171415 athletic-impact-v1: Kademeli yerde ivmelenme/fren, atletik sprint kolları/gövdesi, hız animasyonu filtresi, silahlı tutuş koruması, zaman durdurmayan yakın dövüş geri bildirimi ve hit işareti önceliği uygulandı. Son hız/hasar/ödül ve parkur dalları korunur. Tarayıcısız hareket/rig/vuruş/dönüş/admin testleri PASS; gerçek görsel oyun testi yapılmadı. Masaüstü ATLETİK KOŞU VE VURUŞ YAMASI + ZIP. Devir docs/codex-koridor/GUNCELLEME_1415.md. Yedek _yedek/codex-athletic-1415/.
+
+
+17.10.2026 · Codex · 202610171416 wick-laz-v1: John Wick h24 / Laz Torretto h25, mağaza Şampiyonlar 0 TL. Kullanıcı statik GLB modellerine yaklaşık 20 kemikli skin/ölçek, Wick gömülü aksesuar temizliği, Laz vertex renkleri; tek mesh/tembel yükleme. Gerçek GLB retarget 5 poz/sayısal skin ve HTTP model testleri PASS; canlı oyun/tutuş görsel testi yok. Sınırlamalar ve üretim: docs/codex-characters-1416/DEVIR.md. Yedek _yedek/codex-characters-1416/.
+
+
+17.10.2026 · Codex · 1416 kalite reddi: Yeni Wick/Laz yaklaşık skin omuz/kolu silah pozunda ciddi geriyor. Ağırlık iyileştirme denemeleri kabul edilmedi ve geri alındı. Görsel üretim kalitesi PASS değildir. Rapor docs/codex-characters-1416/KALITE-INCELEMESI.md. FPS/kumarhane ayrı paket masaüstünde hazır; ana oyuna uygulanmadı.
+
+
+## 2026-10-17 16:20 İstanbul — Codex — Genel hata incelemesi / 1417
+- Değişti: ragdoll koridor sınırı, sınırlı fizik adımı, görünür ceset klonu, kararlı yön tabanı ve klon iskelet temizliği.
+- Değişti: silah görseli hitbox dışında; gizli kapı ışın engeli kaldırıldı; yakın dövüş harita/açık dünya duvar kontrolü.
+- Değişti: lobi atmosfer panelinin anlık gizlenmesi, mağaza kart yazı/görsel daralma düzeni.
+- Eklendi: docs/codex-audit-1417/ testleri, sonuçlar, devir ve dürüst oyun değerlendirmesi.
+- Test: audit, gerçek GLB ragdoll, atletik hareket, dönüş ve admin uçuş Node testleri geçti. Tarayıcı/mouse kullanılmadı.
+- Açık: Wick/Laz eklem ağırlıkları düzelmedi; görsel oyun testi ve tam sunucu vuruş doğrulaması yapılmadı.
+- Yedek: _yedek/codex-audit-1417/. Ana oyun build 202610171417. Sunucu durdurulmadı.

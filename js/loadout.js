@@ -91,7 +91,7 @@ function loApply(){
 }
 /* her modda/lobide çağrılır: mod açık dünya değilse ve loadout seçildiyse etkin */
 function loSync(){
- LO.on=!!(LO.ok&&typeof mode!=='undefined'&&mode!=='ow'&&!lobbyOn);
+ LO.on=!!(LO.ok&&typeof mode!=='undefined'&&mode!=='ow'&&mode!=='race'&&!lobbyOn); /* yarışta silah şeridi görünmez (araçta silah yok) */
  document.body.classList.toggle('lo-on',LO.on);
  if(LO.on){if(wk&&!LO.keys.includes(wk))setW(LO.keys[0],true);loHud()}
  else{const h=$('lohud');if(h)h.innerHTML=''}

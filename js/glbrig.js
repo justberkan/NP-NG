@@ -47,7 +47,7 @@ function glbPrep(scene,pf){
   o.frustumCulled=false;o.raycast=()=>{}; // vuruş testi mantık kutularıyla yapılır
   const m=o.material,map=m.map||null;
   if(map){map.encoding=THREE.LinearEncoding;map.anisotropy=1;map.needsUpdate=true}
-  const nm=new THREE.MeshLambertMaterial({map,skinning:true,transparent:!!m.transparent,opacity:m.opacity==null?1:m.opacity,side:THREE.FrontSide});
+  const nm=new THREE.MeshLambertMaterial({map,skinning:true,vertexColors:!!o.geometry.attributes.color,transparent:!!m.transparent,opacity:m.opacity==null?1:m.opacity,side:THREE.FrontSide});
   if(map)nm.color.setRGB(pf.bright,pf.bright,pf.bright);else nm.color.copy(m.color||new THREE.Color(0x222222));
   if(pf.id!=='soldier'){nm.side=m.side===THREE.DoubleSide?THREE.DoubleSide:THREE.FrontSide;if(m.alphaTest>0){nm.alphaTest=m.alphaTest;nm.transparent=false}if(map){map.minFilter=THREE.LinearMipmapLinearFilter}}
   o.userData.part=m.name||''; /* parça adı (Mark_Kitel_1, Mark_Plate_1…): forma/kıyafet sistemi için */
@@ -607,7 +607,7 @@ function glbContactLeg(h,side,i){
  if(!d.contactLegs){d.contactLegs={};for(const sd of ['R','L']){const a=F['th'+sd].P0,b=F['cl'+sd].P0,c=F['ft'+sd].P0;d.contactLegs[sd]={a:a.distanceTo(b),b:b.distanceTo(c),u:b.clone().sub(a).normalize(),v:c.clone().sub(b).normalize(),y:c.y}}}
  const rest=d.contactLegs[side],f=h.contact.feet[i],L=h.legs[i];
  t[th].b.updateWorldMatrix(true,false);_ctS.setFromMatrixPosition(t[th].b.matrixWorld);h.root.worldToLocal(_ctS);
- if(h.contactWallFeet)_ctT.copy(f.wallTarget).applyMatrix4(h.root.matrixWorld);else if(f.plant)_ctT.copy(f.anchor);else{L.knee.updateWorldMatrix(true,false);L.knee.localToWorld(_ctT.set(0,-.44,0))}
+ if(h.contactWallFeet)_ctT.copy(f.solvedTarget||f.wallTarget).applyMatrix4(h.root.matrixWorld);else if(f.plant)_ctT.copy(f.anchor);else{L.knee.updateWorldMatrix(true,false);L.knee.localToWorld(_ctT.set(0,-.44,0))}
  h.root.worldToLocal(_ctT);if(!h.contactWallFeet)_ctT.y+=rest.y-.06;
  _ctD.copy(_ctT).sub(_ctS);const len=_ctD.length(),dc=clamp(len,Math.abs(rest.a-rest.b)+.001,(rest.a+rest.b)*.999);_ctD.multiplyScalar(1/Math.max(len,1e-6));
  const a=(rest.a*rest.a-rest.b*rest.b+dc*dc)/(2*dc),b=Math.sqrt(Math.max(0,rest.a*rest.a-a*a));
@@ -615,7 +615,7 @@ function glbContactLeg(h,side,i){
  _ctE.copy(_ctS).addScaledVector(_ctD,a).addScaledVector(_ctP,b);
  _ctV.copy(_ctE).sub(_ctS).normalize();_ctQ.setFromUnitVectors(rest.u,_ctV).multiply(t[th].Q0);gSet(d,th,_ctQ);
  _ctV.copy(_ctS).addScaledVector(_ctD,dc).sub(_ctE).normalize();_ctQ.setFromUnitVectors(rest.v,_ctV).multiply(t[cl].Q0);gSet(d,cl,_ctQ);
- if(h.contactClimbFeet)_ctQ.setFromAxisAngle(V3(1,0,0),-Math.PI/2).multiply(t[ft].Q0);else if(h.contactWallFeet)_ctQ.setFromAxisAngle(V3(0,0,1),-(h.wallHand==='L'?-1:1)*Math.PI/2).multiply(t[ft].Q0);else _ctQ.copy(t[ft].Q0);gSet(d,ft,_ctQ);
+ if(h.contactClimbFeet)_ctQ.setFromAxisAngle(V3(1,0,0),-Math.PI/2).multiply(t[ft].Q0);else if(h.contactWallFeet)_ctQ.setFromAxisAngle(V3(0,0,1),-(h.wallHand==='L'?-1:1)*Math.PI/2).multiply(t[ft].Q0);else{_ctQ.setFromAxisAngle(V3(0,1,0),h.contactGround?(f.yawOffset||0):0).multiply(t[ft].Q0)}gSet(d,ft,_ctQ);
 
 }
 
@@ -655,7 +655,7 @@ function glbSync(h,c){
  const reloadL=hasW&&!W.g2&&c.rq>=0;
  if(reloadL){QwL=QwR;modeL='w';d.lrifle=false;_gm.copy(_m4).invert();_reloadGrip.copy(P.lh).applyMatrix4(_gm);}
  h.holdingMag=!!(reloadL&&((c.rq>=.18&&c.rq<.38)||(c.rq>=.64&&c.rq<.92)));
- if(h.wallHand==='R'){modeR='f';modeL='w';QwL=QwR;d.lrifle=false}else if(h.wallHand==='L'){modeL='f';QwL=null;d.lrifle=false}
+ if(h.wallHand==='R'){modeR='f';modeL=hasW?'w':'f';QwL=hasW?QwR:null;d.lrifle=false}else if(h.wallHand==='L'){modeL='f';QwL=null;d.lrifle=false}
  gArm(h,d,'R',modeR,QwR);
  let TovL=null;
  if(hasW&&modeL==='w'&&!W.g2&&!h.wallHand){ // iki el tek silahta: sol avuç = sağ avuç + (mantık sol avuç − mantık sağ avuç)
@@ -751,7 +751,7 @@ const RG_CAP=[['pel','chest',.12,'T'],['shR','shL',.06,'T'],['hpR','hpL',.08,'T'
  ['hpR','knR',.08,'TH'],['knR','anR',.065,'SH'],['hpL','knL',.08,'TH'],['knL','anL',.065,'SH']];
 const _rgA=V3(),_rgB=V3(),_rgC=V3(),_rgD=V3(),_rgE=V3(),_rgF=V3(),_rgM=new THREE.Matrix4();
 function rgBasis(up,rx,out){ // up, rx → ortonormal taban kuaterniyonu (x=rx, y=up)
- _rgA.copy(up).normalize();_rgB.copy(rx).addScaledVector(_rgA,-rx.dot(_rgA)).normalize();_rgC.crossVectors(_rgB,_rgA);
+ _rgA.copy(up);if(_rgA.lengthSq()<1e-10)_rgA.set(0,1,0);_rgA.normalize();_rgB.copy(rx).addScaledVector(_rgA,-rx.dot(_rgA));if(_rgB.lengthSq()<1e-10){_rgB.set(Math.abs(_rgA.x)<.8?1:0,Math.abs(_rgA.x)<.8?0:1,0);_rgB.addScaledVector(_rgA,-_rgB.dot(_rgA))}_rgB.normalize();_rgC.crossVectors(_rgB,_rgA).normalize();
  _rgM.makeBasis(_rgB,_rgA,_rgC);return out.setFromRotationMatrix(_rgM);
 }
 spawnRagdoll=(function(prev){return function(h,vel,hitPt,hitDir,power){
@@ -760,10 +760,10 @@ spawnRagdoll=(function(prev){return function(h,vel,hitPt,hitDir,power){
  const g=new THREE.Group();
  h.root.updateWorldMatrix(true,false);
  h.root.matrixWorld.decompose(g.position,g.quaternion,g.scale);
- const mdl=glbShareSkel(THREE.SkeletonUtils.clone(h.glb));g.add(mdl);
+ const mdl=glbShareSkel(THREE.SkeletonUtils.clone(h.glb));mdl.visible=true;g.add(mdl);
  S.add(g);setShadow(g);g.updateMatrixWorld(true);
  // klon için sürülen kemik tablosu (gSet kullanır)
- const t={};for(const k of GL_DRIVEN){const b=mdl.getObjectByName(PF.prefix+PF.bones[k]);if(!b)return prev(h,vel,hitPt,hitDir,power);t[k]=Object.assign({b,cur:new THREE.Quaternion()},PF.tab[k])}
+ const t={};for(const k of GL_DRIVEN){const b=mdl.getObjectByName(PF.prefix+PF.bones[k]);if(!b){removeRagdollRoot(g);return prev(h,vel,hitPt,hitDir,power)}t[k]=Object.assign({b,cur:new THREE.Quaternion()},PF.tab[k])}
  const d={t,PF};
  // canlı pozdan parçacıklar (dünya)
  h.glb.updateMatrixWorld(true);
@@ -798,7 +798,7 @@ spawnRagdoll=(function(prev){return function(h,vel,hitPt,hitDir,power){
  const r={g,mdl,d,P,cons,lim,r0,t:0,acc:0,glb:true,pts:{pel:P.pel},lp:{}};
  for(const n in P)r.lp[n]=V3();
  GLBDEAD.push(r);
- while(GLBDEAD.length>6){const o=GLBDEAD.shift();S.remove(o.g)}
+ while(GLBDEAD.length>6){const o=GLBDEAD.shift();removeRagdollRoot(o.g)}
  rgPose(r);
  return r;
 }})(spawnRagdoll);
@@ -890,12 +890,11 @@ function rgStep(r){
   }
  }
  // zemin, harita, sınırlar
- const bd=(typeof OW!=='undefined'&&OW.on)?OWH-2:((typeof MC!=='undefined'&&MC.cur)?MC.cur.ext:29.4);
  for(const n in P){
   const q=P[n],p=q.p,o=q.o,rad=q.r;
-  const gy=rgGround(p.x,p.z,p.y);
+  const env=ragdollEnvironment(p.x,p.z,p.y),gy=env.floor;
   if(p.y<gy+rad){p.y=gy+rad;o.x+=(p.x-o.x)*.35;o.z+=(p.z-o.z)*.35;o.y=p.y}
-  p.x=clamp(p.x,-bd,bd);p.z=clamp(p.z,-bd,bd);
+  p.x=clamp(p.x,env.xmin,env.xmax);p.z=clamp(p.z,env.zmin,env.zmax);
   if(typeof bnear==='function')for(const b of bnear(p.x,p.z)){
    if(p.x>b.x1-rad&&p.x<b.x2+rad&&p.z>b.z1-rad&&p.z<b.z2+rad&&p.y<b.h+rad){
     const dm=[p.x-(b.x1-rad),(b.x2+rad)-p.x,p.z-(b.z1-rad),(b.z2+rad)-p.z,(b.h+rad)-p.y];
@@ -934,13 +933,13 @@ function glbDeadUpdate(dt){
   }catch(e){ /* tek bir bozuk ölü beden oyunu dondurmasın: kaldır, devam et */
    console.warn('ölü beden güncellenemedi, kaldırıldı',e);r.t=99;
   }
-  if(r.t>10){S.remove(r.g);GLBDEAD.splice(i,1)}
+  if(r.t>10){removeRagdollRoot(r.g);GLBDEAD.splice(i,1)}
  }
 }
 const _updRags0=updRags;
 updRags=function(dt){_updRags0(dt);if(GLBDEAD.length)glbDeadUpdate(dt)};
 const _clearRags0=clearRags;
-clearRags=function(){_clearRags0();for(const r of GLBDEAD)S.remove(r.g);GLBDEAD.length=0};
+clearRags=function(){_clearRags0();for(const r of GLBDEAD)removeRagdollRoot(r.g);GLBDEAD.length=0};
 
 /* ---------- Şampiyon karakterleri (assets/ch_<id>.js, tembel yüklenir) ---------- */
 const CH_BONES={};for(const k of['hip','pelvis','waist','sp1','sp2','head','thR','clR','ftR','thL','clL','ftL','uaR','faR','haR','mdR','uaL','faL','haL','mdL'])CH_BONES[k]=k;
@@ -948,6 +947,11 @@ const CH_SKINFIX={lara:.9}; // karakter başına skin onarım eşiği (m); 0/yok
 const CH_BRIGHT={bw:1.25,kb:1.2,anime:1.1,lara:1.15,
  demiradam:1.3,orumcek:1.2,bsamuray:1.15,karadul:1.35,leon:1.2,siber:1.4,ronin:1.15,uzaypiyade:1.05,gotik:1.25,heetah:1.1,animekiz:1.05,swat:1.3};
 function glbLoadChar(id){
+ if(id==='wick'||id==='laz'){
+  if(GLBR.loading[id]||GLBR.P[id])return;GLBR.loading[id]=1;
+  new THREE.GLTFLoader().load('assets/characters/'+id+'.glb',g=>{try{glbPrep(g.scene,{id,prefix:'N_',bones:CH_BONES,bright:1.05});glbOnReady(id);clearTimeout(GLBR.shT);GLBR.shT=setTimeout(()=>{if(typeof shFill==='function'&&document.querySelector('#av [data-ik]'))shFill()},400)}catch(e){delete GLBR.loading[id];console.warn('Yeni karakter hazırlanamadı',id,e)}},undefined,e=>{delete GLBR.loading[id];console.warn('Yeni karakter yüklenemedi',id,e)});return;
+ }
+
  if(id==='ada'||id==='samus')return; // Kullanici istegiyle kaldirilan modeller.
  if(GLBR.loading[id]||GLBR.P[id])return;
  GLBR.loading[id]=1;

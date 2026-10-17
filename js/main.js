@@ -2,6 +2,8 @@
 /* ===== Ana döngü ve akış ===== */
 /* ----- Fare güvenliği: pencere dışına çıkınca basılı kalan tuş/tık sıfırlanır; fare kilidi alınamazsa kenar-bakış devreye girer ----- */
 const PL={fail:false,mx:0,my:0,hint:0};
+/* kilit alınamazsa kısa ipucu: eskisi 30px tek satırdı, ekrandan taşıyor ve duraklat başlığının üstüne biniyordu */
+const PL_HINT='Fare kilitlenmedi · tekrar tıkla (kenara götürerek de bakabilirsin)';
 function releaseInputs(){firing=false;ads=false;jHeld=false;jPress=false;sPress=false;qPress=false;jBuf=0;for(const k in key)key[k]=0;joy.x=joy.y=0;PL.mx=PL.my=0}
 addEventListener('blur',releaseInputs);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseInputs()});
@@ -9,11 +11,11 @@ document.documentElement.addEventListener('mouseleave',()=>{PL.mx=PL.my=0;firing
 addEventListener('mousemove',e=>{PL.mx=e.clientX/innerWidth*2-1;PL.my=e.clientY/innerHeight*2-1});
 document.addEventListener('pointerlockerror',()=>{
  PL.fail=true;
- if(state==='play'&&$('msg')&&!PL.hint){PL.hint=1;$('msg').textContent='Fare kilitlenemedi: bakmak için fareyi ekranın kenarlarına doğru götür. Tıklayınca tekrar denenir.';setTimeout(()=>{if(state==='play'&&mode!=='zom')$('msg').textContent=''},5000)}
+ if(state==='play'&&$('msg')&&!PL.hint){PL.hint=1;const m=$('msg');m.textContent=PL_HINT;m.classList.add('plhint');setTimeout(()=>{if(m.textContent===PL_HINT){m.textContent='';m.classList.remove('plhint')}},4000)}
 });
 document.addEventListener('pointerlockchange',()=>{if(document.pointerLockElement){PL.fail=false;PL.hint=0}});
 addEventListener('mousedown',()=>{
- if(state==='play'&&!touch&&!document.pointerLockElement&&!(mode==='ow'&&AUTO.on)&&!(typeof CMP!=='undefined'&&CMP.menu))try{$('c').requestPointerLock()}catch(e){}
+ if(state==='play'&&!touch&&!document.pointerLockElement&&mode!=='race'&&!(typeof ADT!=='undefined'&&ADT.open)&&!(mode==='ow'&&AUTO.on)&&!(typeof CMP!=='undefined'&&CMP.menu))try{requestGamePointerLock()}catch(e){}
 },true);
 function edgeLook(dt){
  const dz=v=>Math.abs(v)<.15?0:v-Math.sign(v)*.15;
@@ -31,23 +33,43 @@ function setLobby(on){
  if(on){$('ov').classList.add('off');view(curView||'home')}
 }
 function pauseUI(){
+ {const m=$('msg');if(m&&m.textContent===PL_HINT){m.textContent='';m.classList.remove('plhint')}}
  $('ttl').textContent='Duraklatıldı';$('sub').textContent='';$('res').innerHTML='';$('play').textContent='DEVAM';
  $('autob').classList.toggle('off',mode!=='ow');
- $('help').innerHTML=mode==='ow'?'F: otomatik savaş aç/kapat · M: harita · H: ilk yardım<br>'+HELP:HELP;
+ $('help').innerHTML=mode==='race'?(RACE.air?'W/S alçal / yüksel · A/D dön · Shift art yakıcı':'W/S gaz / fren · A/D direksiyon · Space el freni (drift) · Shift nitro')+' · <b>F</b> özellik ileri · <b>Q</b> geri · <b>G</b> yere bırak · <b>1-3</b> slot seç':mode==='ow'?'F: otomatik savaş aç/kapat · M: harita · H: ilk yardım<br>'+HELP:HELP;
  $('igsb').classList.remove('off');igsOpen(false);
  $('ov').classList.remove('off');
 }
-function resume(){state='play';igsOpen(false);$('ov').classList.add('off');if(!touch&&!(mode==='ow'&&AUTO.on)&&!(typeof CMP!=='undefined'&&CMP.menu))try{$('c').requestPointerLock()}catch(e){}}
+function resume(){state='play';igsOpen(false);$('ov').classList.add('off');if(!touch&&mode!=='race'&&!(mode==='ow'&&AUTO.on)&&!(typeof CMP!=='undefined'&&CMP.menu))try{requestGamePointerLock()}catch(e){}}
 function startMatch(){
  if(selMode==='wc'&&typeof wcOpen==='function'&&!WCG.chosen){wcOpen(()=>startMatch());return}
  /* ses sistemi ilk vuruşta değil maç başlarken (tıklamayla) açılsın: ilk hasarda yaşanan takılmayı önler */
  try{if(!ac)ac=new AudioContext();if(ac.state==='suspended')ac.resume()}catch(e){}
  if(typeof cmbReset==='function')cmbReset();
  if(selMode==='cmp'&&typeof cmpOpen==='function'&&!CMP.chosen){cmpOpen(()=>startMatch());return} /* rekabetçi: önce Rütbesiz/Rütbeli seçimi */
- if(selMode!=='ow'&&selMode!=='aim'&&selMode!=='cmp'&&selMode!=='wc'&&typeof loOpen==='function'&&!LO.ok){loOpen(()=>startMatch());return}
+ if(selMode==='race'&&typeof raceOpen==='function'&&!RACE.picked){raceOpen(()=>startMatch());return} /* yarış: önce araç seçim ekranı */
+ if(selMode!=='ow'&&selMode!=='aim'&&selMode!=='cmp'&&selMode!=='wc'&&selMode!=='race'&&typeof loOpen==='function'&&!LO.ok){loOpen(()=>startMatch());return} /* aim/yarış: loadout sormadan */
  if((selMode==='tdm'||selMode==='tm'||selMode==='cmp')&&typeof mapNeed==='function'&&mapNeed(()=>startMatch()))return;
  if((selMode==='mp'||selMode==='tm'||selMode==='zo')&&!MPL.ready){if(!MPL.authed)mpOpenDialog(()=>startMatch());else mpJoin(()=>startMatch());return}
- mode=(selMode==='tm'||selMode==='zo')?'mp':selMode;setLobby(false);begin();shaderWarm();resume();if(typeof CMP!=='undefined')CMP.chosen=false}
+ mode=(selMode==='tm'||selMode==='zo')?'mp':selMode;
+ try{setLobby(false);begin();shaderWarm();resume();if(typeof CMP!=='undefined')CMP.chosen=false}
+ catch(e){if(mode!=='race')throw e;raceStartFailure(e)}
+}
+/* A failed setup must not leave the closed garage and a half-built race on screen. */
+function raceStartFailure(error){
+ console.error('Yarış başlatılamadı:',error);
+ window.RACE_START_ERROR={message:String(error&&error.message||error),at:new Date().toISOString()};
+ try{raceStop()}catch(cleanupError){console.error('Yarış temizliği:',cleanupError)}
+ state='menu';releaseInputs();setLobby(true);
+ const old=$('race-start-error');if(old)old.remove();
+ const panel=document.createElement('div');panel.id='race-start-error';panel.setAttribute('role','alertdialog');
+ panel.style.cssText='position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;background:#020811cc';
+ const box=document.createElement('div');box.style.cssText='max-width:440px;padding:28px;background:#101e2d;border:1px solid #39dfff;border-radius:12px;color:#fff';
+ const text=document.createElement('p');text.textContent='Yarış başlatılamadı. Lobiye güvenli şekilde dönüldü. Araç seçimini açıp tekrar deneyebilirsin.';box.appendChild(text);
+ const retry=document.createElement('button');retry.className='btn';retry.textContent='ARAÇ SEÇİMİNE DÖN';retry.onclick=()=>{panel.remove();startMatch()};box.appendChild(retry);
+ const back=document.createElement('button');back.className='btn';back.textContent='LOBİDE KAL';back.onclick=()=>panel.remove();box.appendChild(back);
+ panel.appendChild(box);document.body.appendChild(panel);retry.focus();
+}
 /* İlk ateşte/ilk efektte gölgelendirici (shader) derlemesi oyunu bir anlık donduruyordu: maç başlarken önceden derlenir */
 function shaderWarm(){
  try{
@@ -67,6 +89,7 @@ $('autob').onclick=()=>{if(mode==='ow'){toggleAuto(true);resume()}};
 function toLobby(){
  if(mode==='ow'&&OW.on)owExit();
  if(mode==='mp')mpQuit();
+ if(typeof raceStop==='function')raceStop();
  state='menu';if(document.exitPointerLock)try{document.exitPointerLock()}catch(e){}
  firing=false;ads=false;setLobby(true);bal();
 }
@@ -75,9 +98,9 @@ $('play').onclick=()=>{if(state==='pause')resume();else startMatch()};
 $('lob').onclick=()=>{igsOpen(false);toLobby()};
 $('igsb').onclick=()=>igsOpen($('igs').classList.contains('off'));
 document.addEventListener('pointerlockchange',()=>{
- if(!touch&&document.pointerLockElement!==$('c')&&state==='play'&&!(mode==='ow'&&AUTO.on)&&!(typeof CMP!=='undefined'&&CMP.menu)){state='pause';pauseUI()} /* rekabetçi satın alma menüsü fareyi bırakır: duraklatma */
+ if(!touch&&document.pointerLockElement!==$('c')&&state==='play'&&mode!=='race'&&!(typeof ADT!=='undefined'&&ADT.open)&&!(mode==='ow'&&AUTO.on)&&!(typeof CMP!=='undefined'&&CMP.menu)){state='pause';pauseUI()} /* rekabetçi satın alma menüsü fareyi bırakır: duraklatma */
 });
-addEventListener('keydown',e=>{if(e.code==='Escape'&&state==='play'&&mode==='ow'&&AUTO.on){state='pause';pauseUI()}});
+addEventListener('keydown',e=>{if(e.code==='Escape'&&state==='play'&&((mode==='ow'&&AUTO.on)||mode==='race')){state='pause';pauseUI()}});
 const HELP=touch?'Sol: hareket · Sağ: bakış · KANCA, KAY, ZIPLA düğmeleri':'WASD hareket · Fare bakış · Sol tık ateş · Sağ tık nişan · R şarjör · 1-7 silah · V üçüncü şahıs<br>Ctrl/C basılı: eğil (koşarken basınca: kay) · Space zıpla/çift zıpla · Q kanca · Duvara doğru zıpla: sekme<br>Shift basılı: hızlan (Naruto koşusu) · Space basılı tut: otomatik bhop (havada A/D + fareyi aynı yöne çevir: hız kazanırsın) · Yüksekten düşerken Space basılı: süzül · Havada W ile duvara: tırman<br>Enter: yazılı sohbet · B: bas-konuş (🎤 düğmesinden aç) · Açık dünyada sınıf düğmesi: Savaşçı/Ninja/Şifacı/Tank';
 $('help').innerHTML=HELP;
 
@@ -147,14 +170,15 @@ function tick(dt){
   accP+=dt;let nSub=0;
   // 144 Hz gibi oranlarda yuvarlama hatası tam bir fizik adımını geciktirmesin.
   ANQ.on=true;
-  try{while(accP+1e-10>=FIX_DT&&state==='play'&&nSub<8){p.ox=p.x;p.oy=p.y;p.oz=p.z;stepPlayer(FIX_DT);accP=Math.max(0,accP-FIX_DT);nSub++}}
+  try{while(accP+1e-10>=FIX_DT&&state==='play'&&nSub<8){if(mode==='race'){raceStep(FIX_DT);accP=Math.max(0,accP-FIX_DT);nSub++;continue}p.ox=p.x;p.oy=p.y;p.oz=p.z;stepPlayer(FIX_DT);accP=Math.max(0,accP-FIX_DT);nSub++}}
   finally{anqFlush()}
   if(nSub>=8)accP=0;
  }else{accP=0;if(mode==='mp')mpUpdate(dt)}
- if(state==='play'&&!touch&&!document.pointerLockElement&&PL.fail)edgeLook(dt);
+ if(state==='play'&&!touch&&!document.pointerLockElement&&!(typeof ADT!=='undefined'&&ADT.open)&&PL.fail)edgeLook(dt);
  updTracers(dt);updProps(dt);updRags(dt);
  /* kamera ara kare yumuşatma: fizik 120 Hz, ekran farklı hızdaysa son iki fizik adımı arasında çiz (takılma hissi gider) */
- if(state==='play'&&p.ox!=null&&!window.BGMODE&&Math.abs(p.x-p.ox)+Math.abs(p.y-p.oy)+Math.abs(p.z-p.oz)<2){
+ if(mode==='race'){raceCam(dt);if(state!=='play'&&typeof raceEngStep==='function')raceEngStep()}
+ else if(state==='play'&&p.ox!=null&&!window.BGMODE&&Math.abs(p.x-p.ox)+Math.abs(p.y-p.oy)+Math.abs(p.z-p.oz)<2){
   const a=clamp(accP/FIX_DT,0,1),rx=p.x,ry=p.y,rz=p.z;
   p.x=lerp(p.ox,rx,a);p.y=lerp(p.oy,ry,a);p.z=lerp(p.oz,rz,a);
   try{updPlayerView(dt)}finally{p.x=rx;p.y=ry;p.z=rz}
@@ -175,7 +199,7 @@ function loop(now){
  if(fpsSkip(now))return;
  const fms=now-last;fpsTick(now,fms);
  const dt=Math.min(.05,fms/1000);last=now;
- if(lobbyOn){clock+=dt;ecoLoop(dt);lobbyUpdate(dt);R.shadowMap.autoUpdate=true;R.render(LS,LC);return}
+ if(lobbyOn){clock+=dt;ecoLoop(dt);lobbyUpdate(dt);R.shadowMap.autoUpdate=true;if(selMode==='race'&&typeof racePreviewRender==='function'&&$('raceui'))racePreviewRender(dt);else R.render(LS,LC);return}
  /* güvenlik: oyun mantığında bir hata çıksa bile çizim sürer, ekran donmaz; hata konsola ve bir kez ekrana yazılır */
  const _t0=performance.now();
  try{tick(dt)}catch(e){loopErr(e)}

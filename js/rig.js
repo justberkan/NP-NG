@@ -59,7 +59,7 @@ function clipAt(name,ph,out,loop){
 const _fr=V3(),_fl=V3();
 /* c: {t,speed,fwd,air,slide,crouch,pitch,lookYaw,flinch, ads,kick,kickR,kickL,swing,rq,lr,sw,bob,flash,flashL, atk, sprint, glide, lat, wj} */
 function animHuman(h,c,dt){
- const sm=h.sm,k=Math.min(1,10*dt),spd=c.speed||0,amp=clamp(spd/6,0,1);
+ const sm=h.sm,k=1-Math.exp(-10*dt),spd=c.speed||0,amp=clamp(spd/6,0,1);
  sm.amp+=(amp-sm.amp)*k;
  sm.air+=((c.air?1:0)-sm.air)*Math.min(1,8*dt);
  sm.sl+=((c.slide?1:0)-sm.sl)*Math.min(1,9*dt);
@@ -90,7 +90,7 @@ function animHuman(h,c,dt){
   if(rw>0){clipAt('run',h.cp*(CLIPS.run.d>0?1:1),_cp);for(let q=0;q<12;q++)_cp[q]=_cq[q]+(_cp[q]-_cq[q])*rw}else for(let q=0;q<12;q++)_cp[q]=_cq[q];
  }
  const _np=[],_ap=[];
- if(spw>.001){clipAt('ninja',h.sphs,_np);nj=_np}
+ if(spw>.001){clipAt('run',h.sphs,_np);_np[4]=.16+.08*sm.amp;nj=_np}
  if(airW>.001){
   const wj=h.wjT>0;
   if(wj)clipAt('jumpwall',clamp(1-h.wjT,0,1)*.9,_ap,false);
@@ -123,7 +123,7 @@ function animHuman(h,c,dt){
   L.hip.rotation.x=hip-tau;L.knee.rotation.x=kn;
  }
  if(nj){ // ninja koşusunda gövde alçalır, çekim yönüne eğilir
-  h.hips.position.y-=.14*spw;
+  h.hips.position.y-=.035*spw;
  }
  h.hips.rotation.z=(sm.lat||0)*.07+Math.cos(h.ph)*.05*swW; /* kayma eğimi + adım ritminde yan yuvarlanma */
  const lean=leanT-tau;
@@ -136,17 +136,18 @@ function animHuman(h,c,dt){
  h.head.rotation.set(-pit*.7-leanT*(.5+.4*Math.max(spw,glw)),clamp(c.lookYaw||0,-1.1,1.1),0);
  h.aim.rotation.x=-pit-lean*.8;
  if(zb){zombieArms(h,c);return}
- // serbest kollar: ninja koşusunda arkaya, süzülmede yukarı (paraşüt)
- const fw=Math.max(spw,glw);
+ // Atletik koşuda bükülü dirsek ve karşılıklı kol salınımı; süzülmede yukarı.
+ const freeLoc=!h.W?sm.amp*(1-sm.air)*(1-sm.sl)*(1-sm.cr):0;
+ const fw=Math.max(spw*(h.W&&h.W.g ? .4 : 1),glw,freeLoc);
  h.freeW=fw;h.fR=_fr;h.fL=_fl;
  if(fw>.01){
   const phi=h.hips.rotation.x+h.spine.rotation.x;
   for(let sd=0;sd<2;sd++){
    const arm=sd?h.armL:h.armR,out=sd?_fl:_fr,sg=sd?1:-1;
    out.set(0,0,0);
-   if(nj){
-    const ua=-(sd?nj[5]:nj[7])+phi,fa=ua-(sd?nj[6]:nj[8]);
-    out.set(sg*.12,-Math.cos(ua)*arm.L1-Math.cos(fa)*arm.L2*.95,Math.sin(ua)*arm.L1+Math.sin(fa)*arm.L2*.95);
+   if(nj||freeLoc>.01){
+    const phase=(h.contact?h.contact.phase:h.sphs)*Math.PI*2+sd*Math.PI;
+    out.set(sg*.065,-.32+.045*Math.cos(phase),.22+.15*Math.sin(phase));
    }
    if(glw>0){
     const gx=sg*.2,gy=.46,gz=.04;
@@ -196,6 +197,13 @@ const RN=['head','neck','shL','shR','elL','elR','haL','haR','pel','hpL','hpR','k
 const RC=[['head','neck'],['neck','shL'],['neck','shR'],['shL','shR'],['neck','pel'],['shL','pel'],['shR','pel'],['shL','hpR'],['shR','hpL'],['shL','hpL'],['shR','hpR'],['pel','hpL'],['pel','hpR'],['hpL','hpR'],['shL','elL'],['elL','haL'],['shR','elR'],['elR','haR'],['hpL','knL'],['knL','anL'],['hpR','knR'],['knR','anR'],['head','shL'],['head','shR']];
 const _rx=V3(),_ry=V3(),_rz=V3(),_rm=new THREE.Matrix4(),_rq=new THREE.Quaternion();
 
+// Bütün ragdoll tipleri aynı harita zemini/sınırlarını kullanır.
+const RAG_ENV={floor:0,xmin:-29.4,xmax:29.4,zmin:-29.4,zmax:29.4};
+function ragdollEnvironment(x,z,y){
+ const e=RAG_ENV;if(typeof mode!=='undefined'&&mode==='wc'&&typeof WCG!=='undefined'&&WCG.game){const b=WCG.game.getBounds();e.floor=typeof wcTerrainHeight==='function'?wcTerrainHeight(x,z):0;e.xmin=-b.halfWidth;e.xmax=b.halfWidth;e.zmin=b.minZ;e.zmax=typeof WCT!=='undefined'?Math.min(18,WCT.rear-2):18;return e}
+ const ow=typeof OW!=='undefined'&&OW.on,mc=typeof MC!=='undefined'&&MC.cur,bd=ow?OWH-2:mc?MC.cur.ext:29.4;e.floor=ow?owH(x,z):mc?Math.max(mcGround(x,z,y+.3),MC.cur.minY-1):0;e.xmin=e.zmin=-bd;e.xmax=e.zmax=bd;return e;
+}
+function removeRagdollRoot(root){if(!root)return;S.remove(root);const skeletons=new Set();root.traverse(o=>{if(o.isSkinnedMesh&&o.skeleton)skeletons.add(o.skeleton)});for(const skeleton of skeletons)skeleton.dispose()}
 function spawnRagdoll(h,vel,hitPt,hitDir,power){
  h.root.updateMatrixWorld(true);
  const g=(o,x,y,z)=>o.localToWorld(V3(x,y,z));
@@ -213,7 +221,7 @@ function spawnRagdoll(h,vel,hitPt,hitDir,power){
  });
  const cons=RC.map(([a,b])=>[pts[a],pts[b],P0[a].distanceTo(P0[b])]);
  const root=new THREE.Group();
- const cl=m=>{const c=m.clone();root.add(c);return c};
+ const cl=m=>{const c=m.clone();c.visible=true;root.add(c);return c};
  const M={head:cl(h.head.children[1]),torso:cl(h.spine.children[0]),pelvis:cl(h.hips.children[0]),
   uaL:cl(h.armL.sh.children[0]),faL:cl(h.armL.el.children[0]),uaR:cl(h.armR.sh.children[0]),faR:cl(h.armR.el.children[0]),
   thL:cl(h.legs[1].hip.children[0]),shL:cl(h.legs[1].knee.children[0]),thR:cl(h.legs[0].hip.children[0]),shR:cl(h.legs[0].knee.children[0])};
@@ -246,8 +254,8 @@ function updRagMeshes(r){
  M.uaL.position.copy(p.shL.p);M.uaR.position.copy(p.shR.p);M.thL.position.copy(p.hpL.p);M.thR.position.copy(p.hpR.p);
 }
 function stepRagdoll(r,dt){
- r.acc+=dt;const g=18/3600;
- while(r.acc>=1/60){
+ r.acc+=Math.min(Math.max(dt,0),.1);const g=18/3600;let substeps=0;
+ while(r.acc>=1/60&&substeps++<6){
   r.acc-=1/60;
   for(const n of RN){
    const q=r.pts[n],p=q.p,o=q.o;
@@ -262,9 +270,9 @@ function stepRagdoll(r,dt){
   }
   for(const n of RN){
    const q=r.pts[n],p=q.p,o=q.o;
-   const mcr=typeof MC!=='undefined'&&MC.cur,gyR=OW.on?owH(p.x,p.z):(mcr?Math.max(mcGround(p.x,p.z,p.y+.3),MC.cur.minY-1):0),bd=OW.on?OWH-2:(mcr?MC.cur.ext:29.4);
+   const env=ragdollEnvironment(p.x,p.z,p.y),gyR=env.floor;
    if(p.y<gyR+.06){p.y=gyR+.06;o.x+=(p.x-o.x)*.3;o.z+=(p.z-o.z)*.3;o.y=p.y}
-   p.x=clamp(p.x,-bd,bd);p.z=clamp(p.z,-bd,bd);
+   p.x=clamp(p.x,env.xmin,env.xmax);p.z=clamp(p.z,env.zmin,env.zmax);
    for(const b of bnear(p.x,p.z)){
     if(p.x>b.x1-.05&&p.x<b.x2+.05&&p.z>b.z1-.05&&p.z<b.z2+.05&&p.y<b.h+.05){
      const d=[p.x-(b.x1-.05),(b.x2+.05)-p.x,p.z-(b.z1-.05),(b.z2+.05)-p.z,(b.h+.05)-p.y];

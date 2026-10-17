@@ -65,8 +65,7 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{key[e.code]=0;if(typeof kMatch==='function'&&kMatch(e,'jump'))jHeld=false});
 addEventListener('mousemove',e=>{
  if(state==='play'&&document.pointerLockElement){
-  const s=.0022*SET.sens*(ads?SET.adsSens/Math.pow(optZoom(),.75):1);
-  p.yaw-=e.movementX*s;p.pitch=clamp(p.pitch-e.movementY*s*(SET.invY?-1:1),-1.5,1.5);
+  mouseLook(e.movementX,e.movementY);
  }
 });
 addEventListener('mousedown',e=>{
@@ -191,7 +190,7 @@ function stepPlayer(dt){
   else if(!(SK.dT>0)){const sm=7*SPD*(mode==='ow'?skMove():1)*sprMul*(p.cr?CROUCH_SPD:1);
    /* iniş toleransı: inişten sonraki BH_GRACE sn içinde koşu hızının üstündeki hız sürtünmeyle silinmez (geç basılan bhop affedilir) */
    if(p.landT<BH_GRACE&&Math.hypot(p.vx,p.vz)>sm){}
-   else{const k=Math.min(1,((wx||wz)?12:20)*dt);p.vx+=(wx*sm-p.vx)*k;p.vz+=(wz*sm-p.vz)*k}}
+   else{AthleticMotion.ground(p,wx,wz,sm,dt,!!p.spr)}}
   p.st=Math.min(ST,p.st+dt*1.5);p.wj=0;p.dj=0;p.climb=0;
  }else{
   p.slide=0;const s0=Math.hypot(p.vx,p.vz);
