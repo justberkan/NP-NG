@@ -307,7 +307,7 @@ function updPlayerView(dt){
  const latN=p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0;p.lt=(p.lt||0)+(latN-(p.lt||0))*Math.min(1,7*dt);
  const fv=baseFov/(1+(optZoom()-1)*adsT); // hızda FOV genişlemesi kapalı; yakınlaştırma nişangaha göre
  if(Math.abs(fv-cam.fov)>.1){cam.fov+=(fv-cam.fov)*Math.min(1,8*dt);cam.updateProjectionMatrix()}
- const chO=(!cw.melee&&cw.hold!=='pistol'&&cw.hold!=='dual')?1-adsT*.9:1;if(chO!==lastCh){lastCh=chO;$('ch').style.opacity=chO}
+ const chO=cw.melee?1:Math.max(0,1-adsT*1.6); /* nişan alınca (sağ tık) ana artı tamamen kaybolur; tabancada da (iki nişangah olmasın) */if(chO!==lastCh){lastCh=chO;$('ch').style.opacity=chO}
  const si=Math.round(spd),gk=grCd>0?Math.ceil(grCd):0,tx=si+' m/s · kanca '+(gr?'bağlı':gk?gk+' sn':'hazır');
  if(tx!==lastSpd){lastSpd=tx;$('spd').textContent=tx}
  const sp100=Math.max(0,Math.round(p.st/ST*100));if(sp100!==lastSt){lastSt=sp100;$('sti').style.width=sp100+'%'}
@@ -315,7 +315,7 @@ function updPlayerView(dt){
  const play=state==='play'||state==='pause'||state==='end';
  const alive=p.dead<=0;
  const rq=reload>0?1-reload/cw.rel:-1,swv=swU>=0?swU:null,sw=swT>=.25?1:swT/.25;
- const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr,glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0};
+ const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr,glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0,wallrun:p.wr||0};
 
  if(p.dead>0&&pRagdoll){
   const t=pRagdoll.pts.pel.p;

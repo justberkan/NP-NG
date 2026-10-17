@@ -11,6 +11,7 @@ const FNG_POSE={
  /* boş el: rahat, hafif kıvrık */
  free:{idx:[.25,.3,.25],mid:[.35,.4,.3],ring:[.45,.45,.3],pinky:[.55,.5,.3],thumb:[.15,.2,.15]}
 };
+FNG_POSE.wall={idx:[.04,.04,.02],mid:[.04,.04,.02],ring:[.04,.04,.02],pinky:[.04,.04,.02],thumb:[.08,.08,.05]};
 const _fq=new THREE.Quaternion(),_fv=new THREE.Vector3(),_fp=new THREE.Vector3();
 const _FAX=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].map(a=>new THREE.Vector3(...a));
 function fngInit(h){
@@ -62,6 +63,7 @@ function fngSync(h){
   else if(mel&&W.g2)pl=FNG_POSE.fist;
   if(h.holdingMag)pl=FNG_POSE.lGrip;
  }
+ if(h.wallHand==='R'){pr=FNG_POSE.wall;pl=FNG_POSE.rGun}else if(h.wallHand==='L')pl=FNG_POSE.wall;
  /* performans: parmak kemiklerine başka kod dokunmadığı için poz yalnızca değişince yeniden uygulanır */
  if(d._fpr===pr&&d._fpl===pl)return;
  d._fpr=pr;d._fpl=pl;

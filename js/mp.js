@@ -412,7 +412,7 @@ function mpUpdate(dt){
   MPL.sendT=.05;
   const r=v=>Math.round(v*100)/100;
   mpSend({t:'st',x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),
-   f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0),w:wk,rq:reload>0?r(1-reload/cw.rel):-1,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),ad:r(adsT)});
+   f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0)|(p.wr>0?64:p.wr<0?128:0),w:wk,rq:reload>0?r(1-reload/cw.rel):-1,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),ad:r(adsT)});
  }
  if(p.dead>0&&p.dead<900){p.dead-=dt;if(p.dead<.05)p.dead=.05} // sunucunun 'resp' mesajını bekle
  const k=1-Math.exp(-14*dt);
@@ -442,7 +442,7 @@ function mpUpdate(dt){
   e.adsT+=((w.melee?0:e.ad)-e.adsT)*Math.min(1,10*dt);
   const _pr=poseRate(e,q.x-p.x,q.z-p.z);
   if(_pr>0)
-  animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:(e.fl&2)?1:0,
+  animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,wallrun:(e.fl&64)?1:(e.fl&128)?-1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:(e.fl&2)?1:0,
    pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:e.adsT,kick:Math.max(e.kR,e.kL),kickR:e.kR,kickL:e.kL,
    swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:e.rq,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:e.flash,flashL:e.flashL,lr:0},dt*_pr);
   // isim etiketi

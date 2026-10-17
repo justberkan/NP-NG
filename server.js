@@ -198,7 +198,7 @@ function onText(c, s) {
       const dist = Math.hypot(x - c.x, y - c.y, z - c.z);
       if (now > (c.free || 0) && dist > 60 * dt + 4) { send(c, { t: 'fix', x: c.x, y: c.y, z: c.z }); return; } // ışınlanma / aşırı hız
       c.x = x; c.y = y; c.z = z; c.yaw = num(m.yaw, -50, 50); c.pitch = num(m.pitch, -1.6, 1.6);
-      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 63) | 0;
+      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 255) | 0;
       if (WPN[m.w]) c.w = m.w;
       c.rq = num(m.rq, -1, 1, -1); c.sw = num(m.sw, -1, 1, -1); c.cb = num(m.cb, 0, 15) | 0; c.ad = num(m.ad, 0, 1);
       break;
@@ -450,7 +450,7 @@ function owMsg(c, m, now) {
     case 'oquit': owLeave(c); return true;
     case 'ost': {
       c.x = num(m.x, -470, 470); c.y = num(m.y, -5, 120); c.z = num(m.z, -470, 470); c.yaw = num(m.yaw, -50, 50); c.pitch = num(m.pitch, -1.6, 1.6);
-      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 63) | 0; c.w = cleanId(m.w) || c.w;
+      c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 255) | 0; c.w = cleanId(m.w) || c.w;
       c.sw = num(m.sw, -1, 1, -1); c.cb = num(m.cb, 0, 15) | 0; c.hpf = num(m.hp, 0, 1, 1); c.lvl = num(m.lvl, 1, 60, c.lvl);
       return true;
     }
