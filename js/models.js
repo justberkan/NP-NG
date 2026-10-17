@@ -6,7 +6,7 @@ const MDL={cache:{},wait:{},icons:{},fail:{}};
 /* Yön düzeltmeleri (otomatik tahmin yanlışsa): z:-1 uç/namlu yönünü çevirir, y:-1 yukarıyı çevirir */
 const MDLFIX={};
 /* Baş aşağı gelen modeller (otomatik tespit yetmezse elle): P90 kabza/tutamak üstte geliyordu */
-const MDLFLIPY={lg_fn_p90:1};
+const MDLFLIPY={lg_fn_p90:1,lg_s12p8:1};
 
 function mdlScript(id,cb){
  if(window.NPNG_G&&NPNG_G[id])return cb(true);
@@ -108,9 +108,21 @@ function mdlMake(id,len){
 }
 
 /* ----- Sığdırma: uzunluğu Z ekseninde olan nesneyi Y etrafında ang kadar döndürüp kameraya sığdırır ----- */
+/* kutu: iskeletli (skinned) mesh'lerde geometri bağlama pozunda ve başka birimde (asker: santimetre) durduğu için
+   Box3.setFromObject yanlış (100 kat büyük) çıkıyordu → kamera çok uzağa gidip küçük resim boş kalıyordu.
+   İskeletli parçalarda kemiklerin gerçek konumları kullanılır. */
+function mdlBox(obj){
+ const b=new THREE.Box3(),v=new THREE.Vector3(),bb=new THREE.Box3();let sk=false;
+ obj.traverse(o=>{
+  if(o.isSkinnedMesh&&o.skeleton){sk=true;for(const bn of o.skeleton.bones)b.expandByPoint(v.setFromMatrixPosition(bn.matrixWorld))}
+  else if(o.isMesh||o.isLine||o.isPoints){const g=o.geometry;if(!g)return;if(!g.boundingBox)g.computeBoundingBox();if(g.boundingBox.isEmpty())return;bb.copy(g.boundingBox).applyMatrix4(o.matrixWorld);b.union(bb)}
+ });
+ if(sk&&!b.isEmpty()){const s=b.getSize(v);b.expandByScalar(Math.max(s.x,s.y,s.z)*.06)}
+ return b;
+}
 function mdlFit(obj,ang,aspect,fov,pad){
  obj.updateMatrixWorld(true);
- const b=new THREE.Box3().setFromObject(obj),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
+ const b=mdlBox(obj),sz=b.getSize(new THREE.Vector3()),c=b.getCenter(new THREE.Vector3());
  const sa=Math.abs(Math.sin(ang)),ca=Math.abs(Math.cos(ang)),th=Math.tan(fov*Math.PI/360);
  const needW=(sz.x*ca+sz.z*sa)*(pad||1.1),needH=sz.y*(pad||1.1);
  const dist=Math.max(needW/(2*th*aspect),needH/(2*th))+(sz.x*sa+sz.z*ca)/2;
@@ -154,6 +166,7 @@ function mdlIconPump(){
    const ang=view==='front'?-.45:Math.PI/2-.5;
    _ir.setSize(w,h);_ic.aspect=w/h;
    const f=mdlFit(pv,ang,w/h,_ic.fov,view==='front'?1.06:1.02);
+   if(!(f.sz.x+f.sz.y+f.sz.z>0)){try{cb(null)}catch(e){}return setTimeout(mdlIconPump,0)} /* boş model (henüz yüklenmemiş): boş resmi önbelleğe yazma */
    pv.position.set(-f.c.x,-f.c.y,-f.c.z);
    const o=new THREE.Group();o.add(pv);o.rotation.y=ang;_is.add(o);
    _ic.position.set(0,view==='front'?.1*f.sz.y:.2*f.sz.y,f.dist);_ic.lookAt(0,0,0);_ic.updateProjectionMatrix();
@@ -287,7 +300,17 @@ function mdlGripsObj(obj,kind,id){
   const frontMost=Math.max(mag?mag.z1:-1e9,grip?grip.z1:zmin);
   const zA=Math.max(frontMost+.03*L,zmin+.36*L),zB=zmax-.14*L;
   if(zB-zA<.07*L){out.gL=[lo[Math.round(.72*NB)],zmin+.72*L];out.conf=Math.min(out.conf,.5);out.why+=' ön kundak dar'}
-  else{const zl=zA+(zB-zA)*.3,b=Math.max(0,Math.min(NB-1,Math.floor((zl-zmin)/bw)));out.gL=[lo[b],zl];out.gLk='kundak altı'}
+  else{
+   const zl=zA+(zB-zA)*.3,b=Math.max(0,Math.min(NB-1,Math.floor((zl-zmin)/bw)));out.gL=[lo[b],zl];out.gLk='kundak altı';
+   out.support=[];
+   for(let i=0;i<=8;i++){const z=zA+(zl-zA)*i/8,bi=Math.max(0,Math.min(NB-1,Math.floor((z-zmin)/bw)));out.support.push([lo[bi],z]);}
+  }
+ }
+ // Ayrı ön tutamak erişilemiyorsa onun gerisindeki gerçek kundak yüzeyi de
+ // geçerli bir destek alanıdır; şarjör ve kabzanın arkasına geçilmez.
+ if(!pis&&!out.support&&out.gL){
+  const start=Math.max(mag?mag.z1:-1e9,grip?grip.z1:zmin)+.03*L,end=out.gL[1];
+  if(end-start>.07*L){out.support=[];for(let i=0;i<=8;i++){const z=start+(end-start)*i/8,b=Math.max(0,Math.min(NB-1,Math.floor((z-zmin)/bw)));out.support.push([lo[b],z]);}}
  }
  let ys=0,cs2=0,ym=0,cm=0;
  for(let b=0;b<NB;b++){if(b<4){ys+=(lo[b]+hi[b])/2;cs2++}if(b>=NB-3){ym+=(lo[b]+hi[b])/2;cm++}}
@@ -298,4 +321,30 @@ function mdlGrips(id,kind){
  const key=id+'|'+kind;if(MDLG[key])return MDLG[key];
  const m=MDL.cache[id];if(!m)return null;
  return MDLG[key]=mdlGripsObj(m.obj,kind,id);
+}
+
+/* Ayrı şarjör parçasını model geometrisinden bul. Gövde/namlu kadar uzun
+   parçaları kabul etme; tek parça modellerde uydurma kutu şarjör üretme. */
+function mdlMagazine(mm,kind,id){
+ const G=mdlGrips(id,kind);if(!G||G.conf<.5)return null;
+ const anchor=G.mag||((kind==='pistol'&&G.gR)?G.gR:null);if(!anchor)return null;
+ mm.updateWorldMatrix(true,true);
+ const inv=mm.matrixWorld.clone().invert(),mat=new THREE.Matrix4(),box=new THREE.Box3();
+ let best=null,volume=Infinity;
+ mm.traverse(o=>{
+  if(!o.isMesh||!o.geometry.attributes.position)return;
+  o.geometry.computeBoundingBox();mat.multiplyMatrices(inv,o.matrixWorld);
+  box.copy(o.geometry.boundingBox).applyMatrix4(mat);
+  const sz=box.getSize(new THREE.Vector3());
+  if(sz.z>G.L*.45||sz.y<G.H*.18||sz.z<G.L*.025)return;
+  if(anchor[0]<box.min.y-G.H*.03||anchor[0]>box.max.y+G.H*.03||anchor[1]<box.min.z-G.L*.03||anchor[1]>box.max.z+G.L*.03)return;
+  const v=sz.x*sz.y*sz.z;if(v<volume){volume=v;best=o;}
+ });
+ if(!best)return null;
+ const worldBox=new THREE.Box3().setFromObject(best),center=worldBox.getCenter(new THREE.Vector3());
+ const moving=new THREE.Group(),copy=best.clone();
+ copy.matrixAutoUpdate=false;
+ copy.matrix.copy(best.matrixWorld);copy.matrix.premultiply(new THREE.Matrix4().makeTranslation(-center.x,-center.y,-center.z));
+ moving.add(copy);moving.visible=false;
+ return {source:best,moving,center,size:worldBox.getSize(new THREE.Vector3())};
 }

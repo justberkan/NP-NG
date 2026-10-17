@@ -355,6 +355,15 @@ body.npcnear.mow #be.owonly,body.tedit #be.owonly{display:flex}
 .fi2 b{cursor:pointer;padding:1px 7px;border-radius:4px;background:#141c26;border:1px solid var(--ln);font-weight:600}
 .fi2 b:hover{background:#1f2a38}.fi2 em{font-size:10px;color:var(--mut);font-style:normal}
 .fi2.rq{background:#1a2a1a55;border-radius:5px;padding:5px 4px}
+.fav{flex:none;width:24px;height:24px;border-radius:6px;overflow:hidden;background:#141c26}
+.fav svg{display:block;width:100%;height:100%}
+.fi2 .fav{width:22px;height:22px}
+.fim{display:flex;align-items:center;gap:8px;padding:4px 4px;background:#141c2666;border-radius:6px;margin-bottom:2px}
+.fim>svg{flex:none;border-radius:7px}
+.fim span{flex:1;min-width:0;font-size:12px;color:var(--mut);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.fim span b{color:#c8d4e0;font-weight:600}
+.fim>b{cursor:pointer;padding:1px 8px;border-radius:4px;background:#141c26;border:1px solid var(--ln);font-weight:600}
+.fim>b:hover{background:#1f2a38}
 #pvpb{position:absolute;right:12px;top:calc(92px + env(safe-area-inset-top,0px));padding:6px 12px;border-radius:7px;border:1px solid #fff4;color:#fff;font:600 13px system-ui;cursor:pointer;pointer-events:auto;z-index:6;display:none}
 #pvpb.pve{background:#14653a}#pvpb.pvp{background:#8a1c1c}
 @media(max-width:760px){#fr{width:150px}}
@@ -572,3 +581,49 @@ body.lo-on #wbar{display:none}
 body.mow #lohud{display:none}
 .mpt.ally{background:#0a6a3acc;color:#bfffd8}
 #mpb .ally{color:#8dffbd}
+
+/* İstanbul saatine bağlı lobi atmosferi; menü açılınca yalnız bu küçük panel büyür. */
+.lobby-atmosphere{position:absolute;left:20px;bottom:190px;z-index:12;width:280px;max-width:calc(100vw - 40px);color:#e5e9de;font:12px/1.5 Arial,sans-serif;border:1px solid #7f8c795e;border-radius:5px;background:#111c1be8;box-shadow:0 8px 24px #0003}
+.lobby-atmosphere[hidden]{display:none}
+.lobby-atmosphere summary{padding:10px 12px;cursor:pointer;letter-spacing:.1em;font-size:10px;color:#d6c59c}
+.lobby-atmosphere summary span{display:block;letter-spacing:0;color:#b6c3be;font-size:11px;margin-top:3px}
+.la-controls{padding:0 12px 12px;display:grid;gap:8px}
+.la-controls label{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.la-controls select{width:155px;background:#202d2c;border:1px solid #50605a;color:#f1f2e9;border-radius:3px;padding:5px;font:12px Arial,sans-serif}
+.la-controls small{color:#aab8b2;font-size:10px}
+.la-controls button{padding:6px;background:#35433b;border:1px solid #7c8b71;color:#eee8d7;border-radius:3px;cursor:pointer}
+@media(max-width:700px){.lobby-atmosphere{left:10px;bottom:175px;width:225px;max-width:calc(100vw - 30px)}.lobby-atmosphere summary{padding:7px 10px}.la-controls select{width:130px}}
+
+/* Yakında gelecek modlar: tıklanmaz, soluk, köşede rozet */
+.mode.soon{cursor:default;opacity:.55;filter:grayscale(.5);background:linear-gradient(160deg,#1c2430,#0c1016)}
+.mode.soon:after{content:'YAKINDA';position:absolute;top:10px;right:-6px;padding:3px 10px;border-radius:4px;background:#ffb020;color:#111;font:800 11px system-ui;letter-spacing:1px}
+.mode.soon[data-s=race]:before{content:'🏎️'}.mode.soon[data-s=bump]:before{content:'🚗'}.mode.soon[data-s=dog]:before{content:'✈️'}
+.mode.soon[data-s=surv]:before{content:'🏕️'}.mode.soon[data-s=cod]:before{content:'🧟‍♂️'}
+.mode[data-m=zo]{background:linear-gradient(170deg,#2e4a2a,#101a0e)}.mode[data-m=zo]:before{content:'🤝'}
+.mode[data-m=tm]{background:linear-gradient(120deg,#2b4f6e,#6e4a2f)}.mode[data-m=tm]:before{content:'🏆'}
+.mode[data-m=ow]{background:linear-gradient(160deg,#2c5a3a,#163040)}.mode[data-m=ow]:before{content:'🗺️'}
+
+/* Lobi arka planı: neon KAPALI BETA yazısı */
+#betaneon{position:absolute;left:50%;top:9%;transform:translateX(-50%) rotate(-4deg);z-index:-1;pointer-events:none;white-space:nowrap;
+ font:900 clamp(40px,8vw,120px)/1 system-ui;letter-spacing:.12em;color:#ffe9fb;opacity:.85;
+ text-shadow:0 0 4px #fff,0 0 12px #ff2bd6,0 0 28px #ff2bd6,0 0 56px #ff2bd6,0 0 90px #7a2bff;animation:neonFlick 6s infinite}
+#lb{isolation:isolate} /* yazı lobi içeriğinin arkasında kalsın */
+@keyframes neonFlick{0%,18%,22%,62%,64%,100%{opacity:.85}20%,63%{opacity:.35}}
+/* yasal bilgilendirme ve kumarhane onayı */
+#legal{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;background:#05080dcc;backdrop-filter:blur(3px);padding:16px}
+#legal .lgc{max-width:620px;width:100%;max-height:90vh;overflow:auto;padding:22px 24px;border-radius:12px;background:#0f1620;border:1px solid #2a3a4a;color:#dbe4ee;font:14px/1.55 system-ui}
+#legal h2{margin:0 0 8px;color:#27e0ff}#legal ul{padding-left:20px;margin:10px 0}#legal li{margin:6px 0}
+.cgck{display:flex;gap:8px;align-items:center;margin:14px 0;font:600 14px system-ui;cursor:pointer}.cgck input{width:18px;height:18px}
+#legal .btn:disabled,.cgate .btn:disabled{opacity:.45;cursor:default}
+.cgate{max-width:560px;margin:0 auto}.cgate .row{display:flex;gap:10px}
+
+/* Kontroller sekmesi (tuş atama) */
+.kb2 b.kbb{min-width:86px;text-align:center;cursor:pointer;background:#101a24;border:1px solid var(--ln);border-radius:5px;padding:5px 8px;font-size:12px;font-weight:600}
+.kb2 b.kbb:hover{border-color:var(--ac,#27e0ff)}
+.kb2 b.kbb.alt{opacity:.75;border-style:dashed}
+.kb2 b.kbb.wait{border-color:#ffb020;color:#ffb020}
+body.kb-cap{cursor:crosshair}
+
+/* Aim test/ısınma alanı: etkileşim ipucu */
+#rhint{position:fixed;left:50%;bottom:18%;transform:translateX(-50%);padding:8px 16px;border-radius:8px;background:#0d1420d9;border:1px solid #27e0ff66;color:#dbe9f4;font:600 14px system-ui;pointer-events:none;z-index:60;white-space:nowrap}
+#rhint:empty{display:none}

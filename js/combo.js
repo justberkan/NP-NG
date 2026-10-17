@@ -14,7 +14,7 @@ function cmbHit(kill){
  el.classList.remove('off');
  el.style.setProperty('--cc',tt[2]);
  el.innerHTML=`<b>×${CMB.n}</b><span>${tt[1]}${CMB.n>=10?` · +%${Math.round((cmbMul()-1)*100)}`:''}</span><i><u></u></i>`;
- el.classList.remove('pop');void el.offsetWidth;el.classList.add('pop');
+ el.classList.add('pop'); /* <b> her vuruşta yeniden oluşuyor: animasyon kendiliğinden baştan başlar (offsetWidth ile sayfayı zorla yeniden düzenlemeye gerek yok) */
  if(ti>CMB.tier&&ti>0&&typeof snd==='function'){snd(520+ti*120,.1,.05);snd(780+ti*120,.14,.04)}
  CMB.tier=ti;
 }

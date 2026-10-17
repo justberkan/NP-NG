@@ -254,13 +254,29 @@ function crashEnd(){
 
 /* ---------- Kumarhane ekranı ---------- */
 const CGAMES=[['slot','Slot',slotHTML,slotWire],['bj','Blackjack',bjHTML,bjWire],['rl','Rulet',rHTML,rWire],['av','Aviator',crashHTML,crashWire]];
+/* İlk girişte (hesap başına bir kez) 18 yaş onayı. Onay hesabın kayıtlı verisinde (SV.casOk) tutulur. */
+function casinoGateV(){
+ return `<div class='pn2 cgate'><h3>Kumarhane · Giriş onayı</h3>
+ <p>Kumarhane yalnızca <b>18 yaşından büyük</b> oyuncular içindir.</p>
+ <p class='note'>Buradaki oyunlar tamamen eğlence amaçlıdır ve yalnızca oyun içi sanal para (TL) ile oynanır. Sanal para gerçek parayla satın alınamaz, gerçek paraya ya da herhangi bir değere çevrilemez, başka oyunculara aktarılamaz. Gerçek parayla bahis, ödül ya da kazanç yoktur.</p>
+ <label class='cgck'><input type='checkbox' id='cgage'> 18 yaşından büyüğüm ve bu koşulları okudum.</label>
+ <div class='row'><button class='btn' id='cgok' disabled>Kumarhaneye gir</button><button class='btn alt' id='cgno'>Lobiye dön</button></div></div>`;
+}
 function casinoV(){
+ if(!SV.casOk)return casinoGateV();
  const g=CGAMES.find(x=>x[0]===cgGame)||CGAMES[0];
  return `<div class='pn2'><div class='tabs'>${CGAMES.map(x=>`<button data-g='${x[0]}' class='${x[0]===g[0]?'on':''}'>${x[1]}</button>`).join('')}</div>
  <p class='note'>Burada sadece oyun içi para kullanılır. Gerçek para yoktur. Kaybettiğin para geri gelmez, dikkatli oyna.</p></div><div id='cg'>${g[2]()}</div>`;
 }
 VIEWS.casino=casinoV;
 VIEWWIRE.casino=function(){
+ if(!SV.casOk){
+  const ck=$('cgage'),ok=$('cgok');
+  if(ck)ck.onchange=()=>{ok.disabled=!ck.checked};
+  if(ok)ok.onclick=()=>{if(!ck.checked)return;SV.casOk=Date.now();save();view('casino')};
+  const no=$('cgno');if(no)no.onclick=()=>view('home');
+  return;
+ }
  document.querySelectorAll('#av [data-g]').forEach(b=>b.onclick=()=>{if(cgBusy||(cgCrash.on&&cgCrash.phase!=='idle'&&cgCrash.phase!=='crash'))return;casinoStop();cgGame=b.dataset.g;view('casino')});
  const g=CGAMES.find(x=>x[0]===cgGame)||CGAMES[0];
  g[3]();

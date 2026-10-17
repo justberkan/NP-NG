@@ -1,26 +1,42 @@
 'use strict';
 /* ===== Nişangahlar (optikler): silahın üstüne takılan modeller, nişan alınca yakınlaştırma + artı (reticle) ===== */
 const OPT=[
- {id:'o0',n:'Kırmızı nokta',p:0,r:'common',z:1.4,ty:'dot',d:'Hafif ve hızlı. Standart nişangah.'},
- {id:'o1',n:'Reflex',p:220,r:'common',z:1.5,ty:'ring',d:'Dairesel kırmızı artı, geniş camlı küçük nişangah.'},
- {id:'o2',n:'Holografik',p:520,r:'rare',z:1.7,ty:'holo',d:'Dairenin ortasında nokta. Yakın ve orta mesafede çok net.'},
- {id:'o3',n:'ACOG 3,5x',p:1100,r:'rare',z:2.6,ty:'acog',d:'Orta menzil için 3,5 kat yakınlaştırma, şivron artı.'},
- {id:'o4',n:'Tüp dürbün 4x',p:1500,r:'epic',z:3.3,ty:'tube',d:'Klasik dürbün: 4 kat yakınlaştırma, ince artı.'},
- {id:'o5',n:'Nişancı dürbünü 6x',p:2600,r:'epic',z:4.6,ty:'snip',d:'Uzun mesafe için 6 kat, nişan alırken ekran daralır.'},
- {id:'o6',n:'Termal dürbün 3x',p:4200,r:'legendary',z:3,ty:'therm',d:'Yeşil termal görüntü, 3 kat yakınlaştırma.'}
+ {id:'o0',n:'Kırmızı nokta',p:0,r:'common',z:1.4,ty:'dot',d:'Standart nişangah (silahların kendi gezineği).'},
+ {id:'o7',n:'Modern tüfek dürbünü 4x',p:1700,r:'epic',z:3.4,ty:'tube',mid:'op_scope_modern',d:'Modern keskin nişancı dürbünü: 4 kat yakınlaştırma, ince artı.'},
+ {id:'o8',n:'Holosight XPS',p:680,r:'rare',z:1.7,ty:'holo',mid:'op_holosight',d:'Gerçek holografik nişangah modeli: dairenin ortasında nokta.'},
+ {id:'o9',n:'CYBER dürbün 4x (Termal)',p:5600,r:'legendary',z:4,ty:'therm',th:1,mid:'op_scope_futur',d:'Geleceğin termal dürbünü: nişan alırken düşmanlar sıcak imza ile parlar; duman/sis eklendiğinde bu dürbünle görünür kalırlar.'}
 ];
 const OPTID={};OPT.forEach(o=>OPTID[o.id]=o);
 const optCur=()=>OPTID[SV.eq.o||'o0']||OPT[0];
 /* ADS yakınlaştırması: tüfek/SMG'de optiğin değeri, diğerlerinde standart */
-function optLong(){return typeof cw!=='undefined'&&cw&&!cw.melee&&cw.hold!=='pistol'&&cw.hold!=='dual'}
+function optLong(){return typeof cw!=='undefined'&&cw&&!cw.melee&&cw.hold!=='dual'} /* tekli tabancaya da optik takılır */
 function optRawZoom(){return optLong()?optCur().z:1.4}
 /* Ayarlar > Nişan yakınlaştırması: 0 = hiç yakınlaşmaz, 1 = optiğin tam değeri. Dürbünlerde (3x+) en az %60 uygulanır */
 function optZoom(){const z=optRawZoom(),k=SET.adsZoom==null?.5:+SET.adsZoom;return 1+(z-1)*(z>=3?Math.max(.6,k):k)}
 function optScoped(){return optLong()&&optCur().z>=3}
 
 /* ----- 3B model: {g,cy (optik merkezin montaj üstünden yüksekliği)} ----- */
+/* GLB'li optikler: mid ile assets/<mid>.js'ten yüklenir, boy OPTGLEN'den (m) */
+const OPTGLEN={op_scope_modern:.19,op_holosight:.09,op_scope_futur:.2};
 function optModel(id){
- const o=OPTID[id]||OPT[0],B=0x15191e,B2=0x232a33,G=0x2a323c,g=new THREE.Group();
+ const o=OPTID[id]||OPT[0];
+ /* GLB modeli olan optik */
+ if(o.mid){
+  const B=0x15191e,g=new THREE.Group();
+  g.add(mergeBoxes([{w:.04,h:.012,d:.07,x:0,y:.006,z:0,c:0x232a33}])); /* ray */
+  const m=typeof MDL!=='undefined'?MDL.cache[o.mid]:null;
+  if(m&&typeof mdlMake==='function'){
+   const len=OPTGLEN[o.mid]||.18,o2=mdlMake(o.mid,len);
+   if(o2){
+    if(o.mid==='op_holosight')o2.rotation.y=Math.PI; /* model arkaya dönük geliyor: çevir */
+    const bb=new THREE.Box3().setFromObject(o2),bh=bb.max.y-bb.min.y;
+    o2.position.y=-bb.min.y;g.add(o2);return {g,cy:bh*.55}
+   }
+  }
+  if(typeof mdlLoad==='function'&&m===undefined&&!MDL.fail[o.mid])mdlLoad(o.mid,()=>{}); /* modeli önceden yükle (mdlPreload da yapar) */
+  return {g,cy:.05};
+ }
+ const B=0x15191e,B2=0x232a33,G=0x2a323c,g=new THREE.Group();
  let P=[],cy=.03;
  const glass=(c,w,h,z,y)=>new THREE.Mesh(new THREE.BoxGeometry(w,h,.003),new THREE.MeshBasicMaterial({color:c,transparent:true,opacity:.55}));
  const rail=(len,z0)=>({w:.04,h:.012,d:len,x:0,y:.006,z:z0||0,c:B2});
@@ -70,7 +86,7 @@ function optHud(adsT){
  if(!_oh){optHudInit()}
  const o=optCur(),on=optLong();
  const a=on?adsT:0;
- if(a<.05){if(_oh.style.display!=='none')_oh.style.display='none';return}
+ if(a<.05){if(_oh._v!==0){_oh._v=0;_oh.style.display='none'}return}
  const ds=+(SET.dotSize||1),k=o.id+(optScoped()?'s':'')+ds;
  if(k!==_ot){
   _ot=k;const sc=optScoped();
@@ -79,5 +95,34 @@ function optHud(adsT){
   const svg=o.ty==='dot'?`<circle cx="50" cy="50" r="${(1.5*ds).toFixed(2)}" fill="#ff2a2a" stroke="#000" stroke-opacity=".35" stroke-width=".3"/>`:(OPT_SVG[o.ty]||'');
   _oh.innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">${svg}</svg>`;
  }
- _oh.style.display='block';_oh.style.opacity=Math.min(1,a*(optScoped()?1.15:1));
+ if(_oh._v!==1){_oh._v=1;_oh.style.display='block'}
+ const op=Math.round(Math.min(1,a*(optScoped()?1.15:1))*50)/50;if(op!==_oh._o){_oh._o=op;_oh.style.opacity=op}
+}
+
+/* ----- Termal vurgu: termal optikle (th) nişan alırken düşmanlar parlak "sıcak" gösterilir.
+   Sis/duman eklendiğinde bu katman sayesinde bu optikle görünür kalırlar. ----- */
+const _thM=new Map();
+function thermScan(on){
+ if(typeof E==='undefined')return;
+ for(const e of E){
+  if(!e||!e.g)continue;
+  const hot=!!on&&e.hp>0&&e.team===2&&e.g.visible;
+  e.g.traverse(o=>{
+   if(!o.isMesh||!o.material)return;
+   const ms=Array.isArray(o.material)?o.material:[o.material];
+   for(const m of ms){
+    if(!m.emissive)continue;
+    const k=m.uuid;
+    if(!_thM.has(k))_thM.set(k,{h:m.emissive.getHex(),i:'emissiveIntensity' in m?m.emissiveIntensity:1});
+    const v=_thM.get(k);
+    if(hot){ /* vücut ısısı: parlak kırmızı-sıcak imza */
+     const hx=(k.length*7)%3; /* hafif ton farkı: kimi parça turuncu-kırmızı, kimi derin kırmızı */
+     const col=hx===0?0xff3a10:(hx===1?0xff2008:0xd81505);
+     if(m.emissive.getHex()!==col)m.emissive.setHex(col);
+     if('emissiveIntensity' in m&&m.emissiveIntensity!==1.3)m.emissiveIntensity=1.3;
+    }
+    else{if(m.emissive.getHex()!==v.h)m.emissive.setHex(v.h);if('emissiveIntensity' in m&&m.emissiveIntensity!==v.i)m.emissiveIntensity=v.i}
+   }
+  });
+ }
 }

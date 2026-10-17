@@ -43,26 +43,26 @@ addEventListener('keydown',e=>{
  key[e.code]=1;
  if(state!=='play')return;
  if(mode==='ow'){
-  const dg=['Digit1','Digit2','Digit3','Digit4','Digit5'].indexOf(e.code);
-  if(dg>=0){if(!e.repeat)skCast(dg);return}
-  if((e.code==='ShiftLeft'||e.code==='ShiftRight')&&!e.repeat){skDash();return}
-  if(e.code==='KeyE'&&!e.repeat){owInteract();return}
-  if(e.code==='KeyR'&&!e.repeat){const L=wList(),i=L.indexOf(wk);setW(L[(i+1)%L.length]);return}
-  if(e.code==='KeyF'&&!e.repeat){toggleAuto();return}
-  if(e.code==='KeyM'&&!e.repeat){toggleMap();return}
-  if(e.code==='KeyH'&&!e.repeat){owMed();return}
-  if(AUTO.on&&(e.code==='KeyW'||e.code==='KeyA'||e.code==='KeyS'||e.code==='KeyD'||e.code==='Space'))toggleAuto(false);
+  const dg=[0,1,2,3,4].find(i=>kMatch(e,'sk'+(i+1)));
+  if(dg!=null){if(!e.repeat)skCast(dg);return}
+  if(kMatch(e,'dash')&&!e.repeat){skDash();return}
+  if(kMatch(e,'interact')&&!e.repeat){owInteract();return}
+  if(kMatch(e,'wNext')&&!e.repeat){const L=wList(),i=L.indexOf(wk);setW(L[(i+1)%L.length]);return}
+  if(kMatch(e,'auto')&&!e.repeat){toggleAuto();return}
+  if(kMatch(e,'map')&&!e.repeat){toggleMap();return}
+  if(kMatch(e,'med')&&!e.repeat){owMed();return}
+  if(AUTO.on&&(kMatch(e,'fwd')||kMatch(e,'back')||kMatch(e,'left')||kMatch(e,'right')||kMatch(e,'jump')))toggleAuto(false);
  }
- if(e.code==='KeyR')startReload();
- const wi=['Digit1','Digit2','Digit3','Digit4','Digit5','Digit6','Digit7'].indexOf(e.code);
- if(wi>=0){const kk=LO.on?LO.keys[wi]:WKEYS[wi];if(kk)setW(kk)}
- if(e.code==='KeyV')tp=!tp;
- if(e.code==='KeyG'&&!e.repeat&&cw.melee&&cw.hold!=='gsword'){const ok=cw.hold==='knife'?[0,1]:[0,1,2];SET.grip=ok[(ok.indexOf(SET.grip)+1)%ok.length]||0;saveSet();const gm=$('msg');if(gm){gm.textContent='Tutuş: '+['Düz (tek el)','Ters (tek el)','Çift el'][SET.grip];setTimeout(()=>{if(gm.textContent.indexOf('Tutuş')===0)gm.textContent=''},1200)}}
- if(e.code==='Space'){e.preventDefault();if(!e.repeat)jPress=true;jHeld=true}
- if((e.code==='KeyC'||e.code==='ControlLeft')&&!e.repeat){sPress=true;e.preventDefault()}
- if(e.code==='KeyQ'&&!e.repeat)qPress=true;
+ if(kMatch(e,'reload'))startReload();
+ const wi=[0,1,2,3,4,5,6].find(i=>kMatch(e,'slot'+(i+1)));
+ if(wi!=null){const kk=LO.on?LO.keys[wi]:WKEYS[wi];if(kk)setW(kk)}
+ if(kMatch(e,'tp'))tp=!tp;
+ if(kMatch(e,'grip')&&!e.repeat&&cw.melee&&cw.hold!=='gsword'){const ok=cw.hold==='knife'?[0,1]:[0,1,2];SET.grip=ok[(ok.indexOf(SET.grip)+1)%ok.length]||0;saveSet();const gm=$('msg');if(gm){gm.textContent='Tutuş: '+['Düz (tek el)','Ters (tek el)','Çift el'][SET.grip];setTimeout(()=>{if(gm.textContent.indexOf('Tutuş')===0)gm.textContent=''},1200)}}
+ if(kMatch(e,'jump')){e.preventDefault();if(!e.repeat)jPress=true;jHeld=true}
+ if(kMatch(e,'crouch')&&!e.repeat){sPress=true;e.preventDefault()}
+ if(kMatch(e,'hook')&&!e.repeat)qPress=true;
 });
-addEventListener('keyup',e=>{key[e.code]=0;if(e.code==='Space')jHeld=false});
+addEventListener('keyup',e=>{key[e.code]=0;if(typeof kMatch==='function'&&kMatch(e,'jump'))jHeld=false});
 addEventListener('mousemove',e=>{
  if(state==='play'&&document.pointerLockElement){
   const s=.0022*SET.sens*(ads?SET.adsSens/Math.pow(optZoom(),.75):1);
@@ -159,7 +159,7 @@ function stepPlayer(dt){
  if(mode==='ow'){skUpdate(dt);comboT-=dt}
  if(auto&&touch&&(Math.abs(joy.x)>.25||Math.abs(joy.y)>.25)){toggleAuto(false);auto=false}
  if(auto)autoDrive(dt);
- let mx=dead?0:(key.KeyD?1:0)-(key.KeyA?1:0)+joy.x,mz=dead?0:(key.KeyW?1:0)-(key.KeyS?1:0)-joy.y;
+ let mx=dead?0:(kDown('right')?1:0)-(kDown('left')?1:0)+joy.x,mz=dead?0:(kDown('fwd')?1:0)-(kDown('back')?1:0)-joy.y;
  if(auto){mx=0;mz=0}
  if(SK.chain&&mode==='ow'){mx=0;mz=0}
  if(dead){jPress=sPress=qPress=false}
@@ -167,18 +167,18 @@ function stepPlayer(dt){
  const sn=Math.sin(p.yaw),cs=Math.cos(p.yaw);
  let wx=mx*cs-mz*sn,wz=-mx*sn-mz*cs;const wall=probe();
  /* duvarda koşmaya uygun mu (havada, yan duvar, o yönün tuşu basılı): öyleyse hava strafe'i devre dışı, yoksa koşuyu geri çeker */
- const wsd0=wall&&!p.g?wallSide(wall,sn,cs):0,wrTry=wsd0!==0&&(wsd0>0?(key.KeyD||joy.x>.3):(key.KeyA||joy.x<-.3));
+ const wsd0=wall&&!p.g?wallSide(wall,sn,cs):0,wrTry=wsd0!==0&&(wsd0>0?(kDown('right')||joy.x>.3):(kDown('left')||joy.x<-.3));
  if(auto&&!dead){wx=aiIn.wx;wz=aiIn.wz}
  if(SK.chain&&mode==='ow'){wx=wz=0}
  /* eğilme: Ctrl / C basılı tut. Koşarken (6,2 m/s üstü) basınca kayma olur */
- const crK=!dead&&!auto&&!!(key.ControlLeft||key.ControlRight||key.KeyC);
+ const crK=!dead&&!auto&&kDown('crouch');
  p.cr=crK&&p.slide<=0?1:0;
  if(!p.cr&&p.g&&MC.cur&&mcCeil(p.x,p.z,p.y)<p.y+1.8)p.cr=1; /* tavan alçaksa ayağa kalkamaz */
  if(sPress&&!gr&&p.g&&p.slide<=0){const h=Math.hypot(p.vx,p.vz);if(h>6.2){p.cr=0;const s=Math.min(15*SPD,Math.max(h,7*SPD)*1.5);p.vx*=s/h;p.vz*=s/h;p.slide=1.2;snd(80,.2)}}
  if(gr&&(sPress||mz<-.5))relG();
  sPress=false;
  /* hızlanma (koş): Shift basılı ya da İlahî Hız aktifken ileri gidiyorsan */
- const shiftSpr=!!(key.ShiftLeft||key.ShiftRight),godSpr=mode==='ow'&&SK.act.godspeed>0;
+ const shiftSpr=kDown('sprint'),godSpr=mode==='ow'&&SK.act.godspeed>0;
  p.spr=!dead&&!auto&&!p.cr&&p.slide<=0&&mz>.3&&(shiftSpr||godSpr)&&!firing&&!ads&&!gr&&swU<0&&p.g?1:(p.spr&&!p.g&&!dead&&mz>.3&&(shiftSpr||godSpr)&&!firing?1:0);
  const sprMul=p.spr&&shiftSpr?1.4:1;
  jBuf-=dt;if(jPress)jBuf=.14; // zıplama tamponu (bhop)
@@ -244,7 +244,7 @@ function stepPlayer(dt){
  /* tırmanma kameranın duvara bakmasına göre (W+A gibi çapraz tuşlar artık tırmandırmaz) */
 p.wr=0;if(!wall||p.g)p.wrT=0;
  const into=wall?(-sn)*-wall.nx+(-cs)*-wall.nz:0;
- const wsd=wall?wallSide(wall,sn,cs):0,sideKey=wsd>0?(key.KeyD||joy.x>.3):wsd<0?(key.KeyA||joy.x<-.3):false;
+ const wsd=wall?wallSide(wall,sn,cs):0,sideKey=wsd>0?(kDown('right')||joy.x>.3):wsd<0?(kDown('left')||joy.x<-.3):false;
  /* Apex: havadayken W ile duvara bakıyorsan Space basılı tutmadan da tırmanmaya başlar */
  if(wall&&!gr&&p.st>0&&mz>.3&&(into>.7||(p.climb&&into>.5))&&wall.b.h<=4&&(p.climb||wall.b.h-p.y>STEP_AIR+.4)&&(jHeld||p.climb||(!p.g&&(p.at||0)<.7))){ /* alçak kutuda tırmanma yok: üstüne adım atılır, hız korunur */
   /* Apex tarzı tırmanma: duvara bakıp Space basılı tut; kenara yaklaşınca kendini üstüne çeker */
@@ -307,7 +307,7 @@ function updPlayerView(dt){
  const latN=p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0;p.lt=(p.lt||0)+(latN-(p.lt||0))*Math.min(1,7*dt);
  const fv=baseFov/(1+(optZoom()-1)*adsT); // hızda FOV genişlemesi kapalı; yakınlaştırma nişangaha göre
  if(Math.abs(fv-cam.fov)>.1){cam.fov+=(fv-cam.fov)*Math.min(1,8*dt);cam.updateProjectionMatrix()}
- const chO=(!cw.melee&&cw.hold!=='pistol'&&cw.hold!=='dual')?1-adsT*.9:1;if(chO!==lastCh){lastCh=chO;$('ch').style.opacity=chO}
+ const chO=cw.melee?1:Math.max(0,1-adsT*1.6); /* nişan alınca (sağ tık) ana artı tamamen kaybolur; tabancada da (iki nişangah olmasın) */if(chO!==lastCh){lastCh=chO;$('ch').style.opacity=chO}
  const si=Math.round(spd),gk=grCd>0?Math.ceil(grCd):0,tx=si+' m/s · kanca '+(gr?'bağlı':gk?gk+' sn':'hazır');
  if(tx!==lastSpd){lastSpd=tx;$('spd').textContent=tx}
  const sp100=Math.max(0,Math.round(p.st/ST*100));if(sp100!==lastSt){lastSt=sp100;$('sti').style.width=sp100+'%'}
@@ -315,7 +315,7 @@ function updPlayerView(dt){
  const play=state==='play'||state==='pause'||state==='end';
  const alive=p.dead<=0;
  const rq=reload>0?1-reload/cw.rel:-1,swv=swU>=0?swU:null,sw=swT>=.25?1:swT/.25;
- const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr,glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0};
+ const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr,glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0,wallrun:p.wr||0};
 
  if(p.dead>0&&pRagdoll){
   const t=pRagdoll.pts.pel.p;
@@ -346,6 +346,7 @@ function updPlayerView(dt){
  }else if(tp&&alive)pRigGet();
  if((p.shk||0)>.0008&&!tp){cam.rotation.x+=(Math.random()-.5)*p.shk;cam.rotation.y+=(Math.random()-.5)*p.shk;p.shk*=Math.pow(.0004,dt)}else p.shk=0;
  optHud(adsT);
+ if(typeof thermScan==='function')thermScan(optCur().th&&optLong()&&adsT>.5&&!p.dead);
  if(window.DBGCAM)window.DBGCAM(cam,p);
  if(gr){
   cam.updateMatrixWorld();

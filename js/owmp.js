@@ -75,7 +75,7 @@ function ownTick(dt){
  if(OWN.sendT<=0){
   OWN.sendT=.083;
   const r=v=>Math.round(v*100)/100;
-  mpSend({t:'ost',x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0),w:wk,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),hp:r(Math.max(0,p.hp)/owMax()),lvl:SV.ow.lvl});
+  mpSend({t:'ost',x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0)|(p.wr>0?64:p.wr<0?128:0),w:wk,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),hp:r(Math.max(0,p.hp)/owMax()),lvl:SV.ow.lvl});
  }
  /* mob konumları: kendi yönettiğimiz saldırgan mobları yayınla (10 Hz) */
  OWN.mpT-=dt;
@@ -99,8 +99,11 @@ function ownTick(dt){
   if(e.swU>=0){e.swU+=dt/Math.max(.25,w.rate||.6);if(e.swU>=1)e.swU=-1}
   e.flinch=Math.max(0,e.flinch-dt*4);
   e.g.visible=e.hp>0;
-  if(!window.BGMODE&&e.hp>0)animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:0,pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:0,kick:0,kickR:0,kickL:0,
-   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:-1,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:0,flashL:0,lr:0},dt);
+  if(!window.BGMODE&&e.hp>0){
+   const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+   if(_pr>0)animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,wallrun:(e.fl&64)?1:(e.fl&128)?-1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:0,kick:0,kickR:0,kickL:0,
+   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:-1,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:0,flashL:0,lr:0},dt*_pr);
+  }
   if(e.tag){
    _owv.set(q.x,q.y+2.2,q.z).project(cam);
    const d=Math.hypot(q.x-p.x,q.z-p.z);
@@ -211,8 +214,10 @@ const frEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 function frRender(){
  const el=$('fr');if(!el)return;
  const keep=el.querySelector('#frin'),val=keep?keep.value:'',foc=keep&&document.activeElement===keep;
+ const avNow=(typeof SV!=='undefined'&&SV&&SV.av)||'a0';
+ const me='<div class="fim">'+avSVG(avNow,30)+'<span>Profil resmin: <b>'+avName(avNow)+'</b></span><b data-a="avp" title="Önceki resim">◀</b><b data-a="avn" title="Sonraki resim">▶</b></div>';
  if(!MPL.authed){
-  el.innerHTML='<div class="frp"><div class="frh">Arkadaşlar</div><div class="frs">Arkadaş eklemek ve diğer oyuncuları görmek için çevrimiçi hesabına giriş yap.</div><button class="chip" data-a="login">Giriş yap</button></div><div class="frp"><div class="frh">Aktif oyuncular</div><div class="frs">—</div></div>';
+  el.innerHTML=me+'<div class="frp"><div class="frh">Arkadaşlar</div><div class="frs">Arkadaş eklemek ve diğer oyuncuları görmek için çevrimiçi hesabına giriş yap.</div><button class="chip" data-a="login">Giriş yap</button></div><div class="frp"><div class="frh">Aktif oyuncular</div><div class="frs">—</div></div>';
   return;
  }
  const st=n=>n[1]?'<i class="on"></i>':'<i></i>';
@@ -220,15 +225,15 @@ function frRender(){
  top+='<div class="frad"><input id="frin" maxlength="14" placeholder="oyuncu adı" autocomplete="off"><button data-a="send">+</button></div>';
  if(FR.msg)top+='<div class="frm">'+frEsc(FR.msg)+'</div>';
  let lst='';
- for(const q of FR.rq)lst+='<div class="fi2 rq"><span>'+frEsc(q)+'<small>istek</small></span><b data-a="acc" data-n="'+frEsc(q)+'">✓</b><b data-a="rej" data-n="'+frEsc(q)+'">✕</b></div>';
+ for(const q of FR.rq)lst+='<div class="fi2 rq"><u class="fav">'+avSVG('a0')+'</u><span>'+frEsc(q)+'<small>istek</small></span><b data-a="acc" data-n="'+frEsc(q)+'">✓</b><b data-a="rej" data-n="'+frEsc(q)+'">✕</b></div>';
  const frs=FR.fr.slice().sort((a,b)=>b[1]-a[1]);
- for(const f of frs)lst+='<div class="fi2">'+st(f)+'<span>'+frEsc(f[0])+(f[1]?'<small>'+frEsc(f[2])+'</small>':'<small>çevrimdışı</small>')+'</span><b data-a="del" data-n="'+frEsc(f[0])+'" title="Arkadaşlıktan çıkar">✕</b></div>';
+ for(const f of frs)lst+='<div class="fi2"><u class="fav">'+avSVG(f[3]||'a0')+'</u>'+st(f)+'<span>'+frEsc(f[0])+(f[1]?'<small>'+frEsc(f[2])+'</small>':'<small>çevrimdışı</small>')+'</span><b data-a="del" data-n="'+frEsc(f[0])+'" title="Arkadaşlıktan çıkar">✕</b></div>';
  if(!lst)lst='<div class="frs">Henüz arkadaşın yok. Aşağıdaki aktif oyunculardan ya da isim yazarak ekle.</div>';
  let bot='<div class="frh">Aktif oyuncular <small>'+FR.act.length+'</small></div>';
  let al='';
- for(const a of FR.act)al+='<div class="fi2"><i class="on"></i><span>'+frEsc(a[0])+'<small>'+frEsc(a[1])+'</small></span>'+(a[2]?'<em>arkadaş</em>':'<b data-a="add" data-n="'+frEsc(a[0])+'" title="Arkadaş ekle">+</b>')+'</div>';
+ for(const a of FR.act)al+='<div class="fi2"><u class="fav">'+avSVG(a[3]||'a0')+'</u><i class="on"></i><span>'+frEsc(a[0])+'<small>'+frEsc(a[1])+'</small></span>'+(a[2]?'<em>arkadaş</em>':'<b data-a="add" data-n="'+frEsc(a[0])+'" title="Arkadaş ekle">+</b>')+'</div>';
  if(!al)al='<div class="frs">Şu an başka aktif oyuncu yok.</div>';
- el.innerHTML='<div class="frp">'+top+'<div class="frl">'+lst+'</div></div><div class="frp">'+bot+'<div class="frl">'+al+'</div></div>';
+ el.innerHTML=me+'<div class="frp">'+top+'<div class="frl">'+lst+'</div></div><div class="frp">'+bot+'<div class="frl">'+al+'</div></div>';
  const ni=el.querySelector('#frin');if(ni){ni.value=val;if(foc)ni.focus()}
 }
 (function(){
@@ -237,6 +242,8 @@ function frRender(){
   const b=e.target.closest('[data-a]');if(!b)return;
   const a=b.dataset.a,n=b.dataset.n;
   if(a==='login'){if(typeof mpOpenDialog==='function')mpOpenDialog();return}
+  if(a==='avp'){avCycle(-1);frRender();return}
+  if(a==='avn'){avCycle(1);frRender();return}
   if(a==='send'){const i=el.querySelector('#frin');const v=i?i.value.trim():'';if(v){mpSend({t:'fadd',n:v});i.value=''}return}
   if(a==='add')mpSend({t:'fadd',n:n});
   else if(a==='acc')mpSend({t:'facc',n:n});

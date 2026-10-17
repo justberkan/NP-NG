@@ -61,17 +61,24 @@ function hitFeel(heavy){
 }
 function hurtFx(){const v=$('vig');v.style.opacity='.65';setTimeout(()=>v.style.opacity='0',90)}
 
-/* ----- İz (tracer) ----- */
-const trs=[];
+/* ----- İz (tracer): havuzlu — çatışmada her atışta nesne üretip silmek FPS düşürür ----- */
+const trs=[],trPool=[];
 function tracer(a,b){
  if(!SET.fx||window.BGMODE)return;
- const l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a.clone(),b.clone()]),new THREE.LineBasicMaterial({color:0xffe28a,transparent:true,opacity:.9}));
- l.frustumCulled=false;S.add(l);trs.push({l,t:.09});
+ let l=trPool.pop();
+ if(!l){
+  if(trs.length>=48)return; // iz yağmuru sınırı (yalnız görsel)
+  l=new THREE.Line(new THREE.BufferGeometry().setFromPoints([V3(),V3()]),new THREE.LineBasicMaterial({color:0xffe28a,transparent:true,opacity:.9}));
+  l.frustumCulled=false;
+ }
+ const ps=l.geometry.attributes.position;
+ ps.setXYZ(0,a.x,a.y,a.z);ps.setXYZ(1,b.x,b.y,b.z);ps.needsUpdate=true;
+ l.material.opacity=.9;S.add(l);trs.push({l,t:.09});
 }
 function updTracers(dt){
  for(let i=trs.length-1;i>=0;i--){
   const r=trs[i];r.t-=dt;r.l.material.opacity=Math.max(0,r.t/.09);
-  if(r.t<=0){S.remove(r.l);r.l.geometry.dispose();r.l.material.dispose();trs.splice(i,1)}
+  if(r.t<=0){S.remove(r.l);trs.splice(i,1);trPool.push(r.l)}
  }
 }
 
@@ -86,8 +93,7 @@ function setW(k,silent){
  reload=0;swU=-1;ads=false;swT=0;
  if(VM.h)holderSet(VM.h,k,undefined,modId(k));
  if(pRigGet())holderSet(pRigGet(),k,undefined,modId(k));
- if(mode==='ow'){SV.ow.mw=k}else SV.eq.w=k;
- save();
+ if(mode==='ow'){SV.ow.mw=k}else if(mode!=='aim'){SV.eq.w=k;save()} /* aim test alanı kuşanmayı kaydetmez */
  hudWeapons();upd();
  if(!silent)snd(250,.05);
 }
@@ -136,8 +142,9 @@ function shoot(){
  bloom=Math.min(.004,bloom+.0006);
  const NP=cw.pel?7:1;
  for(let pi=0;pi<NP;pi++){
+ /* tek mermi tam olarak nişangâhın baktığı noktaya gider (dağılma yok); saçmalı yalnızca saçmada (pellet) kalır */
  const spp=NP>1?sp*2.2+.012:sp;
- rc.setFromCamera({x:(Math.random()-.5)*spp*2,y:(Math.random()-.5)*spp*2},cam);
+ rc.setFromCamera(NP>1?{x:(Math.random()-.5)*spp*2,y:(Math.random()-.5)*spp*2}:{x:0,y:0},cam);
  rc.far=100;
  let hit=rc.intersectObjects(targetObjs(),true)[0];
  let pt=hit?hit.point:rc.ray.at(60,_ev);
@@ -224,7 +231,7 @@ function hurt(d,from){
  if(p.dead>0||state!=='play')return;
  if(p.inv>0)return;
  if(mode==='ow'){d*=clsRed();d=skAbsorb(d);if(d<=.01)return}
- p.hp-=d;cmbHurt();hudHp();snd(90,.1,.06);hurtFx();p.shk=Math.max(p.shk||0,Math.min(.06,.012+d*.0012));
+ p.hp-=d;cmbHurt();hudHp();snd(90,.1,.06);hurtFx(); /* kamera sarsıntısı kaldırıldı (hasar anında görüşü kaybetme yok) */
  if(mode==='ow')OW.hitT=0;
  if(p.hp<=0){
   const h=pRigGet();
@@ -347,8 +354,10 @@ function updBot(e,dt){
  }
  e.adsT+=(adsGoal-e.adsT)*Math.min(1,8*dt);
  e.kk*=Math.pow(.0005,dt);e.flash-=dt;e.flashL-=dt;e.flinch=Math.max(0,e.flinch-dt*4);
+ const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+ if(_pr>0)
  animHuman(e.rig,{t,speed:speedOut,fwd,pitch,lookYaw,flinch:e.flinch,ads:e.adsT,kick:e.kk,kickR:e.kk,kickL:e.kk,
-  rq:e.rl>0?1-e.rl/w.rel:-1,flash:e.flash,flashL:e.flashL,bob:clamp(speedOut/7,0,1),lr:0,sw:1},dt);
+  rq:e.rl>0?1-e.rl/w.rel:-1,flash:e.flash,flashL:e.flashL,bob:clamp(speedOut/7,0,1),lr:0,sw:1},dt*_pr);
 }
 function updZombie(e,dt){
  const q=e.g.position,px=q.x,pz=q.z,t=clock+e.ph0;
@@ -360,7 +369,9 @@ function updZombie(e,dt){
  if(e.atk>0)e.atk-=dt;
  if(d<1.7&&p.y<2.5&&e.cd<=0&&p.dead<=0){e.cd=.9;e.atk=.5;hurt(10,q)}
  e.flinch=Math.max(0,e.flinch-dt*4);
- animHuman(e.rig,{t,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin(t*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt);
+ const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+ if(_pr>0)
+ animHuman(e.rig,{t,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin(t*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt*_pr);
 }
 
 /* ----- Mod yönetimi ----- */
@@ -372,36 +383,45 @@ function begin(){
  gr=null;grCd=0;grLine.visible=false;
  T.forEach(t=>{t.visible=mode==='aim';t.userData.dead=mode==='aim'?0:1e9});
  WKEYS.forEach(k=>wa[k]=WP[k].mag||0);
- wk=null;setW(SV.eq.w,true);
+ wk=null;
+ if(mode==='aim'){WKEYS.forEach(k=>wa[k]=9999);setW('pistol',true)} /* test alanı: tüm silahlar sınırsız, tabancayla başla */
+ else setW(SV.eq.w,true);
  setupMode();upd();
 }
 function setupMode(){
  if(OW.on&&mode!=='ow')owLeave();
  if(typeof mapApply==='function')mapApply((mode==='tdm'||(mode==='mp'&&MPL.kind==='tm'))?MAPS.sel:'arena');
  E.forEach(e=>S.remove(e.g));E.length=0;clearRags();clearDn();pRagdoll=null;
- tk={1:0,2:0};wave=0;waveCd=1.5;lastT='';
+ tk={1:0,2:0};wave=0;waveCd=1.5;lastT='';zPend=0;zPT=0;
  $('hp').style.display=mode==='aim'?'none':'block';
  $('msg').textContent=mode==='zom'?'Zombiler geliyor':'';
  p.hp=100;hudHp();
  if(mode==='tdm')tdmSetup();
  if(mode==='ow')owStart();
  if(mode==='mp')mpStart();
+ if(typeof rangeStart==='function'){if(mode==='aim')rangeStart();else rangeStop()}
 }
+let zPend=0,zPT=0;
 function updE(dt){
  if(mode==='ow'){owUpdate(dt);return}
  if(mode==='mp'){mpUpdate(dt);return}
  if(p.dead>0){p.dead-=dt;if(p.dead<=0){p.hp=100;p.x=0;p.z=24;p.y=0;p.vx=p.vz=0;if(mode==='tdm')tdmRespawn();hudHp();$('msg').textContent='';pRagdoll=null}}
- if(mode==='zom'&&!E.some(e=>e.hp>0)){
+ /* performans: dalgadaki zombiler tek karede değil, ~1/40 sn arayla tek tek doğar (büyük dalgada 100+ ms donma olmasın) */
+ if(mode==='zom'&&zPend>0){
+  zPT-=dt;
+  if(zPT<=0){zPT=.025;zPend--;
+   let x,z,k=0;
+   do{const a=Math.random()*6.28;x=clamp(p.x+Math.cos(a)*22,-28,28);z=clamp(p.z+Math.sin(a)*22,-28,28)}while(hitBox(x,z,0)&&++k<10);
+   const e=mkE('z',2,x,z);e.hp=e.max=60+wave*8;e.sp=2.6+Math.min(2,wave*.25)+Math.random();
+  }
+ }
+ else if(mode==='zom'&&!E.some(e=>e.hp>0)){
   waveCd-=dt;
   if(waveCd<=0){
    for(let i=E.length-1;i>=0;i--){S.remove(E[i].g);E.splice(i,1)}
    wave++;waveCd=3;p.hp=Math.min(100,p.hp+30);hudHp();hudT();
    $('msg').textContent='Dalga '+wave;setTimeout(()=>{if(mode==='zom')$('msg').textContent=''},1500);
-   for(let i=0;i<3+wave*2;i++){
-    let x,z,k=0;
-    do{const a=Math.random()*6.28;x=clamp(p.x+Math.cos(a)*22,-28,28);z=clamp(p.z+Math.sin(a)*22,-28,28)}while(hitBox(x,z,0)&&++k<10);
-    const e=mkE('z',2,x,z);e.hp=e.max=60+wave*8;e.sp=2.6+Math.min(2,wave*.25)+Math.random();
-   }
+   zPend=3+wave*2;zPT=0;
   }
  }
  for(const e of E){if(e.hp<=0)continue;if(e.kind==='z')updZombie(e,dt);else updBot(e,dt)}

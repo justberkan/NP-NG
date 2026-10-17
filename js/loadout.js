@@ -98,9 +98,9 @@ function loSync(){
 }
 document.addEventListener('keydown',e=>{
  if(!LO.open)return;
- if(e.code==='Enter'){e.preventDefault();loConfirm()}
+ if(kMatch(e,'chat')){e.preventDefault();loConfirm()}
  else if(e.code==='Escape'){loClose()}
- else{const i=['Digit1','Digit2','Digit3','Digit4','Digit5'].indexOf(e.code);if(i>=0){SV.lo.sel=i;save();loRender()}}
+ else{const i=[0,1,2,3,4].find(i=>kMatch(e,'sk'+(i+1)));if(i!=null){SV.lo.sel=i;save();loRender()}}
 },true);
 
 /* ---------- Maç içi kenar göstergesi: yalnız loadout silahları, şeffaf silüet ---------- */

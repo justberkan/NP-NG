@@ -22,7 +22,7 @@ function mergeBoxes(parts){
  G.setAttribute('normal',new THREE.BufferAttribute(nor,3));
  G.setAttribute('color',new THREE.BufferAttribute(col,3));
  G.setIndex(new THREE.BufferAttribute(idx,1));
- G.computeBoundingSphere();
+ G.computeBoundingSphere();G.userData.own=1; /* bu geometri tek nesneye ait: nesne silinince güvenle atılabilir */
  return new THREE.Mesh(G,VCMAT);
 }
 const boxMesh=(w,h,d,x,y,z,c)=>mergeBoxes([{w,h,d,x,y,z,c}]);
@@ -36,7 +36,7 @@ const WP={
  dual:{n:'Çift Tabanca',hold:'dual',mag:24,rate:.13,dmg:22,auto:1,rel:2,kick:.8,spread:.03,sh:.087,mg:[.03,.09,.04],well:[0,-.09,-.005],gR:[0,-.05,-.01],gL:[0,-.05,-.01],mz:[0,.045,.2],st:[45,40,45,70,24],ic:'🔫',d:'İki el tabanca. Sırayla ateş eder, yakın menzilde yıkıcı. Oyunda 4 tuşu.'},
  knife:{n:'Bıçak',hold:'knife',melee:1,rate:.32,dmg:50,range:2.6,ang:.55,hitT:.45,gR:[0,0,0],mz:[0,0,.25],st:[40,100,0,90,0],ic:'🔪',d:'Hızlı yakın dövüş silahı. Oyunda 5 tuşu.'},
  sword:{n:'Kılıç',hold:'sword',melee:1,rate:.6,dmg:80,range:4,ang:.8,hitT:.45,gR:[0,0,0],gL:[0,0,-.15],mz:[0,0,.9],st:[70,100,0,60,0],ic:'🗡️',d:'Geniş kesik atar, birden çok düşmana çarpar. Oyunda 6 tuşu.'},
- gsword:{n:'İki El Kılıcı',hold:'gsword',melee:1,rate:1.05,dmg:140,range:4.6,ang:1.05,hitT:.5,gR:[0,0,.08],gL:[0,0,-.1],mz:[0,0,1.5],st:[100,100,0,30,0],ic:'⚔️',d:'Ağır ve yavaş. Tek vuruşta ezer, geniş alanı süpürür. Oyunda 7 tuşu.'}
+ gsword:{n:'Büyük Kılıç',hold:'gsword',melee:1,rate:1.05,dmg:140,range:4.6,ang:1.05,hitT:.5,gR:[0,0,.08],gL:[0,0,-.1],mz:[0,0,1.5],st:[100,100,0,30,0],ic:'⚔️',d:'Ağır ve yavaş. Tek vuruşta ezer, geniş alanı süpürür. Oyunda 7 tuşu.'}
 };
 const WNAME=k=>WP[k].n;
 
@@ -64,6 +64,8 @@ const SKINS=[
 ];
 const SKIN=id=>SKINS.find(s=>s.id===id)||SKINS[0];
 const skinOf=k=>SKIN((SV.sk&&SV.sk[k])||'g0');
+/* kuşanılan model silaha özel kaplama varsa o öncelikli (anahtar 'm:<modelId>'), yoksa slotun kaplaması */
+const skinFor=(k,mid)=>SKIN((mid&&SV.sk&&SV.sk['m:'+mid])||(SV.sk&&SV.sk[k])||'g0');
 const CHARS=[
  {id:'c0',glb:1,tint:[0.62,0.72,0.95],n:'Gece Mavisi',r:'common',p:0,j:0x2f6fd0,j2:0x2a5fb8,pa:0x27324a,v:0x1e2a3a,v2:0x1a232f,h:0x1b2432,gl:0x161b22,sk:0xe8c9a0,bo:0x14181d},
  {id:'c1',glb:1,tint:[0.85,1.0,0.78],n:'Orman Kamuflaj',r:'common',p:300,j:0x4f7a3a,j2:0x44692f,pa:0x3d4a2c,v:0x2f3a22,v2:0x28321d,h:0x2b3520,gl:0x1d2418,sk:0xd9b48c,bo:0x1d2014},
@@ -72,16 +74,16 @@ const CHARS=[
  {id:'c4',glb:1,tint:[1.4,1.15,0.6],n:'Altın Muhafız',r:'legendary',p:800,j:0xe0a030,j2:0xc78a20,pa:0x4a3a1a,v:0x7a5a1a,v2:0x5a4210,h:0x3a2c10,gl:0x2a1f0a,sk:0xe8c9a0,bo:0x2a1f0a},
  {id:'c5',glb:1,tint:[0.3,0.32,0.38],n:'Gece Ajanı',r:'rare',p:450,j:0x252a33,j2:0x1d2128,pa:0x1b1f26,v:0x14171c,v2:0x101216,h:0x14171c,gl:0x0c0e11,sk:0xb88a64,bo:0x0c0e11},
  /* Şampiyonlar: özgün küp karakterler (aksesuarlı) */
- {id:'h1',ch:1,glb:1,tint:[0.9,0.92,0.98],n:'Taş Dev',r:'epic',p:700,j:0x7a7f86,j2:0x6a6f76,pa:0x4a4e54,v:0x5a5f66,v2:0x50555b,h:0x6b7078,gl:0x3c4046,sk:0x8a9097,bo:0x2a2d31,nohat:1,ey:0xffb347,pu:0xff6a00,sc:1.08,
+ {id:'h1',ch:1,off:1,glb:1,tint:[0.9,0.92,0.98],n:'Taş Dev',r:'epic',p:700,j:0x7a7f86,j2:0x6a6f76,pa:0x4a4e54,v:0x5a5f66,v2:0x50555b,h:0x6b7078,gl:0x3c4046,sk:0x8a9097,bo:0x2a2d31,nohat:1,ey:0xffb347,pu:0xff6a00,sc:1.08,
   hd:[{w:.24,h:.07,d:.26,x:0,y:.29,z:0,c:0x6b7078},{w:.08,h:.06,d:.1,x:-.12,y:.24,z:.06,c:0x5a5f66},{w:.08,h:.06,d:.1,x:.12,y:.24,z:.06,c:0x5a5f66}],
   bd:[{w:.16,h:.13,d:.27,x:-.28,y:.5,z:0,c:0x6b7078},{w:.16,h:.13,d:.27,x:.28,y:.5,z:0,c:0x6b7078},{w:.1,h:.08,d:.1,x:-.28,y:.6,z:0,c:0x80858c},{w:.1,h:.08,d:.1,x:.28,y:.6,z:0,c:0x80858c}]},
- {id:'h2',ch:1,glb:1,tint:[1.3,0.9,0.65],n:'Kızıl Tilki',r:'rare',p:450,j:0xd9712a,j2:0xc4601f,pa:0x3a2a20,v:0xf3e6d3,v2:0xd9712a,h:0xc4601f,gl:0x3a2a20,sk:0xe0853a,bo:0x2a1a10,nohat:1,
+ {id:'h2',ch:1,off:1,glb:1,tint:[1.3,0.9,0.65],n:'Kızıl Tilki',r:'rare',p:450,j:0xd9712a,j2:0xc4601f,pa:0x3a2a20,v:0xf3e6d3,v2:0xd9712a,h:0xc4601f,gl:0x3a2a20,sk:0xe0853a,bo:0x2a1a10,nohat:1,
   hd:[{w:.06,h:.11,d:.05,x:-.07,y:.34,z:0,c:0xd9712a},{w:.06,h:.11,d:.05,x:.07,y:.34,z:0,c:0xd9712a},{w:.03,h:.04,d:.03,x:-.07,y:.41,z:0,c:0x2a1a10},{w:.03,h:.04,d:.03,x:.07,y:.41,z:0,c:0x2a1a10},{w:.11,h:.06,d:.05,x:0,y:.12,z:.13,c:0xf3e6d3},{w:.03,h:.03,d:.02,x:0,y:.14,z:.16,c:0x1a1a1a}],
   hp:[{w:.1,h:.1,d:.34,x:0,y:.02,z:-.27,c:0xd9712a},{w:.1,h:.1,d:.14,x:0,y:.02,z:-.5,c:0xf3e6d3}]},
- {id:'h3',ch:1,glb:1,tint:[0.12,0.12,0.16],n:'Gölge Avcı',r:'legendary',p:1200,j:0x1a1a24,j2:0x14141c,pa:0x101018,v:0x22222e,v2:0x181822,h:0x14141c,gl:0x0c0c12,sk:0x2a2a36,bo:0x0a0a10,nohat:1,ey:0xc060ff,pu:0xe8b0ff,
+ {id:'h3',ch:1,off:1,glb:1,tint:[0.12,0.12,0.16],n:'Gölge Avcı',r:'legendary',p:1200,j:0x1a1a24,j2:0x14141c,pa:0x101018,v:0x22222e,v2:0x181822,h:0x14141c,gl:0x0c0c12,sk:0x2a2a36,bo:0x0a0a10,nohat:1,ey:0xc060ff,pu:0xe8b0ff,
   hd:[{w:.25,h:.3,d:.08,x:0,y:.17,z:-.14,c:0x14141c},{w:.05,h:.28,d:.2,x:-.13,y:.17,z:-.03,c:0x14141c},{w:.05,h:.28,d:.2,x:.13,y:.17,z:-.03,c:0x14141c},{w:.26,h:.06,d:.27,x:0,y:.31,z:-.01,c:0x14141c}],
   bd:[{w:.38,h:.58,d:.03,x:0,y:.26,z:-.17,c:0x14141c},{w:.3,h:.2,d:.03,x:0,y:-.05,z:-.17,c:0x0c0c12}]},
- {id:'h4',ch:1,glb:1,tint:[1.9,2.0,2.2],n:'Robot RX-9',r:'epic',p:600,j:0xb8c4cf,j2:0x9aa8b5,pa:0x6a7783,v:0x8fa0b0,v2:0x6a7783,h:0x5a6672,gl:0x2a323a,sk:0x8fa0b0,bo:0x2a323a,nohat:1,ey:0x28e0ff,pu:0x28e0ff,
+ {id:'h4',ch:1,off:1,glb:1,tint:[1.9,2.0,2.2],n:'Robot RX-9',r:'epic',p:600,j:0xb8c4cf,j2:0x9aa8b5,pa:0x6a7783,v:0x8fa0b0,v2:0x6a7783,h:0x5a6672,gl:0x2a323a,sk:0x8fa0b0,bo:0x2a323a,nohat:1,ey:0x28e0ff,pu:0x28e0ff,
   hd:[{w:.21,h:.04,d:.23,x:0,y:.285,z:0,c:0x5a6672},{w:.02,h:.12,d:.02,x:.06,y:.35,z:0,c:0x8f9aa5},{w:.04,h:.04,d:.04,x:.06,y:.42,z:0,c:0xff4040},{w:.04,h:.07,d:.05,x:-.115,y:.17,z:0,c:0x5a6672},{w:.04,h:.07,d:.05,x:.115,y:.17,z:0,c:0x5a6672}],
   bd:[{w:.22,h:.28,d:.12,x:0,y:.3,z:-.2,c:0x6a7783},{w:.04,h:.1,d:.04,x:-.07,y:.5,z:-.2,c:0xffb020},{w:.04,h:.1,d:.04,x:.07,y:.5,z:-.2,c:0xffb020}]},
  /* Operatörler: konsept görseldeki taktik karakterler */
@@ -111,7 +113,13 @@ const CHARS=[
  {id:'h14',ch:1,glb:'gotik',n:'Gotik Zarafet',r:'rare',p:600,j:0x2a2a30,j2:0x2a2a30,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h15',ch:1,glb:'heetah',n:'Heetah',r:'rare',p:600,j:0xd98a3a,j2:0xd98a3a,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h16',ch:1,glb:'animekiz',n:'Anime Kız',r:'rare',p:500,j:0x3f6a3a,j2:0x3f6a3a,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
- {id:'h17',ch:1,glb:'swat',n:'SWAT',r:'rare',p:450,j:0x2c3138,j2:0x2c3138,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1}
+ {id:'h17',ch:1,glb:'swat',n:'SWAT',r:'rare',p:450,j:0x2c3138,j2:0x2c3138,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
+ {id:'h18',ch:1,glb:'anime',n:'Anime Savaşçı',r:'rare',p:550,j:0x3a5a8a,j2:0x324d78,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
+ {id:'h19',ch:1,glb:'bw',n:'Black Widow',r:'epic',p:1000,j:0x1a1c22,j2:0x14161b,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
+ {id:'h20',ch:1,glb:'goblin',n:'Goblin',r:'rare',p:600,j:0x3a6a2a,j2:0x315c24,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
+ {id:'h21',ch:1,glb:'kb',n:'KB',r:'epic',p:900,j:0x6a5a2a,j2:0x5a4c22,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
+ {id:'h22',ch:1,glb:'lara',n:'Lara',r:'epic',p:1000,j:0x4a7a8a,j2:0x3e6876,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
+ {id:'h23',ch:1,glb:'samus',n:'Samus',r:'legendary',p:1500,j:0xb97a2a,j2:0xa06a22,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1}
 ];
 /* Formalar: karakterden bağımsız kuşanılan aksesuar (glbrig.js: KITS). Her karaktere giyilir, çıkarılabilir. */
 const FORMS=[
@@ -149,6 +157,22 @@ function mkFlash(mz){
  const m=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,.1),new THREE.MeshBasicMaterial({color:0xffd070,transparent:true,opacity:.95}));
  m.position.set(mz[0],mz[1],mz[2]+.05);m.visible=false;return m;
 }
+/* kaplama (skin) GLB modele uygulanır: eskiden yalnız kutu modeli boyuyordu, GLB silahlarda tüm kaplamalar aynı görünüyordu.
+   Ana renk dokuyla çarpılır (doku deseni korunur); koyu kaplamalarda vurgu rengi hafif parıltı olarak eklenir. Malzemeler model+kaplama başına bir kez kopyalanır. */
+const _SKM=new Map();
+function skinTint(root,sk){
+ /* dokular çok koyu olduğu için renkle çarpmak görünmüyordu: kaplamada doku kaldırılır, silah kaplama rengine boyanır.
+    Koyu tabanlı (desenli) kaplamalarda vurgu rengi karıştırılır ve hafif parıltı verilir. */
+ const c=new THREE.Color(sk.c),a=new THREE.Color(sk.a),l=c.getHSL({}).l;
+ const base=(l<.12?c.clone().lerp(a,.45):c.clone()).multiplyScalar(.55); /* modeller parlak ışıkta beyaza kaçıyordu */
+ root.traverse(o=>{
+  if(!o.isMesh||!o.material)return;
+  const tint=m=>{const key=m.uuid+'|'+sk.id;let n=_SKM.get(key);
+   if(!n){n=m.clone();n.map=null;if(n.color)n.color.copy(base);if(n.emissive)n.emissive.copy(l<.12?a:c).multiplyScalar(.06);n.needsUpdate=true;_SKM.set(key,n)}
+   return n};
+  o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);
+ });
+}
 function buildWeapon(k,sk,mid,own){
  sk=sk||SKIN('g0');
  const d=WP[k],parts=wparts(k,sk.c,sk.a);
@@ -156,18 +180,28 @@ function buildWeapon(k,sk,mid,own){
  /* GLB model varsa kutu modelin yerine kullanılır (catalog.js: mdlSpec/mdlPlace) */
  const sp=typeof mdlSpec==='function'?mdlSpec(k,mid):null;
  const mm=sp?mdlBuild(sp):null,pl=mm?mdlPlace(mm,k,d,sp):null;
- if(mm)g.add(mm); /* kutu (klasik) silah modeli kaldırıldı: GLB yüklenene kadar boş durur */
+ if(mm){if(sk&&sk.id&&sk.id!=='g0')skinTint(mm,sk);g.add(mm)} /* kutu (klasik) silah modeli kaldırıldı: GLB yüklenene kadar boş durur */
  const gR=d.gR,gL=pl&&pl.gL?pl.gL:d.gL,mz=pl?pl.mz:d.mz;
  const W={g,g2:null,mag:null,mag2:null,flash:null,flash2:null,gR:V3(...gR),gL:gL?V3(...gL):V3(),well:d.mg?V3(...d.well):V3(),mz:V3(...mz),sh:pl?pl.sh:d.sh,hideMag:!!mm,adsZ:pl&&pl.adsz||0,bk:pl&&pl.bk!=null?pl.bk:null};
- const optOK=!d.melee&&d.hold!=='pistol'&&d.hold!=='dual';
+ W.support=pl&&pl.support?pl.support.map(p=>V3(...p)):null;
+ const optOK=!d.melee&&d.hold!=='dual'; /* tekli tabancaya da optik takılabilir */
  if(optOK&&mm&&typeof optModel==='function'&&(own?(SV.eq.o||'o0'):'o0')!=='o0'){
   /* nişangah (optik): kuşanılan model sadece kendi silahında görünür, diğerlerinde standart kırmızı nokta */
   const oid=own?(SV.eq.o||'o0'):'o0',om=optModel(oid);
   const y0=mm?pl.sh:(d.sh-.03),oz=mm?(mm.position.z):(d.dot?d.dot[1]:.1);
   om.g.position.set(0,y0,oz);g.add(om.g);W.sh=y0+om.cy;W.opt=oid;W.dotM=om.dot||null;
  }
- if(d.mg)W.mag=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e);
- if(d.hold==='dual'){W.g2=new THREE.Group();if(mm){const m2=mdlBuild(sp);mdlPlace(m2,k,d,sp);W.g2.add(m2)}W.mag2=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e)}
+ if(d.mg){
+  const mg=mm?mdlMagazine(mm,d.hold==='pistol'||d.hold==='dual'?'pistol':k,sp.mid):null;
+  if(mg){W.mag=mg.moving;W.nativeMag=mg.source;W.well.copy(mg.center);W.magSize=mg.size}
+  else if(!mm)W.mag=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e);
+  W.magStatus=mg?'geometry':mm?'integrated-or-unresolved':'loading';
+ }
+ if(d.hold==='dual'){
+  W.g2=new THREE.Group();
+  if(mm){const m2=mdlBuild(sp);mdlPlace(m2,k,d,sp);W.g2.add(m2);const mg=mdlMagazine(m2,'pistol',sp.mid);if(mg){W.mag2=mg.moving;W.nativeMag2=mg.source}}
+  else W.mag2=boxMesh(d.mg[0],d.mg[1],d.mg[2],0,0,0,0x15191e);
+ }
  if(!d.melee){W.flash=mkFlash(mz);g.add(W.flash);if(W.g2){W.flash2=mkFlash(mz);W.g2.add(W.flash2)}}
  return W;
 }
@@ -209,7 +243,7 @@ function mkHolder(parent,aimPos,p0R,p0L,cols,fp){
 }
 function holderSet(h,k,skin,mid){
  if(h.W){h.aim.remove(h.W.g);if(h.W.g2)h.aim.remove(h.W.g2);if(h.W.mag)h.aim.remove(h.W.mag);if(h.W.mag2)h.aim.remove(h.W.mag2)}
- h.W=buildWeapon(k,skin||skinOf(k),mid,h.optOn);h.wk=k;h.mid=mid||null;h.dropped=false;
+ h.W=buildWeapon(k,skin||skinFor(k,mid),mid,h.optOn);h.wk=k;h.mid=mid||null;h.dropped=false;
  if(typeof mdlWant==='function')mdlWant(k,mid,()=>{if(h.wk===k&&h.mid===(mid||null)&&h.W)holderSet(h,k,skin,mid)});
  h.aim.add(h.W.g);if(h.W.g2)h.aim.add(h.W.g2);if(h.W.mag)h.aim.add(h.W.mag);if(h.W.mag2)h.aim.add(h.W.mag2);
 }
@@ -223,7 +257,7 @@ function tilt(q){if(q<.18)return ease(q/.18);if(q<.82)return 1;if(q<.95)return 1
 
 /* Şarjör değiştirme: sol el şarjörü tutar, çeker, atar, kemerden yenisini alır, takar */
 function reloadHands(h,q,d){
- const W=h.W,mh=d.mg[1],w=W.well;
+ const W=h.W,mh=W.magSize?W.magSize.y:d.mg[1],w=W.well;
  _pW.set(w.x,w.y,w.z).applyMatrix4(_m4);
  _pBelow.set(w.x,w.y-mh*.75,w.z).applyMatrix4(_m4);
  _pOut.set(w.x,w.y-mh*1.9,w.z).applyMatrix4(_m4);
@@ -257,8 +291,10 @@ function poseGun(h,c){
   const bk=pis?0:(W.bk!=null?W.bk:.24);
   const smg=h.wk==='smg',gx=pis?-.15:-.2,gy=pis?-.21:-.215,gz=pis?.33:(bk+(smg?-.1:-.04)); /* kalça: kabza kameraya göre (sağ, aşağı, ileri) */
   /* nişan: silah ileri ve hafif aşağı → ekranın ortası açık kalır, kırmızı nokta (ekran katmanı) tam ortada.
-     ADS_ILERI: büyütünce silah küçülür/uzaklaşır · ADS_ALT: büyütünce silah ekranın altına iner */
-  const ADS_ILERI=pis?.12:.16,ADS_ALT=pis?.03:.045;
+     ADS_ILERI: büyütünce silah küçülür/uzaklaşır · ADS_ALT: büyütünce silah ekranın altına iner.
+     Optik takılıysa (W.opt) nişangah hizası göze yaklaştırılır: artı penceresinden bakılır. */
+  const hasO=!!W.opt;
+  const ADS_ILERI=hasO?.08:(pis?.12:.16),ADS_ALT=hasO?.006:(pis?.03:.045);
   const sx=0,sy=-W.sh-ADS_ALT,sz=(pis?.3:(bk+(smg?-.08:.03)))+ADS_ILERI;
   const tx=lerp(gx,sx,ads),tz=lerp(gz,sz,ads);
   P.wp.x=tx-W.gR.x;P.wp.z=tz-W.gR.z;
@@ -290,13 +326,14 @@ function poseDual(h,c){
  P.wp.y-=.1*lr;P.w2p.y-=.1*lr;P.wr.x+=.7*lr;P.w2r.x+=.7*lr;
  P.wp.y-=(1-sw)*.3;P.w2p.y-=(1-sw)*.3;P.wr.x+=(1-sw)*.9;P.w2r.x+=(1-sw)*.9;
  P.wp.z-=kR*.05;P.wr.x-=kR*.1;P.w2p.z-=kL*.05;P.w2r.x-=kL*.1;
- const rq=c.rq==null?-1:c.rq,mh=d.mg[1],w=W.well;
+ const rq=c.rq==null?-1:c.rq,mh=W.magSize?W.magSize.y:d.mg[1],w=W.well;
  if(rq>=0){const tl=tilt(rq);P.wr.z+=tl*.6;P.wr.x+=tl*.5;P.w2r.z-=tl*.6;P.w2r.x+=tl*.5;P.wp.x+=.05*tl;P.w2p.x-=.05*tl;P.wp.y-=.05*tl;P.w2p.y-=.05*tl}
  _qa.setFromEuler(P.wr);_m4.compose(P.wp,_qa,_one);
  _qb.setFromEuler(P.w2r);_m4b.compose(P.w2p,_qb,_one);
  P.rh.copy(W.gR).applyMatrix4(_m4);
  P.lh.copy(W.gR).applyMatrix4(_m4b);P.lhOn=false;
- P.magAtt=false;P.magV=true;P.mag2V=true;
+ // Takılı GLB şarjörün üstüne ikinci kutu şarjör çizme; yalnız değişim sırasında ayır.
+ P.magAtt=rq<.4||rq>=.85;P.magV=true;P.mag2V=true;
  P.magQ.copy(_qa);P.mag2Q.copy(_qb);
  P.magP.set(w.x,w.y,w.z).applyMatrix4(_m4);
  P.mag2P.set(w.x,w.y,w.z).applyMatrix4(_m4b);
@@ -366,7 +403,9 @@ function applyPose(h,c){
   if(P.magAtt&&d.hold!=='dual'){P.magP.set(W.well.x,W.well.y,W.well.z).applyMatrix4(_m4);P.magQ.copy(_qa)}
   W.mag.visible=P.magV&&!(W.hideMag&&P.magAtt);W.mag.position.copy(P.magP);W.mag.quaternion.copy(P.magQ);
  }
- if(W.mag2){W.mag2.visible=P.mag2V;W.mag2.position.copy(P.mag2P);W.mag2.quaternion.copy(P.mag2Q)}
+ if(W.mag2){W.mag2.visible=P.mag2V&&!(W.hideMag&&P.magAtt);W.mag2.position.copy(P.mag2P);W.mag2.quaternion.copy(P.mag2Q)}
+ if(W.nativeMag)W.nativeMag.visible=P.magAtt;
+ if(W.nativeMag2)W.nativeMag2.visible=P.magAtt;
  if(W.flash)W.flash.visible=(c.flash||0)>0;
  if(W.flash2)W.flash2.visible=(c.flashL||0)>0;
 }
@@ -471,10 +510,9 @@ function spawnMagProp(h,which){
  if(window.BGMODE)return;
  if(!SET.fx)return;
  const m=which===2?h.W.mag2:h.W.mag;if(!m)return;
- const p=new THREE.Mesh(m.geometry,m.material);
+ const p=m.clone(true);p.visible=true;
  m.updateWorldMatrix(true,false);
- p.position.setFromMatrixPosition(m.matrixWorld);
- p.quaternion.setFromRotationMatrix(m.matrixWorld);
+ m.matrixWorld.decompose(p.position,p.quaternion,p.scale);
  S.add(p);
  props.push({m:p,v:V3(rnd(-.8,.8),rnd(.2,1.2),rnd(-.8,.8)),w:V3(rnd(-6,6),0,rnd(-6,6)),t:3});
 }

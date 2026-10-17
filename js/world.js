@@ -251,19 +251,22 @@ function owDeact(m){
  if(!m.g)return;
  if(OWN.on&&!m.net&&m.state!=='idle'&&m.state!=='dead'&&typeof mpSend==='function')mpSend({t:'omp',m:[ownMobRow(m,0)]});
  S.remove(m.g);
- m.g.traverse(o=>{if(o.geometry)o.geometry.dispose()});
+ /* yalnızca bu moba ait geometriler atılır. GLB karakter/goblin/silah modelleri tüm kopyalarca PAYLAŞILIYOR:
+    eskiden onlar da atılıyordu, sonraki karede ekran kartına baştan yükleniyordu (mob uzaklaştıkça takılma) */
+ m.g.traverse(o=>{if(o.geometry&&o.geometry.userData.own)o.geometry.dispose()});
  const i=E.indexOf(m);if(i>=0)E.splice(i,1);
  const j=OW.act.indexOf(m);if(j>=0)OW.act.splice(j,1);
  m.g=null;m.rig=null;
  if(m.state==='aggro'||m.state==='return'){m.state='idle';m.x=m.hx;m.z=m.hz;if(!OWN.on)m.hp=m.max;m.tx=null;m.net=false}
 }
 function owStream(dt){
- OW.sT-=dt;if(OW.sT>0)return;OW.sT=.3;
+ /* performans: yakına gelen mobları tek karede 4'er 4'er değil, kısa aralıklarla birer birer oluştur (takılma/ani FPS düşüşü olmasın) */
+ OW.sT-=dt;if(OW.sT>0)return;OW.sT=window.BGMODE?.3:.08;
  let n=0;
  for(const m of OW.mobs){
   const d=Math.hypot(m.x-p.x,m.z-p.z);
   if(m.g){if(d>OW_DEACT||(m.state==='dead'&&d>70))owDeact(m)}
-  else if(d<OW_ACT&&m.state!=='dead'&&OW.act.length<OW_MAXACT&&n<(window.BGMODE?40:4)){owAct(m);n++}
+  else if(d<OW_ACT&&m.state!=='dead'&&OW.act.length<OW_MAXACT&&n<(window.BGMODE?40:1)){owAct(m);n++}
  }
 }
 function owAggro(m){
@@ -511,11 +514,13 @@ function owMob(m,dt){
  if(m.g){
   m.g.position.set(m.x,gy,m.z);m.g.rotation.y=m.yaw;
   if(!window.BGMODE&&m.rig){
-   const t=clock+m.ph0,fwd=1;
+   const t=clock+m.ph0,fwd=1,_pr=poseRate(m,m.x-p.x,m.z-p.z);
+   if(_pr>0){
    if(def.r){
     m.kk*=Math.pow(.0005,dt);m.flash-=dt;m.adsT+=(adsGoal-m.adsT)*Math.min(1,8*dt);
-    animHuman(m.rig,{t,speed:sp,fwd,pitch,lookYaw:look,flinch:m.flinch,ads:m.adsT,kick:m.kk,kickR:m.kk,kickL:m.kk,rq:-1,flash:m.flash,flashL:0,bob:clamp(sp/7,0,1),lr:0,sw:1},dt);
-   }else animHuman(m.rig,{t,speed:sp,fwd,pitch:0,lookYaw:look,flinch:m.flinch,atk:m.atk>0?owAtkAnim(1-m.atk/m.atkT):0},dt);
+    animHuman(m.rig,{t,speed:sp,fwd,pitch,lookYaw:look,flinch:m.flinch,ads:m.adsT,kick:m.kk,kickR:m.kk,kickL:m.kk,rq:-1,flash:m.flash,flashL:0,bob:clamp(sp/7,0,1),lr:0,sw:1},dt*_pr);
+   }else animHuman(m.rig,{t,speed:sp,fwd,pitch:0,lookYaw:look,flinch:m.flinch,atk:m.atk>0?owAtkAnim(1-m.atk/m.atkT):0},dt*_pr);
+   }
   }
  }
 }
@@ -537,7 +542,10 @@ function owBossBar(){
  for(const m of OW.act)if(m.boss&&m.state==='aggro'&&m.hp>0){const d=Math.hypot(m.x-p.x,m.z-p.z);if(d<bd){bd=d;b=m}}
  if(!_bb){const h=$('owhud');if(!h)return;_bb=document.createElement('div');_bb.id='bossbar';_bb.innerHTML='<b></b><i><u></u></i>';h.appendChild(_bb)}
  if(!b){if(_bb.style.display!=='none')_bb.style.display='none';return}
- _bb.style.display='block';_bb.firstChild.textContent=b.name+'  Lv '+b.L;_bb.querySelector('u').style.width=Math.max(0,b.hp/b.max*100)+'%';
+ const bt=b.name+'  Lv '+b.L,bw=Math.round(Math.max(0,b.hp/b.max*100))+'%';
+ if(_bb.style.display!=='block')_bb.style.display='block';
+ if(_bb._t!==bt){_bb._t=bt;_bb.firstChild.textContent=bt}
+ if(_bb._w!==bw){_bb._w=bw;_bb.querySelector('u').style.width=bw}
 }
 
 /* ----- Dünya adımı ----- */

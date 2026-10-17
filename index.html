@@ -2,7 +2,7 @@
 <html lang="tr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>N.P.N.G - No Pain No Gain</title>
-<link rel="stylesheet" href="css/style.css?v=202610170101">
+<link rel="stylesheet" href="css/style.css?v=202610171400">
 </head><body>
 <canvas id="c"></canvas>
 <div id="fps" class="off"></div>
@@ -43,6 +43,7 @@
 </div></div>
 
 <div id="lb">
+ <div id="betaneon" aria-hidden="true">KAPALI BETA</div>
  <div id="tp">
   <div id="lt"></div>
   <div id="bal"></div>
@@ -66,7 +67,13 @@
    <button class="mode" data-m="zo">Zombi Co-op Online<small>Arkadaşlarınla birlikte dalga dalga zombi, hayatta kal</small></button>
    <button class="mode" data-m="tm">5v5 Online<small>Gerçek oyuncularla 5'e 5, harita seç (Arena / Dust2 / Minecraft), ilk 30 öldürme</small></button>
    <button class="mode" data-m="mp">Çevrimiçi Arena<small>Sunucuya bağlan, gerçek oyuncularla savaş (ilk 20 öldürme)</small></button>
+   <button class="mode" data-m="cmp">Rekabetçi<small>5v5 bombalı raunt modu · Rütbesiz (botlarla) / Rütbeli</small></button>
    <button class="mode" data-m="ow">Açık Dünya<small>Dev arazi, zombi ve mutant grupları, kılıç, yetenek, item, demirci, otomatik savaş (AFK)</small></button>
+   <div class="mode soon" data-s="race">Yarış<small>Pistlerde araç yarışı</small></div>
+   <div class="mode soon" data-s="bump">Çarpışan Araba<small>Arenada çarp, devir, son kalan kazanır</small></div>
+   <div class="mode soon" data-s="dog">İt Dalaşı<small>Uçaklarla hava savaşı</small></div>
+   <div class="mode soon" data-s="surv">Zombi: Hayatta Kalma<small>Açık dünyada topla, inşa et, hayatta kal</small></div>
+   <div class="mode soon" data-s="cod">Zombi Direnişi 2<small>Yeni büyük harita, kapı açma, silah duvarı, tuzaklar (CoD Zombies tarzı)</small></div>
   </div>
   <p class="mh">Seçmek için üzerine bas</p>
  </div>
@@ -75,41 +82,48 @@
 <script src="lib/three.min.js"></script>
 <script src="lib/GLTFLoader.js"></script>
 <script src="lib/SkeletonUtils.js"></script>
-<script src="js/core.js?v=202610170101"></script>
-<script src="js/settings.js?v=202610170101"></script>
-<script src="js/weapons.js?v=202610170101"></script>
-<script src="js/swords.js?v=202610170101"></script>
-<script src="js/optics.js?v=202610170101"></script>
-<script src="js/models.js?v=202610170101"></script>
-<script src="js/catalog.js?v=202610170101"></script>
-<script src="js/clips.js?v=202610170101"></script>
-<script src="js/rig.js?v=202610170101"></script>
-<script src="js/model_soldier.js?v=202610170101"></script>
-<script src="js/glbrig.js?v=202610170101"></script>
-<script src="js/combat.js?v=202610170101"></script>
-<script src="js/player.js?v=202610170101"></script>
-<script src="js/world.js?v=202610170101"></script>
-<script src="js/newchars.js?v=202610170101"></script>
-<script src="js/auto.js?v=202610170101"></script>
-<script src="js/owui.js?v=202610170101"></script>
-<script src="js/skills.js?v=202610170101"></script>
-<script src="js/trees.js?v=202610170101"></script>
-<script src="js/ow2.js?v=202610170101"></script>
-<script src="js/lobby3d.js?v=202610170101"></script>
-<script src="js/eco.js?v=202610170101"></script>
-<script src="js/ui.js?v=202610170101"></script>
-<script src="js/shop.js?v=202610170101"></script>
-<script src="js/crates.js?v=202610170101"></script>
-<script src="js/mapcol.js?v=202610170101"></script>
-<script src="js/maps.js?v=202610170101"></script>
-<script src="js/loadout.js?v=202610170101"></script>
-<script src="js/casino.js?v=202610170101"></script>
-<script src="js/views.js?v=202610170101"></script>
-<script src="js/combo.js?v=202610170101"></script>
-<script src="js/mp.js?v=202610170101"></script>
-<script src="js/owmp.js?v=202610170101"></script>
-<script src="js/chat.js?v=202610170101"></script>
-<script src="js/classes.js?v=202610170101"></script>
-<script src="js/admin.js?v=202610170101"></script>
-<script src="js/main.js?v=202610170101"></script>
-<div style="position:fixed;right:6px;bottom:4px;z-index:99999;font:10px monospace;color:#8f8;opacity:.7;pointer-events:none">build 202610170101 · hareket-test-v1</div></body></html>
+<script src="js/core.js?v=202610171400"></script>
+<script src="js/settings.js?v=202610171400"></script>
+<script src="js/controls.js?v=202610171400"></script>
+<script src="js/weapons.js?v=202610171400"></script>
+<script src="js/swords.js?v=202610171400"></script>
+<script src="js/optics.js?v=202610171400"></script>
+<script src="js/models.js?v=202610171400"></script>
+<script src="js/catalog.js?v=202610171400"></script>
+<script src="js/clips.js?v=202610171400"></script>
+<script src="js/rig.js?v=202610171400"></script>
+<script src="js/anim-contact.js?v=202610171400"></script>
+<script src="js/model_soldier.js?v=202610171400"></script>
+<script src="js/glbrig.js?v=202610171400"></script>
+<script src="js/fingers.js?v=202610171400"></script>
+<script src="js/combat.js?v=202610171400"></script>
+<script src="js/range.js?v=202610171400"></script>
+<script src="js/player.js?v=202610171400"></script>
+<script src="js/world.js?v=202610171400"></script>
+<script src="js/newchars.js?v=202610171400"></script>
+<script src="js/auto.js?v=202610171400"></script>
+<script src="js/owui.js?v=202610171400"></script>
+<script src="js/skills.js?v=202610171400"></script>
+<script src="js/trees.js?v=202610171400"></script>
+<script src="js/ow2.js?v=202610171400"></script>
+<script src="js/lobby-atmosphere.js?v=202610171400"></script>
+<script src="js/lobby3d.js?v=202610171400"></script>
+<script src="js/eco.js?v=202610171400"></script>
+<script src="js/ui.js?v=202610171400"></script>
+<script src="js/shop.js?v=202610171400"></script>
+<script src="js/crates.js?v=202610171400"></script>
+<script src="js/mapcol.js?v=202610171400"></script>
+<script src="js/maps.js?v=202610171400"></script>
+<script src="js/loadout.js?v=202610171400"></script>
+<script src="js/casino.js?v=202610171400"></script>
+<script src="js/views.js?v=202610171400"></script>
+<script src="js/combo.js?v=202610171400"></script>
+<script src="js/mp.js?v=202610171400"></script>
+<script src="js/avatars.js?v=202610171400"></script>
+<script src="js/owmp.js?v=202610171400"></script>
+<script src="js/chat.js?v=202610171400"></script>
+<script src="js/classes.js?v=202610171400"></script>
+<script src="js/admin.js?v=202610171400"></script>
+<script src="js/main.js?v=202610171400"></script>
+<script src="js/compet.js?v=202610171400"></script>
+<div style="position:fixed;right:6px;bottom:4px;z-index:99999;font:10px monospace;color:#8f8;opacity:.7;pointer-events:none">build 202610171400 · anim-v4</div></body></html>

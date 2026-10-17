@@ -177,7 +177,7 @@ function gpDom(){
   gpAct(t.dataset.a,t.dataset.v,t.dataset.w);
  });
  e.addEventListener('pointerdown',ev=>ev.stopPropagation());
- addEventListener('keydown',ev=>{if(GP.open&&ev.code==='Escape'){ev.preventDefault();owPanelClose(!GP.lobby)}if(GP.open&&ev.code==='KeyE'&&!GP.lobby){ev.preventDefault();ev.stopImmediatePropagation();owPanelClose(false)}},true);
+ addEventListener('keydown',ev=>{if(GP.open&&ev.code==='Escape'){ev.preventDefault();owPanelClose(!GP.lobby)}if(GP.open&&kMatch(ev,'interact')&&!GP.lobby){ev.preventDefault();ev.stopImmediatePropagation();owPanelClose(false)}},true);
  const f=document.createElement('div');f.id='pk';$('hud').appendChild(f);
 }
 function gpAct(a,v,w){

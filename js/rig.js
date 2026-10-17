@@ -105,6 +105,11 @@ function animHuman(h,c,dt){
  if(glw>0)leanT=lerp(leanT,.42,glw);
  const tau=useClips?(spw*.32+glw*.15)*leanT:0;   // kalça öne eğilir, kalan omurgaya
  h.hips.rotation.x=tau;
+ /* yürüyüş kalça salınımı: gövde yatayda zıt yöne döner, ağırlık adım ritmiyle sağa sola kayar
+    (robotik görünümü kırar; koşu/ninja/süzülme/kayma/eğilme anlarında kapalı) */
+ const swW=sm.amp*(1-sm.air)*(1-sm.sl)*(1-sm.cr)*(1-Math.max(spw,glw));
+ h.hips.rotation.y=Math.sin(h.ph)*.14*swW;
+ h.hips.position.x=Math.cos(h.ph)*.024*swW;
  for(let i=0;i<2;i++){
   const L=h.legs[i],ph=h.ph+i*Math.PI,s=Math.sin(ph),co=Math.cos(ph);
   let hip=-s*.8*sm.amp,kn=Math.max(0,co)*1.1*sm.amp+.04;
@@ -120,13 +125,13 @@ function animHuman(h,c,dt){
  if(nj){ // ninja koşusunda gövde alçalır, çekim yönüne eğilir
   h.hips.position.y-=.14*spw;
  }
- h.hips.rotation.z=(sm.lat||0)*.07;
+ h.hips.rotation.z=(sm.lat||0)*.07+Math.cos(h.ph)*.05*swW; /* kayma eğimi + adım ritminde yan yuvarlanma */
  const lean=leanT-tau;
  sm.leanW=leanT;
  let ex=0,ey=0;
  if(c.swing!=null&&h.wk&&WP[h.wk]&&WP[h.wk].melee&&!h.zombie){const q=swingD(WP[h.wk],c.swing,c.combo,c.grip);ey=-q[4]*.45;ex=(gripOf(WP[h.wk],c.grip)===1?-.5:1)*q[3]*.12}
  else if(h.zombie&&c.atk>0){const a=c.atk;ex=a<.5?-.35*ease(a/.5):a<.68?lerp(-.35,.55,(a-.5)/.18):.55*(1-ease((a-.68)/.32))}
- h.spine.rotation.x=lean+ex*(1-Math.max(spw,glw));h.spine.rotation.y=ey*(1-Math.max(spw,glw));h.spine.rotation.z=-(sm.lat||0)*.14;
+ h.spine.rotation.x=lean+ex*(1-Math.max(spw,glw));h.spine.rotation.y=ey*(1-Math.max(spw,glw))-Math.sin(h.ph)*.09*swW;h.spine.rotation.z=-(sm.lat||0)*.14;
  h.spine.position.y=.06+Math.sin((c.t||0)*1.6+h.ph)*.004;
  h.head.rotation.set(-pit*.7-leanT*(.5+.4*Math.max(spw,glw)),clamp(c.lookYaw||0,-1.1,1.1),0);
  h.aim.rotation.x=-pit-lean*.8;
@@ -169,6 +174,20 @@ function glideCanopy(h,w){
  h.cano.visible=w>.3;
  const s=Math.min(1,w*1.4);h.cano.scale.setScalar(.2+.8*s);
  h.cano.rotation.x=-h.hips.rotation.x-h.spine.rotation.x*.2-.1;
+}
+
+/* ----- İskelet pozu seyreltme (CPU kazandırır) -----
+   Uzak ve/veya kamera arkasındaki varlıklarda animHuman çağrısını azalt; ekranda fark edilmez.
+   Dönüş: 0 = bu kareyi atla; >0 = animHuman'a verilecek dt çarpanı (birikmiş zaman telafi edilir,
+   yürüyüş fazı ve geçişler hızlanıp yavaşlamaz). */
+function poseRate(e,dx,dz){
+ if(typeof p==='undefined'||!p)return 1;
+ e.skN=(e.skN||0)+1;
+ const d2=dx*dx+dz*dz;
+ const behind=Math.sin(p.yaw)*dx+Math.cos(p.yaw)*dz>0;
+ if(d2>900&&behind)return e.skN%3?0:3; /* 30 m üstü arkada 1/3; ÖNDEKİLER her karede (akıcılık: önde seyreltme bot hareketini kesik gösteriyordu) */
+ if(behind&&d2>100)return e.skN%3?0:3;                 /* 10 m üstü arkada: 1/3 */
+ return 1;
 }
 
 /* ===== Ragdoll (Verlet noktaları + kemik uzunluğu kısıtları) ===== */

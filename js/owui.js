@@ -5,7 +5,7 @@ function owUI(on){
  const h=$('owhud');if(!h)return;
  h.classList.toggle('off',!on);
  document.body.classList.toggle('mow',on);
- if(!on){if(typeof owNpcOff==='function')owNpcOff();$('ab').classList.add('off');$('bigmap').classList.add('off');OW.map=false;OWL.forEach(l=>l.e.style.display='none')}
+ if(!on){if(typeof owNpcOff==='function')owNpcOff();$('ab').classList.add('off');$('bigmap').classList.add('off');OW.map=false;OWL.forEach(l=>{l.e.style.display='none';l.v=0})}
  else if(!OWL.length)owLabInit();
  const sm=$('ab').querySelector('small');if(sm)sm.textContent=touch?'kapatmak için OTO düğmesine bas ya da joystick kullan':'kapatmak için F (ya da bir hareket tuşu)';
  hudS='';
@@ -35,19 +35,20 @@ function owLabels(){
  c.sort((a,b)=>a[0]-b[0]);
  for(let i=0;i<OWL.length;i++){
   const l=OWL[i];
-  if(i>=c.length){if(l.e.style.display!=='none')l.e.style.display='none';continue}
+  /* performans: DOM'a yalnızca değişen değer yazılır; konum left/top yerine transform ile (sayfa yeniden düzenlenmez) */
+  if(i>=c.length){if(l.v){l.v=0;l.e.style.display='none'}continue}
   const m=c[i][1];
   _pv.set(m.x,owH(m.x,m.z)+1.95*m.sc+.35,m.z).project(cam);
-  if(_pv.z>1){l.e.style.display='none';continue}
-  l.e.style.display='block';
-  l.e.style.left=((_pv.x*.5+.5)*innerWidth)+'px';
-  l.e.style.top=((-_pv.y*.5+.5)*innerHeight)+'px';
+  if(_pv.z>1){if(l.v){l.v=0;l.e.style.display='none'}continue}
+  if(!l.v){l.v=1;l.e.style.display='block';l.e.style.left='0';l.e.style.top='0'}
+  const px=Math.round((_pv.x*.5+.5)*innerWidth),py=Math.round((-_pv.y*.5+.5)*innerHeight);
+  if(px!==l.px||py!==l.py){l.px=px;l.py=py;l.e.style.transform='translate('+px+'px,'+py+'px) translate(-50%,-100%)'}
   const tx='Lv '+m.L+' '+m.name;
   if(tx!==l.t){l.t=tx;l.s.textContent=tx}
-  l.s.style.color=lvCol(m.L);
-  l.e.classList.toggle('ag',m.state==='aggro');
-  const f=clamp(m.hp/m.max,0,1);
-  l.u.style.width=(f*100)+'%';l.u.style.background=f>.5?'#4dff6a':f>.25?'#ffcf3a':'#ff4a4a';
+  const lc=lvCol(m.L);if(lc!==l.c){l.c=lc;l.s.style.color=lc}
+  const ag=m.state==='aggro';if(ag!==l.ag){l.ag=ag;l.e.classList.toggle('ag',ag)}
+  const f=Math.round(clamp(m.hp/m.max,0,1)*100);
+  if(f!==l.f){l.f=f;l.u.style.width=f+'%';l.u.style.background=f>50?'#4dff6a':f>25?'#ffcf3a':'#ff4a4a'}
  }
 }
 

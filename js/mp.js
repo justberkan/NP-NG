@@ -104,7 +104,7 @@ const MP_SLOTS=[0,2,3];
 function mpSend(o){const w=MPL.ws;if(w&&w.readyState===1)try{w.send(JSON.stringify(o))}catch(e){}}
 function mpJoin(cb){
  MPL.cb=cb||null;
- const sk={};for(const k of WKEYS)if(SV.sk&&SV.sk[k])sk[k]=SV.sk[k];
+ const sk={};if(SV.sk)for(const k in SV.sk)if(SV.sk[k]&&(WKEYS.includes(k)||k.indexOf('m:')===0))sk[k]=SV.sk[k];
  const mods={};for(const k of['rifle','smg','pistol','knife']){const id=modId(k);if(id)mods[k]=id}
  MPL.want=selMode==='tm'?'tm':selMode==='zo'?'zo':'ar';
  mpSend({t:'join',room:MPL.want,map:MAPS.sel,ch:chWithKit(SV.eq.c),w:SV.eq.w,sk,mods});
@@ -210,7 +210,8 @@ function mpAddRemote(info){
  if(MPL.ents.has(info.id))return MPL.ents.get(info.id);
  const w=WP[info.w]?info.w:'rifle';
  const rig=mkHuman(CHAR(info.ch),false);
- holderSet(rig,w,SKIN((info.sk&&info.sk[w])||'g0'),mpModOf(info.mods,w));
+ const md0=mpModOf(info.mods,w);
+ holderSet(rig,w,SKIN((info.sk&&(md0&&info.sk['m:'+md0]||info.sk[w]))||'g0'),md0);
  rig.root.position.set(info.x,info.y,info.z);S.add(rig.root);setShadow(rig.root);
  const tag=document.createElement('div');tag.className='mpt'+((MPL.kind==='zo'||(MPL.kind==='tm'&&info.team===MPL.team))?' ally':'');tag.textContent=info.name;mpTagLayer().appendChild(tag);
  const tm=MPL.kind==='tm',e={rig,g:rig.root,ch:info.ch,kind:'r',team:(MPL.kind==='zo'||(tm&&info.team===MPL.team))?1:2,mods:info.mods||{},hp:info.hp==null?100:info.hp,max:100,mp:info.id,name:info.name,wk:w,sk:info.sk||{},
@@ -324,7 +325,7 @@ function mpMsg(m){
    const inf=MPL.info.get(id);if(inf){inf.x=s[1];inf.y=s[2];inf.z=s[3];inf.yaw=s[4];inf.w=s[12]}
    const e=MPL.ents.get(id);if(!e||e.hp<=0)continue;
    e.tx=s[1];e.ty=s[2];e.tz=s[3];e.tyaw=s[4];e.pitch=s[5];e.pvx=s[6];e.pvz=s[7];e.fl=s[8];e.pq=s[9];e.psw=s[10];e.pcb=s[11];e.ad=s[13];
-   if(WP[s[12]]&&e.wk!==s[12]){e.wk=s[12];holderSet(e.rig,e.wk,SKIN(e.sk[e.wk]||'g0'),mpModOf(e.mods,e.wk));e.swU=-1;e.rq=-1}
+   if(WP[s[12]]&&e.wk!==s[12]){e.wk=s[12];const md1=mpModOf(e.mods,e.wk);holderSet(e.rig,e.wk,SKIN((md1&&e.sk['m:'+md1]||e.sk[e.wk])||'g0'),md1);e.swU=-1;e.rq=-1}
    if(e.psw>=0&&e.swU<0&&e.swGate!==true){e.swU=0;e.combo=e.pcb&3;e.grip=e.pcb>>2} // fx olayı kaçtıysa savuruşu başlat
    e.swGate=e.psw>=0; // aynı savuruş için tekrar başlatma
   }
@@ -334,8 +335,8 @@ function mpMsg(m){
   if(m.k==='f'){
    if(m.side===2){e.kL=1;e.flashL=.05}else{e.kR=1;e.flash=.05}
    if(e.rig.W&&WP[m.w]){
-    if(e.wk!==m.w){e.wk=m.w;holderSet(e.rig,m.w,SKIN(e.sk[m.w]||'g0'),mpModOf(e.mods,m.w))}
-    muzzleWorld(e.rig,_mz,m.side===2?2:1);tracer(_mz,V3(m.pt[0],m.pt[1],m.pt[2]));
+    if(e.wk!==m.w){e.wk=m.w;const md2=mpModOf(e.mods,m.w);holderSet(e.rig,m.w,SKIN((md2&&e.sk['m:'+md2]||e.sk[m.w])||'g0'),md2)}
+    muzzleWorld(e.rig,_mz,m.side===2?2:1);_mpt.set(m.pt[0],m.pt[1],m.pt[2]);tracer(_mz,_mpt);
    }
    if(Math.hypot(e.g.position.x-p.x,e.g.position.z-p.z)<45)snd(150,.06,.03);
   }else if(m.k==='s'){e.swU=0;e.combo=(m.cb|0)&3;e.grip=(m.cb|0)>>2;e.swGate=true;if(Math.hypot(e.g.position.x-p.x,e.g.position.z-p.z)<20)snd(220,.08,.03)}
@@ -402,7 +403,7 @@ function mpHit(e,d,info){
 }
 
 /* ---------- Her karede ---------- */
-const _mpv=V3();
+const _mpv=V3(),_mpt=V3();
 function mpUpdate(dt){
  if(!MPL.ready)return;
  // kendi durumumuzu yolla (20 Hz)
@@ -411,7 +412,7 @@ function mpUpdate(dt){
   MPL.sendT=.05;
   const r=v=>Math.round(v*100)/100;
   mpSend({t:'st',x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),
-   f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0),w:wk,rq:reload>0?r(1-reload/cw.rel):-1,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),ad:r(adsT)});
+   f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0)|(p.wr>0?64:p.wr<0?128:0),w:wk,rq:reload>0?r(1-reload/cw.rel):-1,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),ad:r(adsT)});
  }
  if(p.dead>0&&p.dead<900){p.dead-=dt;if(p.dead<.05)p.dead=.05} // sunucunun 'resp' mesajını bekle
  const k=1-Math.exp(-14*dt);
@@ -422,7 +423,8 @@ function mpUpdate(dt){
   e.yaw=angLerp(e.yaw,e.tyaw,Math.min(1,8*dt));e.g.rotation.y=e.yaw;
   e.vx=(q.x-px)/Math.max(dt,.001);e.vz=(q.z-pz)/Math.max(dt,.001);
   if(e.atk>0)e.atk-=dt;e.flinch=Math.max(0,e.flinch-dt*4);
-  animHuman(e.rig,{t:clock+e.ph0,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin((clock+e.ph0)*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt);
+  const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+  if(_pr>0)animHuman(e.rig,{t:clock+e.ph0,speed:Math.hypot(e.vx,e.vz),fwd:1,pitch:0,lookYaw:Math.sin((clock+e.ph0)*1.3)*.3,flinch:e.flinch,atk:e.atk>0?1-e.atk/.5:0},dt*_pr);
  }
  for(const e of MPL.ents.values()){
   const q=e.g.position;
@@ -438,9 +440,11 @@ function mpUpdate(dt){
   if(e.swU>=0){e.swU+=dt/Math.max(.25,w.rate);if(e.swU>=1)e.swU=-1}
   e.kR*=Math.pow(.0005,dt);e.kL*=Math.pow(.0005,dt);e.flash-=dt;e.flashL-=dt;e.flinch=Math.max(0,e.flinch-dt*4);
   e.adsT+=((w.melee?0:e.ad)-e.adsT)*Math.min(1,10*dt);
-  animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:(e.fl&2)?1:0,
+  const _pr=poseRate(e,q.x-p.x,q.z-p.z);
+  if(_pr>0)
+  animHuman(e.rig,{t:clock+e.ph0,speed:spd,fwd:(vx*fx+vz*fz)/Math.max(spd,.01),air:!(e.fl&1),crouch:(e.fl&2)?1:0,slide:!!(e.fl&4),sprint:!!(e.fl&8),glide:!!(e.fl&16),wj:(e.fl&32)?1:0,wallrun:(e.fl&64)?1:(e.fl&128)?-1:0,lat:clamp(((e.pvx||0)*(-fz)+(e.pvz||0)*fx)/7,-1,1),crouch:(e.fl&2)?1:0,
    pitch:e.pitch||0,lookYaw:0,flinch:e.flinch,ads:e.adsT,kick:Math.max(e.kR,e.kL),kickR:e.kR,kickL:e.kL,
-   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:e.rq,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:e.flash,flashL:e.flashL,lr:0},dt);
+   swing:e.swU>=0?e.swU:null,combo:e.combo,grip:e.grip,rq:e.rq,sw:1,bob:clamp(spd/7,0,1)*((e.fl&1)?1:0),flash:e.flash,flashL:e.flashL,lr:0},dt*_pr);
   // isim etiketi
   if(e.tag){
    _mpv.set(q.x,q.y+2.2,q.z).project(cam);

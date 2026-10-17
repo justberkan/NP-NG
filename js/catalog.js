@@ -89,12 +89,20 @@ const WMOD=WM_RAW.map(r=>{
  return {id,mid,n,cat,cls:b.cls,r:rar,p,k,cs:{dmg,rate,mag,kick,spread,auto:st.auto,rel:st.rel,pel:st.pel,mel},st:bar,sub:WM_SUB[cat]};
 });
 const WMID={};WMOD.forEach(m=>WMID[m.id]=m);
+/* Kaplamalar sekmesi: 'm:<modelId>' anahtarlı çipler için vw çözümleme (model silahlar da ayrı kaplanır) */
+const vwCls=()=>(typeof vw==='string'&&vw.startsWith('m:')&&WMID[vw.slice(2)])?WMID[vw.slice(2)].cls:vw;
+const vwMid=()=>(typeof vw==='string'&&vw.startsWith('m:'))?vw.slice(2):null;
 /* Oyundan kaldırılan modeller: elleri silaha oturmuyor (Mozambique: tutuş noktası güveni 0,3, sol el havada).
    Kayıt silinmez (envanter/pazar bozulmasın) ama satılmaz, kasadan çıkmaz, seçilemez; kuşanan varsayılan modele düşer. */
 const WM_HIDE=new Set(['m_moz']);
 const wmOn=m=>!WM_HIDE.has(m.id);
 /* sınıf anahtarı → seçili model kimliği (çift tabanca, tabanca modelini kullanır) */
-const modId=cls=>{const c=cls==='dual'?'pistol':cls;const id=(typeof LO!=='undefined'&&LO.on&&(c in LO.mod))?LO.mod[c]:(SV&&SV.mod&&SV.mod[c]);return id&&WMID[id]&&!WM_HIDE.has(id)?id:null};
+const modId=cls=>{
+ const c=cls==='dual'?'pistol':cls;
+ let id=(typeof LO!=='undefined'&&LO.on&&(c in LO.mod))?LO.mod[c]:null;
+ if(!id&&typeof RANGE_MOD!=='undefined'&&typeof mode!=='undefined'&&mode==='aim'&&RANGE_MOD[c])id=RANGE_MOD[c]; /* aim range: duvardan alınan model (oturumluk) */
+ if(!id&&SV&&SV.mod)id=SV.mod[c];
+ return id&&WMID[id]&&!WM_HIDE.has(id)?id:null};
 const modOf=cls=>{const id=modId(cls);return id?WMID[id]:null};
 
 /* Sınıf WP kaydının model uygulanmış kopyası (yalnızca yerel oyuncu için) */
@@ -158,7 +166,8 @@ function mdlPlace(mm,k,d,sp){
    let gL=null;
    if(!pis&&G.gL)gL=[0,cy+s*G.gL[0]-(G.gLk==='ön tutamak'?0:.03),cz+s*G.gL[1]];
    mm.userData.auto=1;
-   return {bk:s*(G.gR[1]-G.zmin),adsz:pis?0:((k==='smg'?.4:.42)-gf)*L,mz:[0,cy+s*G.mz[0],cz+s*G.mz[1]],gL,sh:cy+s*G.top-.012};
+   const support=G.support?G.support.map(p=>[0,cy+s*p[0]-.03,cz+s*p[1]]):null;
+   return {bk:s*(G.gR[1]-G.zmin),adsz:pis?0:((k==='smg'?.4:.42)-gf)*L,mz:[0,cy+s*G.mz[0],cz+s*G.mz[1]],gL,support,sh:cy+s*G.top-.012};
   }
  }
  const gf=mel?(sp.sw?.15:.22):(pis?.28:(k==='smg'?.27:.3)); /* kabza: silahın arkadan %27-30'unda */
@@ -180,6 +189,7 @@ function mdlPreload(){
   ['rifle','smg','pistol','knife'].forEach(k=>{const m=modOf(k);if(m)ids.push(m.mid)});
   const sw=SWMOD[SV.ow.mw];if(sw)ids.push(sw.mid);
   (SV.ow.sw||[]).forEach(s=>{if(SWMOD[s])ids.push(SWMOD[s].mid)});
+  if(typeof optCur==='function'){const oc=optCur();if(oc&&oc.mid)ids.push(oc.mid)} /* GLB'li nişangah */
   ids.forEach(id=>mdlLoad(id,()=>{}));
  }catch(e){}
 }

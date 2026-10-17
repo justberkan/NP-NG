@@ -133,13 +133,15 @@ const SEL={
  light:[[0,'Düz (en hızlı)'],[1,'Güneş ışığı'],[2,'Güneş ışığı (güçlü)']],
  fog:[[0,'Kapalı'],[1,'Yakın'],[2,'Orta'],[3,'Uzak']],
  fx:[[0,'Düşük (izsiz, az ragdoll)'],[1,'Orta'],[2,'Yüksek']],
- fpsCap:[[0,'Ekran hızı'],[30,'30'],[60,'60'],[90,'90'],[120,'120'],[144,'144']],
- preset:[['low','Düşük'],['mid','Orta'],['high','Yüksek'],['custom','Özel']]
+ fpsCap:[[0,'Limitsiz'],[30,'30'],[60,'60'],[90,'90'],[120,'120'],[144,'144'],[165,'165'],[240,'240'],[360,'360'],[500,'500']],
+ preset:[['ultra','Çok düşük'],['low','Düşük'],['mid','Orta'],['high','Yüksek'],['custom','Özel']]
 };
 const cRange=(l,k,mn,mx,st,u)=>`<div class='sr2'><span>${l}</span><input type='range' data-k='${k}' min='${mn}' max='${mx}' step='${st}' value='${SET[k]}'><b data-v='${k}'>${SET[k]}${u||''}</b></div>`;
 const cCheck=(l,k)=>`<label class='sr2'><span>${l}</span><input type='checkbox' data-k='${k}' ${SET[k]?'checked':''}></label>`;
 const cSel=(l,k,o)=>`<div class='sr2'><span>${l}</span><select data-k='${k}'>${o.map(x=>`<option value='${x[0]}' ${String(SET[k])===String(x[0])?'selected':''}>${x[1]}</option>`).join('')}</select></div>`;
 const CREDITS=[
+ ['ANITKABİR 2','adasamli','https://sketchfab.com/3d-models/anitkabir-2-cfd9c518c550400b9cfd92dbc009663d','Lobi Anıtkabir modeli · CC BY 4.0 · ölçek, yön ve malzeme uyarlandı'],
+ ['Turkish Flag - Türk Bayrağı','Veysel Gök','https://sketchfab.com/3d-models/turkish-flag-turk-bayrag-e94fdd812b3a4265ad6b3ca063c52088','Lobi bayrağı · CC BY 4.0 · ölçek ve dalgalanma uyarlandı'],
  ['Soldier Full Tactical Gear','DanlyVostok','https://sketchfab.com/3d-models/soldier-full-tactical-gear-850593a8c7114c188395ba1849a66eb9','Oyuncu / bot karakter modeli'],
  ['10 Genshin Impact Inspired Sword 3D Models','Anime 3D (Anime_CG)','https://sketchfab.com/3d-models/10-genshin-impact-inspired-sword-3d-models-a25cde4706d04e4cb5ea7ff89ceb5dd9','Açık dünya kılıç modelleri'],
  ['Low Poly Knife Collection','BUttERflY_Bee','https://sketchfab.com/3d-models/low-poly-knife-collection-000c0c7c9ee740a28469e3c393ae133d','Bıçak modelleri'],
@@ -158,7 +160,7 @@ function creditsHTML(){
  <div style='display:flex;flex-direction:column;gap:8px;margin-top:8px'>${CREDITS.map(c=>`<div class='sr' style='display:block'><b>${c[0]}</b> · ${c[1]}<br><span class='note'>${c[3]}</span><br><a href='${c[2]}' target='_blank' rel='noopener' style='color:#27e0ff;font-size:12px;word-break:break-all'>${c[2]}</a></div>`).join('')}</div>`;
 }
 function setV(ig){
- const tabs=ig?[['game','Oyun'],['xh','Nişangah'],['vid','Video'],['mob','Mobil']]:[['game','Oyun'],['xh','Nişangah'],['vid','Video'],['mob','Mobil'],['mk','Pazar'],['acc','Veri'],['cr','Krediler']];
+ const tabs=ig?[['game','Oyun'],['xh','Nişangah'],['vid','Video'],['mob','Mobil'],['ctl','Kontroller']]:[['game','Oyun'],['xh','Nişangah'],['vid','Video'],['mob','Mobil'],['ctl','Kontroller'],['acc','Veri'],['cr','Krediler']];
  if(ig&&!tabs.some(t=>t[0]===setTab))setTab='game';
  let b='';
  if(setTab==='game')b=cRange('Fare hassasiyeti','sens',.2,3,.05,'x')+cRange('Nişan alırken çarpan','adsSens',.2,1.5,.05,'x')+cRange('Görüş açısı (FOV)','fov',60,120,1,'°')+cRange('Nişan yakınlaştırması (0 = yok, 1 = tam)','adsZoom',0,1,.05,'')+cRange('Ses seviyesi','volume',0,1,.05,'')+cCheck('Y ekseni ters (fare)','invY')+cCheck('Otomatik bhop (Space basılı tut)','autoHop')+cCheck('Kasa açılış animasyonunu atla','skipCrate')+`<hr style='border:0;border-top:1px solid #243242'><h3>Açık dünya</h3>`+cSel('Otomatik savaş hedef seçimi','autoPol',[[0,'Güvenli (kendi seviyem ve altı)'],[1,'Dengeli (+2 seviyeye kadar)'],[2,'Cesur (+5 seviyeye kadar)']])+`<p class='note'>Açık dünyada F: otomatik savaş aç/kapat · M: harita · H: ilk yardım çantası. Açık dünyada ateşli silah yok: bıçak, kılıç ve iki elli kılıçla dövüşürsün. Otomatik savaşta karakter hedef arar, yaklaşıp vurur, canı azalınca kaçıp iyileşir. AFK bırakırken sekmeyi kapatma; arka plana atsan da oyun devam eder.</p>`;
@@ -168,12 +170,14 @@ function setV(ig){
   <hr style='border:0;border-top:1px solid #243242'><h3>Kırmızı nokta (tüfek ve SMG)</h3>`+cRange('Çerçeve boyutu','opticSize',.3,1.5,.05,'x')+cRange('Nokta boyutu','dotSize',.3,3,.1,'x')+`<p class='note'>Değişiklik silah modeli yenilenince hemen görünür. Nişan alırken (sağ tık) kırmızı nokta kullanılır, normal nişangah silikleşir.</p>`;
  else if(setTab==='vid'){
   const pr=pixelRatio();
-  b=cSel('Grafik ön ayarı','preset',SEL.preset)+cRange('Çözünürlük ölçeği','res',40,100,5,'%')+`<p class='note'>Şu an yaklaşık ${Math.round(innerWidth*pr)}×${Math.round(innerHeight*pr)} piksel çiziliyor.</p>`+
+  b=cSel('Grafik ön ayarı','preset',SEL.preset)+cRange('Çözünürlük ölçeği','res',25,100,5,'%')+`<p class='note'>Şu an yaklaşık ${Math.round(innerWidth*pr)}×${Math.round(innerHeight*pr)} piksel çiziliyor. FPS kazanmak için en etkili ayar budur: %25-%60 arası zayıf PC'ler için önerilir.</p>`+
   cSel('Işık kalitesi','light',SEL.light)+cCheck('Gölgeler (yavaş PC\'de kapalı tut)','shadow')+cSel('Sis ve çizim mesafesi','fog',SEL.fog)+cSel('Efekt kalitesi','fx',SEL.fx)+
   cSel('FPS sınırı','fpsCap',SEL.fpsCap)+cCheck('FPS göstergesi','fpsShow')+
   `<p class='note'>Doku: modeller şimdilik doku kullanmıyor, renkli yüzeylerle çiziliyor. Silah skin dokuları gelince doku kalitesi ayarı da eklenecek.</p>
-  <p class='note'>V-Sync: tarayıcıda otomatik açık ve kapatılamıyor, ekranının yenileme hızına kilitli. EXE sürümünde bu seçenek açılıp kapanabilecek. Şimdilik FPS sınırı ile düşürebilirsin.</p>`;
+  <p class='note'>FPS sınırı "Limitsiz" = yapay sınır yok. V-Sync tarayıcıda otomatik açık ve kapatılamıyor: üst sınır ekranının yenileme hızıdır (örn. 144 Hz ekranda en fazla 144 FPS). Sınır seçince sistem ısınmasını ve fan sesini azaltırsın; Limitsiz'de mümkün olan en yüksek değeri alırsın. Ekranın yenileme hızının üstüne (ör. 300-500 FPS) çıkmak için oyunu klasördeki <b>OYNA-SINIRSIZ-FPS.bat</b> ile aç: Chrome/Edge V-Sync kapalı açılır. EXE sürümünde de bu ayar kapalı gelecek.</p>
+  <p class='note'>Zayıf bilgisayar: "Çok düşük" ön ayarını seç. En çok FPS kazandıran ayar çözünürlük ölçeğidir.</p>`;
  }else if(setTab==='mob')b=cRange('Dokunmatik bakış hassasiyeti','touchSens',.4,2.5,.05,'x')+`<div class='row' style='margin-top:10px'><button class='btn alt' id='tle2'>Tuş düzenini değiştir</button></div><p class='note'>Düğmeleri sürükleyip yerleştirir, boyutlarını ayarlarsın. Dokunmatik cihazda en rahat çalışır.</p>`;
+ else if(setTab==='ctl')b=typeof kontrollerHTML==='function'?kontrollerHTML():'';
  else if(setTab==='cr')b=creditsHTML();
  else if(setTab==='mk'){
   b=`<p class='note'>İkinci el pazarda hangi eşyaların satılıp alınabileceğini ayarla. Kapalı eşyalar ilanlarda çıkmaz, satılamaz.</p><div class='grid' style='max-height:46vh'>${tradables().map(i=>`<label class='cell r-${i.r}' style='cursor:pointer'><i style='background:#101822'>${iconOf(i.id,'rifle')}</i>${i.n}<br><input type='checkbox' data-tr='${i.id}' ${isTradable(i.id)?'checked':''}> satılabilir</label>`).join('')}</div>`;
@@ -213,7 +217,8 @@ function wireSettings(a,view){
   });
  });
  const xc=$('xhcol');if(xc){xc.oninput=()=>{SET.xhColor=xc.value;saveSet();applyCrosshair()};$('xhrst').onclick=()=>{SET.xhColor='';saveSet();applyCrosshair();view('settings')}}
- const t2=$('tle2');if(t2)t2.onclick=()=>startTouchEdit();
+ const t2=$('tle2');if(t2){t2.onclick=()=>startTouchEdit()}
+ if(typeof kontrollerWire==='function')kontrollerWire(a);
  a.querySelectorAll('[data-tr]').forEach(c=>c.onchange=()=>{SV.eco.tr[c.dataset.tr]=c.checked;save()});
  const r1=$('rst1');if(r1)r1.onclick=()=>{
   r1.textContent='Emin misin? Tekrar bas';r1.onclick=()=>{try{localStorage.removeItem('mmofps_sv');localStorage.removeItem('mmofps_best')}catch(e){}location.reload()};

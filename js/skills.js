@@ -216,7 +216,7 @@ function skUpdChain(dt){
 /* ----- Dash ----- */
 function skDash(){
  if(mode!=='ow'||state!=='play'||p.dead>0||SK.chain||SK.dCd>0)return false;
- let mx=(key.KeyD?1:0)-(key.KeyA?1:0)+joy.x,mz=(key.KeyW?1:0)-(key.KeyS?1:0)-joy.y;
+ let mx=(kDown('right')?1:0)-(kDown('left')?1:0)+joy.x,mz=(kDown('fwd')?1:0)-(kDown('back')?1:0)-joy.y;
  if(AUTO.on&&(aiIn.wx||aiIn.wz)){SK.dX=aiIn.wx;SK.dZ=aiIn.wz}
  else{
   if(Math.hypot(mx,mz)<.15){mx=0;mz=1}
@@ -370,8 +370,9 @@ function fxPart(x,y,z,col,vy,life,size){
 /* ekran parlaması ve kenar ışıması */
 function fxFlash(col,a){
  const e=$('fxo');if(!e||window.BGMODE)return;
- e.style.transition='none';e.style.background='radial-gradient(circle,'+col+'00 25%,'+col+' 130%)';e.style.opacity=a;
- void e.offsetWidth;e.style.transition='opacity .35s';e.style.opacity=0;
+ /* performans: offsetWidth ile zorla sayfa düzenlemesi yerine Web Animations (her çağrıda takılma yok) */
+ e.style.transition='none';e.style.background='radial-gradient(circle,'+col+'00 25%,'+col+' 130%)';e.style.opacity=0;
+ if(e.animate){if(e._fa)e._fa.cancel();e._fa=e.animate([{opacity:a},{opacity:0}],{duration:350,easing:'ease'})}
 }
 let camRollK=0;
 function camKick(v){camRollK=v}
