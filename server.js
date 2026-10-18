@@ -19,6 +19,8 @@ const WPN = {
   rifle: { d: 25, r: .1 }, smg: { d: 15, r: .065 }, pistol: { d: 35, r: .26 }, dual: { d: 22, r: .13 },
   knife: { d: 50, r: .32, m: 2.6 }, sword: { d: 80, r: .6, m: 3.4 }, gsword: { d: 140, r: 1.05, m: 4.2 }
 };
+const {createValidator,LIMITS:HIT_LIMITS}=require('./server-hit-validation');
+const HIT=createValidator();
 const SPAWNS = [];
 const WCNET = require('./server-wavecorridor')({send,weapons:WPN});
 for (const x of [-10, -5, 0, 5, 10]) { SPAWNS.push([x, 24]); SPAWNS.push([x, -24]); }
@@ -183,7 +185,8 @@ function onText(c, s) {
     if (rm.kind === 'tm') { let a = 0, b = 0; for (const o of players.values()) { if (o.team === 1) a++; else b++; } c.team = a <= b ? 1 : 2; } else c.team = rm.kind === 'zo' ? 1 : 0;
     c.hp = 100; c.alive = true; c.k = 0; c.d = 0; c.inv = now + PROTECT_MS; c.last = {}; c.lt = now; c.free = now + 6000;
     const sp = pickSpawn(c); c.x = sp[0]; c.y = 0; c.z = sp[1]; c.yaw = sp[1] > 0 ? 0 : Math.PI; c.pitch = 0; c.vx = c.vz = 0; c.fl = 1; c.rq = -1; c.sw = -1; c.cb = 0; c.ad = 0;
-    send(c, { t: 'welcome', wave: rm.wave, id: c.id, sp: { x: c.x, z: c.z }, limit: rm.limit, kind: rm.kind, map: rm.map, team: c.team, tk: rm.tk, players: [...players.values()].map(pub) });
+    HIT.reset(c,now);
+    send(c, { t: 'welcome', serverAt:now, wave: rm.wave, id: c.id, sp: { x: c.x, z: c.z }, limit: rm.limit, kind: rm.kind, map: rm.map, team: c.team, tk: rm.tk, players: [...players.values()].map(pub) });
     players.set(c.id, c); // kendisi hariç herkese duyur
     bcast({ t: 'join', p: pub(c) }, c); sendBoard();
     console.log('+ ' + c.name + ' katıldı [' + rm.key + (c.team ? ' T' + c.team : '') + '] (' + players.size + ' oyuncu)');
@@ -202,6 +205,7 @@ function onText(c, s) {
       c.x = x; c.y = y; c.z = z; c.yaw = num(m.yaw, -50, 50); c.pitch = num(m.pitch, -1.6, 1.6);
       c.vx = num(m.vx, -60, 60); c.vz = num(m.vz, -60, 60); c.fl = num(m.f, 0, 511) | 0;
       if (WPN[m.w]) c.w = m.w;
+      HIT.record(c,now,m.sentAt);
       c.rq = num(m.rq, -1, 1, -1); c.sw = num(m.sw, -1, 1, -1); c.cb = num(m.cb, 0, 15) | 0; c.ad = num(m.ad, 0, 1);
       break;
     }
@@ -220,10 +224,15 @@ function onText(c, s) {
       const W = WPN[m.w], v = players.get(m.id | 0);
       if (!c.alive || CUR.roundOver || !W || !v || v === c || !v.alive || v.inv > now || (v.admin&&v.adtools?.god)) return;
       if (CUR.kind !== 'ar' && v.team === c.team) return; // dost ateşi yok
-      const key = 'h' + m.w, minGap = W.r * 1000 * (W.m ? .5 : .45);
-      if (c.last[key] && now - c.last[key] < minGap) return; c.last[key] = now;
-      const d = Math.hypot(c.x - v.x, c.y - v.y, c.z - v.z), reach = W.m ? W.m + 3.5 : (CUR.kind === 'tm' ? 320 : 130);
-      if (d > reach) return;
+      const checked=HIT.validate(c,v,m,W,CUR.map,now);
+      if(checked===false)return;
+      if(checked===null){
+        HIT.legacy();
+        const key='h'+m.w,minGap=W.r*1000*(W.m?HIT_LIMITS.legacyMeleeRate:HIT_LIMITS.legacyGunRate);
+        if(c.last[key]&&now-c.last[key]<minGap)return HIT.reject(c,m,'legacy-fire-rate',now);c.last[key]=now;
+        const d=Math.hypot(c.x-v.x,c.y-v.y,c.z-v.z),reach=W.m?W.m+HIT_LIMITS.legacyMeleeSlack:(CUR.kind==='tm'?HIT_LIMITS.legacyGunTeamRange:HIT_LIMITS.legacyGunArenaRange);
+        if(d>reach)return HIT.reject(c,m,'legacy-range',now);
+      }
       const hd = !W.m && !!m.hd, dmg = W.d * (hd ? 2 : 1);
       v.hp -= dmg; v.lastBy = c.id;
       if (v.hp > 0) { bcast({ t: 'hp', id: v.id, hp: v.hp, by: c.id }); return; }
@@ -273,6 +282,7 @@ function respawn(v) {
   if (!players.has(v.id) || CUR.roundOver) return;
   const sp = pickSpawn(v);
   v.hp = 100; v.alive = true; v.x = sp[0]; v.y = 0; v.z = sp[1]; v.vx = v.vz = 0; v.inv = Date.now() + PROTECT_MS; v.lt = Date.now(); v.free = Date.now() + 4000;
+  HIT.reset(v,Date.now());
   bcast({ t: 'resp', id: v.id, x: sp[0], z: sp[1] });
 }
 function endRound(winner) {
@@ -282,7 +292,7 @@ function endRound(winner) {
   console.log('* Tur bitti [' + rm.key + ']. Kazanan: ' + (tmw ? 'Takım ' + winner.team : winner.name));
   setTimeout(() => {
     useRoom(rm); rm.roundOver = false; rm.tk = { 1: 0, 2: 0 }; const sps = {};
-    for (const c of players.values()) { c.k = c.d = 0; c.hp = 100; c.alive = true; c.vx = c.vz = 0; c.inv = Date.now() + PROTECT_MS; c.lt = Date.now(); c.free = Date.now() + 4000; const sp = pickSpawn(c); c.x = sp[0]; c.y = 0; c.z = sp[1]; sps[c.id] = [sp[0], sp[1]]; }
+    for (const c of players.values()) { c.k = c.d = 0; c.hp = 100; c.alive = true; c.vx = c.vz = 0; c.inv = Date.now() + PROTECT_MS; c.lt = Date.now(); c.free = Date.now() + 4000; const sp = pickSpawn(c); c.x = sp[0]; c.y = 0; c.z = sp[1]; HIT.reset(c,Date.now());sps[c.id] = [sp[0], sp[1]]; }
     bcast({ t: 'round', sps, tk: rm.tk }); sendBoard();
   }, NEXT_ROUND_MS);
 }
@@ -291,7 +301,7 @@ const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
 function zStartWave(rm) {
   rm.wave++; rm.waveCd = 3; rm.zs.clear();
   for (const c of players.values()) {
-    if (!c.alive) { const sp = pickSpawn(c); c.alive = true; c.hp = 60; c.x = sp[0]; c.y = 0; c.z = sp[1]; c.vx = c.vz = 0; c.inv = Date.now() + PROTECT_MS; c.lt = Date.now(); c.free = Date.now() + 4000; bcast({ t: 'resp', id: c.id, x: sp[0], z: sp[1] }); bcast({ t: 'hp', id: c.id, hp: c.hp, by: 0 }); }
+    if (!c.alive) { const sp = pickSpawn(c); c.alive = true; c.hp = 60; c.x = sp[0]; c.y = 0; c.z = sp[1]; c.vx = c.vz = 0; c.inv = Date.now() + PROTECT_MS; c.lt = Date.now(); c.free = Date.now() + 4000; HIT.reset(c,Date.now()); bcast({ t: 'resp', id: c.id, x: sp[0], z: sp[1] }); bcast({ t: 'hp', id: c.id, hp: c.hp, by: 0 }); }
     else { c.hp = Math.min(100, c.hp + 30); bcast({ t: 'hp', id: c.id, hp: c.hp, by: 0 }); }
   }
   const n = Math.min(40, 3 + rm.wave * 2), arr = [...players.values()];
@@ -323,9 +333,15 @@ function zDamagePlayer(rm, c, d, z) {
 function zHit(c, m, now) {
   const rm = CUR; if (rm.kind !== 'zo' || !c.alive || rm.over) return;
   const W = WPN[m.w], z = rm.zs.get(m.id | 0); if (!W || !z) return;
-  const key = 'z' + m.w, minGap = W.r * 1000 * (W.m ? .5 : .45);
-  if (c.last[key] && now - c.last[key] < minGap) return; c.last[key] = now;
-  const d = Math.hypot(c.x - z.x, c.z - z.z), reach = W.m ? W.m + 3.5 : 130; if (d > reach) return;
+  const checked=HIT.validate(c,z,m,W,rm.map,now);
+  if(checked===false)return;
+  if(checked===null){
+    HIT.legacy();
+    const key='z'+m.w,minGap=W.r*1000*(W.m?HIT_LIMITS.legacyMeleeRate:HIT_LIMITS.legacyGunRate);
+    if(c.last[key]&&now-c.last[key]<minGap)return HIT.reject(c,m,'legacy-fire-rate',now);c.last[key]=now;
+    const d=Math.hypot(c.x-z.x,c.z-z.z),reach=W.m?W.m+HIT_LIMITS.legacyMeleeSlack:HIT_LIMITS.legacyGunArenaRange;
+    if(d>reach)return HIT.reject(c,m,'legacy-range',now);
+  }
   const hd = !W.m && !!m.hd; z.hp -= W.d * (hd ? 2 : 1);
   if (z.hp > 0) return;
   rm.zs.delete(z.id); c.k++;
@@ -348,7 +364,7 @@ function zTick(rm, dt) {
   }
   bcast({ t: 'zs', s: zl.filter(z => rm.zs.has(z.id)).map(z => [z.id, r2(z.x), r2(z.z), r2(z.yaw), Math.round(z.hp), z.atk > 0 ? 1 : 0]) });
 }
-setInterval(() => { for (const rm of ROOMS.values()) if (rm.kind === 'zo') zTick(rm, .05); }, 50);
+setInterval(() => { for (const rm of ROOMS.values()) if (rm.kind === 'zo') { zTick(rm,.05);const now=Date.now();for(const z of rm.zs.values())HIT.record(z,now); } }, 50);
 
 /* ----- Sohbet + sesli sohbet sinyalleşmesi (aynı odadaki oyuncular) ----- */
 function roomOf(c) { return c.ow ? { map: OWP, id: c.oid, key: 'o' } : c.joined && c.rm ? { map: c.rm.players, id: c.id, key: 'a' } : null; }
