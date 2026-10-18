@@ -268,3 +268,5 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - Yedek: paketin originals/ ve editable/ klasörleri; kaynak Downloads/arabalar değişmedi. Notlar dışında ana oyuna kurulum yapılmadı.
 
 - 2026-10-17 23:30 · Claude · 202610171808 denetim-v1 · Genel hata denetimi: hareket gerilemesi (1415 kademeli ivme, karşı tuşla duruş 0.25 sn) geri alındı; aktör/silah/rekabetçi işaret GPU sızıntıları kapatıldı; yarışta silah şeridi ve fare kilidi ipucu taşması düzeltildi. Yeni zorunlu test tests/audit.cjs (npm test içinde), 39/39 PASS. Açık işler ve Codex/Kimi promptları: docs/HATA_DENETIMI_20261017.md. IS_PLANI başına yeni çalışma hattı: canlı klasöre ajan yazmaz, tek FAIL = teslim yok.
+
+- 2026-10-18 14:45 · Claude · 202610171809 sunucu-vurus-v1 · Codex PR #8 (A-06 aşama 1) birleştirildi: Arena/Takımlı/Zombi Co-op'ta sunucu vuruşu atış hızı, menzil, zaman ve harita duvarıyla doğruluyor (geçerli atış kabulü %99.8+, 0.06 ms). Sunucu yeniden başlatılmalı. Kimi KİMİ-1 raporu: 151–165 FPS, sızıntı yok; Chrome Intel UHD kullanıyor (A-12, Berkan ayarı).

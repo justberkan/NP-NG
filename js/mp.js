@@ -4,6 +4,8 @@
    Ağ paketi (animasyon durumu): {x,y,z,yaw,pitch,vx,vz,f(bit:1 yerde,2 çömelme,4 kayma),w,rq(şarjör fazı),sw(savuruş fazı),cb(kombo),ad(nişan)}
    Ateş ve savuruş ayrıca 'fx' olayı olarak iletilir (namlu alevi, tracer, kılıç savurma). */
 const MPL={ws:null,ready:false,authed:false,acct:'',id:0,info:new Map(),ents:new Map(),sendT:0,addr:'',board:[],spawn:null,limit:20,cb:null,tags:null,manual:false,q:0,retry:0,win:0,winName:''};
+let mpShotId=0,mpShotAt=0,mpClockOffset=0;
+function mpHitStamp(){if(!mpShotAt)mpShotAt=Date.now()+mpClockOffset;return {shotId:mpShotId,shotAt:mpShotAt}}
 const MP_SAVE='mmofps_srv';
 function mpLoad(){try{return JSON.parse(localStorage.getItem(MP_SAVE))||{}}catch(e){return{}}}
 function mpStore(o){try{localStorage.setItem(MP_SAVE,JSON.stringify(Object.assign(mpLoad(),o)))}catch(e){}}
@@ -193,7 +195,7 @@ function mpAddZombie(s){
 }
 function mpZHit(e,d,info){
  if(e.hp<=0)return;
- mpSend({t:'zhit',id:e.zid,w:wk,hd:!!(info&&info.head)});
+ mpSend({...mpHitStamp(),t:'zhit',id:e.zid,w:wk,hd:!!(info&&info.head)});
  e.flinch=1;
  if(info&&info.player){if(info.pt)dmgNum(info.pt,d,info.head,false);if(!info.melee)snd(info.head?900:600,.08,.05)}
 }
@@ -288,6 +290,7 @@ function mpMsg(m){
  case'saved':mpStore({sts:m.ts});if(!MPL.q)try{localStorage.setItem('mmofps_dirty','0')}catch(e){}break;
  case'kicked':MPL.manual=true;alert2('Bu hesapla başka yerden giriş yapıldı.');break;
  case'welcome':
+  mpClockOffset=Number.isFinite(m.serverAt)?m.serverAt-Date.now():0;
   MPL.id=m.id;MPL.spawn=m.sp;MPL.limit=m.limit||20;MPL.ready=true;MPL.kind=m.kind||'ar';MPL.wave=m.wave||0;mpClearZ();MPL.team=m.team||0;MPL.tk=m.tk||{1:0,2:0};MPL.win=0;
   MPL.info.clear();for(const q of m.players)MPL.info.set(q.id,q);
   mpLobbySlots();
@@ -393,11 +396,11 @@ function mpMsg(m){
 }
 
 /* ---------- Oyundan gönderilenler ---------- */
-function mpFire(side,pt){mpSend({t:'fire',w:wk,side,x:+pt.x.toFixed(2),y:+pt.y.toFixed(2),z:+pt.z.toFixed(2)})}
-function mpSwing(cb){mpSend({t:'sw',cb})}
+function mpFire(side,pt){mpShotId++;mpShotAt=0;mpSend({t:'fire',w:wk,side,x:+pt.x.toFixed(2),y:+pt.y.toFixed(2),z:+pt.z.toFixed(2)})}
+function mpSwing(cb){mpShotId++;mpShotAt=0;mpSend({t:'sw',cb})}
 function mpHit(e,d,info){
  if(e.hp<=0)return;
- mpSend({t:'hit',id:e.mp,w:wk,hd:!!(info&&info.head),m:!!(info&&info.melee)});
+ mpSend({...mpHitStamp(),t:'hit',id:e.mp,w:wk,hd:!!(info&&info.head),m:!!(info&&info.melee)});
  e.flinch=1;
  if(info&&info.player){if(info.pt)dmgNum(info.pt,d,info.head,false);if(!info.melee)snd(info.head?900:600,.08,.05)}
 }
@@ -411,7 +414,7 @@ function mpUpdate(dt){
  if(MPL.sendT<=0){
   MPL.sendT=.05;
   const r=v=>Math.round(v*100)/100;
-  mpSend({t:'st',x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),
+  mpSend({t:'st',sentAt:Date.now()+mpClockOffset,x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),
    f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0)|(p.wr>0?64:p.wr<0?128:0)|(p.climb?256:0),w:wk,rq:reload>0?r(1-reload/cw.rel):-1,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),ad:r(adsT)});
  }
  if(p.dead>0&&p.dead<900){p.dead-=dt;if(p.dead<.05)p.dead=.05} // sunucunun 'resp' mesajını bekle

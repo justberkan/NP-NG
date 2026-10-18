@@ -37,8 +37,11 @@ Denetim araçları: `tests/audit.cjs` (yeni, kalıcı), ayrıntılı çıktı `t
 | A-03 | 🟠 | Botlar dizleri çok bükük, yengeç gibi yürüyor | Codex: animasyon ayarı, tarayıcıda görüntü kanıtıyla | Açık |
 | A-04 | 🟡 | Tab skor tablosu yalnız rekabetçide var; TDM, zombi ve çevrimiçi modlarda yok | Codex | Açık |
 | A-05 | 🟡 | Envanter: varsayılan eşyalar görünürken "Bu sekmede henüz eşyan yok" yazıyor, sağ panel boş | Codex | Açık |
-| A-06 | 🔴 (yayın öncesi) | Çevrimiçi vuruşu sunucu doğrulamıyor (görüş hattı, mesafe, atış hızı); istemci "vurdum" derse kabul ediliyor | Codex (server.js) | Açık |
-| A-07 | 🟠 | Gerçek bilgisayarda mod başına FPS 1405'ten beri ölçülmedi (yarış, koridor, animasyon eklendi) | Kimi | Açık |
+| A-06 | 🔴 (yayın öncesi) | Çevrimiçi vuruşu sunucu doğrulamıyor (görüş hattı, mesafe, atış hızı); istemci "vurdum" derse kabul ediliyor | Codex (server.js) | **Aşama 1 bitti (Arena, Takımlı, Zombi Co-op) — PR #8, build 1809.** Claude: testler 39+ PASS, iki tarayıcı istemciyle uçtan uca vuruş doğrulandı |
+| A-06b | 🟠 | Koridor co-op vuruşları hâlâ oda sahibine güveniyor (simülasyon oda sahibinde) | Codex: önce mimari öneri, onaysız kod yok | Açık |
+| A-07 | 🟠 | Gerçek bilgisayarda mod başına FPS 1405'ten beri ölçülmedi | Kimi | **Bitti** (docs/QA_RAPORU.md): tüm modlar 151–165 FPS (165 Hz sınırı), Açık Dünya 10 dk'da sızıntı yok |
+| A-12 | 🔴 (Berkan, 1 dk) | Chrome oyunu **Intel UHD** ile çalıştırıyor, RTX 5050 hiç kullanılmıyor | Berkan: Windows Ayarlar → Ekran → Grafik → Chrome → Yüksek performans | Açık |
+| A-13 | 🟡 | Sınırsız FPS'te (vsync kapalı) Dust2'de 60 sn'de 306 kısa takılma; vsync açıkken yok. RTX'e geçince tekrar ölçülecek | Kimi tekrar ölçer; sürerse Claude | Açık |
 | A-08 | 🟡 | Rekabetçide duraklatma ekranı ve satın alma menüsü aynı anda açılabiliyor | Codex | Açık |
 | A-09 | 🟡 | `animHuman` 5 dosyada üst üste sarmalanmış; her yeni animasyon yaması bir öncekini bozabiliyor | Codex: tek animasyon hattına toplama (davranış aynı, testler PASS) | Açık |
 | A-10 | 🟡 | Kullanılmayan büyük dosyalar ve `_yedek` / `docs` şişkinliği | Codex: silme listesi çıkarır, Berkan onaylar | Açık |
