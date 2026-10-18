@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NPNG Kumarhane — Olimpos Altını</title>
+<style>
+  :root{
+    --gold1:#f7d774; --gold2:#b8860b; --gold3:#7a5c00;
+    --panel:#2a0a3a; --deep:#16041f; --wine:#3d0f2e;
+    --ok:#34d399; --bad:#f87171;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none}
+  html,body{height:100%;overflow:hidden}
+  body{
+    background:
+      radial-gradient(1200px 500px at 50% -10%, #5b2a86 0%, transparent 60%),
+      radial-gradient(900px 400px at 85% 110%, #8a5a00 0%, transparent 55%),
+      linear-gradient(180deg,#1c0530 0%, #0d0216 100%);
+    color:#fff; font-family:"Segoe UI",system-ui,sans-serif;
+    display:flex; align-items:center; justify-content:center;
+  }
+  /* ---------- ana çerçeve (altın) ---------- */
+  #app{
+    width:min(96vw,980px); height:min(94vh,640px);
+    display:grid; grid-template-columns:1fr 190px; grid-template-rows:auto 1fr auto;
+    gap:10px; padding:14px; position:relative;
+    background:linear-gradient(180deg,#31104a,#1a0526);
+    border:3px solid transparent; border-radius:18px;
+    background-clip:padding-box;
+    box-shadow:0 0 0 3px var(--gold2), 0 0 40px rgba(247,215,116,.25), inset 0 0 60px rgba(0,0,0,.6);
+  }
+  #app::before{ /* köşe süsleri */
+    content:""; position:absolute; inset:-3px; border-radius:18px; pointer-events:none;
+    background:
+      radial-gradient(circle 10px at 0 0, var(--gold1) 98%, transparent),
+      radial-gradient(circle 10px at 100% 0, var(--gold1) 98%, transparent),
+      radial-gradient(circle 10px at 0 100%, var(--gold1) 98%, transparent),
+      radial-gradient(circle 10px at 100% 100%, var(--gold1) 98%, transparent);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  }
+  /* ---------- başlık ---------- */
+  header{grid-column:1/3; display:flex; align-items:center; justify-content:space-between; gap:10px}
+  #title{
+    font-size:26px; font-weight:900; letter-spacing:2px; white-space:nowrap;
+    background:linear-gradient(180deg,#fff6c8 0%, var(--gold1) 40%, var(--gold2) 75%, #6b4d00 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.8));
+  }
+  #title small{display:block; font-size:10px; letter-spacing:6px; color:#e8c96a; -webkit-text-fill-color:#e8c96a}
+  .hbox{
+    min-width:150px; padding:6px 14px; text-align:right; border-radius:10px;
+    background:rgba(0,0,0,.45); border:1px solid rgba(247,215,116,.35);
+  }
+  .hbox b{display:block; font-size:10px; letter-spacing:2px; color:var(--gold1)}
+  .hbox span{font-size:20px; font-weight:900; font-variant-numeric:tabular-nums}
+  #credit{color:var(--gold1)} #lastWin{color:var(--ok)}
+  /* ---------- makaralar ---------- */
+  #stage{position:relative; grid-row:2; display:flex; align-items:stretch; justify-content:center}
+  #reels{
+    flex:1; max-width:660px; display:grid; gap:8px; padding:12px;
+    grid-template-columns:repeat(6,1fr); grid-template-rows:repeat(5,1fr);
+    background:linear-gradient(180deg,#4a1030,#2a0a20);
+    border-radius:14px; border:2px solid rgba(247,215,116,.5);
+    box-shadow:inset 0 0 30px rgba(0,0,0,.7);
+    transition:filter .18s;
+  }
+  #reels.blur{filter:blur(3px) saturate(1.3)}
+  .cell{
+    position:relative; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.08), rgba(0,0,0,.35));
+    border-radius:10px; border:1px solid rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .cell svg{width:82%; height:82%; display:block}
+  .cell.win{animation:winpulse .55s ease-in-out 2; z-index:2}
+  .cell.win::after{
+    content:""; position:absolute; inset:0; border-radius:10px;
+    box-shadow:0 0 18px 4px rgba(247,215,116,.9), inset 0 0 12px rgba(247,215,116,.8);
+  }
+  .cell.dim{opacity:.35; filter:saturate(.4)}
+  .cell.drop{animation:drop .34s cubic-bezier(.2,.7,.3,1.15) backwards}
+  @keyframes winpulse{50%{transform:scale(1.12)}}
+  @keyframes drop{from{transform:translateY(-110%);opacity:.2}}
+  /* ---------- kazanç şeridi ---------- */
+  #winbar{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    text-align:center; pointer-events:none; opacity:0; transition:opacity .25s; z-index:5;
+  }
+  #winbar.on{opacity:1}
+  #winbar .amt{
+    font-size:44px; font-weight:900; color:#fff;
+    text-shadow:0 0 18px var(--gold1), 0 3px 6px #000; font-variant-numeric:tabular-nums;
+  }
+  /* ---------- büyük kazanç katmanı ---------- */
+  #bigwin{
+    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
+    flex-direction:column; background:rgba(0,0,0,.55); z-index:50;
+  }
+  #bigwin.on{display:flex}
+  #bw-title{
+    font-size:min(11vw,84px); font-weight:900; letter-spacing:4px; text-align:center;
+    background:linear-gradient(180deg,#fff 10%, var(--gold1) 45%, var(--gold2) 80%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    filter:drop-shadow(0 0 25px rgba(247,215,116,.9)) drop-shadow(0 4px 4px #000);
+    animation:bwpop .5s cubic-bezier(.2,1.6,.4,1) backwards, bwshine 1.2s .5s infinite alternate ease-in-out;
+  }
+  #bw-amt{
+    margin-top:6px; font-size:min(7vw,52px); font-weight:900; color:var(--ok);
+    text-shadow:0 0 20px rgba(52,211,153,.8), 0 3px 5px #000; font-variant-numeric:tabular-nums;
+    animation:bwpop .5s .12s cubic-bezier(.2,1.6,.4,1) backwards;
+  }
+  @keyframes bwpop{from{transform:scale(.2);opacity:0}}
+  @keyframes bwshine{to{transform:scale(1.06)}}
+  #fx{position:fixed; inset:0; pointer-events:none; z-index:49}
+  /* ---------- sağ panel (Olimpos süsü) ---------- */
+  #side{grid-row:2; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding:8px 4px;
+    background:rgba(0,0,0,.3); border-radius:14px; border:1px solid rgba(247,215,116,.25)}
+  #side svg{width:150px; flex:1}
+  #mult-label{font-size:11px; letter-spacing:2px; color:var(--gold1); text-align:center}
+  #mult-value{font-size:30px; font-weight:900; color:#fff; text-shadow:0 0 12px var(--gold1); min-height:36px}
+  /* ---------- alt kontroller ---------- */
+  footer{grid-column:1/3; display:flex; align-items:center; gap:12px; padding:4px 6px}
+  .ctl{
+    background:rgba(0,0,0,.5); border:1px solid rgba(247,215,116,.3); border-radius:10px;
+    padding:6px 10px; text-align:center;
+  }
+  .ctl label{display:block; font-size:9px; letter-spacing:2px; color:var(--gold1)}
+  .ctl span{font-size:18px; font-weight:900; font-variant-numeric:tabular-nums}
+  .btn{
+    cursor:pointer; border:1px solid rgba(247,215,116,.4); color:#ffe9a8;
+    background:linear-gradient(180deg,#4a2a10,#2a1608); border-radius:10px;
+    font-weight:800; font-size:13px; letter-spacing:1px; padding:9px 13px;
+    transition:transform .08s, filter .15s;
+  }
+  .btn:hover{filter:brightness(1.25)} .btn:active{transform:translateY(1px)}
+  .btn.off{opacity:.4}
+  #spin{
+    margin-left:auto; width:86px; height:86px; border-radius:50%;
+    border:3px solid var(--gold1);
+    background:radial-gradient(circle at 35% 30%, #ffe9a8, var(--gold1) 45%, var(--gold2) 80%);
+    color:#3a2a00; font-size:15px; font-weight:900; letter-spacing:1px;
+    box-shadow:0 0 22px rgba(247,215,116,.55), inset 0 -5px 8px rgba(0,0,0,.35);
+    cursor:pointer; transition:transform .1s, box-shadow .2s;
+  }
+  #spin:hover{transform:scale(1.05)} #spin:active{transform:scale(.96)}
+  #spin:disabled{filter:grayscale(.7) brightness(.6); cursor:default; transform:none}
+  #spin.auto-on{box-shadow:0 0 22px rgba(52,211,153,.8), inset 0 -5px 8px rgba(0,0,0,.35)}
+  #msg{
+    position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
+    background:rgba(0,0,0,.8); border:1px solid var(--gold2); color:var(--gold1);
+    padding:8px 18px; border-radius:20px; font-size:13px; z-index:60; display:none;
+  }
+  @media (max-width:760px){ #app{grid-template-columns:1fr} #side{display:none} header,footer{grid-column:1} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div id="title">OLİMPOS ALTINI<small>NPNG KUMARHANE</small></div>
+    <div class="hbox"><b>BAKİYE</b><span id="credit">0</span></div>
+    <div class="hbox"><b>SON KAZANÇ</b><span id="lastWin">0</span></div>
+  </header>
+
+  <div id="stage">
+    <div id="reels"></div>
+    <div id="winbar"><div class="amt" id="win-amt"></div></div>
+  </div>
+
+  <div id="side">
+    <svg viewBox="0 0 150 340" aria-hidden="true">
+      <defs>
+        <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#f7d774"/><stop offset="1" stop-color="#8a6508"/>
+        </linearGradient>
+        <linearGradient id="gSky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffd98a"/><stop offset="1" stop-color="#c86b1e"/>
+        </linearGradient>
+      </defs>
+      <!-- güneş halesi -->
+      <circle cx="75" cy="86" r="46" fill="url(#gSky)" opacity=".55"/>
+      <!-- yıldırım -->
+      <path d="M78 40 L52 96 L72 96 L60 150 L104 82 L80 82 L96 40 Z" fill="url(#gGold)" stroke="#6b4d00" stroke-width="2">
+        <animate attributeName="opacity" values="1;.55;1;.8;1" dur="2.6s" repeatCount="indefinite"/>
+      </path>
+      <!-- tapınak -->
+      <g fill="url(#gGold)" stroke="#6b4d00" stroke-width="1.5">
+        <path d="M25 190 L75 168 L125 190 Z"/>
+        <rect x="30" y="192" width="90" height="7"/>
+        <rect x="34" y="201" width="8" height="86"/><rect x="54" y="201" width="8" height="86"/>
+        <rect x="88" y="201" width="8" height="86"/><rect x="108" y="201" width="8" height="86"/>
+        <rect x="26" y="289" width="98" height="8"/>
+      </g>
+      <!-- defne dalı -->
+      <path d="M20 320 Q75 300 130 320" stroke="#caa544" stroke-width="2" fill="none" opacity=".7"/>
+    </svg>
+    <div>
+      <div id="mult-label">ÇARPAN</div>
+      <div id="mult-value">×1</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="ctl"><label>BAHİS</label><span id="bet-v">1.000</span></div>
+    <button class="btn" id="bet-minus">−</button>
+    <button class="btn" id="bet-plus">+</button>
+    <button class="btn" id="turbo">TURBO</button>
+    <button class="btn" id="sound">SES: AÇIK</button>
+    <button class="btn" id="auto">OTO: KAPALI</button>
+    <button id="spin">ÇEVİR</button>
+  </footer>
+  <div style="grid-column:1/3;text-align:center;font-size:11px;letter-spacing:1px;color:#c9a44a;opacity:.85">Sanal para ile oynanır — gerçek para değeri yoktur.</div>
+</div>
+
+<div id="bigwin"><div id="bw-title"></div><div id="bw-amt"></div></div>
+<canvas id="fx"></canvas>
+<div id="msg"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   OLİMPOS ALTINI — NPNG Kumarhane slotu (tek dosya, bağımlılıksız)
+   - Çekirdek (core) bölümü DOM'suzdur: node ile NPNG_CASINO.simulate() test edilebilir.
+   - Oyun içi para birimi API'si: NPNG_CASINO.getCredit/setCredit/onChange.
+   ===================================================================== */
+
+/* ---------------- RNG (test için tohumlanabilir) ---------------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let rng = Math.random;
+
+/* ---------------- ÇEKİRDEK: semboller & ödeme tablosu ----------------
+   pay: 8-9 / 10-11 / 12+ eşleşme için bahis katı (scatter-pays)        */
+const SYM = {
+  blue:  {w:12, pay:[0.4,0.8,1.5]},
+  green: {w:12, pay:[0.5,1.2,2.0]},
+  yellow:{w:10, pay:[0.6,1.4,2.5]},
+  purple:{w:9,  pay:[0.8,1.8,3.2]},
+  red:   {w:8,  pay:[1.0,2.0,4.0]},
+  cup:   {w:8,  pay:[1.5,3.0,6.0]},
+  ring:  {w:7,  pay:[2.0,4.0,8.0]},
+  hour:  {w:6,  pay:[3.0,6.0,12.0]},
+  crown: {w:5,  pay:[5.0,10.0,25.0]},
+};
+const ORB_VALUES=[2,3,5,8,10,12,15,20,25,50,100,250,500];
+const ROWS=5, COLS=6, N=ROWS*COLS;
+const SCATTER='scatter', ORB='orb';
+const POOL=[]; // [anahtar, ağırlık]
+for(const k in SYM) POOL.push([k,SYM[k].w]);
+POOL.push([SCATTER,0.5],[ORB,1]); // scatter seyrek: doğal bonus tetiklemesi ~1/7000
+const POOL_W=POOL.reduce((s,e)=>s+e[1],0);
+
+function pickSym(){let r=rng()*POOL_W;for(const[k,w]of POOL){if((r-=w)<0)return k}return 'blue'}
+function genBoard(){const b=new Array(N);for(let i=0;i<N;i++){const s=pickSym();b[i]=s===ORB?{o:ORB_VALUES[Math.floor(rng()*6)]}:s}return b}
+
+/* kategori olasılık tablosu — RTP hedefi ~%96 (simülasyonla doğrulanır)
+   [isim, olasılık, hedef ödeme (bahis katı) üreteci, bonus tetikleme şansı]
+   loss olasılığı kalanı tamamlar (tablo her zaman toplam 1 olur) */
+const CATS=[
+  ['near', 0.110,  null,                0   ],
+  ['small',0.125,  ()=>0.4+rng()*1.6,   0   ],
+  ['big',  0.011,  ()=>2+rng()*13,      0.15],
+  ['mega', 0.0038, ()=>15+rng()*35,     0.15],
+  ['epic', 0.0008, ()=>50+rng()*150,    0.15],
+  ['leg',  0.00015,()=>250+rng()*500,   0.20],
+  ['jack', 0.00002,()=>1500+rng()*1500, 0.25],
+  ['loss', 0,      null,                0   ],
+];
+CATS[CATS.length-1][1]=1-CATS.slice(0,-1).reduce((s,c)=>s+c[1],0); // loss = kalan
+const CAT_W=CATS.reduce((s,c)=>s+c[1],0);
+/* Near-miss ("kıl payı kaçırma") YAPAY psikoloji mekaniğidir; CONFIG.nearMiss ile
+   açılır, VARSAYILAN KAPALIdır (karar Berkan'a ait). Kapalıyken near spinleri
+   loss gibi davranır; doğal sonuçlara dokunmaz. */
+const CONFIG={nearMiss:false};
+function catProb(c){
+  if(c[0]==='near')return CONFIG.nearMiss?c[1]:0;
+  if(c[0]==='loss'&&!CONFIG.nearMiss){const n=CATS.find(x=>x[0]==='near');return c[1]+(n?n[1]:0)} // near kapatilinca loss absorbe eder (olasiliklar korunur)
+  return c[1];
+}
+function drawCat(){const w=CATS.map(catProb);const tw=w.reduce((s,x)=>s+x,0);let r=rng()*tw;
+  for(let i=0;i<CATS.length;i++){if((r-=w[i])<0)return CATS[i]}return CATS[CATS.length-1]}
+
+/* ---------------- ÇEKİRDEK: tahta müdahale (garantili kategori) ---------------- */
+function pickGem(ex){const ks=Object.keys(SYM).filter(k=>k!==ex);return ks[Math.floor(rng()*ks.length)]}
+function clearSym(board,sym){for(let i=0;i<N;i++)if(board[i]===sym)board[i]=pickGem(sym)}
+function clearOrbs(board){for(let i=0;i<N;i++)if(typeof board[i]==='object'&&board[i])board[i]=pickGem()}
+function plant(board,sym,count){let n=0;while(n<count){const i=Math.floor(rng()*N);if(board[i]===sym)continue;board[i]=sym;n++}}
+function plantOrbs(board,sum){ // büyükten küçüğe doygunlukla orb yerleştir; tacı/scatter'ı EZME
+  clearOrbs(board); // doğal orb'ları temizle ki çarpan hedefi şişmesin
+  let s=0,guard=0;
+  while(s<sum&&guard++<60){
+    const v=ORB_VALUES[Math.floor(rng()*Math.min(10,ORB_VALUES.length))]; // 500/250 çok nadiren
+    if(s+v>sum*1.35)continue;
+    const free=[];for(let i=0;i<N;i++){const c=board[i];if(c!=='crown'&&c!==SCATTER&&typeof c!=='object')free.push(i)}
+    if(!free.length)break;
+    board[free[Math.floor(rng()*free.length)]]={o:v};s+=v;
+  }
+  return s;
+}
+function plantScatters(board,count){clearSym(board,SCATTER);let n=0;while(n<count){const i=Math.floor(rng()*N);if(board[i]===SCATTER)continue;board[i]=SCATTER;n++}}
+function forceWin(board,target){
+  const capped=Math.min(target,5000);
+  if(capped<2.2){ // küçük ödeme: ucuz taş, çarpansız
+    const pick=capped<0.5?['blue',8]:capped<0.9?['green',8]:capped<1.3?['red',8]:capped<1.8?['cup',8]:['ring',8];
+    clearOrbs(board);clearSym(board,pick[0]);plant(board,pick[0],pick[1]);return;
+  }
+  clearSym(board,'crown');clearOrbs(board);
+  const cnt=8+Math.floor(rng()*3);           // 8-10 taç -> baz 5-10x
+  const base=SYM.crown.pay[cnt>=10?1:0];
+  const m=Math.max(1,Math.round(capped/base));
+  plant(board,'crown',cnt);
+  plantOrbs(board,m);
+}
+function plantNear(board){ // kıl payı: TAM 7 taç (8 eşiğinin bir altı) — doğal taçlar temizlenir
+  clearOrbs(board);clearSym(board,'crown');plant(board,'crown',7);
+}
+
+/* ---------------- ÇEKİRDEK: değerlendirme + düşürme (tumble) ---------------- */
+function evaluate(board){
+  const counts={};for(const s of board){if(typeof s==='string'&&s!==SCATTER)counts[s]=(counts[s]||0)+1}
+  const wins=[];for(const k in counts){if(counts[k]>=8){const p=SYM[k].pay;wins.push({sym:k,count:counts[k],pay:p[counts[k]>=12?2:counts[k]>=10?1:0]})}}
+  let orbSum=0;for(const s of board)if(typeof s==='object'&&s)orbSum+=s.o;
+  let scat=0;for(const s of board)if(s===SCATTER)scat++;
+  return {wins,orbSum,scat};
+}
+function dropRefill(board){ // sütun sütun aşağı kaydır, üstten doldur
+  const b=board.slice();
+  for(let c=0;c<COLS;c++){
+    const col=[];for(let r=0;r<ROWS;r++){const v=b[r*COLS+c];if(v!==null)col.push(v)}
+    while(col.length<ROWS)col.unshift(genBoard()[0]);
+    for(let r=0;r<ROWS;r++)b[r*COLS+c]=col[r];
+  }
+  return b;
+}
+/* tam çözümleme: adım adım (UI animasyonu da bunu oynatır) */
+function cascade(board){
+  let cur=board.slice(),base=0,orbTotal=0;const steps=[];
+  const first=evaluate(cur);
+  orbTotal+=first.orbSum;
+  for(let g=0;g<12;g++){
+    const ev=evaluate(cur);
+    if(ev.wins.length===0)break;
+    const pay=ev.wins.reduce((s,w)=>s+w.pay,0);
+    base+=pay;
+    const cells=new Set();ev.wins.forEach(w=>{for(let i=0;i<N;i++)if(cur[i]===w.sym)cells.add(i)});
+    steps.push({type:'win',pay,cells:[...cells]});
+    const nxt=cur.slice();cells.forEach(i=>nxt[i]=null);
+    cur=dropRefill(nxt);
+    steps.push({type:'drop',board:cur.slice()});
+  }
+  return {base,orbSum:orbTotal,scat:first.scat,steps};
+}
+
+/* ---------------- ÇEKİRDEK: bir spin ---------------- */
+function runSpin(bet,inBonus){
+  let board=genBoard(),bonusTrig=false,catName=inBonus?'bonus':'loss';
+  if(!inBonus){
+    const cat=drawCat();catName=cat[0];
+    if(cat[0]==='near')plantNear(board);
+    else if(cat[2]){
+      if(rng()<cat[3]){plantScatters(board,4);bonusTrig=true}
+      else forceWin(board,cat[2]());
+    }
+    else clearOrbs(board); // loss: doğal kazanç çarpansız kalsın (RTP kontrolü)
+  }else{
+    if(rng()<0.30)forceWin(board,0.5+rng()*1.5); // bonus turu: mütevazı garanti (ucuz taş dalı)
+    if(rng()<0.10)plantOrbs(board,2+Math.floor(rng()*10)); // biriken çarpana katkı
+    else clearOrbs(board); // doğal orb'lar glob'u şişirmesin
+  }
+  const res=cascade(board);
+  if(!inBonus&&res.scat>=4&&!bonusTrig)bonusTrig=true;
+  // NOT: win/odeme "bahis kati" birimindedir; gercek tutar = win * bet
+  const win=Math.min(res.base*(1+res.orbSum),5000);
+  if(typeof DBG!=='undefined'&&!inBonus){DBG.byCat[catName]=DBG.byCat[catName]||{n:0,win:0};DBG.byCat[catName].n++;DBG.byCat[catName].win+=win}
+  return {board,res,win,bonusTrig};
+}
+var DBG={byCat:{}};
+function runBonus(bet){
+  let spins=15,total=0,glob=1,log=[];
+  while(spins-->0){
+    const r=runSpin(bet,true);
+    glob+=Math.min(r.res.orbSum,10); // çarpan büyümesi sınırlı (patlama koruması)
+    const w=r.res.base*glob;
+    total+=w;log.push({win:w,glob});
+    if(r.res.scat>=3)spins+=5;
+  }
+  return {total:Math.min(total,5000),log};
+}
+
+/* ---------------- ÇEKİRDEK: simülasyon (doğrulama) ---------------- */
+function simulate(n){
+  let bet=1,spent=0,won=0,bonusHits=0,maxWin=0,wins=0;
+  for(let i=0;i<n;i++){
+    spent+=bet;
+    const r=runSpin(bet,false);
+    let w=r.win;
+    if(r.bonusTrig){bonusHits++;const b=runBonus(bet);w+=b.total}
+    if(w>0)wins++;
+    if(w>maxWin)maxWin=w;
+    won+=w;
+  }
+  return {spins:n,totalBet:spent,totalWin:Math.round(won*100)/100,rtp:Math.round(won/spent*10000)/100,
+          bonusHits,bonusPer:Math.round(bonusHits/n*10000)/100,hitRate:Math.round(wins/n*10000)/100,maxWin};
+}
+
+/* ---------------- DURUM & KALICILIK ---------------- */
+const store={
+  get(k,d){try{const v=localStorage.getItem('npng_casino_'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('npng_casino_'+k,JSON.stringify(v))}catch(e){}}
+};
+let credit=store.get('credit',100000);
+let bet=store.get('bet',1000);
+const turboRef={on:false};
+const listeners=[];
+function setCredit(v){credit=Math.max(0,Math.round(v));store.set('credit',credit);listeners.forEach(f=>{try{f(credit)}catch(e){}});if(typeof document!=='undefined')renderCredit()}
+function fmt(v){return v.toLocaleString('tr-TR',{minimumFractionDigits:0,maximumFractionDigits:0})}
+
+/* ---------------- SES (WebAudio, sentez — dosyasız) ---------------- */
+let AC=null,soundOn=store.get('sound',true);
+function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(f,t0,dur,type,vol){const ac=audio();if(!ac||!soundOn)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(vol||.12,ac.currentTime+t0);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t0+dur);o.connect(g).connect(ac.destination);o.start(ac.currentTime+t0);o.stop(ac.currentTime+t0+dur+.02)}
+const sfx={
+  tick(){tone(220+Math.random()*80,0,.03,'square',.03)},
+  coin(n){for(let i=0;i<Math.min(n,10);i++)tone(700+i*90,i*.06,.12,'triangle',.1)},
+  big(){[523,659,784,1046,1318].forEach((f,i)=>tone(f,i*.11,.3,'triangle',.14))},
+  bonus(){[392,494,587,784].forEach((f,i)=>tone(f,i*.13,.35,'sawtooth',.08))},
+};
+
+/* ---------------- UI ---------------- */
+const $=id=>document.getElementById(id);
+const cellEls=[];
+let spinning=false,autoLeft=0,autoOn=false;
+function symSVG(s){
+  if(typeof s==='object'&&s){ // çarpan küresi
+    return `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#1b2a6b" stroke="#7db2ff" stroke-width="3"/><circle cx="24" cy="22" r="8" fill="#bcd6ff" opacity=".7"/><text x="32" y="40" font-size="20" font-weight="900" text-anchor="middle" fill="#fff">×${s.o}</text></svg>`;
+  }
+  const g=(inner,fill)=>`<svg viewBox="0 0 64 64">${inner}</svg>`;
+  switch(s){
+    case SCATTER:return g(`<circle cx="32" cy="32" r="24" fill="#3a2a08" stroke="#f7d774" stroke-width="3"/><path d="M34 12 L20 34 L30 34 L26 52 L44 28 L33 28 L39 12 Z" fill="#ffe9a8"/>`);
+    case 'crown':return g(`<path d="M12 44 L14 22 L26 32 L32 14 L38 32 L50 22 L52 44 Z" fill="#f7d774" stroke="#8a6508" stroke-width="2"/><rect x="12" y="44" width="40" height="7" rx="3" fill="#b8860b"/>`);
+    case 'cup':  return g(`<path d="M18 16 H46 V34 C46 46 38 50 32 50 C26 50 18 46 18 34 Z" fill="#f7d774" stroke="#8a6508" stroke-width="2"/><rect x="29" y="50" width="6" height="8" fill="#b8860b"/><rect x="22" y="58" width="20" height="4" rx="2" fill="#b8860b"/>`);
+    case 'ring': return g(`<circle cx="32" cy="36" r="16" fill="none" stroke="#f7d774" stroke-width="6"/><path d="M24 20 L32 10 L40 20 Z" fill="#ff5f8f" stroke="#a02050" stroke-width="1.5"/>`);
+    case 'hour': return g(`<path d="M18 12 H46 C46 24 40 28 32 32 C40 36 46 40 46 52 H18 C18 40 24 36 32 32 C24 28 18 24 18 12 Z" fill="#7db2ff" stroke="#28418a" stroke-width="2" opacity=".95"/>`);
+    case 'red':  return g(`<path d="M32 8 L52 20 V44 L32 56 L12 44 V20 Z" fill="#e0334a" stroke="#7a0f1e" stroke-width="2"/>`);
+    case 'purple':return g(`<path d="M32 8 L54 24 L45 52 H19 L10 24 Z" fill="#a44de0" stroke="#4a1470" stroke-width="2"/>`);
+    case 'yellow':return g(`<path d="M32 8 L56 50 H8 Z" fill="#f2c f" stroke="#8a6508" stroke-width="2"/>`).replace('#f2c f','#f2cf3f');
+    case 'green':return g(`<path d="M32 8 L50 18 V42 L32 54 L14 42 V18 Z" fill="#3ecf6e" stroke="#0f6b2f" stroke-width="2"/>`);
+    default:     return g(`<rect x="12" y="12" width="40" height="40" rx="8" fill="#3f8fe0" stroke="#123a6b" stroke-width="2"/>`);
+  }
+}
+function buildGrid(){
+  const r=$('reels');r.innerHTML='';cellEls.length=0;
+  for(let i=0;i<N;i++){const d=document.createElement('div');d.className='cell';r.appendChild(d);cellEls.push(d)}
+  paint(genBoard());
+}
+function paint(board){for(let i=0;i<N;i++)cellEls[i].innerHTML=symSVG(board[i])}
+function renderCredit(){$('credit').textContent=fmt(credit);$('bet-v').textContent=fmt(bet)}
+function showMsg(t){const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(showMsg._t);showMsg._t=setTimeout(()=>m.style.display='none',2200)}
+
+/* partikül (canvas, tek bileşik) */
+let parts=[],fxRun=false,fx=null,fctx=null;
+if(typeof document!=='undefined'){
+  fx=$('fx');fctx=fx.getContext('2d');
+  const fxResize=()=>{fx.width=innerWidth;fx.height=innerHeight};
+  addEventListener('resize',fxResize);fxResize();
+}
+function burst(x,y,n,colors){
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,v=2+Math.random()*6;
+    parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-3,life:1,c:colors[Math.floor(Math.random()*colors.length)],r:2+Math.random()*3})}
+  if(!fxRun){fxRun=true;requestAnimationFrame(fxLoop)}
+}
+function fxLoop(){
+  fctx.clearRect(0,0,fx.width,fx.height);
+  parts=parts.filter(p=>p.life>0);
+  for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.18;p.life-=.016;
+    fctx.globalAlpha=Math.max(p.life,0);fctx.fillStyle=p.c;fctx.beginPath();fctx.arc(p.x,p.y,p.r,0,7);fctx.fill()}
+  fctx.globalAlpha=1;
+  if(parts.length)requestAnimationFrame(fxLoop);else fxRun=false;
+}
+
+/* büyük kazanç katmanı */
+function bigWinShow(title,amount){
+  $('bw-title').textContent=title;$('bw-amt').textContent='₺'+fmt(amount);
+  $('bigwin').classList.add('on');sfx.big();
+  const cx=innerWidth/2,cy=innerHeight/2;
+  let waves=0;const iv=setInterval(()=>{burst(cx,cy,40,['#f7d774','#fff3c4','#34d399']);if(++waves>5)clearInterval(iv)},260);
+  setTimeout(()=>$('bigwin').classList.remove('on'),turboRef.on?1400:2600);
+}
+function tierOf(x){return x>=250?'LEGENDARY WIN':x>=50?'EPIC WIN':x>=15?'MEGA WIN':'BIG WIN'}
+
+/* kazanç sayacı (rAF) */
+function countUp(el,to,dur){
+  const t0=performance.now();
+  (function f(t){const k=Math.min((t-t0)/dur,1);el.textContent='₺'+fmt(Math.round(to*k));if(k<1)requestAnimationFrame(f)})(t0);
+}
+
+/* ---------------- spin akışı ---------------- */
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+async function spin(){
+  if(spinning)return;
+  if(credit<bet){showMsg('Yetersiz bakiye! Zombi moduna dönüp para kas.');autoStop();return}
+  spinning=true;$('spin').disabled=true;
+  setCredit(credit-bet);
+  $('lastWin').textContent='0';$('winbar').classList.remove('on');
+  const T=turboRef.on;
+  audio();
+  /* makara blur animasyonu: sütunlar sırayla durur */
+  $('reels').classList.add('blur');
+  let col=0;const stopAt=Array.from({length:COLS},(_,i)=>Date.now()+500+i*(T?90:160));
+  try{
+  const blurIv=setInterval(()=>{
+    for(let i=0;i<N;i++)cellEls[i].innerHTML=symSVG(pickSym());
+    sfx.tick();
+    const now=Date.now();
+    while(col<COLS&&now>=stopAt[col]){
+      for(let r=0;r<ROWS;r++){const i=r*COLS+col;cellEls[i].innerHTML=symSVG(rng()<.5?'blue':'red')}
+      col++;
+    }
+    if(col>=COLS)clearInterval(blurIv);
+  },T?45:70);
+  await sleep(stopAt[COLS-1]-Date.now()+80);
+  $('reels').classList.remove('blur');
+
+  const r=runSpin(bet,false);
+  const board=r.res.steps.length?lastBoard(r.res.steps):r.board;
+  paint(board);
+  await playSteps(r.res,T);
+  finishWin(r.win);
+  if(r.bonusTrig){await bonusFlow()}
+  }catch(err){
+    console.error('spin hatasi:',err); // buton kilidi acilmasin diye yut
+    $('reels').classList.remove('blur');
+  }finally{
+    spinning=false;$('spin').disabled=false;
+  }
+  if(autoOn&&autoLeft>0){autoLeft--;if(autoLeft<=0)autoStop();await sleep(T?120:400);if(autoOn)spin()}
+}
+function lastBoard(steps){for(let i=steps.length-1;i>=0;i--)if(steps[i].type==='drop')return steps[i].board;return null}
+async function playSteps(res,T){
+  for(const st of res.steps){
+    if(st.type==='win'){
+      cellEls.forEach((c,i)=>{if(st.cells.includes(i)){c.classList.add('win')}else{c.classList.add('dim')}});
+      $('winbar').classList.add('on');$('win-amt').textContent='₺'+fmt(st.pay*bet);
+      await sleep(T?260:520);
+      cellEls.forEach(c=>c.classList.remove('win','dim'));
+    }else if(st.type==='drop'){
+      paint(st.board);
+      cellEls.forEach((c,i)=>{const row=Math.floor(i/COLS);c.classList.add('drop');c.style.animationDelay=(row*40)+'ms'});
+      await sleep(T?200:420);
+      cellEls.forEach(c=>{c.classList.remove('drop');c.style.animationDelay=''});
+    }
+  }
+  $('winbar').classList.remove('on');
+}
+function finishWin(winMult){
+  if(winMult<=0)return;
+  const amount=winMult*bet; // bahis kati -> gercek tutar
+  setCredit(credit+amount);
+  $('lastWin').textContent='₺'+fmt(amount);
+  $('winbar').classList.add('on');countUp($('win-amt'),amount,turboRef.on?400:900);
+  setTimeout(()=>$('winbar').classList.remove('on'),turboRef.on?600:1400);
+  sfx.coin(Math.log2(amount+1));
+  if(winMult>=15)bigWinShow(tierOf(winMult),amount);
+}
+async function bonusFlow(){
+  showMsg('⚡ BONUS: 15 ÜCRETSİZ ÇEVİRME!');
+  sfx.bonus();
+  const b=runBonus(bet);
+  for(const t of b.log){
+    $('mult-value').textContent='×'+fmt(t.glob);
+    setCredit(credit+t.win*bet);
+    $('lastWin').textContent='₺'+fmt(t.win*bet);
+    await sleep(turboRef.on?150:320);
+  }
+  $('mult-value').textContent='×1';
+  const tot=b.total*bet;
+  $('lastWin').textContent='₺'+fmt(tot);
+  if(b.total>=15)bigWinShow(tierOf(b.total),tot);
+  else{showMsg('Bonus toplamı: ₺'+fmt(tot));sfx.coin(8)}
+}
+
+/* otomatik oynatma */
+function autoStop(){autoOn=false;autoLeft=0;$('auto').textContent='OTO: KAPALI';$('spin').classList.remove('auto-on')}
+
+/* ---------------- olaylar + başlatma (yalnız tarayıcıda) ---------------- */
+if(typeof document!=='undefined'){
+  $('spin').addEventListener('click',()=>{
+    if(autoOn){autoStop();return}
+    audio();spin();
+  });
+  $('auto').addEventListener('click',()=>{
+    if(autoOn){autoStop();return}
+    autoOn=true;autoLeft=50;$('auto').textContent='OTO: 50';$('spin').classList.add('auto-on');audio();spin();
+  });
+  $('bet-plus').addEventListener('click',()=>{bet=Math.min(bet*2,100000);store.set('bet',bet);renderCredit()});
+  $('bet-minus').addEventListener('click',()=>{bet=Math.max(bet/2>=100?bet/2:100,100);store.set('bet',bet);renderCredit()});
+  $('turbo').addEventListener('click',()=>{turboRef.on=!turboRef.on;$('turbo').classList.toggle('off',!turboRef.on)});
+  $('sound').addEventListener('click',()=>{soundOn=!soundOn;store.set('sound',soundOn);$('sound').textContent='SES: '+(soundOn?'AÇIK':'KAPALI')});
+  $('turbo').classList.add('off');
+  $('sound').textContent='SES: '+(soundOn?'AÇIK':'KAPALI');
+}
+
+/* ---------------- dışa açık API ---------------- */
+const API={
+  get credit(){return credit},
+  getCredit:()=>credit,
+  setCredit,
+  getBet:()=>bet,
+  setBet:v=>{bet=Math.max(100,Math.round(v));store.set('bet',bet);if(typeof document!=='undefined')renderCredit()},
+  onChange:f=>listeners.push(f),
+  spin:()=>spin(),
+  simulate,
+  seed:s=>{rng=mulberry32(s)},
+  unseed:()=>{rng=Math.random},
+  config:{get rtpTarget(){return 0.96},
+          get nearMiss(){return CONFIG.nearMiss},
+          set nearMiss(v){CONFIG.nearMiss=!!v}},
+  _core:{runSpin,runBonus,cascade,evaluate,genBoard,CATS,DBG,forceWin,plantOrbs,plantNear}, // test için
+};
+if(typeof window!=='undefined')window.NPNG_CASINO=API;
+if(typeof document!=='undefined'){
+  document.dispatchEvent(new CustomEvent('npng-casino-ready'));
+  buildGrid();renderCredit();
+}
+</script>
+</body>
+</html>
