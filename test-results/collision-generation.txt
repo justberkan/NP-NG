@@ -1,0 +1,17 @@
+{
+  "bytes": 608334,
+  "triangles": {
+    "dust2": 9330,
+    "mc": 48024
+  },
+  "sources": {
+    "js/core.js": "5b5d678cb92bba46edc065e01b24bd6fe6ca14a4afe71dd6931e97892cbe0bf7",
+    "js/maps.js": "c1058082e51f878aec124f13df19403e8bcdeb660c1edb6b7f58fa7ffc5344d0",
+    "js/mapcol.js": "6ade0a261f0db55334dff83ae19442d1972614d65e30e225428406b0fb6ad90c",
+    "js/weapons.js": "7ff4469c5cccebc4e61afb1f1a7837eea6c3045ba2a134ceb7872a455db13dfa",
+    "js/catalog.js": "e865df1f364f6c3c2c42b89fd4b1c7918a58e69a353ac1209daf2139b20b9cd4",
+    "assets/map_dust2.js": "63f9c50c6b4debe15b254e5458f735a0c9ffcb2457bc8fdc9b517e0b83bc474e",
+    "assets/map_mc.js": "7915250f12af498dff517d817cf88b2bc467db9f9e8281df0daeac22517178fc"
+  }
+}
+PASS deterministic regeneration SHA256 66C3D6D54ADCAD09F4EF71D087D5F58ED372AFA0BBB0A0036BD77437595D5E96

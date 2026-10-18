@@ -1,0 +1,81 @@
+{
+ "at": "2026-10-17T21:11:28.491Z",
+ "baseURL": "http://127.0.0.1:57655",
+ "results": [
+  {
+   "name": "aim: aç/oyna/lobiye dön (4 kez) hatasız",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "aim: maç başına doku/geometri sızıntısı yok",
+   "ok": true,
+   "detail": "doku 21→79→79→79, geometri 68→456→456→456"
+  },
+  {
+   "name": "tdm: aç/oyna/lobiye dön (4 kez) hatasız",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "tdm: maç başına doku/geometri sızıntısı yok",
+   "ok": true,
+   "detail": "doku 23→27→27→27, geometri 86→92→94→93"
+  },
+  {
+   "name": "zom: aç/oyna/lobiye dön (4 kez) hatasız",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "zom: maç başına doku/geometri sızıntısı yok",
+   "ok": true,
+   "detail": "doku 19→22→22→22, geometri 75→83→83→83"
+  },
+  {
+   "name": "cmp: aç/oyna/lobiye dön (4 kez) hatasız",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "cmp: maç başına doku/geometri sızıntısı yok",
+   "ok": true,
+   "detail": "doku 23→27→27→27, geometri 78→83→83→83"
+  },
+  {
+   "name": "ow: aç/oyna/lobiye dön (4 kez) hatasız",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "ow: maç başına doku/geometri sızıntısı yok",
+   "ok": true,
+   "detail": "doku 48→54→54→54, geometri 111→119→119→119"
+  },
+  {
+   "name": "wc: aç/oyna/lobiye dön (4 kez) hatasız",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "wc: maç başına doku/geometri sızıntısı yok",
+   "ok": true,
+   "detail": "doku 15→17→17→17, geometri 72→76→76→76"
+  },
+  {
+   "name": "race: aç/oyna/lobiye dön (4 kez) hatasız",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "race: maç başına doku/geometri sızıntısı yok",
+   "ok": true,
+   "detail": "doku 14→14→14→14, geometri 55→55→55→55"
+  },
+  {
+   "name": "Lobi: 10 sekme, 99 tıklama hatasız",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

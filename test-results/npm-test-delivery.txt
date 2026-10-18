@@ -1,0 +1,289 @@
+
+> npng@0.1.0 test
+> node tests/run.cjs
+
+PASS Collision source hashes match client
+PASS Collision data below 2 MiB
+PASS Legacy client accepted and stays connected
+PASS Arena normal hit accepted
+PASS Arena wall hit rejected
+PASS 10x firing rate rejected
+PASS 300m hit rejected
+PASS 500 legitimate corner-exit shots at 100ms: >=99% {"accepted":499,"total":500}
+PASS Dust2 doorway/passage fixtures from client geometry {"passages":[{"a":{"x":13.87833023071289,"y":4.6426667213439945,"z":-11.160331726074219},"b":{"x":19.87833023071289,"y":4.6426667213439945,"z":-11.160331726074219}},{"a":{"x":14.37833023071289,"y":4.6426667213439945,"z":15.839668273925781},"b":{"x":14.37833023071289,"y":4.6426667213439945,"z":21.83966827392578}},{"a":{"x":-4.871669769287109,"y":1.4000000000003336,"z":-6.160331726074219},"b":{"x":1.1283302307128906,"y":1.4000000000003336,"z":-6.160331726074219}},{"a":{"x":23.12833023071289,"y":4.6426667213439945,"z":20.83966827392578},"b":{"x":23.12833023071289,"y":4.6426667213439945,"z":26.83966827392578}},{"a":{"x":11.37833023071289,"y":4.6426667213439945,"z":36.33966827392578},"b":{"x":17.37833023071289,"y":4.6426667213439945,"z":36.33966827392578}},{"a":{"x":-18.12166976928711,"y":1.8053333401679992,"z":-9.160331726074219},"b":{"x":-18.12166976928711,"y":1.8053333401679992,"z":-3.1603317260742188}}]}
+PASS 500 legitimate Dust2 passage shots: >=99% {"accepted":500,"total":500}
+PASS Dust2 wall adjacent to passage rejected
+PASS 500 legitimate range-boundary shots: >=99% {"accepted":499,"total":500}
+PASS Zombie Co-op normal hit accepted
+PASS Zombie Co-op 10x rate rejected
+PASS Zombie Co-op 300m rejected
+PASS Zombie Co-op wall rejected
+PASS Modern client cannot downgrade by omitting metadata
+PASS Future timestamp rejected
+PASS Replay rejected
+PASS At least 250ms position history retained
+PASS Respawn discards previous-life history
+PASS rifle range boundary accepted
+PASS rifle beyond range rejected
+PASS smg range boundary accepted
+PASS smg beyond range rejected
+PASS pistol range boundary accepted
+PASS pistol beyond range rejected
+PASS dual range boundary accepted
+PASS dual beyond range rejected
+PASS knife range boundary accepted
+PASS knife beyond range rejected
+PASS sword range boundary accepted
+PASS sword beyond range rejected
+PASS gsword range boundary accepted
+PASS gsword beyond range rejected
+PASS All catalog model firing rates accepted {"modelShots":1120}
+PASS Validation mean below 0.2ms {"count":1511,"meanMs":0.04353090668431503,"p95Ms":0.0819,"maxMs":0.5771}
+✔ Oyun dosyaları ve yeni dosya yeniden başlatmadan sunulur (269.5835ms)
+✔ Özel dosyalar HTTP üzerinden okunamaz (5.0603ms)
+✔ HEAD gövdesiz, yazma yöntemleri reddedilir (4.0519ms)
+✔ API bilgi yanıtı ve sunucu canlılığı (0.6221ms)
+✔ Bozuk yüzde kodlaması sunucuyu kapatmaz (0.8354ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 382.3167
+PASS Tarayıcı çalışma hatası yok
+PASS Koşu hızı 5.25 m/s
+PASS 30–240 FPS koşu farkı 0.1 mm altında
+PASS 30–240 FPS zıplama yüksekliği farkı 1 cm altında
+PASS Tek basışta tek zıplama ve yere iniş
+PASS Karşı tuşla duruş 100 ms altında
+PASS Otomatik bhop seçeneği
+PASS Zıplama anında hız sınırı 11.5
+PASS Hava strafe sınırı 13.5
+PASS Çömelme hızı yarı yarıya
+PASS 3 metrelik kutunun üstüne tırmanıp basma
+PASS Duvara bakmadan tırmanmama
+PASS Kutu kenarına iniş ve çıkış
+PASS Yan duvarda koşma
+PASS Odak kaybında tüm eylemler temizlenir
+PASS Uzun karede en fazla 8 fizik adımı
+PASS Duraklatıldığında fizik ilerlemez
+[
+  {
+    "name": "run",
+    "x": 0,
+    "y": 0,
+    "z": 9.893749999995894,
+    "speed": 5.249999999945253,
+    "remaining": 9998.00000000003,
+    "fps": 30
+  },
+  {
+    "name": "jump",
+    "x": 0,
+    "y": 0,
+    "z": 20,
+    "speed": 0,
+    "remaining": 9998.00000000003,
+    "fps": 30,
+    "apex": 1.2472222222222213,
+    "jumps": 1,
+    "grounded": true
+  },
+  {
+    "name": "run",
+    "x": 0,
+    "y": 0,
+    "z": 9.893749999995894,
+    "speed": 5.249999999945253,
+    "remaining": 9998.00000000003,
+    "fps": 60
+  },
+  {
+    "name": "jump",
+    "x": 0,
+    "y": 0,
+    "z": 20,
+    "speed": 0,
+    "remaining": 9998.00000000003,
+    "fps": 60,
+    "apex": 1.2472222222222213,
+    "jumps": 1,
+    "grounded": true
+  },
+  {
+    "name": "run",
+    "x": 0,
+    "y": 0,
+    "z": 9.893749999995894,
+    "speed": 5.249999999945253,
+    "remaining": 9998.00000000003,
+    "fps": 120
+  },
+  {
+    "name": "jump",
+    "x": 0,
+    "y": 0,
+    "z": 20,
+    "speed": 0,
+    "remaining": 9998.00000000003,
+    "fps": 120,
+    "apex": 1.2472222222222213,
+    "jumps": 1,
+    "grounded": true
+  },
+  {
+    "name": "run",
+    "x": 0,
+    "y": 0,
+    "z": 9.893749999995894,
+    "speed": 5.249999999945253,
+    "remaining": 9998.00000000003,
+    "fps": 144
+  },
+  {
+    "name": "jump",
+    "x": 0,
+    "y": 0,
+    "z": 20,
+    "speed": 0,
+    "remaining": 9998.00000000003,
+    "fps": 144,
+    "apex": 1.2472222222222213,
+    "jumps": 1,
+    "grounded": true
+  },
+  {
+    "name": "run",
+    "x": 0,
+    "y": 0,
+    "z": 9.893749999995894,
+    "speed": 5.249999999945253,
+    "remaining": 9998.00000000003,
+    "fps": 240
+  },
+  {
+    "name": "jump",
+    "x": 0,
+    "y": 0,
+    "z": 20,
+    "speed": 0,
+    "remaining": 9998.00000000003,
+    "fps": 240,
+    "apex": 1.2472222222222213,
+    "jumps": 1,
+    "grounded": true
+  },
+  {
+    "name": "counter-strafe",
+    "seconds": 0.05833333333333333
+  },
+  {
+    "name": "autohop",
+    "autoHop": false,
+    "jumps": 1
+  },
+  {
+    "name": "autohop",
+    "autoHop": true,
+    "jumps": 5
+  },
+  {
+    "name": "jump-cap",
+    "x": 0.09583333333333333,
+    "y": 0.06097222222222222,
+    "z": 20,
+    "speed": 11.5,
+    "remaining": 9999.991666666667
+  },
+  {
+    "name": "air-cap",
+    "maxSpeed": 13.5
+  },
+  {
+    "name": "crouch",
+    "x": 0,
+    "y": 0,
+    "z": 14.946874999997911,
+    "speed": 2.6249999999726263,
+    "remaining": 9998.00000000003,
+    "crouching": 1
+  },
+  {
+    "name": "climb",
+    "x": -18,
+    "y": 3,
+    "z": -5.273643114889239,
+    "speed": 4.1250763306113456e-8,
+    "remaining": 9998.00000000003,
+    "maxHeight": 3.3604166666666693,
+    "climbed": true,
+    "landedOnTop": true,
+    "climbSeconds": 1.0416666666666654,
+    "grounded": true
+  },
+  {
+    "name": "climb-facing-away",
+    "climbed": false
+  },
+  {
+    "name": "edge-escape",
+    "x": -18,
+    "y": 0.5616666666666668,
+    "z": -0.07376329166666698,
+    "speed": 5.25,
+    "remaining": 9999.200000000012,
+    "landed": 3
+  },
+  {
+    "name": "wallrun",
+    "x": -7.0999546430884,
+    "y": 1.1118577801111418,
+    "z": -16.927634908149216,
+    "speed": 7.421899538542934,
+    "remaining": 9999.200000000012,
+    "wallTime": 0.7999999999999996
+  },
+  {
+    "name": "blur",
+    "key": 0,
+    "jHeld": false,
+    "jPress": false,
+    "sPress": false,
+    "qPress": false,
+    "jBuf": 0,
+    "firing": false,
+    "ads": false
+  },
+  {
+    "name": "long-frame",
+    "simulated": 0.06666666666569654,
+    "accumulator": 0
+  },
+  {
+    "name": "paused",
+    "x": 0,
+    "y": 0,
+    "z": 20,
+    "speed": 0,
+    "remaining": 10000
+  }
+]
+PASS 64 HTTP dosyası birebir, 153 JS sözdizimi, lobi ve Aim Training açılışı
+PASS İstanbul takvimi, 4 mevsim, gün/gece, 5 görsel senaryo, kayıt/menü, mobil efekt bütçesi, model hata yedeği
+PASS aim: aç/oyna/lobiye dön (4 kez) hatasız
+PASS aim: maç başına doku/geometri sızıntısı yok — doku 21→79→79→79, geometri 68→456→456→456
+PASS tdm: aç/oyna/lobiye dön (4 kez) hatasız
+PASS tdm: maç başına doku/geometri sızıntısı yok — doku 23→27→27→27, geometri 86→92→94→93
+PASS zom: aç/oyna/lobiye dön (4 kez) hatasız
+PASS zom: maç başına doku/geometri sızıntısı yok — doku 19→22→22→22, geometri 75→83→83→83
+PASS cmp: aç/oyna/lobiye dön (4 kez) hatasız
+PASS cmp: maç başına doku/geometri sızıntısı yok — doku 23→27→27→27, geometri 78→83→83→83
+PASS ow: aç/oyna/lobiye dön (4 kez) hatasız
+PASS ow: maç başına doku/geometri sızıntısı yok — doku 48→54→54→54, geometri 111→119→119→119
+PASS wc: aç/oyna/lobiye dön (4 kez) hatasız
+PASS wc: maç başına doku/geometri sızıntısı yok — doku 15→17→17→17, geometri 72→76→76→76
+PASS race: aç/oyna/lobiye dön (4 kez) hatasız
+PASS race: maç başına doku/geometri sızıntısı yok — doku 14→14→14→14, geometri 55→55→55→55
+PASS Lobi: 10 sekme, 99 tıklama hatasız

@@ -242,3 +242,15 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Dosyalar: IS_PLANI.md, ISLEM_GUNLUGU.md
 - Test: gerekmez (yalnız belge)
 - Yedek: _yedek/claude-denetim-1808/IS_PLANI.md (önceki hali)
+
+
+### 2026-10-18 14:21 İstanbul · Codex · A-06 aşama 1 / PR adayı
+- Yetki: ONAY · CODEX-2; Arena, Takımlı Online ve Zombi Co-op. Koridor/A-06b kapsam dışı. Canlı masaüstü klasörüne yazılmadı. Dal: codex/A-06-sunucu-vurus.
+- Eklendi: silaha/modeline göre atış aralığı, menzil, görüş hattı; 350 ms konum geçmişi ve 100 ms sınırlı geri sarma; ret sayaçları ve nedenli günlük. Ban/kick eklenmedi.
+- Değişti: mp.js yalnız atış kimliği/zaman ve saat eşleme alanları; hasar/geri tepme/hareket değişmedi. Eski istemciler eski kontrolleri kullanır; yeni protokolü kullanan oturum metadata kaldırarak geri dönemez.
+- Çarpışma: istemci mapLoad/mcBuild kaynağından tekrar üretim; Arena kutuları, Dust2 ve mevcut Minecraft takım haritası. 608334 bayt; GLTF yükleme sırası sabitlenerek iki üretimde aynı SHA-256 doğrulandı. Betik: node tests/generate-hit-collision.cjs.
+- Test: npm test tam çıktı test-results/npm-test-delivery.txt; tüm kontroller PASS. Sunucu 37 kontrol; 500 köşe çıkışı 499 kabul, 500 Dust2 geçit 500 kabul, 500 sınır menzil 499 kabul. 56 model için 1120 atış aralığı kontrolü PASS. Gerçek iki WebSocket istemcisi; test yerleştirme/iyileştirmesi yerel test adminiyle yapıldı.
+- Performans: 1511 ölçüm ortalama 0.043531 ms, p95 0.0819 ms, en yüksek 0.5771 ms. Ortalama/p95 hedef altında; her bir çağrı için 0.2 ms garantisi yok.
+- Dosyalar: server.js, server-hit-validation.js, server-hit-collision.js, server-hit-collision.bin, js/mp.js, tests/server-hit.cjs, tests/generate-hit-collision.cjs, tests/http.cjs, tests/run.cjs, ISLEM_GUNLUGU.md, test-results/server-hit.json, test-results/npm-test-delivery.txt, test-results/collision-generation.txt, test-results/audit/audit.json, test-results/audit/aim.png, test-results/audit/tdm.png, test-results/audit/zom.png, test-results/audit/cmp.png, test-results/audit/ow.png, test-results/audit/wc.png, test-results/audit/race.png.
+- Çıkarıldı: yok. Yedek: Git başlangıç eddcbd3 ve dal commitleri. HTTP testine yalnız yeni bağımlılıkların fixture kopyası eklendi (Berkan ek onayı).
+- Sınır: eski istemci yolu bilerek daha zayıf; sunucu konumuna dayalı baş/gövde görüş hattı tam iskelet hitbox doğrulaması değildir. Koridor değiştirilmedi. Oyuna birleştirme/uygulama Claude'a ait.
