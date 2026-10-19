@@ -62,6 +62,13 @@ let child=null,log='';const dir=fs.mkdtempSync(path.join(os.tmpdir(),'npng-dede-
       await new Promise(r=>setTimeout(r,400));view('home');const a=CGD.api;await new Promise(r=>{const t=setInterval(()=>{if(!a.spinning){clearInterval(t);r()}},50)});
       const c1=a.credit,t1=SV.tl;await new Promise(r=>setTimeout(r,2500));return {hidden:CGD.f.style.display==='none',same:a.credit===c1&&SV.tl===t1,eq:a.credit===SV.tl,auto:doc.getElementById('auto').textContent}});
     check('Kumarhaneden çıkınca otomatik çevirme durur, süren çevirme ödenir',s.hidden&&s.same&&s.eq&&/KAPALI/.test(s.auto),s);
+    /* Türkçe ses yoksa sentez İngilizce aksanla okumasın (Berkan, 2026-10-19): mp3 yokken yalnız tr sesle konuşur */
+    s=await page.evaluate(async()=>{const w=CGD.f.contentWindow,ss=w.speechSynthesis;let n=0;
+      w.SpeechSynthesisUtterance=function(t){this.text=t};ss.speak=()=>{n++};w.eval('interacted=true;voiceOn=true');
+      ss.getVoices=()=>[{lang:'en-US'}];w.dedeSes('yok-test-1','Ahahah, olmadı yine!');await new Promise(r=>setTimeout(r,800));const en=n;
+      ss.getVoices=()=>[{lang:'en-US'},{lang:'tr-TR'}];w.dedeSes('yok-test-2','Ahahah, olmadı yine!');await new Promise(r=>setTimeout(r,800));
+      return {yalnizIngilizce:en,turkceVarken:n-en}});
+    check('DEDE: Türkçe ses yoksa konuşmaz, varsa Türkçe konuşur',s.yalnizIngilizce===0&&s.turkceVarken===1,s);
     check('Sayfa hatası ve 4xx yok',!errors.length&&!http.length,[...errors,...http].slice(0,4));
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);failed++}).finally(async()=>{

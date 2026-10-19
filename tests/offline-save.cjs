@@ -17,7 +17,8 @@ async function startServer(){
   child.stdout.on('data',b=>log+=b);child.stderr.on('data',b=>log+=b);
   const t=Date.now();while(!log.includes('sunucusu çalışıyor')){if(Date.now()-t>8000||child.exitCode!==null)throw Error('sunucu başlamadı: '+log);await sleep(25)}
 }
-async function stopServer(){if(watcher){try{watcher.ws.close()}catch(e){}watcher=null}if(child&&child.exitCode===null)await new Promise(r=>{child.once('exit',r);child.kill('SIGTERM')});child=null}
+/* SIGKILL: Windows'taki gibi anında öldür (exit işleyicisi çalışmaz) — kalıcılık 5 sn'lik yazım döngüsüne güvenmemeli (Kimi bulgusu, 2026-10-19) */
+async function stopServer(sig='SIGTERM'){if(watcher){try{watcher.ws.close()}catch(e){}watcher=null}if(child&&child.exitCode===null)await new Promise(r=>{child.once('exit',r);child.kill(sig)});child=null}
 function peer(){const ws=new WebSocket(`ws://127.0.0.1:${port}`),p={ws,msgs:[],send:m=>ws.send(JSON.stringify(m))};ws.addEventListener('message',e=>{try{p.msgs.push(JSON.parse(e.data))}catch(x){}});return new Promise((res,rej)=>{ws.addEventListener('open',()=>res(p));ws.addEventListener('error',rej)})}
 async function waitMsg(p,f,ms=4000){const t=Date.now();while(Date.now()-t<ms){const m=p.msgs.find(f);if(m)return m;await sleep(10)}return null}
 async function auth(mode,name,pass,save){const p=await peer();p.send({t:'auth',mode,name,pass,save});const m=await waitMsg(p,m=>m.t==='auth');return {p,m}}
@@ -47,7 +48,7 @@ const PASS='sifre1234';
    for(const p of ps)p.ws.close();await sleep(200);}
   await auth('register','sizan1',PASS,{v:3,tl:0}).then(r=>r.p.ws.close());
   await auth('register','sizan2',PASS,{v:3,tl:0}).then(r=>r.p.ws.close());
-  await stopServer();
+  await stopServer('SIGKILL');
   {const f=path.join(dir,'accounts.json'),acc=JSON.parse(fs.readFileSync(f,'utf8'));
    acc.sizan1.save.tl=1000010548;acc.sizan2.save.tl=1e9;fs.writeFileSync(f,JSON.stringify(acc));}
   await startServer();

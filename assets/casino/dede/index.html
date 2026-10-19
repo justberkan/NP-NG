@@ -421,8 +421,10 @@ function dedeSes(id,text){
     if(!voiceOn||!interacted)return;
     try{
       const u=new SpeechSynthesisUtterance(text);u.lang='tr-TR';
-      const vs=speechSynthesis.getVoices();const v=vs.find(x=>x.lang&&x.lang.toLowerCase().startsWith('tr'));
-      if(v)u.voice=v;
+      /* Türkçe ses yoksa sentez KONUŞMAZ (yoksa İngilizce aksanla okuyordu — Berkan, 2026-10-19); balon yine görünür */
+      const vs=speechSynthesis.getVoices();const v=vs.find(x=>x.lang&&x.lang.toLowerCase().replace('_','-').startsWith('tr'));
+      if(!v)return;
+      u.voice=v;
       speechSynthesis.speak(u);
     }catch(e){}
   };

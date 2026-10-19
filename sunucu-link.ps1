@@ -33,26 +33,44 @@ if (-not (Test-Path '.\cloudflared.exe')) {
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
   Invoke-WebRequest -Uri 'https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe' -OutFile '.\cloudflared.exe'
 }
-# Eski tunel ve sunucu surecleri kalmasin (eski link zaten gecersiz olur)
+# Eski tunel kalmasin (eski link zaten gecersiz olur)
 Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force
-$srv = Start-Process $node -ArgumentList 'server.js', $port -WorkingDirectory $PSScriptRoot -PassThru -WindowStyle Minimized
 
-# 1) Sunucu gercekten ayaga kalkti mi?
-$local = $false
-for ($i = 0; $i -lt 20 -and -not $local; $i++) {
-  Start-Sleep -Milliseconds 500
-  try { $r = Invoke-WebRequest -Uri "http://localhost:$port/api/info" -UseBasicParsing -TimeoutSec 2; if ($r.StatusCode -eq 200) { $local = $true } } catch {}
+# Sunucu ayakta mi? Dogrudan 127.0.0.1'e TCP baglantisi (localhost/IPv6 ve proxy ayarlarindan etkilenmez)
+function Test-Port([int]$p) {
+  $c = New-Object System.Net.Sockets.TcpClient
+  try { $iar = $c.BeginConnect('127.0.0.1', $p, $null, $null); return ($iar.AsyncWaitHandle.WaitOne(700) -and $c.Connected) }
+  catch { return $false } finally { $c.Close() }
 }
-if (-not $local) {
-  Write-Host 'Sunucu baslamadi (port 3000 baska bir programda olabilir). Once DURDUR.bat calistir, tekrar dene.' -ForegroundColor Red
-  Read-Host 'Cikmak icin Enter'
-  exit
+
+# 1) Sunucu: zaten calisiyorsa (onceki denemeden kalan) yeniden kullan, yoksa baslat ve 60 sn'ye kadar bekle
+#    (ilk acilista antivirus node.exe'yi tararken baslangic uzun surebilir)
+if (Test-Port $port) {
+  Write-Host 'Sunucu zaten calisiyor (port 3000), yeniden kullaniliyor.' -ForegroundColor Green
+} else {
+  $srv = Start-Process $node -ArgumentList 'server.js', $port -WorkingDirectory $PSScriptRoot -PassThru -WindowStyle Minimized
+  Write-Host 'Sunucu baslatiliyor' -NoNewline
+  $local = $false
+  for ($i = 0; $i -lt 90 -and -not $local; $i++) {
+    Start-Sleep -Milliseconds 700
+    Write-Host '.' -NoNewline
+    if ($srv.HasExited) { break }
+    $local = Test-Port $port
+  }
+  Write-Host ''
+  if (-not $local) {
+    if ($srv.HasExited) { Write-Host 'Sunucu kapandi: port 3000 baska bir programda olabilir. Once DURDUR.bat calistir, tekrar dene.' -ForegroundColor Red }
+    else { Write-Host 'Sunucu 60 sn icinde yanit vermedi. 1 dk bekleyip SUNUCU-INTERNET.bat dosyasini tekrar calistir (acik sunucu yeniden kullanilir).' -ForegroundColor Red }
+    Read-Host 'Cikmak icin Enter'
+    exit
+  }
+  Write-Host 'Sunucu calisiyor.' -ForegroundColor Green
 }
 
 # 2) Tunel: http2 kullan (bazi aglarda varsayilan QUIC/UDP engelli oldugu icin 1033 hatasi verir)
 $log = Join-Path $env:TEMP 'mmofps-tunnel.log'
 if (Test-Path $log) { Remove-Item $log -Force }
-$tun = Start-Process '.\cloudflared.exe' -ArgumentList 'tunnel', '--url', "http://localhost:$port", '--protocol', 'http2', '--no-autoupdate', '--logfile', $log -PassThru -WindowStyle Minimized
+$tun = Start-Process '.\cloudflared.exe' -ArgumentList 'tunnel', '--url', "http://127.0.0.1:$port", '--protocol', 'http2', '--no-autoupdate', '--logfile', $log -PassThru -WindowStyle Minimized
 
 # 3) Link yazilsa bile tunel baglanmadan acilirsa 1033 verir: "Registered tunnel connection" gorunene kadar bekle
 $url = $null; $registered = $false

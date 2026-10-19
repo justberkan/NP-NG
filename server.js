@@ -109,6 +109,8 @@ function flushAcc() {
   catch (e) { console.log('Kayıt yazılamadı: ' + e.message); }
 }
 setInterval(flushAcc, 5000); process.on('exit', flushAcc); process.on('SIGINT', () => process.exit()); process.on('SIGTERM', () => process.exit());
+// Windows: konsol penceresi kapatılınca SIGHUP, Ctrl+Break'te SIGBREAK gelir; hesaplar diske yazılıp çıkılsın
+process.on('SIGHUP', () => process.exit()); if (process.platform === 'win32') process.on('SIGBREAK', () => process.exit());
 const hashPw = (pw, salt) => crypto.scryptSync(String(pw), salt, 32).toString('hex');
 const users = new Map(), fails = new Map(), conns = new Set();
 console.log('Kayıtlı hesap sayısı: ' + Object.keys(ACC).length);
@@ -260,7 +262,7 @@ function repairSave(a, now) {
   if (a.save.tl >= INF_TL) a.save.tl = START_TL;
   a.ts = now; accDirty = true; console.log('! ' + a.name + ' kaydı onarıldı: tl ' + old + ' -> ' + a.save.tl);
 }
-for (const k in ACC) repairSave(ACC[k], Date.now()); // açılışta tüm hesaplar (admin listesi de doğru görünsün)
+for (const k in ACC) repairSave(ACC[k], Date.now()); flushAcc(); // açılışta tüm hesaplar (admin listesi de doğru görünsün); onarım hemen diske
 function doAuth(c, m, now) {
   if (c.user) return;
   const reply = (ok, err, extra) => send(c, Object.assign({ t: 'auth', ok, err }, extra || {}));
@@ -277,7 +279,7 @@ function doAuth(c, m, now) {
     const salt = crypto.randomBytes(16).toString('hex');
     a = ACC[key] = { name, salt, hash: hashPw(pw, salt), toks: [], ts: 0, save: null, created: now };
     if (m.save && typeof m.save === 'object' && JSON.stringify(m.save).length < 1500000) { a.save = m.save; a.save.tl = START_TL; a.ts = now; }
-    accDirty = true; console.log('+ yeni hesap: ' + name);
+    accDirty = true; flushAcc(); console.log('+ yeni hesap: ' + name); // yeni hesap hemen diske (Windows'ta zorla kapatmada 5 sn'lik kayıp olmasın)
   } else if (m.mode === 'token') {
     if (!a || typeof m.tok !== 'string' || !a.toks.includes(m.tok)) return reply(0, 'Oturum süresi dolmuş. Tekrar giriş yap.');
   } else {

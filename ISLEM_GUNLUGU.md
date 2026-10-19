@@ -301,3 +301,18 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Değişti: SUNUCU-BASLAT.bat ve sunucu-link.ps1 — klasördeki node\node.exe varsa onu kullanır (Node kurulumu gerekmez); zip içinden çalıştırılırsa ve beklenmeyen hatada pencere kapanmadan sebebi yazar. .gitignore'a node/ eklendi.
 - Test: paket klasöründen sunucu açıldı; gerçek hesap kopyasında onarım çalıştı (neggastr → 10.548, jejjejr → 31); audit 7 mod + lobi 99 tıklama paket sunucusuna karşı PASS (0 sayfa hatası, 0 eksik dosya). PowerShell betiği sözdizimi denetimi PASS. Windows'ta .bat/.ps1 gerçek çalıştırma Berkan'da.
 - Yedek: _yedek/claude-sunucu-paketi/
+
+### 2026-10-19 14:10 İstanbul · Claude · sunucu dayanıklılığı + yan bilgisayar güncelleyici (oyun kodu değişmedi, build 1325 aynı)
+- Yan bilgisayar (sunucu) hatası: sunucu açılmıştı ama sunucu-link.ps1 ona localhost üzerinden 10 sn içinde ulaşamayıp "başlamadı" dedi. Düzeltme: 127.0.0.1'e doğrudan TCP kontrolü, 60 sn bekleme, zaten açık sunucuyu yeniden kullanma; tünel 127.0.0.1'e bağlanıyor.
+- Kimi bulgusu (doğru): Windows'ta SIGTERM/taskkill /f node'u anında öldürür, 'exit' işleyicisi çalışmaz → son 5 sn'lik hesap yazımları kaybolur (offline-save testi Windows'ta bu yüzden düşüyordu; gerçek oyunda da DURDUR.bat aynı kaybı yapıyordu). Düzeltme: server.js yeni hesabı ve açılış onarımını anında diske yazar; SIGHUP (konsol kapatma) ve SIGBREAK'te kayıt yazılıp çıkılır. DURDUR.bat artık yalnız 3000 portunu dinleyen sunucuyu önce kibarca, 3 sn sonra zorla kapatır (bilgisayardaki diğer node programlarına dokunmaz). offline-save testi artık Windows gibi anında öldürüyor (eski kodda düştüğü, yenisinde geçtiği doğrulandı).
+- Eklendi: GUNCELLE.bat + guncelle.ps1 — yan bilgisayarda tek tıkla en son main'i GitHub'dan indirir, oyun dosyalarını yeniler (data, node, cloudflared.exe, LINK.txt'ye dokunmaz), sunucuyu yeniden başlatır. Linux PowerShell 7 ile denendi: sürüm 1809→1325 yenilendi, hesap dosyası md5 aynı, node/cloudflared dokunulmadı.
+- Değişti: server.js, DURDUR.bat, sunucu-link.ps1, tests/offline-save.cjs. Eklendi: GUNCELLE.bat, guncelle.ps1.
+- Test: npm test baştan sona PASS (çıkış 0, 109 PASS, 0 FAIL). Windows'ta .bat gerçek çalıştırması Berkan'da.
+- Yedek: _yedek/claude-sunucu-1410/
+
+### 2026-10-19 14:20 İstanbul · Claude · build 202610191415 dede-tts-tr
+- DEDE İngilizce aksan (Berkan): mp3'ler henüz yokken sayfa tarayıcı sentezine düşüyordu; tarayıcıda Türkçe ses yoksa varsayılan İngilizce sesle okuyordu. Düzeltme: Türkçe ses yoksa sentez konuşmaz, balon görünür. Kalıcı çözüm: Kimi'nin edge-tts Türkçe mp3'leri (kimi/dede-ses, PR bekleniyor).
+- GUNCELLE.bat/guncelle.ps1: yalnız istemci dosyaları değiştiyse sunucu yeniden başlatılmaz (link aynı kalır, oyuncular Ctrl+F5); sunucu dosyaları değiştiyse yeniden başlatılır. Çıkış kodları PowerShell 7 ile denendi (aynı → 0, değişti → 3).
+- Değişti: assets/casino/dede/index.html, guncelle.ps1, GUNCELLE.bat, index.html (build 1415, 60 ?v), tests/casino-dede.cjs (Türkçe ses kontrolü; 11 kontrol).
+- Test: npm test baştan sona PASS (çıkış 0, 110 PASS, 0 FAIL). Tam çıktı test-results/npm-test-1415.txt.
+- Yedek: _yedek/claude-sunucu-1410/ (aynı yayın)

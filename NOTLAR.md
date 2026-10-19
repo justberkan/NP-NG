@@ -278,3 +278,6 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 2026-10-19 13:40 · Claude · 202610191325 suzulme-naruto-v1 · Paraşüt titremesi düzeltildi (süzülme yüksek FPS'te sürekli aç-kapa yapıyordu); Naruto koşusu yalnız açık dünyada, diğer modlarda Shift normal hızlı koşu. Berkan'ın 19 Ekim listesi takip tablosunda (A-14…A-20, Y-01).
 
 - 2026-10-19 13:50 · Claude · sunucu paketi · Yan bilgisayar için kurulum gerektirmeyen tam sunucu paketi (Node + tünel içinde). Başlatma betikleri artık klasördeki node\node.exe'yi kullanıyor ve hatada pencere açık kalıyor.
+
+- 2026-10-19 14:10 · Claude · sunucu · Yan bilgisayarda "sunucu başlamadı" hatası düzeltildi; hesaplar artık zorla kapatmada kaybolmuyor; DURDUR.bat yalnız oyun sunucusunu kapatıyor; GUNCELLE.bat ile yan bilgisayar tek tıkla en son sürüme geçiyor.
+- 2026-10-19 14:20 · Claude · 202610191415 dede-tts-tr · Dede, tarayıcıda Türkçe ses yoksa İngilizce aksanla okumuyor (balon kalır); Türkçe mp3'ler Kimi'den gelecek. GUNCELLE.bat sunucu dosyası değişmediyse yeniden başlatmıyor.
