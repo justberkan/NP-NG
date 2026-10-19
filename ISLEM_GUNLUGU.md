@@ -287,3 +287,10 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Berkan kararı bekleyen: near-miss (öneri: KAPALI kalsın), haftalık bonus oranı/tavanı (şimdilik %10 / 25.000), Kimi'nin edge-tts sesleri.
 - NOT: server.js değişti (yalnız MIME) → sunucu yeniden başlatılınca .webp doğru türle gider; oyuncular Ctrl+F5.
 - Yedek: _yedek/claude-dede-1230/
+
+### 2026-10-19 13:40 İstanbul · Claude · build 202610191325 suzulme-naruto-v1 (A-16, A-20)
+- A-16 Paraşüt titremesi: süzülmenin başlama eşiği (düşüş hızı < -2,2) her fizik alt adımında yeniden soruluyordu; süzülme hızı -1,9'a oturunca kapanıp açılıyordu. Ölçüm (eski kod, 3 sn): 144/165/240 FPS'te 33 kez aç-kapa, tüm FPS'lerde 14–19 hız sıçraması, birinci şahısta silah 6–9 mm/kare titriyordu. Düzeltme: süzülme başladıktan sonra Space bırakılana (ya da yere inene) dek sürer. Sonra: 0–1 geçiş (yalnız giriş), 0 sıçrama, 0 titreme.
+- A-20 Naruto koşusu (Berkan kararı a): yalnız açık dünyada. Diğer modlarda Shift hızlı koşu (1,4×) kalır, animasyon normal koşu klibi. Birinci şahıs silah indirme davranışı değişmedi.
+- Eklendi: tests/glide-sprint.cjs (11 kontrol; eski kodda A-16 kontrollerinin düştüğü doğrulandı), package.json test:glide. Değişti: js/player.js, js/rig.js, index.html (build 1325, 60 ?v), tests/run.cjs, docs/HATA_DENETIMI_20261017.md (A-14…A-20, Y-01 eklendi; A-16/A-20 bitti). Çıkarıldı: yok.
+- Test: npm test baştan sona PASS (çıkış 0, 109 PASS, 0 FAIL) — sunucu vuruş, HTTP, hareket, smoke, atmosfer, audit 7 mod + lobi, offline-save, DEDE RTP + casino-dede, glide-sprint 11/11. Tam çıktı test-results/npm-test-suzulme-1325.txt.
+- Yedek: _yedek/claude-suzulme-1325/

@@ -10,7 +10,8 @@
     "test:movement": "node tests/movement.cjs",
     "test:audit": "node tests/audit.cjs",
     "test:offline": "node tests/offline-save.cjs",
-    "test:casino": "node tests/casino-rtp.cjs && node tests/casino-dede.cjs"
+    "test:casino": "node tests/casino-rtp.cjs && node tests/casino-dede.cjs",
+    "test:glide": "node tests/glide-sprint.cjs"
   },
   "devDependencies": { "playwright": "1.62.1" }
 }

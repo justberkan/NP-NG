@@ -266,7 +266,10 @@ p.wr=0;if(!wall||p.g)p.wrT=0;
  }
  /* süzülme: havada Space basılı tutulursa paraşüt gibi yavaşça süzül */
  p.at=p.g?0:(p.at||0)+dt;p.wjT=Math.max(0,(p.wjT||0)-dt);
- p.glide=!dead&&!p.g&&!gr&&p.at>.9&&jHeld&&p.vy<-2.2&&!p.climb&&!(SK.chain)&&!(SK.meteor)?1:0;
+ /* A-16 (2026-10-19): başlama eşiği (vy<-2.2) her alt adımda yeniden sorulunca süzülme hızı -1,9'a oturduğu an kapanıp açılıyordu
+    (144+ FPS'te 3 sn'de 33 kez): eller/silah pozu ve paraşüt titriyor, düşüş hızı testere gibi sıçrıyordu. Başladıktan sonra Space bırakılana dek sürer. */
+ const glideOk=!dead&&!p.g&&!gr&&jHeld&&!p.climb&&!(SK.chain)&&!(SK.meteor);
+ p.glide=glideOk&&(p.glide||(p.at>.9&&p.vy<-2.2))?1:0;
  if(p.glide){
   p.vy+=22*dt;if(p.vy<-1.9)p.vy+=(-1.9-p.vy)*Math.min(1,6*dt);
   const gs=Math.max(8.5*SPD*1.5,Math.hypot(p.vx,p.vz)*.995),hs=Math.hypot(p.vx,p.vz)||1;

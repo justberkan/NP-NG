@@ -66,7 +66,9 @@ function animHuman(h,c,dt){
  sm.cr+=((c.crouch||0)-sm.cr)*k;
  sm.fl+=((c.flinch||0)-sm.fl)*Math.min(1,14*dt);
  const zb=h.zombie;
- sm.sp=(sm.sp||0)+(((c.sprint&&!zb)?1:0)-(sm.sp||0))*Math.min(1,9*dt);
+ /* A-20 (Berkan, 2026-10-19): Naruto (ninja) koşusu yalnız açık dünyada; diğer modlarda Shift hızlı koşu, animasyon normal koşu klibi */
+ const naruto=c.sprint&&!zb&&(typeof mode==='undefined'||mode==='ow');
+ sm.sp=(sm.sp||0)+((naruto?1:0)-(sm.sp||0))*Math.min(1,9*dt);
  sm.gl=(sm.gl||0)+(((c.glide&&!zb)?1:0)-(sm.gl||0))*Math.min(1,7*dt);
  sm.lat=(sm.lat||0)+((c.lat||0)-(sm.lat||0))*Math.min(1,8*dt);
  if(c.air)h.at=(h.at||0)+dt;else h.at=0;

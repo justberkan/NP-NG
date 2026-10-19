@@ -274,3 +274,5 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 2026-10-19 03:30 · Claude · 202610190325 cevrimdisi-v1 · Berkan kuralı: çevrimdışı para sınırsız ama hiçbir şey kaydedilmez; online hesap 31 TL ile başlar; açık dünya 50 kişi. Çevrimdışı 1e9 TL'nin hesaplara sızma açığı kapatıldı (sunucu reddeder + açılışta onarır). npm test PASS. Sunucu yeniden başlatılmalı.
 
 - 2026-10-19 12:40 · Claude · 202610191230 dede-v1 · Kimi'nin DEDE slotu (PR #10) oyuna eklendi: Kumarhane → DEDE ⚡; para yalnız oyunda, haftalık kayıp bonusu (%10, tavan 25.000, çevrimdışı yok), RTP %96,28 (near-miss kapalı). npm test PASS.
+
+- 2026-10-19 13:40 · Claude · 202610191325 suzulme-naruto-v1 · Paraşüt titremesi düzeltildi (süzülme yüksek FPS'te sürekli aç-kapa yapıyordu); Naruto koşusu yalnız açık dünyada, diğer modlarda Shift normal hızlı koşu. Berkan'ın 19 Ekim listesi takip tablosunda (A-14…A-20, Y-01).

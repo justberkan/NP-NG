@@ -48,11 +48,11 @@ Denetim araçları: `tests/audit.cjs` (yeni, kalıcı), ayrıntılı çıktı `t
 | A-11 | — | Kimi'nin favicon 403 bildirimi | — | Kapandı: denetimde 4xx yanıt yok |
 | A-14 | 🟠 | Koşuda ayaklar çok ters dönüyor (Berkan, 2026-10-19) | Codex: A-03 bitince aynı dosyalarda (rig/anim-contact/glbrig), görüntü kanıtıyla | Açık |
 | A-15 | 🟠 | Karakter boyları farklı; hepsi tek standart boyda olmalı (Valorant gibi). Hasar alan kutular (hitbox) ve ragdoll yeniden gözden geçirilecek | Codex: önce ölçüm (model başına boy/kafa yüksekliği) + plan; sunucu vuruş doğrulamasıyla uyumlu | Açık |
-| A-16 | 🟡 | Paraşüt (süzülme) açılınca elde ve FPS'te titreme | Claude | Açık |
+| A-16 | 🟡 | Paraşüt (süzülme) açılınca elde ve FPS'te titreme | Claude | **Bitti** (1325): başlama eşiği her alt adımda yeniden sorulduğu için süzülme 144+ FPS'te 3 sn'de 33 kez kapanıp açılıyordu; artık Space bırakılana dek sürer. Test: tests/glide-sprint.cjs |
 | A-17 | 🟡 | Duvarda koşma animasyonu Titanfall 2 tarzına yaklaştırılacak | Codex (animasyon), A-03/A-14 sonrası | Açık |
 | A-18 | 🟠 | Silah tutuşu: eller silahı daha iyi kavrasın | Codex (A-03'te korunuyor; ayrı iyileştirme işi) | Açık |
 | A-19 | 🟠 | 5v5'te botlara ateş ederken ms (kare süresi) yükseliyor | Kimi RTX'te ölçer (A-12/A-13 ile) → Claude düzeltir | Açık |
-| A-20 | 🟡 | Naruto koşusu yalnız açık dünyada olacak (şu an her modda) | Claude | Açık |
+| A-20 | 🟡 | Naruto koşusu yalnız açık dünyada olacak | Claude | **Bitti** (1325): diğer modlarda Shift hızlı koşu, normal koşu animasyonu (Berkan kararı a) |
 | Y-01 | — | Yeni özellik: Liyakat sistemi (yazılı sohbete göre mizahi itibar rengi/lakap; ceza yok). Ayrıntılı istek: Berkan'ın 2026-10-19 metni | Codex: plan → ONAY (sunucu + profil arayüzü) | Açık |
 
 ## 4. Kök sebep: süreç
