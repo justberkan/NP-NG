@@ -46,6 +46,14 @@ Denetim araçları: `tests/audit.cjs` (yeni, kalıcı), ayrıntılı çıktı `t
 | A-09 | 🟡 | `animHuman` 5 dosyada üst üste sarmalanmış; her yeni animasyon yaması bir öncekini bozabiliyor | Codex: tek animasyon hattına toplama (davranış aynı, testler PASS) | Açık |
 | A-10 | 🟡 | Kullanılmayan büyük dosyalar ve `_yedek` / `docs` şişkinliği | Codex: silme listesi çıkarır, Berkan onaylar | Açık |
 | A-11 | — | Kimi'nin favicon 403 bildirimi | — | Kapandı: denetimde 4xx yanıt yok |
+| A-14 | 🟠 | Koşuda ayaklar çok ters dönüyor (Berkan, 2026-10-19) | Codex: A-03 bitince aynı dosyalarda (rig/anim-contact/glbrig), görüntü kanıtıyla | Açık |
+| A-15 | 🟠 | Karakter boyları farklı; hepsi tek standart boyda olmalı (Valorant gibi). Hasar alan kutular (hitbox) ve ragdoll yeniden gözden geçirilecek | Codex: önce ölçüm (model başına boy/kafa yüksekliği) + plan; sunucu vuruş doğrulamasıyla uyumlu | Açık |
+| A-16 | 🟡 | Paraşüt (süzülme) açılınca elde ve FPS'te titreme | Claude | Açık |
+| A-17 | 🟡 | Duvarda koşma animasyonu Titanfall 2 tarzına yaklaştırılacak | Codex (animasyon), A-03/A-14 sonrası | Açık |
+| A-18 | 🟠 | Silah tutuşu: eller silahı daha iyi kavrasın | Codex (A-03'te korunuyor; ayrı iyileştirme işi) | Açık |
+| A-19 | 🟠 | 5v5'te botlara ateş ederken ms (kare süresi) yükseliyor | Kimi RTX'te ölçer (A-12/A-13 ile) → Claude düzeltir | Açık |
+| A-20 | 🟡 | Naruto koşusu yalnız açık dünyada olacak (şu an her modda) | Claude | Açık |
+| Y-01 | — | Yeni özellik: Liyakat sistemi (yazılı sohbete göre mizahi itibar rengi/lakap; ceza yok). Ayrıntılı istek: Berkan'ın 2026-10-19 metni | Codex: plan → ONAY (sunucu + profil arayüzü) | Açık |
 
 ## 4. Kök sebep: süreç
 Bugün yapılan 20'den fazla yamanın neredeyse hepsi "tarayıcı/mouse kullanılmadı, görsel test yok" notuyla teslim edildi. Düşen test (`counter-strafe`) iki ajan tarafından görüldü, not düşüldü ve öylece bırakıldı. Ajanlar canlı oyun klasörüne doğrudan yazdığı için her yama bir öncekinin üstüne bindi. `IS_PLANI.md` kurallar yerine günlük kayıtlarıyla doldu ve "oyun kodunu yalnız Claude değiştirir" kuralı ile "Codex doğrudan uyguladı" kayıtları çelişiyor.
