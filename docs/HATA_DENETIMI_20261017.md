@@ -32,7 +32,7 @@ Denetim araçları: `tests/audit.cjs` (yeni, kalıcı), ayrıntılı çıktı `t
 
 | No | Önem | İş | Sahibi | Durum |
 |---|---|---|---|---|
-| A-01 | 🟠 | John Wick ve Laz Torretto kolları silah tutarken bozuluyor. Katalogdan çıkarıldılar ama `assets/characters/*.glb` dosyaları (16 MB) duruyor | Kimi (Blender/Mixamo) ya da Berkan "silinsin" der | Karar bekliyor |
+| A-01 | 🟠 | John Wick ve Laz Torretto kolları silah tutarken bozuluyor (Kimi KİMİ-2 doğruladı; yeniden rig Mixamo = Berkan'ın Adobe hesabı, yoksa silinsin). Katalogdan çıkarıldılar ama `assets/characters/*.glb` dosyaları (16 MB) duruyor | Kimi (Blender/Mixamo) ya da Berkan "silinsin" der | Karar bekliyor |
 | A-02 | 🟠 | 5 GLB karakterde deformasyon şüphesi (Siber, Heetah, Lara ve diğerleri) | Kimi: görsel kontrol | Açık |
 | A-03 | 🟠 | Botlar dizleri çok bükük, yengeç gibi yürüyor | Codex: animasyon ayarı, tarayıcıda görüntü kanıtıyla | Açık |
 | A-04 | 🟡 | Tab skor tablosu yalnız rekabetçide var; TDM, zombi ve çevrimiçi modlarda yok | Codex | Açık |
@@ -52,8 +52,11 @@ Denetim araçları: `tests/audit.cjs` (yeni, kalıcı), ayrıntılı çıktı `t
 | A-17 | 🟡 | Duvarda koşma animasyonu Titanfall 2 tarzına yaklaştırılacak | Codex (animasyon), A-03/A-14 sonrası | Açık |
 | A-18 | 🟠 | Silah tutuşu: eller silahı daha iyi kavrasın | Codex (A-03'te korunuyor; ayrı iyileştirme işi) | Açık |
 | A-19 | 🟠 | 5v5'te botlara ateş ederken ms (kare süresi) yükseliyor | Kimi RTX'te ölçer (A-12/A-13 ile) → Claude düzeltir | Açık |
-| A-20 | 🟡 | Naruto koşusu yalnız açık dünyada olacak | Claude | **Bitti** (1325): diğer modlarda Shift hızlı koşu, normal koşu animasyonu (Berkan kararı a) |
+| A-20 | 🟡 | Naruto koşusu yalnız açık dünyada olacak | Claude | **Bitti** (1325): diğer modlarda Shift hızlı koşu, normal koşu animasyonu (Berkan kararı a). 0050: dash atarken de Naruto pozu; mobilde joystick sonuna kadar ileri = Naruto koşusu |
 | Y-01 | — | Yeni özellik: Liyakat sistemi (yazılı sohbete göre mizahi itibar rengi/lakap; ceza yok). Ayrıntılı istek: Berkan'ın 2026-10-19 metni | Codex: plan → ONAY (sunucu + profil arayüzü) | Açık |
+| A-21 | 🟠 | Goblin (h20) GLB'sinde iskelet yok, oyunda küp görünüyor (Kimi KİMİ-2) | Berkan karar: mağazadan gizle ya da model düzelt | Açık |
+| Y-02 | — | Açık dünyaya şehir (lowpoly_city.glb) | Kimi KİMİ-4: optimize + çarpışma JSON (yalnız yeni dosyalar) → Claude bağlar | Onaylandı, Kimi'de |
+| Y-03 | — | Çevrimiçi açık dünya ortak ganimet: öldürenin, 15 sn sonra herkesin | Claude | **Bitti** (0050). Test: tests/ow-loot.cjs |
 
 ## 4. Kök sebep: süreç
 Bugün yapılan 20'den fazla yamanın neredeyse hepsi "tarayıcı/mouse kullanılmadı, görsel test yok" notuyla teslim edildi. Düşen test (`counter-strafe`) iki ajan tarafından görüldü, not düşüldü ve öylece bırakıldı. Ajanlar canlı oyun klasörüne doğrudan yazdığı için her yama bir öncekinin üstüne bindi. `IS_PLANI.md` kurallar yerine günlük kayıtlarıyla doldu ve "oyun kodunu yalnız Claude değiştirir" kuralı ile "Codex doğrudan uyguladı" kayıtları çelişiyor.

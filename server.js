@@ -456,6 +456,11 @@ function admMsg(c, m) {
 
 /* ---------- Açık dünya odası (ortak mob, PvE/PvP) ---------- */
 const OWP = new Map(), OW_MAX = 50; let nextOid = 1000; // herkes tek ortak açık dünyada
+/* Ortak ganimet (Berkan, 2026-10-19): mobu öldürenin eşyası 15 sn yalnız ona ait, sonra herkes alabilir; 90 sn sonra kaybolur.
+   Eşya listesini öldüren istemci üretir (önceki gibi); sunucu yalnız son 5 sn'de gerçekten öldürene, öldürme başına bir kez izin verir. */
+const OWLOOT = new Map(); let nextLid = 1;
+const LOOT_FREE_MS = 15000, LOOT_TTL_MS = 90000, LOOT_MAX = 300;
+const lootRow = (l, now) => [l.id, l.it, l.n, l.x, l.z, l.o, now - l.t];
 const owMobs = new Map(), owOwner = new Map();
 const owpub = c => ({ id: c.oid, name: c.name, ch: c.ch, w: c.w, x: r2(c.x), y: r2(c.y), z: r2(c.z), yaw: r2(c.yaw), pvp: c.pvp ? 1 : 0, lvl: c.lvl });
 function obcast(o, except) { const b = frame(1, Buffer.from(JSON.stringify(o))); for (const c of OWP.values()) if (c !== except && c.sock.writable) { try { c.sock.write(b); } catch (e) { } } }
@@ -474,7 +479,7 @@ function owMsg(c, m, now) {
     c.oid = nextOid++; c.ow = true; c.name = c.acc.name; c.ch = cleanId(m.ch) || 'c0'; c.w = cleanId(m.w) || 's0';
     c.pvp = !!m.pvp; c.lvl = num(m.lvl, 1, 60, 1); c.x = c.z = 0; c.y = 0; c.yaw = 0; c.pitch = 0; c.vx = c.vz = 0; c.fl = 1; c.sw = -1; c.cb = 0; c.hpf = 1; c.ot = 0; c.pvT = 0; c.hmT = 0;
     const mobs = []; for (const [i, w] of owMobs) if (w.dead || w.hp < w.max) mobs.push([i, Math.round(w.hp), w.max, w.dead ? 1 : 0]);
-    send(c, { t: 'owel', id: c.oid, players: [...OWP.values()].map(owpub), mobs });
+    send(c, { t: 'owel', id: c.oid, players: [...OWP.values()].map(owpub), mobs, loot: [...OWLOOT.values()].map(l => lootRow(l, now)) });
     OWP.set(c.oid, c); obcast({ t: 'ojn', p: owpub(c) }, c);
     console.log('+ ' + c.name + ' açık dünyaya girdi (' + OWP.size + ')');
     return true;
@@ -505,8 +510,31 @@ function owMsg(c, m, now) {
       w.hp = 0; w.dead = true; owOwner.delete(i);
       const part = []; for (const [o, t] of w.hit) if (now - t < 60000 && OWP.has(o)) part.push(o);
       obcast({ t: 'omk', i, by: c.oid, part });
+      c.lootQ = (c.lootQ || []).filter(q => now - q.t < 5000); c.lootQ.push({ i, t: now }); if (c.lootQ.length > 8) c.lootQ.shift(); // ganimet hakkı
       const rt = num(m.rt, 8, 130, 25) * 1000;
       setTimeout(() => { w.dead = false; w.hp = w.max; w.hit.clear(); owOwner.delete(i); obcast({ t: 'omr', i }); }, rt);
+      return true;
+    }
+    case 'olt': { // ganimet bırak: yalnız son 5 sn'de bu mobu öldüren, öldürme başına bir kez
+      const q = (c.lootQ || []).findIndex(e => e.i === (m.i | 0) && now - e.t < 5000);
+      if (q < 0) return true; c.lootQ.splice(q, 1);
+      const x = num(m.x, -470, 470), z = num(m.z, -470, 470);
+      if (Math.hypot(x - c.x, z - c.z) > 40) return true;
+      const rows = [];
+      for (const e of (Array.isArray(m.it) ? m.it.slice(0, 10) : [])) {
+        if (!Array.isArray(e) || OWLOOT.size >= LOOT_MAX) continue;
+        const it = String(e[0] || ''); if (!/^[a-z0-9]{1,16}$/.test(it)) continue;
+        const l = { id: nextLid++, it, n: Math.max(1, Math.min(5, e[1] | 0)), x: r2(x), z: r2(z), o: c.oid, t: now };
+        OWLOOT.set(l.id, l); rows.push(lootRow(l, now));
+      }
+      if (rows.length) obcast({ t: 'oln', l: rows });
+      return true;
+    }
+    case 'olp': { // ganimet al: sahibi her zaman, başkaları 15 sn sonra; yakında olmalı (sahibi otomatik savaşta 25 m'den toplar)
+      const l = OWLOOT.get(m.id | 0); if (!l) { send(c, { t: 'olx', id: m.id | 0 }); return true; }
+      if (l.o !== c.oid && now - l.t < LOOT_FREE_MS) { send(c, { t: 'olr', id: l.id, w: LOOT_FREE_MS - (now - l.t) }); return true; }
+      if (Math.hypot(l.x - c.x, l.z - c.z) > (l.o === c.oid ? 25 : 12)) return true;
+      OWLOOT.delete(l.id); send(c, { t: 'olg', id: l.id, it: l.it, n: l.n }); obcast({ t: 'olx', id: l.id }, c);
       return true;
     }
     case 'omp': { // mob konumları: sahip olan oyuncu yollar
@@ -586,6 +614,7 @@ function frMsg(c, m) {
   return true;
 }
 setInterval(() => { for (const c of users.values()) sendFl(c); }, 4000);
+setInterval(() => { const now = Date.now(); for (const l of OWLOOT.values()) if (now - l.t > LOOT_TTL_MS) { OWLOOT.delete(l.id); obcast({ t: 'olx', id: l.id }); } }, 5000); // süresi dolan ganimet
 /* hasar almış ama 20 sn boyunca vurulmamış moblar iyileşir */
 setInterval(() => { const now = Date.now(); for (const [i, w] of owMobs) { if (w.dead || w.hp >= w.max) continue; let last = 0; for (const t of w.hit.values()) last = Math.max(last, t); if (now - last > 20000) { w.hp = w.max; w.hit.clear(); obcast({ t: 'omh', i, hp: w.max, max: w.max }); } } }, 5000);
 

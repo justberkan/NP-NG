@@ -45,7 +45,7 @@ const meleeDmg=()=>mode==='ow'?swBase()*skMeleeMul()*clsDmg():cw.dmg;
 const _sv=V3(),_sv2=V3();
 
 function skReset(){
- SK.cd={};SK.cdMax={};SK.act={};SK.dT=0;SK.dCd=0;SK.chain=null;SK.shield=0;SK.shT=0;SK.q.length=0;SK.waves.length=0;SK.meteor=0;
+ SK.cd={};SK.cdMax={};SK.act={};SK.dT=0;SK.dCd=0;SK.chain=null;SK.shield=0;SK.shT=0;SK.q.length=0;SK.waves.length=0;SK.meteor=0;SK.slam=null;SK.slamCd=0;
  p.inv=0;skClearFx();skFill();
 }
 /* Seviyeyle açılan yetenekleri boş slotlara yerleştir */
@@ -225,7 +225,7 @@ function skDash(){
   SK.dX=mx*cs-mz*sn;SK.dZ=-mx*sn-mz*cs;
  }
  const l=Math.hypot(SK.dX,SK.dZ)||1;SK.dX/=l;SK.dZ/=l;
- SK.dT=.2;SK.dCd=DASH_CD;p.inv=Math.max(p.inv,.3);SK.dashT=OW.t;SK.dashX=p.x;SK.dashZ=p.z;
+ SK.dT=.2;SK.dCd=DASH_CD;p.inv=Math.max(p.inv,.3);p.nrT=.45; /* Berkan (2026-10-20): dash atarken Naruto koşusu pozu */SK.dashT=OW.t;SK.dashX=p.x;SK.dashZ=p.z;
  p.vx=SK.dX*30;p.vz=SK.dZ*30;
  if(!window.BGMODE){fxGhost(p.x,p.y,p.z,p.yaw,'#7fb8ff',.4);snd(500,.08,.05,'sawtooth');fxFlash('#ffffff',.12)}
  return true;
@@ -253,6 +253,28 @@ function skUpdate(dt){
   if(SK.meteor===1&&p.vy<0){SK.meteor=2;p.vy=-30}
   else if(SK.meteor===2&&p.g)skMeteorLand();
  }
+ if(SK.slamCd>0)SK.slamCd-=dt;
+ if(SK.slam){if(p.dead>0)SK.slam=null;else if(p.g)skSlamLand();else{p.vy=Math.min(p.vy,-24);SK.slam.t+=dt;if(SK.slam.t>4)SK.slam=null}}
+}
+
+/* ----- Yere vurma (Berkan, 2026-10-19): açık dünyada havadayken yakın dövüş saldırısı → yere çakılış.
+   Yükseklik arttıkça hasar ve alan büyür (1 m: ~3,5 m alan, ~1x; 10 m: ~7,5 m, ~2,4x; tavan 10 m alan, 3,2x). ----- */
+const SLAM_MINH=1;
+function skSlamTry(){
+ if(mode!=='ow'||!cw.melee||p.g||p.dead>0||SK.meteor||SK.slam||SK.slamCd>0||SK.chain)return false;
+ const h=p.y-owH(p.x,p.z);if(!(h>=SLAM_MINH))return false;
+ SK.slam={y0:p.y,t:0};p.vy=Math.min(p.vy,-24);p.vx*=.4;p.vz*=.4;p.glide=0;
+ if(!window.BGMODE)snd(420,.12,.05,'sawtooth');
+ return true;
+}
+function skSlamHit(H){return {r:Math.min(10,3+H*.45),mult:Math.min(3.2,.8+H*.16),stun:.3+Math.min(1,H*.06),kb:6+Math.min(10,H),power:8+Math.min(10,H)}}
+function skSlamLand(){
+ const H=Math.max(0,SK.slam.y0-p.y),k=skSlamHit(H);
+ SK.slam=null;SK.slamCd=1.2;p.inv=Math.max(p.inv,.25);
+ const n=skAoe(k.r,k.mult,{stun:k.stun,kb:k.kb,power:k.power});
+ SK.lastSlam={H:+H.toFixed(2),r:+k.r.toFixed(2),mult:+k.mult.toFixed(2),n};
+ if(!window.BGMODE){fxRing(p.x,p.y,p.z,k.r,'#d9a35a',.5,1);if(H>4){fxRing(p.x,p.y,p.z,k.r*.6,'#ffd070',.4,1);fxCracks(p.x,p.z)}fxBurst(p.x,p.y+.3,p.z,'#c9a06a',Math.round(12+H*2),4+H*.3,.7);snd(Math.max(45,90-H*4),.3,.1,'sawtooth');camKick(Math.min(.09,.03+H*.005))}
+ return n;
 }
 /* Kalkan hasarı emer; true dönerse hasar tamamen emildi */
 function skAbsorb(d){

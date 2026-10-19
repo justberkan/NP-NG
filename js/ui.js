@@ -222,7 +222,7 @@ function applyTouchLayout(){
   const e=$(id),d=TBDEF[id],s=tlay[id];
   e.style.right=e.style.bottom=e.style.left=e.style.top='';
   const sz=(s&&s.s)||d.s;e.style.width=e.style.height=sz+'px';
-  if(s&&s.x!=null){e.style.left=(s.x*innerWidth)+'px';e.style.top=(s.y*innerHeight)+'px'}
+  if(s&&s.x!=null){e.style.left=clamp(s.x*innerWidth,0,Math.max(0,innerWidth-sz))+'px';e.style.top=clamp(s.y*innerHeight,0,Math.max(0,innerHeight-sz))+'px'} /* ekran döner/küçülürse dışarıda kalmasın */
   else{if(d.l!=null)e.style.left=d.l+'px';else e.style.right=d.r+'px';if(d.b!=null)e.style.bottom=d.b+'px';else e.style.top=d.t+'px'}
  });
 }
@@ -240,7 +240,7 @@ function initTouchEdit(){
   },true);
   e.addEventListener('pointermove',ev=>{
    if(!window.tEditing||!drag||drag.id!==id)return;
-   const x=clamp(ev.clientX-drag.dx,0,innerWidth-20),y=clamp(ev.clientY-drag.dy,0,innerHeight-20);
+   const w=e.offsetWidth||64,x=clamp(ev.clientX-drag.dx,0,Math.max(0,innerWidth-w)),y=clamp(ev.clientY-drag.dy,0,Math.max(0,innerHeight-w)); /* düğmenin tamamı ekranda kalır */
    e.style.right=e.style.bottom='';e.style.left=x+'px';e.style.top=y+'px';
    tlay[id]=Object.assign(tlay[id]||{},{x:x/innerWidth,y:y/innerHeight});
   });
@@ -250,9 +250,19 @@ function initTouchEdit(){
   window.tEditing=true;document.body.classList.add('tedit');$('tc').style.display='block';$('joy').style.display=$('look').style.display='none';
   $('lb').classList.add('off');
   const m=document.createElement('div');m.id='tedit';
-  m.innerHTML=`<b>Tuş düzeni</b><p>Düğmeleri sürükleyerek yerleştir. Bir düğmeye dokunup boyutunu ayarla.</p><div class='row' style='justify-content:center'><button class='btn alt sm' id='te-m'>Küçült</button><button class='btn alt sm' id='te-p'>Büyüt</button><button class='btn alt sm' id='te-r'>Sıfırla</button><button class='btn sm' id='te-s'>Kaydet</button></div>`;
+  m.innerHTML=`<div class='teh' id='te-h'><span class='teg'>⠿</span><b>Tuş düzeni</b><button class='btn alt sm' id='te-c' title='Paneli küçült'>–</button></div><p>Düğmeyi sürükle, dokunup boyutla. Paneli ⠿ ile taşı.</p><div class='row' style='justify-content:center'><button class='btn alt sm' id='te-m'>Küçült</button><button class='btn alt sm' id='te-p'>Büyüt</button><button class='btn alt sm' id='te-r'>Sıfırla</button><button class='btn sm' id='te-s'>Kaydet</button></div>`;
   document.body.appendChild(m);
-  const sz=dl=>{if(!tsel)return;const e=$(tsel),cur=(tlay[tsel]&&tlay[tsel].s)||TBDEF[tsel].s,n=clamp(cur+dl,36,130);tlay[tsel]=Object.assign(tlay[tsel]||{},{s:n});e.style.width=e.style.height=n+'px'};
+  /* Berkan (2026-10-19): panel ortada çok büyüktü → küçük, üstte; ⠿ ile taşınır, – ile küçülür, ekran dışına çıkmaz */
+  const placeP=(x,y)=>{const r=m.getBoundingClientRect();x=clamp(x,0,Math.max(0,innerWidth-r.width));y=clamp(y,0,Math.max(0,innerHeight-r.height));m.style.transform='none';m.style.left=x+'px';m.style.top=y+'px';tlay._p={x:x/innerWidth,y:y/innerHeight}};
+  if(tlay._p)placeP(tlay._p.x*innerWidth,tlay._p.y*innerHeight);
+  let pd=null;const hd=$('te-h');
+  hd.addEventListener('pointerdown',ev=>{if(ev.target.id==='te-c')return;ev.preventDefault();ev.stopPropagation();const r=m.getBoundingClientRect();pd={dx:ev.clientX-r.left,dy:ev.clientY-r.top};hd.setPointerCapture(ev.pointerId)});
+  hd.addEventListener('pointermove',ev=>{if(pd)placeP(ev.clientX-pd.dx,ev.clientY-pd.dy)});
+  hd.addEventListener('pointerup',()=>{pd=null});
+  $('te-c').onclick=()=>{m.classList.toggle('min');$('te-c').textContent=m.classList.contains('min')?'+':'–';const r=m.getBoundingClientRect();placeP(r.left,r.top)};
+  const reP=()=>{if(!m.isConnected)return removeEventListener('resize',reP);const r=m.getBoundingClientRect();placeP(r.left,r.top)};addEventListener('resize',reP);
+  const sz=dl=>{if(!tsel)return;const e=$(tsel),cur=(tlay[tsel]&&tlay[tsel].s)||TBDEF[tsel].s,n=clamp(cur+dl,36,130);tlay[tsel]=Object.assign(tlay[tsel]||{},{s:n});e.style.width=e.style.height=n+'px';
+   const r=e.getBoundingClientRect();if(r.right>innerWidth||r.bottom>innerHeight){const x=clamp(r.left,0,innerWidth-n),y=clamp(r.top,0,innerHeight-n);e.style.right=e.style.bottom='';e.style.left=x+'px';e.style.top=y+'px';tlay[tsel].x=x/innerWidth;tlay[tsel].y=y/innerHeight}};
   $('te-m').onclick=()=>sz(-8);$('te-p').onclick=()=>sz(8);
   $('te-r').onclick=()=>{tlay={};applyTouchLayout()};
   $('te-s').onclick=()=>{

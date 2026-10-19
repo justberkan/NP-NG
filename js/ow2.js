@@ -43,18 +43,30 @@ function pkFeed(id,n,extra){
  while(f.children.length>6)f.firstChild.remove();
 }
 function owLootGive(id,n){invAdd(id,n);pkFeed(id,n)}
-function owLootSpawn(id,n,x,z){
- if(window.BGMODE||!OW.on){owLootGive(id,n);return}
+function owLootSpawn(id,n,x,z,net){
+ if(!net&&(window.BGMODE||!OW.on)){owLootGive(id,n);return}
  if(!lootG){lootG=new THREE.BoxGeometry(.3,.3,.3);beamG=new THREE.BoxGeometry(.06,2.4,.06)}
  const r=ITM[id].r,g=new THREE.Group();
  if(id==='med'||id==='ammo'){const type=id==='med'?'health':'ammo',item=wcItemModel(type);g.add(item);wcLoadItemModels().then(()=>{if(!g.parent)return;g.remove(item);g.add(wcItemModel(type))})}else g.add(new THREE.Mesh(lootG,lootMat(r)));
  if(r>=3){const b=new THREE.Mesh(beamG,new THREE.MeshBasicMaterial({color:LCOL[r],transparent:true,opacity:.35,blending:THREE.AdditiveBlending,depthWrite:false}));b.position.y=1.2;g.add(b)}
  const a=Math.random()*6.28,d=.8+Math.random()*1.4;
  const o={id,n,g,x:x+Math.cos(a)*d,z:z+Math.sin(a)*d,age:0,ph:Math.random()*6,vy:3.5};
+ if(net){o.lid=net.lid;o.owner=net.owner;o.freeAt=net.freeAt;o.req=0}
  o.y=owH(x,z)+1;g.position.set(x,o.y,z);o.sx=x;o.sz=z;
  OW.root.add(g);LOOT.push(o);
- if(LOOT.length>40){const q=LOOT.shift();OW.root.remove(q.g);owLootGive(q.id,q.n)}
+ if(LOOT.length>40){const q=LOOT.shift();OW.root.remove(q.g);if(!q.lid)owLootGive(q.id,q.n)} /* çevrimiçi ganimet sunucuda kalır, yalnız görüntü kalkar */
 }
+/* ----- Çevrimiçi ortak ganimet (Berkan, 2026-10-19): eşya öldürene ait; 15 sn alınmazsa herkes alabilir. Sunucu dağıtır ve onaylar. ----- */
+const LOOT_FREE=15000;
+const owLootCan=o=>!o.lid||o.owner===OWN.id||performance.now()>=o.freeAt;
+function owLootNet(e){ /* e=[lid,it,n,x,z,sahip,yaşMs] */
+ const [lid,id,n,x,z,owner,age]=e;
+ if(!ITM[id]||LOOT.some(o=>o.lid===lid))return;
+ if(window.BGMODE||!OW.on){if(owner===OWN.id)mpSend({t:'olp',id:lid});return} /* arka planda (AFK) kendi ganimetini doğrudan iste */
+ owLootSpawn(id,n,x,z,{lid,owner,freeAt:performance.now()+Math.max(0,LOOT_FREE-(age||0))});
+}
+function owLootDrop(lid){const i=LOOT.findIndex(o=>o.lid===lid);if(i>=0){if(OW.root)OW.root.remove(LOOT[i].g);LOOT.splice(i,1)}}
+function owLootNetClear(){for(let i=LOOT.length-1;i>=0;i--)if(LOOT[i].lid){if(OW.root)OW.root.remove(LOOT[i].g);LOOT.splice(i,1)}}
 function owLootUpd(dt){
  for(let i=LOOT.length-1;i>=0;i--){
   const o=LOOT[i];o.age+=dt;
@@ -65,15 +77,22 @@ function owLootUpd(dt){
   o.vy-=14*dt;o.y+=o.vy*dt;if(o.y<gy){o.y=gy;o.vy=0}
   let px=o.sx,pz=o.sz;
   const dx=p.x-px,dz=p.z-pz,d=Math.hypot(dx,dz);
-  if(o.age>.5&&d<7){const k=Math.min(1,(10-d)*1.3*dt);o.x+=dx*k;o.z+=dz*k;o.sx+=dx*k;o.sz+=dz*k}
+  const can=owLootCan(o);
+  if(o.age>.5&&d<7&&can){const k=Math.min(1,(10-d)*1.3*dt);o.x+=dx*k;o.z+=dz*k;o.sx+=dx*k;o.sz+=dz*k}
+  if(o.lid)o.g.scale.setScalar(can?1:.7); /* başkasının ganimeti: 15 sn boyunca küçük ve çekilmez */
   o.g.position.set(o.sx,o.y+Math.sin(o.age*3+o.ph)*.08*(o.vy===0?1:0),o.sz);
   o.g.children[0].rotation.y+=dt*2.4;o.g.children[0].rotation.x=.4;
+  if(o.lid){ /* çevrimiçi: sunucu onaylayınca (olg) verilir; sahibi otomatik savaşta 20 m'den toplar */
+   if(o.req>0)o.req-=dt;
+   else if(can&&p.dead<=0&&o.age>.45&&(d<1.7||(AUTO.on&&o.owner===OWN.id&&d<20&&o.age>1.5))){o.req=1.5;mpSend({t:'olp',id:o.lid})}
+   continue;
+  }
   if((o.age>.45&&d<1.7&&p.dead<=0)||o.age>16){
    OW.root.remove(o.g);LOOT.splice(i,1);owLootGive(o.id,o.n);
   }
  }
 }
-function owLootFlush(){for(const o of LOOT){if(OW.root)OW.root.remove(o.g);invAdd(o.id,o.n)}LOOT.length=0}
+function owLootFlush(){for(const o of LOOT){if(OW.root)OW.root.remove(o.g);if(!o.lid)invAdd(o.id,o.n)}LOOT.length=0} /* çevrimiçi ganimet sunucuda kalır */
 
 function owDrops(m){
  const t=BDROP[m.camp.bi],L=m.L,out=[],R=Math.random;
@@ -86,7 +105,8 @@ function owDrops(m){
  if(m.boss&&R()<.18)out.push(['gem',1]);
  if(m.camp.bi===0&&R()<.2)out.push(['ammo',1]);
  const gy=owH(m.x,m.z);
- for(const o of out)owLootSpawn(o[0],o[1],m.x,m.z);
+ if(typeof OWN!=='undefined'&&OWN.on){if(out.length)mpSend({t:'olt',i:OW.mobs.indexOf(m),x:+m.x.toFixed(2),z:+m.z.toFixed(2),it:out})} /* çevrimiçi: sunucu herkese gösterir, 15 sn öldürene ait */
+ else for(const o of out)owLootSpawn(o[0],o[1],m.x,m.z);
  /* nadiren yeni kılıç düşer */
  if(R()<(m.boss?.12:.006)){
   const maxR=1+Math.floor(L/8);

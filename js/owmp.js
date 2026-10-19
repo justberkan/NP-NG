@@ -16,6 +16,7 @@ function ownLeave(){
 function ownClear(){
  for(const e of OWN.ents.values()){freeActor(e.g);if(e.tag)e.tag.remove()}
  OWN.ents.clear();
+ if(typeof owLootNetClear==='function')owLootNetClear(); /* çevrimiçi ganimet görüntüleri */
  for(const m of OW.mobs){m.net=false;m.nx=null}
 }
 function ownTagLayer(){
@@ -75,7 +76,7 @@ function ownTick(dt){
  if(OWN.sendT<=0){
   OWN.sendT=.083;
   const r=v=>Math.round(v*100)/100;
-  mpSend({t:'ost',x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|(p.spr?8:0)|(p.glide?16:0)|(p.wjT>0?32:0)|(p.wr>0?64:p.wr<0?128:0)|(p.climb?256:0),w:wk,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),hp:r(Math.max(0,p.hp)/owMax()),lvl:SV.ow.lvl});
+  mpSend({t:'ost',x:r(p.x),y:r(p.y),z:r(p.z),yaw:r(p.yaw),pitch:r(p.pitch),vx:r(p.vx),vz:r(p.vz),f:(p.g?1:0)|(p.cr&&p.g?2:0)|(p.slide>0?4:0)|((p.spr||p.nrT>0)?8:0)|(p.glide?16:0)|(p.wjT>0?32:0)|(p.wr>0?64:p.wr<0?128:0)|(p.climb?256:0),w:wk,sw:swU>=0?r(swU):-1,cb:swCombo|((SET.grip|0)<<2),hp:r(Math.max(0,p.hp)/owMax()),lvl:SV.ow.lvl});
  }
  /* mob konumları: kendi yönettiğimiz saldırgan mobları yayınla (10 Hz) */
  OWN.mpT-=dt;
@@ -132,6 +133,7 @@ function ownMsg(m){
   OWN.id=m.id;OWN.on=true;OWN.joining=false;
   for(const q of m.players)ownAdd(q);
   for(const x of m.mobs){const mb=OW.mobs[x[0]];if(!mb)continue;mb.max=x[2];mb.hp=x[1];if(x[3])ownMobDead(mb)}
+  if(m.loot)for(const e of m.loot)owLootNet(e);
   ownUI();if(!window.BGMODE)owToast('Çevrimiçi açık dünya · '+(m.players.length+1)+' oyuncu');
   return true;
  case'ojn':ownAdd(m.p);ownUI();if(!window.BGMODE)owToast(m.p.name+' açık dünyaya katıldı');return true;
@@ -153,11 +155,15 @@ function ownMsg(m){
   mb.max=m.max;mb.hp=Math.max(1,m.hp);
   if(mb.state!=='aggro'&&!mb.local){mb.net=true;owAggroNet(mb)}
   return true}
+ case'oln':for(const e of m.l||[])owLootNet(e);return true;
+ case'olx':owLootDrop(m.id);return true;
+ case'olg':owLootDrop(m.id);if(ITM[m.it]){owLootGive(m.it,m.n);save()}return true;
+ case'olr':{const o=LOOT.find(q=>q.lid===m.id);if(o){o.freeAt=performance.now()+(m.w|0);o.req=0}if(!window.BGMODE&&!(OWN.lrT>performance.now())){OWN.lrT=performance.now()+3000;owToast('Bu eşya '+Math.ceil((m.w|0)/1000)+' sn daha öldürene ait')}return true}
  case'omk':{
   const mb=OW.mobs[m.i];if(!mb||mb.state==='dead')return true;
   const mine=m.by===OWN.id||m.part.indexOf(OWN.id)>=0;
   mb.net=false;
-  owKill(mb,{coop:mine&&m.part.length>=2},!mine);
+  owKill(mb,{coop:mine&&m.part.length>=2,killer:m.by===OWN.id},!mine);
   return true}
  case'omr':{
   const mb=OW.mobs[m.i];if(!mb)return true;

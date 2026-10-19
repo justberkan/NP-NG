@@ -1,4 +1,11 @@
 'use strict';
+/* iOS Safari user-scalable=no'yu yok sayar: iki parmakla ve çift dokunmayla sayfa yakınlaşıp oyun bozuluyordu (Berkan, 2026-10-19).
+   Oyun tuşları pointerdown kullandığı için bu engeller oyunu etkilemez; yazı kutularında çift dokunma serbest. */
+if(typeof touch!=='undefined'&&touch){
+ for(const ev of['gesturestart','gesturechange','gestureend'])document.addEventListener(ev,e=>e.preventDefault(),{passive:false});
+ let _lastTap=0;
+ document.addEventListener('touchend',e=>{const n=Date.now();if(n-_lastTap<320&&!(e.target&&e.target.closest&&e.target.closest('input,textarea,select')))e.preventDefault();_lastTap=n},{passive:false});
+}
 /* ===== Kontroller: tuş eşleme sistemi (Kimi) =====
    Her eylem için ana tuş + yedek tuş; fare tuşları atanabilir; çakışma uyarısı;
    varsayılana dönüş; localStorage'a kalıcı kayıt. Oyun davranışını değiştirmez,

@@ -304,7 +304,7 @@ function owKill(m,info,norew){
  let extra='';
  if(Math.random()<(m.boss?.9:.035)){SV.ow.med++;extra=' +1 ilk yardım'}
  owGain(xp);
- if(typeof owDrops==='function')owDrops(m);
+ if(typeof owDrops==='function'&&!(info&&info.killer===false))owDrops(m); /* çevrimiçi: eşyalar yalnız öldürenden düşer */
  if(!window.BGMODE){hitFlash('kill');owToast('Lv '+m.L+' '+m.name+' · +'+tl+' TL · +'+xp+' XP'+extra)}
  upd();
  OW.saveT+=1;if(OW.saveT>=6){OW.saveT=0;save()}

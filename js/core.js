@@ -140,8 +140,8 @@ function ensureSV(){
  if(SV.own){SV.own=SV.own.map(i=>/^k[1-4]$/.test(i)?'f'+i[1]:i)}
  if(/^k[1-4]$/.test(SV.eq.c||'')){SV.eq.f='f'+SV.eq.c[1];SV.eq.c='c0'}
  {const _rm=['m1','m2','m3','m4','m5'];if(_rm.includes(SV.eq.c))SV.eq.c='c6';if(Array.isArray(SV.own))SV.own=SV.own.filter(x=>!_rm.includes(x))}
- // Kullanici talebi: Ada Wong (h8) ve Samus (h23) kaldirildi; eski kusanimi askere tasi.
- if(/^(h8|h23)(x[1-4])?$/.test(SV.eq.c||''))SV.eq.c='c0';
+ // Kullanici talebi: Ada Wong (h8), Samus (h23) ve Lara (h22, 2026-10-20) kaldirildi; eski kusanimi askere tasi.
+ if(/^(h8|h22|h23)(x[1-4])?$/.test(SV.eq.c||''))SV.eq.c='c0';
  SV.sk=SV.sk||{};
  SV.mod=SV.mod&&typeof SV.mod==='object'?SV.mod:{};
  SV.ow=Object.assign(OWDEF(),SV.ow||{});

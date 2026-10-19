@@ -72,7 +72,7 @@ function wcItemAssets(){
  WCITEM.cache=assets;return assets;
 }
 function wcItemModel(type){
- const a=wcItemAssets(),kind=a[type],root=new THREE.Group(),spin=new THREE.Group(),body=new THREE.Mesh(kind.geo,a.mat);spin.add(WCITEM.models[type]?WCITEM.models[type].clone(true):body);spin.position.y=.25;root.add(spin);
+ const a=wcItemAssets(),kind=a[type],root=new THREE.Group(),spin=new THREE.Group(),body=new THREE.Mesh(kind.geo,a.mat);spin.add(WCITEM.models&&WCITEM.models[type]?WCITEM.models[type].clone(true):body); /* modeller henüz yüklenmediyse kutu (açık dünyada ilk can/mermi düşüşü çöküyordu, 2026-10-19) */spin.position.y=.25;root.add(spin);
  const ring=new THREE.Mesh(a.ringGeo,kind.ringMat);ring.rotation.x=-Math.PI/2;ring.position.y=.012;root.add(ring);
  const label=new THREE.Sprite(kind.labelMat);label.position.y=.96;label.scale.set(.78,.195,1);root.add(label);root.userData.spin=spin;root.name='Koridor '+type+' pickup';return root;
 }

@@ -177,7 +177,7 @@ function stepPlayer(dt){
  if(gr&&(sPress||mz<-.5))relG();
  sPress=false;
  /* hızlanma (koş): Shift basılı ya da İlahî Hız aktifken ileri gidiyorsan */
- const shiftSpr=kDown('sprint'),godSpr=mode==='ow'&&SK.act.godspeed>0;
+ const shiftSpr=kDown('sprint')||(touch&&mode==='ow'&&-joy.y>.85&&Math.abs(joy.x)<.5),godSpr=mode==='ow'&&SK.act.godspeed>0; /* mobil: açık dünyada joystick sonuna kadar ileri = Naruto koşusu */
  p.spr=!dead&&!auto&&!p.cr&&p.slide<=0&&mz>.3&&(shiftSpr||godSpr)&&!firing&&!ads&&!gr&&swU<0&&p.g?1:(p.spr&&!p.g&&!dead&&mz>.3&&(shiftSpr||godSpr)&&!firing?1:0);
  const sprMul=p.spr&&shiftSpr?1.4:1;
  jBuf-=dt;if(jPress)jBuf=.14; // zıplama tamponu (bhop)
@@ -265,10 +265,10 @@ p.wr=0;if(!wall||p.g)p.wrT=0;
   else if(p.cn){p.vx=-p.cn.x*3.4;p.vz=-p.cn.z*3.4;p.vy=Math.max(p.vy,1.1)}
  }
  /* süzülme: havada Space basılı tutulursa paraşüt gibi yavaşça süzül */
- p.at=p.g?0:(p.at||0)+dt;p.wjT=Math.max(0,(p.wjT||0)-dt);
+ p.at=p.g?0:(p.at||0)+dt;p.wjT=Math.max(0,(p.wjT||0)-dt);if(p.nrT>0)p.nrT-=dt;
  /* A-16 (2026-10-19): başlama eşiği (vy<-2.2) her alt adımda yeniden sorulunca süzülme hızı -1,9'a oturduğu an kapanıp açılıyordu
     (144+ FPS'te 3 sn'de 33 kez): eller/silah pozu ve paraşüt titriyor, düşüş hızı testere gibi sıçrıyordu. Başladıktan sonra Space bırakılana dek sürer. */
- const glideOk=!dead&&!p.g&&!gr&&jHeld&&!p.climb&&!(SK.chain)&&!(SK.meteor);
+ const glideOk=!dead&&!p.g&&!gr&&jHeld&&!p.climb&&!(SK.chain)&&!(SK.meteor)&&!(SK.slam);
  p.glide=glideOk&&(p.glide||(p.at>.9&&p.vy<-2.2))?1:0;
  if(p.glide){
   p.vy+=22*dt;if(p.vy<-1.9)p.vy+=(-1.9-p.vy)*Math.min(1,6*dt);
@@ -319,7 +319,7 @@ function updPlayerView(dt){
  const play=state==='play'||state==='pause'||state==='end';
  const alive=p.dead<=0;
  const rq=reload>0?1-reload/cw.rel:-1,swv=swU>=0?swU:null,sw=swT>=.25?1:swT/.25;
- const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr,glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0,wallrun:p.wr||0,climb:!!p.climb};
+ const ctx={t:clock,ads:adsT,kick:kickR,kickR,kickL,swing:swv,combo:swCombo,grip:SET.grip,rq,sw,bob:clamp(spd/7,0,1)*(p.g?1:0),flash:flashR,flashL,lr:0,sprint:!!p.spr||(mode==='ow'&&p.nrT>0),glide:!!p.glide,lat:p.g?clamp((p.vx*Math.cos(p.yaw)-p.vz*Math.sin(p.yaw))/(7*SPD),-1,1):0,wj:p.wjT>0?1:0,wallrun:p.wr||0,climb:!!p.climb};
 
  if(p.dead>0&&pRagdoll&&!firstPersonOnly){
   const t=pRagdoll.pts.pel.p;

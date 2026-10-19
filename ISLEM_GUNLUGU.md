@@ -316,3 +316,18 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Değişti: assets/casino/dede/index.html, guncelle.ps1, GUNCELLE.bat, index.html (build 1415, 60 ?v), tests/casino-dede.cjs (Türkçe ses kontrolü; 11 kontrol).
 - Test: npm test baştan sona PASS (çıkış 0, 110 PASS, 0 FAIL). Tam çıktı test-results/npm-test-1415.txt.
 - Yedek: _yedek/claude-sunucu-1410/ (aynı yayın)
+
+### 2026-10-20 01:00 İstanbul · Claude · build 202610200050 mobil-ganimet-v1
+- Not: 19 Ekim 14:40'ta hazırlanan "1450" paketi yayına girmeden Claude'un çalışma alanı sıfırlandı; değişiklikler aynı içerikle yeniden uygulandı ve bu sürüme katıldı.
+- Mobil (iOS): iki parmak/çift dokunma yakınlaştırması ve yatayda yazı büyütme kapatıldı (viewport maximum-scale=1, gesture*/çift dokunma engeli; yazı kutuları serbest). Açık dünya yetenek tuşları (k1–k5) diğer modlarda boş daire olarak görünüyordu → yalnız açık dünyada.
+- Mobil tuş düzeni paneli: ortada büyük kutu yerine küçük ve üstte; ⠿ ile taşınır, – ile küçülür, ekran dışına çıkmaz; düğmeler sürüklenirken/büyütülürken ve ekran dönünce ekran içinde kalır.
+- Açık dünya: havadayken yakın dövüş saldırısı → yere vurma; yükseklik arttıkça alan (3,5→10 m) ve hasar (≈1x→3,2x) büyür, yerdeyken normal saldırı. Kılıç vuruşu büyük mob/boss gövdesini hesaba katıyor (ıskalama). Otomatik savaş yakın dövüşte menzilin ~yarısına + gövde yarıçapına kadar sokuluyor.
+- Naruto koşusu (Berkan): açık dünyada Shift ile vardı; artık dash atarken de (0,45 sn, ağ bayrağıyla diğer oyuncular da görür) ve mobilde joystick sonuna kadar ileri itilince.
+- Çevrimiçi açık dünya ortak ganimet (Berkan): eşyalar yalnız öldürenden düşer, sunucu herkese gösterir; 15 sn yalnız öldüren alır, sonra herkes; 90 sn sonra kaybolur. Sunucu: öldürme başına bir kez, son 5 sn'de gerçekten öldürene izin; alma uzaklık kontrollü; aynı eşya iki kez alınamaz. Katılımcılar TL/XP almaya devam eder, eşya almaz.
+- Lara (h22) kaldırıldı (Berkan isteği, Kimi planında); kuşananlar askere döner.
+- Hata: açık dünyada ilk can/mermi kutusu düşüşü, modeller yüklenmeden önce çöküyordu (wave-corridor-visuals.js) → kutu gösterilir. Açık dünyadan çıkınca sınıf seçim penceresi lobide açık kalıyordu → kapanır.
+- Kimi KİMİ-2 raporu main'e alındı (docs/KARAKTER_KONTROLU.md + boy ölçümleri; 170 görüntü yalnız dalında). Bulgu: Goblin (h20) iskeletsiz → küp (A-21, karar Berkan'da).
+- Eklendi: tests/mobile.cjs, tests/ow-slam-auto.cjs, tests/ow-loot.cjs. Değişti: server.js, js/{auto,combat,controls,core,owmp,owui,ow2,player,skills,ui,wave-corridor-visuals,weapons,world}.js, css/style.css, index.html (build 0050, 60 ?v), server-hit-collision.bin (yalnız core/weapons kaynak özeti; geometri aynı doğrulandı), tests/run.cjs, tests/casino-dede.cjs, package.json, docs/HATA_DENETIMI_20261017.md.
+- Test: npm test baştan sona PASS (çıkış 0, 142 PASS, 0 FAIL): sunucu vuruş, HTTP, hareket, smoke, atmosfer, audit 7 mod + lobi, offline-save, DEDE RTP + casino-dede, glide-sprint, mobile 12/12, ow-slam-auto 8/8, ow-loot 13/13.
+- NOT: server.js değişti → yan bilgisayarda GUNCELLE.bat (sunucu yeniden başlar, link değişir); oyuncular Ctrl+F5.
+- Yedek: _yedek/claude-0050/

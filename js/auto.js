@@ -186,11 +186,12 @@ function autoDrive(dt){
  /* savaş */
  const dx=t.x-p.x,dz=t.z-p.z,d=Math.hypot(dx,dz)||.01,eye=p.y+p.eye,ty=owH(t.x,t.z)+1.1*t.sc;
  autoAim(dt,dx,dz,ty-eye,d);
- const eng=w.melee?w.range-.8:(AUTO_ENG[wk]||24);
+ const rad=.45*(t.sc||1); /* Berkan (2026-10-19): otomatikte uzak durup ıskalıyordu → menzilin ~yarısına + gövde yarıçapına kadar sokul */
+ const eng=w.melee?Math.max(1.3,w.range*.5)+rad:(AUTO_ENG[wk]||24);
  /* menzilli mob (def.r) varsa geri çekilir: dash ile boşluk kapat, kılıç menziline gir */
  if(w.melee&&t.def&&t.def.r&&SK.dCd<=0&&d>eng+.8){aiIn.wx=dx/d;aiIn.wz=dz/d;skDash()}
  let mx=0,mz=0;
- if(w.melee){if(d>eng){mx=dx/d;mz=dz/d}else if(d<1.2){mx=-dx/d;mz=-dz/d}}
+ if(w.melee){if(d>eng){mx=dx/d;mz=dz/d}else if(d<.9+rad){mx=-dx/d;mz=-dz/d}}
  else if(ml&&mld<8&&mld<d+4){
   const ax=p.x-ml.x,az=p.z-ml.z,al=Math.hypot(ax,az)||1;
   mx=ax/al-az/al*AUTO.side*.45;mz=az/al+ax/al*AUTO.side*.45;
@@ -200,7 +201,7 @@ function autoDrive(dt){
  else{mx=-dz/d*AUTO.side*.7;mz=dx/d*AUTO.side*.7}
  autoMove(mx,mz,1);autoStuck(dt,mx!==0||mz!==0);
  /* otomatik modda kılıç biraz erken savrulur; vuruş tespiti zaten +.4 toleranslı, ıskalamaz */
- const range=w.melee?w.range+.3:Math.min(eng+8,60);
+ const range=w.melee?w.range+rad+.3:Math.min(eng+8,60);
  if(d<=range&&Math.abs(AUTO.yawE)<Math.max(.035,Math.atan2(.4,d))&&Math.abs(AUTO.pitE)<.12&&(w.melee||owLOS(p.x,eye,p.z,t.x,ty,t.z)))aiIn.fire=true;
 }
 

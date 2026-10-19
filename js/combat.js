@@ -137,7 +137,7 @@ function recoilTick(dt){
 }
 function shoot(){
  if(p.dead>0||reload>0||fireCd>0||swT<.25)return;
- if(cw.melee){if(swU>=0)return;swCombo=comboT>0?(swCombo+1)%4:0;comboT=cw.rate*1.9+.5;swU=0;swHit=false;fireCd=cw.rate;shots++;snd(220,.08);if(mode==='mp')mpSwing(swCombo|((SET.grip|0)<<2));else if(mode==='ow'&&OWN.on)ownSwing(swCombo|((SET.grip|0)<<2));upd();return}
+ if(cw.melee){if(swU>=0)return;if(typeof skSlamTry==='function')skSlamTry();swCombo=comboT>0?(swCombo+1)%4:0;comboT=cw.rate*1.9+.5;swU=0;swHit=false;fireCd=cw.rate;shots++;snd(220,.08);if(mode==='mp')mpSwing(swCombo|((SET.grip|0)<<2));else if(mode==='ow'&&OWN.on)ownSwing(swCombo|((SET.grip|0)<<2));upd();return}
  if(ammo<=0){startReload();return}
  ammo--;shots++;fireCd=cw.rate;
  let side=1;
@@ -181,14 +181,14 @@ function applyMelee(){
  const md=meleeDmg();
  if(mode==='ow'){slashFx(swCombo,SK.act.inferno>0?'#ff7a2a':null);camKick((swCombo%2?-1:1)*.025);if(!AUTO.on&&p.g){p.vx+=-Math.sin(p.yaw)*3.5;p.vz+=-Math.cos(p.yaw)*3.5}}
  const cs=Math.cos(cw.ang);let any=false;
- const test=(x,y,z,fn)=>{
+ const test=(x,y,z,fn,rad=0)=>{
   _to.set(x-cam.position.x,y-cam.position.y,z-cam.position.z);
-  const d=_to.length();if(d>cw.range+.4||d<.01)return;
+  const d=_to.length();if(d-rad>cw.range+.4||d<.01)return;
   _to.divideScalar(d);
   if(_to.dot(_dir)<cs){
    /* çok yakın hedef: dikey fark yüzünden ıskalamasın, yatay açıya bak */
    const hx=x-cam.position.x,hz=z-cam.position.z,hl=Math.hypot(hx,hz),dl=Math.hypot(_dir.x,_dir.z);
-   if(!(hl<2.2&&dl>.05&&(hx*_dir.x+hz*_dir.z)/(hl*dl||1)>=cs&&Math.abs(y-cam.position.y)<3.2))return;
+   if(!(hl<2.2+rad&&dl>.05&&(hx*_dir.x+hz*_dir.z)/(hl*dl||1)>=cs&&Math.abs(y-cam.position.y)<3.2+rad))return;
   }
   if(meleeBlocked(cam.position,_to,d))return;
   any=true;fn(V3(x,y,z));
@@ -196,7 +196,8 @@ function applyMelee(){
  for(const e of E){
   if(e.hp<=0||e.team!==2)continue;
   const q=e.g.position;
-  test(q.x,q.y+1.2,q.z,pt=>damageEnemy(e,md,{player:true,pt,dir:_dir.clone(),head:false,melee:true,power:cw.dmg>100?12:7}));
+  const owm=mode==='ow'&&e.sc>0,rad=owm?.45*e.sc:0; /* açık dünya mobu: büyük mob/boss gövdesi geniş, göğüs yüksekliği ölçekli */
+  test(q.x,q.y+(owm?1.1*e.sc:1.2),q.z,pt=>damageEnemy(e,md,{player:true,pt,dir:_dir.clone(),head:false,melee:true,power:cw.dmg>100?12:7}),rad);
  }
  if(mode==='ow'&&OWN.on&&OWN.pvp)for(const q of OWN.ents.values()){
   if(q.hp<=0||!ownCanPvp(q))continue;

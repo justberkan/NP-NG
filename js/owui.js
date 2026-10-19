@@ -5,7 +5,7 @@ function owUI(on){
  const h=$('owhud');if(!h)return;
  h.classList.toggle('off',!on);
  document.body.classList.toggle('mow',on);
- if(!on){if(typeof owNpcOff==='function')owNpcOff();$('ab').classList.add('off');$('bigmap').classList.add('off');OW.map=false;OWL.forEach(l=>{l.e.style.display='none';l.v=0})}
+ if(!on){if(typeof owNpcOff==='function')owNpcOff();{const c=document.getElementById('clsm');if(c)c.classList.remove('open')} /* açık dünyadan çıkınca sınıf seçim penceresi lobide açık kalmasın */$('ab').classList.add('off');$('bigmap').classList.add('off');OW.map=false;OWL.forEach(l=>{l.e.style.display='none';l.v=0})}
  else if(!OWL.length)owLabInit();
  const sm=$('ab').querySelector('small');if(sm)sm.textContent=touch?'kapatmak için OTO düğmesine bas ya da joystick kullan':'kapatmak için F (ya da bir hareket tuşu)';
  hudS='';

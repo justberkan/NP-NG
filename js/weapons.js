@@ -117,7 +117,6 @@ const CHARS=[
  {id:'h19',ch:1,glb:'bw',n:'Black Widow',r:'epic',p:1000,j:0x1a1c22,j2:0x14161b,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h20',ch:1,glb:'goblin',n:'Goblin',r:'rare',p:600,j:0x3a6a2a,j2:0x315c24,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
  {id:'h21',ch:1,glb:'kb',n:'KB',r:'epic',p:900,j:0x6a5a2a,j2:0x5a4c22,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
- {id:'h22',ch:1,glb:'lara',n:'Lara',r:'epic',p:1000,j:0x4a7a8a,j2:0x3e6876,pa:0x2a2d33,v:0x33363d,v2:0x26292e,h:0x2a2d33,gl:0x15171a,sk:0xd9b48c,bo:0x15171a,nohat:1},
 ];
 /* Formalar: karakterden bağımsız kuşanılan aksesuar (glbrig.js: KITS). Her karaktere giyilir, çıkarılabilir. */
 const FORMS=[

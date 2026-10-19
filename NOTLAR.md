@@ -281,3 +281,4 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 
 - 2026-10-19 14:10 · Claude · sunucu · Yan bilgisayarda "sunucu başlamadı" hatası düzeltildi; hesaplar artık zorla kapatmada kaybolmuyor; DURDUR.bat yalnız oyun sunucusunu kapatıyor; GUNCELLE.bat ile yan bilgisayar tek tıkla en son sürüme geçiyor.
 - 2026-10-19 14:20 · Claude · 202610191415 dede-tts-tr · Dede, tarayıcıda Türkçe ses yoksa İngilizce aksanla okumuyor (balon kalır); Türkçe mp3'ler Kimi'den gelecek. GUNCELLE.bat sunucu dosyası değişmediyse yeniden başlatmıyor.
+- 2026-10-20 01:00 · Claude · 202610200050 mobil-ganimet-v1 · iOS yakınlaştırma kapandı, mobil tuş düzeni paneli küçük/taşınır; açık dünyada havadan yere vurma, otomatik savaş yaklaşır, Naruto koşusu dash'te ve mobilde; çevrimiçi ganimet 15 sn öldürenin; Lara kaldırıldı. Sunucu değişti → GUNCELLE.bat.

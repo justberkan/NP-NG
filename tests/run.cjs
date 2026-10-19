@@ -17,7 +17,7 @@ const cwd=path.resolve(__dirname,'..');
       },25);
       server.once('error',e=>{clearInterval(poll);reject(e)});
     });
-    const commands=[['tests/server-hit.cjs'],['--test','tests/http.cjs'],['tests/movement.cjs'],['tests/smoke.cjs'],['tests/lobby-atmosphere.cjs'],['tests/audit.cjs'],['tests/offline-save.cjs'],['tests/casino-rtp.cjs'],['tests/casino-dede.cjs'],['tests/glide-sprint.cjs']]; /* audit.cjs: tüm modlar aç/kapa + sızıntı + lobi tıklama (2026-10-17) · offline-save.cjs: çevrimdışı kayıt kuralı (2026-10-19) · casino-rtp/casino-dede: DEDE RTP kapısı + oyun içi para (2026-10-19) */
+    const commands=[['tests/server-hit.cjs'],['--test','tests/http.cjs'],['tests/movement.cjs'],['tests/smoke.cjs'],['tests/lobby-atmosphere.cjs'],['tests/audit.cjs'],['tests/offline-save.cjs'],['tests/casino-rtp.cjs'],['tests/casino-dede.cjs'],['tests/glide-sprint.cjs'],['tests/mobile.cjs'],['tests/ow-slam-auto.cjs'],['tests/ow-loot.cjs']]; /* audit.cjs: tüm modlar aç/kapa + sızıntı + lobi tıklama (2026-10-17) · offline-save.cjs: çevrimdışı kayıt kuralı (2026-10-19) · casino-rtp/casino-dede: DEDE RTP kapısı + oyun içi para (2026-10-19) */
     for(const args of commands){
       const result=spawnSync(process.execPath,args,{cwd,windowsHide:true,stdio:'inherit',env:{...process.env,TEST_URL:`http://127.0.0.1:${port}`}});
       if(result.status!==0){process.exitCode=1;}
