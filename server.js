@@ -45,6 +45,33 @@ function notePublicHost(req) {
   PUBLIC_URL = u; PUBLIC_URL_T = Date.now();
   try { fs.mkdirSync(path.join(process.env.MMOFPS_DATA || path.join(ROOT, 'data')), { recursive: true }); fs.writeFileSync(path.join(process.env.MMOFPS_DATA || path.join(ROOT, 'data'), 'public-url.json'), JSON.stringify({ url: u, t: PUBLIC_URL_T })); } catch (e) { }
 }
+// Manifest is intentionally isolated from account/game state. Hash streaming yields to the event loop.
+const manifestCache=new Map();let manifestPending;
+async function gameManifest(){
+ if(manifestPending)return manifestPending;
+ manifestPending=(async()=>{
+  const files=[],seen=new Set(),root=await fs.promises.realpath(ROOT);
+  async function visit(p){
+   if(!(p==='index.html'||/^(assets|js|css|lib)\//.test(p))||/[\\\0:]/.test(p)||p.split('/').some(s=>s.startsWith('.')))return;
+   const f=path.join(ROOT,p);let st;try{st=await fs.promises.lstat(f)}catch(e){if(e.code==='ENOENT')return;throw e}
+   if(st.isSymbolicLink())return;
+   const real=await fs.promises.realpath(f);if(!real.startsWith(root+path.sep))return; const relative=path.relative(root,real).split(path.sep).join('/');if(relative!=='index.html'&&(!/^(assets|js|css|lib)\//.test(relative)||relative.split('/').some(s=>s.startsWith('.'))))return;
+   if(st.isDirectory()){for(const n of await fs.promises.readdir(f))await visit(p+'/'+n);return}
+   if(!st.isFile())return;
+   let cached=manifestCache.get(p);
+   if(!cached||cached.mtime!==st.mtimeMs||cached.size!==st.size||cached.ctime!==st.ctimeMs){
+    const hash=crypto.createHash('sha256');for await(const chunk of fs.createReadStream(f))hash.update(chunk);
+    const after=await fs.promises.stat(f);if(after.mtimeMs!==st.mtimeMs||after.size!==st.size||after.ctimeMs!==st.ctimeMs)throw Error('Manifest source changed');
+    cached={mtime:st.mtimeMs,ctime:st.ctimeMs,size:st.size,sha256:hash.digest('hex')};manifestCache.set(p,cached);
+   }
+   seen.add(p);files.push({p,size:cached.size,sha256:cached.sha256});
+  }
+  await visit('index.html');for(const dir of ['assets','js','css','lib']){let names;try{names=await fs.promises.readdir(path.join(ROOT,dir))}catch(e){if(e.code==='ENOENT')continue;throw e}for(const n of names)await visit(dir+'/'+n)}
+  for(const key of manifestCache.keys())if(!seen.has(key))manifestCache.delete(key);
+  const html=await fs.promises.readFile(path.join(ROOT,'index.html'),'utf8');
+  return {build:(html.match(/build\s+(\d{12,14})/i)||[])[1]||'unknown',files:files.sort((a,b)=>a.p.localeCompare(b.p))};
+ })();try{return await manifestPending}finally{manifestPending=null}
+}
 const server = http.createServer((req, res) => {
   // Yalnız istemci dosyalarını sun; Git, hesaplar ve yedekler web kökü değildir.
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -53,6 +80,7 @@ const server = http.createServer((req, res) => {
   try { u = decodeURIComponent((req.url || '/').split('?')[0]); }
   catch (e) { res.writeHead(400); res.end('400'); return; }
   notePublicHost(req);
+  if (u === '/api/manifest') { gameManifest().then(m=>{res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(req.method==='HEAD'?undefined:JSON.stringify(m))}).catch(()=>{res.writeHead(503,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Manifest temporarily unavailable'}))});return; }
   if (u === '/api/info') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify({ game: 'mmofps', players: totalPlayers(), max: MAXP })); return; }
   if (u === '/public-url.json') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify({ url: PUBLIC_URL, t: PUBLIC_URL_T })); return; }
   if (u === '/') u = '/index.html';

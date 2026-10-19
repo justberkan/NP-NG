@@ -2,7 +2,7 @@
 const $=id=>document.getElementById(id),form=$('server-form'),address=$('address'),button=$('connect'),status=$('status'),hint=$('hint'),api=window.npngLauncher;
 let remote='',probeSequence=0;
 const options=()=>({fullscreen:$('fullscreen').checked,keepAwake:$('keep-awake').checked});
-function message(text){status.textContent=text||''}
+function message(text){status.textContent=text||'';$('offline-hint').hidden=!text||!text.includes('bağlanılamadı')}
 function resetHealth(){probeSequence++;$('health').textContent='Bağlantı henüz kontrol edilmedi';$('health-dot').className='health-dot'}
 function mode(remoteMode){resetHealth();if(remoteMode){address.value=remote;address.placeholder='https://oyun-sunucusu.example';hint.textContent='Oyunun veya arkadaşının paylaştığı sunucu linkini yapıştır.';address.focus()}else{if(address.value&&!/^http:\/\/(localhost|127\.0\.0\.1)(:|\/)/.test(address.value))remote=address.value;address.value='http://localhost:3000/';hint.textContent='Oyun sunucusunu sağdaki düğmeden başlatabilirsin.'}}
 form.addEventListener('change',e=>{if(e.target.name==='server')mode(e.target.value==='remote')});address.addEventListener('input',resetHealth);
@@ -31,3 +31,9 @@ $('gh-refresh').onclick=()=>ghRefresh(false);
 $('gh-use').onclick=()=>{if(!ghCurrent)return;form.querySelector('[value=remote]').checked=true;mode(true);address.value=ghCurrent;remote=ghCurrent;probe()};
 $('gh-publish').onclick=async()=>{const b=$('gh-publish');b.disabled=true;ghMsg('GitHub’a gönderiliyor…');try{const r=await api.ghPublish($('gh-input').value);ghMsg(r.ok?'Yayınlandı: '+r.url:(r.error||'Yayınlanamadı.'));if(r.ok){$('gh-input').value='';await ghRefresh(true)}}catch(e){ghMsg('Yayınlanamadı.')}finally{b.disabled=false}};
 ghRefresh(true);
+
+async function refreshOffline(){const p=await api.offlineStatus();$('offline-play').disabled=!p.available;$('offline-meta').textContent=p.available?'Son güncelleme: '+new Date(p.tarih).toLocaleString('tr-TR')+' · '+p.build:'Önce bir kez internetle bağlan.';offlineProgress(p.progress)}
+function offlineProgress(p){$('offline-progress').textContent=p?.state==='syncing'?'Çevrimdışı kopya güncelleniyor %'+p.percent:p?.state==='error'?'Kopya güncellenemedi; önceki kopya korunuyor.':''}
+api.onOfflineStatus(p=>{offlineProgress(p);if(p.state==='ready')refreshOffline()});
+$('offline-play').onclick=async()=>{$('offline-play').disabled=true;try{const r=await api.offlinePlay();message(r.ok?'':r.error)}catch(e){message('Çevrimdışı oyun açılamadı.')}finally{await refreshOffline()}};
+refreshOffline().catch(()=>{});

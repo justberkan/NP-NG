@@ -2,6 +2,9 @@
 const {contextBridge,ipcRenderer}=require('electron');
 // Bu köprü yalnız yerel sunucu seçme penceresine yüklenir; oyun penceresine yüklenmez.
 contextBridge.exposeInMainWorld('npngLauncher',Object.freeze({
+ offlineStatus:()=>ipcRenderer.invoke('npng:offline-status'),
+ offlinePlay:()=>ipcRenderer.invoke('npng:offline-play'),
+ onOfflineStatus:callback=>ipcRenderer.on('npng:offline-status',(_,p)=>callback(p)),
  preferences:()=>ipcRenderer.invoke('npng:preferences'),
  connect:(url,options)=>ipcRenderer.invoke('npng:connect',url,options),
  probe:url=>ipcRenderer.invoke('npng:probe',url),

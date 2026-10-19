@@ -9,7 +9,7 @@ function gameURL(value){
  if(!['http:','https:'].includes(u.protocol)||!u.hostname||u.username||u.password)throw new Error('Yalnız kullanıcı adı/şifre içermeyen HTTP veya HTTPS oyun adresi kullanılabilir.');
  return u.href;
 }
-function canNavigate(value,origin){try{return new URL(gameURL(value)).origin===origin}catch(e){return false}}
+function canNavigate(value,origin){try{if(origin==='npng://game'){const u=new URL(value);return u.protocol==='npng:'&&u.hostname==='game'&&!u.port&&!u.username&&!u.password}return new URL(gameURL(value)).origin===origin}catch(e){return false}}
 function shortcut(input){
  const key=String(input.key||'').toLowerCase(),ctrl=input.control||input.meta;
  if(key==='f11')return 'fullscreen';

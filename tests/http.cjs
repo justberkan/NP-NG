@@ -66,3 +66,13 @@ test('Bozuk yüzde kodlaması sunucuyu kapatmaz',async()=>{
   assert.equal((await request('/assets/%E0%A4%A')).status,400);
   assert.equal((await request('/api/info')).status,200);
 });
+
+test('Manifest yalnız public dosyalar; doğru hash, cache güncelleme ve silme',async()=>{
+ const crypto=require('node:crypto');const get=async()=>{const r=await request('/api/manifest');assert.equal(r.status,200);return JSON.parse(r.body)};
+ const m=await get();assert(m.files.length>0);for(const f of m.files){assert(f.p==='index.html'||/^(assets|js|css|lib)\//.test(f.p));assert(!f.p.split('/').some(x=>x.startsWith('.')));const b=fs.readFileSync(path.join(root,f.p));assert.equal(f.size,b.length);assert.equal(f.sha256,crypto.createHash('sha256').update(b).digest('hex'))}
+ assert(!m.files.some(f=>/accounts|private|server\.js/.test(f.p)));
+ const f=path.join(root,'js/test.js');fs.writeFileSync(f,'window.fixture=2;');const next=await get();assert.notEqual(m.files.find(x=>x.p==='js/test.js').sha256,next.files.find(x=>x.p==='js/test.js').sha256);
+ fs.unlinkSync(path.join(root,'assets/new.js'));assert(!(await get()).files.some(x=>x.p==='assets/new.js'));
+ const link=path.join(root,'assets','outside');fs.symlinkSync(path.join(root,'data'),link,'junction');assert(!(await get()).files.some(x=>x.p.includes('outside')));
+ assert.equal((await request('/api/manifest','HEAD')).body,'');
+});
