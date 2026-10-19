@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Şehir modeli testi — oyunun GLTFLoader'ı</title>
+<style>body{margin:0;background:#87b5e0}#hud{position:fixed;top:8px;left:8px;color:#fff;font:14px monospace;background:#0008;padding:6px 10px;white-space:pre}</style>
+</head>
+<body>
+<div id="hud">yükleniyor…</div>
+<script src="../../lib/three.min.js"></script>
+<script src="../../lib/GLTFLoader.js"></script>
+<script>
+/* KİMİ-4 doğrulama: aynı loader/three sürümü (r128) ile modeli aç, hücreleri say,
+   colliders üst üste çiz, 4 açıdan ekran görüntüsü için hazırla.
+   ?auto=1 verilirse kareleri otomatik döner (Playwright kullanır). */
+const hud=document.getElementById('hud');
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+renderer.setSize(innerWidth,innerHeight);
+document.body.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87b5e0);
+scene.fog=new THREE.Fog(0x87b5e0,200,900);
+const cam=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,2000);
+scene.add(new THREE.HemisphereLight(0xcfe8ff,0x5a6a4a,0.55));
+const sun=new THREE.DirectionalLight(0xffffff,.75);sun.position.set(120,200,80);scene.add(sun);
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(1200,1200).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0x6a9a4a})));
+
+let city=null,cells=0,tris=0,boxes=[];
+new THREE.GLTFLoader().load('../../assets/city/lowpoly_city_opt.glb',g=>{
+  city=g.scene;
+  if(new URLSearchParams(location.search).get('mat')==='basic')
+    city.traverse(o=>{if(o.isMesh){o.material=new THREE.MeshBasicMaterial({vertexColors:true})}});
+  if(new URLSearchParams(location.search).get('mat')==='normal')
+    city.traverse(o=>{if(o.isMesh){o.material=new THREE.MeshNormalMaterial()}});
+  scene.add(city);
+  city.traverse(o=>{if(o.isMesh){cells++;tris+=(o.geometry.index?o.geometry.index.count:o.geometry.attributes.position.count)/3}});
+  fetch('../../assets/city/city_colliders.json').then(r=>r.json()).then(c=>{
+    boxes=c.boxes||[];
+    const mat=new THREE.LineBasicMaterial({color:0xff3030});
+    for(const b of boxes){
+      const w=b[2]-b[0],d=b[3]-b[1],h=b[4];
+      const geo=new THREE.EdgesGeometry(new THREE.BoxGeometry(w,h,d));
+      const l=new THREE.LineSegments(geo,mat);
+      l.position.set(b[0]+w/2,h/2,b[1]+d/2);
+      scene.add(l);
+    }
+    window.__ready=true;
+    hud.textContent='hücre(mesh) sayısı: '+cells+'\nüçgen: '+Math.round(tris)+'\ncollider kutu: '+boxes.length;
+  });
+},undefined,e=>{hud.textContent='YÜKLEME HATASI: '+e;window.__error=String(e)});
+
+const views=[[260,150,260,0,0,0],[0,220,320,0,0,0],[-260,140,140,0,0,-40],[60,90,-280,0,0,40],[8,3,60,0,8,-40],[-30,4,-80,30,10,0]];
+let vi=0;
+function place(i){const v=views[i%views.length];cam.position.set(v[0],v[1],v[2]);cam.lookAt(v[3],v[4],v[5]);}
+place(0);
+window.__setView=place;
+window.__shots=views.length;
+(function loop(){renderer.render(scene,cam);requestAnimationFrame(loop)})();
+if(new URLSearchParams(location.search).get('auto')){
+  const t=setInterval(()=>{if(window.__ready||window.__error){clearInterval(t);
+    let k=0;const iv=setInterval(()=>{place(k);k++;if(k>=views.length)clearInterval(iv)},400)}},200);
+}
+</script>
+</body>
+</html>
