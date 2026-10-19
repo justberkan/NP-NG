@@ -9,7 +9,8 @@
     "test:http": "node --test tests/http.cjs",
     "test:movement": "node tests/movement.cjs",
     "test:audit": "node tests/audit.cjs",
-    "test:offline": "node tests/offline-save.cjs"
+    "test:offline": "node tests/offline-save.cjs",
+    "test:casino": "node tests/casino-rtp.cjs && node tests/casino-dede.cjs"
   },
   "devDependencies": { "playwright": "1.62.1" }
 }

@@ -1,4 +1,4 @@
-// Görsel doğrulama: casino/index.html'i gerçek Chrome'da aç, olayları tetikle,
+// Görsel doğrulama: assets/casino/dede/index.html'i gerçek Chrome'da aç, olayları tetikle,
 // docs/casino/ altına ekran görüntüsü al. Gereksinim: playwright + Chrome.
 // Kullanım: node tests/casino-ui.cjs
 const path=require('path');
@@ -20,7 +20,7 @@ const {chromium}=require('playwright');
    if(t.includes('ERR_FILE_NOT_FOUND')&&loc.includes('/ses/'))return; // mp3 henuz yok: sentez yedege duser, beklenen
    errs.push(t);
  });
- await page.goto('file:///'+path.join(__dirname,'..','casino','index.html').replace(/\\/g,'/'));
+ await page.goto('file:///'+path.join(__dirname,'..','assets','casino','dede','index.html').replace(/\\/g,'/'));
  await page.waitForTimeout(900);
  const api=await page.evaluate(()=>typeof window.NPNG_CASINO!=='undefined');
  const cells=await page.locator('#reels .cell').count();

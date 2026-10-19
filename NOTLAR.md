@@ -272,3 +272,5 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 2026-10-18 14:45 · Claude · 202610171809 sunucu-vurus-v1 · Codex PR #8 (A-06 aşama 1) birleştirildi: Arena/Takımlı/Zombi Co-op'ta sunucu vuruşu atış hızı, menzil, zaman ve harita duvarıyla doğruluyor (geçerli atış kabulü %99.8+, 0.06 ms). Sunucu yeniden başlatılmalı. Kimi KİMİ-1 raporu: 151–165 FPS, sızıntı yok; Chrome Intel UHD kullanıyor (A-12, Berkan ayarı).
 
 - 2026-10-19 03:30 · Claude · 202610190325 cevrimdisi-v1 · Berkan kuralı: çevrimdışı para sınırsız ama hiçbir şey kaydedilmez; online hesap 31 TL ile başlar; açık dünya 50 kişi. Çevrimdışı 1e9 TL'nin hesaplara sızma açığı kapatıldı (sunucu reddeder + açılışta onarır). npm test PASS. Sunucu yeniden başlatılmalı.
+
+- 2026-10-19 12:40 · Claude · 202610191230 dede-v1 · Kimi'nin DEDE slotu (PR #10) oyuna eklendi: Kumarhane → DEDE ⚡; para yalnız oyunda, haftalık kayıp bonusu (%10, tavan 25.000, çevrimdışı yok), RTP %96,28 (near-miss kapalı). npm test PASS.

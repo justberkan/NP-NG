@@ -275,3 +275,15 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - NOT: server.js değişti → sunucu YENİDEN BAŞLATILMALI (onarım açılışta çalışır: neggastr → 10.548 TL, jejjejr → 31 TL; seviye/eşyalar kalır). Oyuncular Ctrl+F5.
 - Bilinen sınır: sunucu istemci kaydına hâlâ güvenir (para dışındaki alanlar doğrulanmıyor); hile koruması ayrı iş. Sızan parayla alınmış eşyalar hesaplarda kaldı.
 - Yedek: _yedek/claude-cevrimdisi-0325/
+
+### 2026-10-19 12:40 İstanbul · Claude · build 202610191230 dede-v1 (PR #10 birleştirme + oyun içi entegrasyon)
+- İşlem: Kimi'nin KİMİ-CASINO-DEDE PR #10'u incelendi, birleştirildi ve oyunun parasına bağlandı. Kumarhane → "DEDE ⚡" ilk/varsayılan sekme; eski emoji slot "Meyve slot" adıyla duruyor.
+- İnceleme: PR yalnız yeni dosya içeriyor; RTP Claude ortamında tekrar ölçüldü: 1.000.000 spin, tohum 20261019 → %96,28, near-miss kapalı. Sayfa para tutmuyor (setCredit/onBet/onWin), "Sanal para" yazısı görünür.
+- Claude değişiklikleri: sayfa casino/ → assets/casino/dede/index.html (sunucu yalnız index.html/assets/js/css/lib sunar; EXE çevrimdışı kopyası da bu kökleri alır), yollar aynı klasöre göre; bahis basamakları 10 TL'den (yeni hesap 31 TL); API'ye stopAuto/spinning/weeklyStatus; bonus adım ödemeleri 5000x tavanını aşamaz; çevrimdışı bonus mesajı.
+- Oyun tarafı (js/casino.js): iframe #lb içinde bir kez açılır, sekmelerin altına 1200×790 tasarımdan ölçeklenir (kesilmez); para yalnız SV.tl, her olayda setCredit ile eşitlenir; sekmeden çıkınca süren çevirme arka planda biter/ödenir, otomatik çevirme durur. Haftalık kayıp bonusu oyunda: tüm kumarhane oyunlarının son 7 gün net kaybının %10'u, tavan 25.000, haftada bir, SV.cas'ta; çevrimdışıyken verilmez.
+- Sunucu: MIME tablosuna .webp .jpeg .mp3 .ogg .wav eklendi (DEDE görselleri ve ileride sesler).
+- Eklendi: assets/casino/dede/ (6 WebP 416 KB + orijinal JPG'ler + index.html), docs/casino/ (BENIOKU + 7 ekran görüntüsü), tests/casino-rtp.cjs (npm test kapısı: RTP %95–97 + near-miss kapalı), tests/casino-ui.cjs (Kimi'nin Windows görsel aracı, run.cjs'te yok), tests/casino-dede.cjs (10 kontrol). Değişti: js/casino.js, css/style.css, server.js, index.html (build 1230, 60 ?v), tests/run.cjs, package.json (test:casino). Çıkarıldı: yok.
+- Test: npm test baştan sona PASS (çıkış 0, 100 PASS, 0 FAIL) — sunucu vuruş, HTTP, hareket, smoke, atmosfer, audit 7 mod + lobi tıklama (DEDE dahil), offline-save 18/18, DEDE RTP %96,28, casino-dede 10/10. Tam çıktı test-results/npm-test-dede-1230.txt.
+- Berkan kararı bekleyen: near-miss (öneri: KAPALI kalsın), haftalık bonus oranı/tavanı (şimdilik %10 / 25.000), Kimi'nin edge-tts sesleri.
+- NOT: server.js değişti (yalnız MIME) → sunucu yeniden başlatılınca .webp doğru türle gider; oyuncular Ctrl+F5.
+- Yedek: _yedek/claude-dede-1230/

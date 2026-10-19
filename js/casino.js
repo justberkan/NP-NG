@@ -1,8 +1,8 @@
 'use strict';
 /* ===== Kumarhane: slot, blackjack, rulet, Aviator (oyun içi para, gerçek para değil) ===== */
-let cgGame='slot',cgBet=50,cgTimers=[],cgRaf=0,cgBusy=false;
+let cgGame='dede',cgBet=50,cgTimers=[],cgRaf=0,cgBusy=false;
 const cgSet=(fn,ms)=>{const t=setTimeout(fn,ms);cgTimers.push(t);return t};
-function casinoStop(){cgTimers.forEach(clearTimeout);cgTimers=[];cancelAnimationFrame(cgRaf);cgRaf=0;cgBusy=false;if(cgCrash.on&&cgCrash.phase==='fly'){/* uçuş sırasında çıkılırsa bahis yanar */cgCrash.on=false;cgCrash.phase='idle'}}
+function casinoStop(){dedeHide();cgTimers.forEach(clearTimeout);cgTimers=[];cancelAnimationFrame(cgRaf);cgRaf=0;cgBusy=false;if(cgCrash.on&&cgCrash.phase==='fly'){/* uçuş sırasında çıkılırsa bahis yanar */cgCrash.on=false;cgCrash.phase='idle'}}
 const cgMsg=(t,cls)=>{const e=$('cgm');if(e){e.textContent=t;e.className='cgm '+(cls||'')}};
 function cgBetHTML(){
  return `<div class='row'><label class='note'>Bahis (TL)</label><input type='number' id='bet' value='${cgBet}' min='10' step='10'>${[10,50,100,500,1000].map(v=>`<button class='chip' data-b='${v}'>${v}</button>`).join('')}<button class='chip' data-b='max'>Hepsi</button></div>`;
@@ -15,9 +15,9 @@ function cgTakeBet(){
  const b=Math.floor(+$('bet').value||0);
  if(b<10){cgMsg('En az 10 TL bahis','lose');return 0}
  if(b>SV.tl){cgMsg('Bakiyen yetmiyor','lose');return 0}
- cgBet=b;SV.tl-=b;save();bal();return b;
+ cgBet=b;SV.tl-=b;casLog(b,0);save();bal();return b;
 }
-function cgPay(n){if(n>0){SV.tl+=Math.floor(n);save();bal()}}
+function cgPay(n){if(n>0){SV.tl+=Math.floor(n);casLog(0,Math.floor(n));save();bal()}}
 
 /* ---------- Slot ---------- */
 const SLOT=[['🍒',.30,6],['🍋',.25,8],['🔔',.20,14],['⭐',.15,28],['7️⃣',.07,70],['💎',.03,140]];
@@ -253,7 +253,56 @@ function crashEnd(){
 }
 
 /* ---------- Kumarhane ekranı ---------- */
-const CGAMES=[['slot','Slot',slotHTML,slotWire],['bj','Blackjack',bjHTML,bjWire],['rl','Rulet',rHTML,rWire],['av','Aviator',crashHTML,crashWire]];
+/* ---------- DEDE (Kimi PR #10, Claude entegrasyonu 2026-10-19) ----------
+   Ayrı sayfa (assets/casino/dede/index.html), aynı köken: NPNG_CASINO API'si doğrudan kullanılır.
+   Para yalnız oyunda (SV.tl): sayfa onBet/onWin bildirir, oyun setCredit ile geri yollar.
+   iframe #lb içinde bir kez açılır ve yerinde kalır: sekmeden çıkınca süren çevirme arka planda biter ve ödenir
+   (yeniden yüklense yarım kalan kazanç kaybolurdu). Çıkışta otomatik çevirme durur. */
+const CGD={f:null,api:null,ro:null};
+function dedeHTML(){return `<div id='cgdede'><p class='note'>DEDE yükleniyor…</p></div>`}
+function dedeVer(){const s=document.querySelector('script[src*="js/casino.js"]');return s&&s.src.split('v=')[1]||'1'}
+function dedeWire(){
+ let f=CGD.f;
+ if(!f){f=CGD.f=document.createElement('iframe');f.id='dedef';f.title='DEDE kumarhane';f.setAttribute('allow','autoplay');
+  f.onload=dedeBind;f.src='assets/casino/dede/index.html?v='+dedeVer();$('lb').appendChild(f);
+  addEventListener('resize',dedePlace);document.addEventListener('scroll',dedePlace,true)}
+ f.style.display='block';dedePlace();requestAnimationFrame(dedePlace);setTimeout(dedePlace,350);
+ if(window.ResizeObserver){if(CGD.ro)CGD.ro.disconnect();CGD.ro=new ResizeObserver(dedePlace);CGD.ro.observe($('cgdede'))}
+ dedeSync();
+}
+/* Sayfa 1200×790 tasarım boyutunda çizilir, sekmelerin altındaki alana ölçeklenip ortalanır (kesilme olmaz) */
+const DEDE_W=1200,DEDE_H=790;
+function dedePlace(){const h=$('cg'),f=CGD.f;if(!h||!f||f.style.display==='none')return;
+ const top=Math.max(0,h.getBoundingClientRect().top),k=Math.max(.3,Math.min(1.25,(innerWidth-32)/DEDE_W,(innerHeight-top-12)/DEDE_H));
+ f.style.width=DEDE_W+'px';f.style.height=DEDE_H+'px';f.style.transform='scale('+k.toFixed(4)+')';
+ f.style.left=Math.round((innerWidth-DEDE_W*k)/2)+'px';f.style.top=Math.round(top)+'px'}
+function dedeHide(){if(!CGD.f)return;CGD.f.style.display='none';if(CGD.ro){CGD.ro.disconnect();CGD.ro=null}try{if(CGD.api)CGD.api.stopAuto()}catch(e){}}
+function dedeSync(){try{if(CGD.api){CGD.api.setCredit(Math.max(0,Math.floor(SV.tl)));const w=CGD.f.contentWindow;if(w&&typeof w.weeklyRefresh==='function')w.weeklyRefresh()}}catch(e){}}
+function dedeBind(){
+ let api=null;try{api=CGD.f.contentWindow.NPNG_CASINO}catch(e){}
+ if(!api)return;CGD.api=api;
+ api.onBet(b=>{b=Math.floor(+b||0);if(b<=0)return;SV.tl-=b;casLog(b,0);save();bal();dedeSync()});
+ api.onWin(w=>{w=Math.floor(+w||0);if(w<=0)return;SV.tl+=w;casLog(0,w);save();bal();dedeSync()});
+ api.claimWeeklyBonus=casWeekly;api.weeklyStatus=casWeekStatus;
+ if(api.getBet()>Math.max(10,SV.tl))api.setBet(10);
+ dedeSync();
+}
+/* Haftalık kumarhane kayıp bonusu (Kimi önerisi, Berkan varsayılanı: %10, tavan 25.000; kesin oran Berkan'da).
+   Tüm kumarhane oyunlarının son 7 günlük net kaybı; haftada bir. Kayıt hesapta (SV.cas). Çevrimdışıyken verilmez. */
+const CAS_WEEK={rate:.10,cap:25000};
+const casDay=()=>Math.floor(Date.now()/864e5);
+function casWeekId(){const d=new Date(),t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())),n=t.getUTCDay()||7;t.setUTCDate(t.getUTCDate()+4-n);const y=new Date(Date.UTC(t.getUTCFullYear(),0,1));return t.getUTCFullYear()+'-W'+Math.ceil(((t-y)/864e5+1)/7)}
+function casLog(b,w){const c=SV.cas=SV.cas&&typeof SV.cas==='object'?SV.cas:{d:{},wk:''};if(!c.d||typeof c.d!=='object')c.d={};const d=casDay(),e=c.d[d]=c.d[d]||[0,0];e[0]+=b;e[1]+=w;for(const k in c.d)if(+k<d-8)delete c.d[k]}
+function casWeekNet(){const c=SV.cas;if(!c||!c.d)return 0;const d=casDay();let n=0;for(const k in c.d)if(+k>d-7)n+=(+c.d[k][0]||0)-(+c.d[k][1]||0);return n}
+function casWeekAmount(){return Math.min(Math.round(Math.max(0,casWeekNet())*CAS_WEEK.rate),CAS_WEEK.cap)}
+function casWeekStatus(){if(offInf())return 'offline';if(SV.cas&&SV.cas.wk===casWeekId())return 'claimed';return casWeekAmount()>0?'ready':'none'}
+function casWeekly(){
+ const st=casWeekStatus();
+ if(st!=='ready')return Promise.resolve({amount:0,reason:st==='offline'?'offline':st==='claimed'?'already-claimed':'no-loss'});
+ const amount=casWeekAmount();SV.cas.wk=casWeekId();SV.tl+=amount;save();bal();dedeSync();
+ return Promise.resolve({amount});
+}
+const CGAMES=[['dede','DEDE ⚡',dedeHTML,dedeWire],['slot','Meyve slot',slotHTML,slotWire],['bj','Blackjack',bjHTML,bjWire],['rl','Rulet',rHTML,rWire],['av','Aviator',crashHTML,crashWire]];
 /* İlk girişte (hesap başına bir kez) 18 yaş onayı. Onay hesabın kayıtlı verisinde (SV.casOk) tutulur. */
 function casinoGateV(){
  return `<div class='pn2 cgate'><h3>Kumarhane · Giriş onayı</h3>

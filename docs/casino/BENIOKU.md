@@ -1,7 +1,7 @@
 # DEDE — NPNG Kumarhane (Slot Yaması)
 
 Bu klasör, N.P.N.G.'ye kumarhane slotu olarak eklenecek **DEDE** temalı yamadır.
-Kendi başına çalışır (tarayıcıda `casino/index.html` açın), oyuna gömülünce
+Kendi başına çalışır (tarayıcıda `assets/casino/dede/index.html` açın), oyuna gömülünce
 oyunun hesap verisi üzerinden çalışır. **Entegrasyonu Claude yapacaktır** —
 bu yama yalnızca yeni dosyalar içerir, oyunun mevcut dosyalarına dokunmaz.
 
@@ -106,7 +106,7 @@ near-miss        : KAPALI (varsayılan)
 
 ## Dosyalar
 
-- `casino/index.html` — tema, mantık, test kancası (UI testlerini çalıştırır).
+- `assets/casino/dede/index.html` — tema, mantık, test kancası (UI testlerini çalıştırır).
 - `assets/casino/dede/*.webp` — 6 poz (416 KB toplam). `orijinal/` altında kaynak JPG'ler.
 - `tests/casino-rtp.cjs` — RTP simülasyonu (yukarıdaki çıktıyı üretir).
 - `tests/casino-ui.cjs` — tema kancası/balon/poz/para modeli testleri.
@@ -120,3 +120,17 @@ npm test                    # tüm testler (önceki oyun testleri dahil)
 node tests/casino-rtp.cjs   # yalnız RTP simülasyonu
 node tests/casino-ui.cjs    # yalnız tema testi
 ```
+
+## Oyuna entegrasyon (Claude, 2026-10-19 · build 202610191230)
+
+- Sayfa `casino/` yerine `assets/casino/dede/index.html` altında: sunucu yalnız `index.html`, `assets/`, `js/`, `css/`, `lib/` sunar
+  (EXE'nin çevrimdışı kopyası da bu kökleri alır). Görsel/ses yolları aynı klasöre göre (`taht.webp`, `ses/<id>.mp3`).
+- Oyunda: Kumarhane → **DEDE ⚡** (ilk sekme, varsayılan). Eski emoji slot "Meyve slot" adıyla duruyor.
+- `js/casino.js`: sayfa aynı kökenden iframe ile açılır, `NPNG_CASINO` doğrudan kullanılır. Para yalnız oyunda (`SV.tl`):
+  `onBet` → düş, `onWin` → ekle, her olaydan sonra `setCredit` ile geri yollanır. iframe bir kez açılır ve yerinde kalır;
+  sekmeden çıkınca süren çevirme arka planda biter ve ödenir, otomatik çevirme durur (`stopAuto`).
+- Haftalık bonus oyunda hesaplanır (`casWeekly`): tüm kumarhane oyunlarının son 7 günlük net kaybının %10'u, tavan 25.000,
+  haftada bir; kayıt hesapta (`SV.cas`). **Çevrimdışıyken verilmez** (çevrimdışı = para sınırsız, kayıt yok).
+- Sayfada yapılan küçük değişiklikler: bahis basamakları 10 TL'den başlar (yeni hesap 31 TL), `stopAuto`/`spinning`/`weeklyStatus`
+  API'ye eklendi, bonus adım ödemeleri hesaplanan 5000x tavanını aşamaz, çevrimdışı bonus mesajı.
+- Test: `tests/casino-rtp.cjs` (npm test kapısı: RTP %95–97, near-miss kapalı), `tests/casino-dede.cjs` (oyun içi para/bonus/çıkış).

@@ -143,7 +143,7 @@
 
   <div id="dede" class="idle">
     <div class="imgs">
-      <img id="dede-a" class="on" alt="" src="../assets/casino/dede/taht.webp">
+      <img id="dede-a" class="on" alt="" src="taht.webp">
       <img id="dede-b" alt="" src="">
     </div>
     <div id="bubble"></div>
@@ -356,6 +356,7 @@ function simulate(n){
    (external=true). Tek başına açılırsa demo mod: bakiye localStorage'da tutulur,
    oyuna gömülüyken localStorage asla kullanılmaz. */
 const listeners=[],betListeners=[],winListeners=[];
+const BETS=[10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000];
 let credit=0,bet=1000,external=false;
 let voiceOn=true,soundOn=true,fxReduce=false;
 let interacted=false;
@@ -415,7 +416,7 @@ const sfx={
    sonra ve "Dedenin sesi" açıkken */
 function dedeSes(id,text){
   if(!voiceOn||!interacted)return;
-  const a=new Audio('../assets/casino/dede/ses/'+id+'.mp3');
+  const a=new Audio('ses/'+id+'.mp3');
   a.onerror=()=>{
     if(!voiceOn||!interacted)return;
     try{
@@ -523,7 +524,7 @@ function showMsg(t){const m=$('msg');m.textContent=t;m.style.display='block';cle
 const POSES={idle:'taht',spin:'simsek-kaldir',kayip:'gul-isaret',buyuk:'su-bardagi',kazanc:'arka'};
 let poseFlip=false,poseTimer=null,idleTimer=null;
 function dedePose(key,ms){
-  const src='../assets/casino/dede/'+POSES[key]+'.webp';
+  const src=POSES[key]+'.webp';
   const showEl=poseFlip?$('dede-b'):$('dede-a');
   const hideEl=poseFlip?$('dede-a'):$('dede-b');
   showEl.src=src;showEl.classList.add('on');hideEl.classList.remove('on');
@@ -705,13 +706,14 @@ function finishWin(winMult){
 async function bonusFlow(){
   showMsg('⚡ BONUS: 15 ÜCRETSİZ ÇEVİRME!');
   sfx.bonus();
-  const b=runBonus(bet);
+  const b=runBonus(bet);let paid=0;
   for(const t of b.log){
     $('winbar').classList.add('on');$('win-amt').textContent='×'+fmt(t.glob);
-    addCredit(t.win*bet);
-    winListeners.forEach(f=>{try{f(t.win*bet)}catch(e){}});
-    if(!external)flowLog.push({t:Date.now(),bet:0,win:t.win*bet});
-    $('lastWin').textContent='₺'+fmt(t.win*bet);
+    const w=Math.max(0,Math.min(t.win,b.total-paid));paid+=w; /* toplam 5000x tavanını aşma */
+    addCredit(w*bet);
+    if(w>0)winListeners.forEach(f=>{try{f(w*bet)}catch(e){}});
+    if(!external)flowLog.push({t:Date.now(),bet:0,win:w*bet});
+    $('lastWin').textContent='₺'+fmt(w*bet);
     await sleep(turboRef.on?150:320);
   }
   $('winbar').classList.remove('on');
@@ -733,7 +735,7 @@ async function weeklyClick(){
       quip('haftalik');
       showMsg('Haftalık bonus: ₺'+fmt(r.amount));
     }else{
-      showMsg(r&&r.reason==='already-claimed'?'Bu haftanın bonusu alındı.':'Henüz bonus yok (son 7 günde net kayıp yok).');
+      showMsg(r&&r.reason==='already-claimed'?'Bu haftanın bonusu alındı.':r&&r.reason==='offline'?'Çevrimdışısın: bonus yok (ilerleme kaydedilmez).':'Henüz bonus yok (son 7 günde net kayıp yok).');
     }
   }catch(e){showMsg('Bonus şu anda alınamıyor.')}
   btn.disabled=false;
@@ -741,7 +743,10 @@ async function weeklyClick(){
 }
 function weeklyRefresh(){
   const btn=$('weekly');
-  if(external){ // oyun hesaplar; durumu oyun bildirecek (varsayılan: hazır bilinmiyor)
+  if(external){ // oyun hesaplar ve durumu bildirir
+    const st=typeof API.weeklyStatus==='function'?API.weeklyStatus():'';
+    btn.classList.toggle('ready',st==='ready');
+    $('weekly-tag').textContent=st==='ready'?'HAZIR':st==='claimed'?'ALINDI':st==='offline'?'ÇEVRİMDIŞI':'YOK';
     return;
   }
   const week=isoWeek(new Date());
@@ -758,8 +763,10 @@ if(typeof document!=='undefined'){
     if(autoOn){autoStop();return}
     autoOn=true;autoLeft=50;$('auto').textContent='OTO: 50';audio();spin();
   });
-  $('bet-plus').addEventListener('click',()=>{bet=Math.min(bet*2,100000);if(!external)demoStore.set('bet',bet);renderCredit()});
-  $('bet-minus').addEventListener('click',()=>{bet=Math.max(bet/2>=100?bet/2:100,100);if(!external)demoStore.set('bet',bet);renderCredit()});
+  /* Claude entegrasyonu: bahis basamakları 10 TL'den başlar (oyunda yeni hesap 31 TL) */
+  const stepBet=d=>{let i=0;for(let k=0;k<BETS.length;k++)if(BETS[k]<=bet)i=k;bet=BETS[Math.max(0,Math.min(BETS.length-1,i+d))];if(!external)demoStore.set('bet',bet);renderCredit()};
+  $('bet-plus').addEventListener('click',()=>stepBet(1));
+  $('bet-minus').addEventListener('click',()=>stepBet(-1));
   $('turbo').addEventListener('click',()=>{turboRef.on=!turboRef.on;$('turbo').classList.toggle('off',!turboRef.on)});
   $('sound').addEventListener('click',()=>{soundOn=!soundOn;$('sound').textContent='SES: '+(soundOn?'AÇIK':'KAPALI')});
   $('voice').addEventListener('change',e=>{
@@ -781,11 +788,14 @@ const API={
   setCredit,                       // oyun bağlanır: bakiye her zaman oyundan
   addCredit,                       // demo/geri uyumluluk; oyunda kullanma
   getBet:()=>bet,
-  setBet:v=>{bet=Math.max(100,Math.round(v));if(typeof document!=='undefined')renderCredit()},
+  setBet:v=>{bet=Math.max(10,Math.round(v));if(typeof document!=='undefined')renderCredit()},
   onChange:f=>listeners.push(f),
   onBet:f=>betListeners.push(f),   // her spin başında bet miktarıyla çağrılır
   onWin:f=>winListeners.push(f),   // her kazançta tutarla çağrılır
   claimWeeklyBonus:demoClaimWeekly, // oyun kendi hesabıyla BUNU DEĞİŞTİRECEK
+  weeklyStatus:null,               // oyun bağlar: ()=>'ready'|'claimed'|'none'|'offline'
+  stopAuto:()=>autoStop(),         // oyun kumarhaneden çıkınca çağırır
+  get spinning(){return spinning},
   simulate,
   seed:s=>{rng=mulberry32(s)},
   unseed:()=>{rng=Math.random},
