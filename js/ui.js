@@ -40,7 +40,7 @@ const own=i=>i.t==='w'||i.t==='oi'||(i.t==='op'&&i.p===0)||(i.t==='f'&&i.p===0)|
 const eqd=i=>i.t==='ws'?SV.ow.mw===i.sid:i.t==='oi'?false:i.t==='m'?(SV.mod[i.m.cls]===i.id&&(SV.eq.w===i.m.cls||(i.m.cls==='pistol'&&SV.eq.w==='dual'))):i.t==='w'?(SV.eq.w===i.w&&(i.w==='dual'||!SV.mod[i.w])):i.t==='g'?(SV.sk[vw]||'g0')===i.id:i.t==='c'?SV.eq.c===i.id:i.t==='f'?(SV.eq.f||'f0')===i.id:i.t==='op'?(SV.eq.o||'o0')===i.id:SV.eq.x===i.id;
 function bal(){
  const dbt=typeof debtTotal==='function'?debtTotal():0;
- $('bal').innerHTML=`<span class='g'>para<b>${fmt(SV.tl)}</b></span><span class='y'>altın<b>${fmt(SV.gold||0)}</b></span><span class='r'>borç<b>${dbt?'-'+fmt(dbt):'0'}</b></span>`;
+ $('bal').innerHTML=`<span class='g'>para<b>${SV.tl>=INF_TL?'∞':fmt(SV.tl)}</b></span><span class='y'>altın<b>${fmt(SV.gold||0)}</b></span><span class='r'>borç<b>${dbt?'-'+fmt(dbt):'0'}</b></span>`;
 }
 function applyEq(rebuild){
  const x=XH.find(i=>i.id===SV.eq.x);if(x)document.documentElement.style.setProperty('--cx',hex(x.c));

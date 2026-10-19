@@ -8,7 +8,8 @@
     "test": "node tests/run.cjs",
     "test:http": "node --test tests/http.cjs",
     "test:movement": "node tests/movement.cjs",
-    "test:audit": "node tests/audit.cjs"
+    "test:audit": "node tests/audit.cjs",
+    "test:offline": "node tests/offline-save.cjs"
   },
   "devDependencies": { "playwright": "1.62.1" }
 }

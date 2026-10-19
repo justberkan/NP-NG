@@ -18,6 +18,8 @@ Bugün 20'den fazla yama tarayıcıda denenmeden canlı klasöre yazıldı; dü�
 4. Görsel/animasyon/arayüz işinde gerçek tarayıcı ekran görüntüsü şart; "tarayıcı açılmadı" diyen teslim reddedilir.
 5. Kayıt `ISLEM_GUNLUGU.md` biçiminde. Görsel kabul Berkan'da.
 Hazır görev promptları: `docs/HATA_DENETIMI_20261017.md` bölüm 6.
+6. **Berkan kuralı (2026-10-19): Çevrimdışı = para sınırsız, hiçbir ilerleme kaydedilmez (ne bu bilgisayara ne hesaba). Online hesap 31 TL ile başlar.** Sunucu 1e9+ parayı reddeder; açık dünya tek ortak dünya, en fazla 50 kişi. Kumarhane/bonus gibi para işleri de bu kurala uyar: çevrimdışıyken hak/bonus verilmez. Test: `tests/offline-save.cjs`.
+7. Gece işi (2026-10-19): Codex'e `ONAY · CODEX-EXE-1` verildi — EXE çevrimdışı kopya + "Çevrimdışı oyna" + VSync seçeneği + 0.3.0 kurulum. Dal `codex/exe-offline`, PR ile gelir; birleştirme Claude'da.
 
 
 ## ZORUNLU KAYIT KURALI (2026-10-17, Berkan)

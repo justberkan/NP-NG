@@ -264,3 +264,14 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Test: Claude ortamında npm test baştan sona PASS (sunucu vuruş 27 kontrol, HTTP 5, hareket 17, smoke, atmosfer, audit 7 mod + lobi). İki gerçek tarayıcı istemcisi: A'nın 3 vuruşu B'nin canını 100→25 düşürdü, sunucuda 0 ret. Rekabetçi ve Koridor'da tek oyunculu vuruş da ayrıca doğrulandı (Kimi'nin raporundaki 0 vuruş ölçüm betiğinden: rekabetçide donma süresi, koridorda spawner kırılmadan zombi çıkmıyor).
 - NOT: server.js değişti → sunucu YENİDEN BAŞLATILMALI; oyuncular Ctrl+F5.
 - Yedek: _yedek/claude-a06-1809/
+
+### 2026-10-19 03:30 İstanbul · Claude · build 202610190325 cevrimdisi-v1
+- İşlem: Berkan kuralı uygulandı — çevrimdışı = para sınırsız, HİÇBİR ilerleme kaydedilmez; online hesap 31 TL ile başlar; açık dünya tek ortak dünya, en fazla 50 kişi.
+- Bulunan açık (tarayıcıda kanıtlandı): çevrimdışı 1e9 TL, kayıt olurken ya da bağlantı gidip gelince hesaba yazılıyordu (yeni hesap sunucuda 1.000.000.000 TL ile başladı). Canlı hesaplarda neggastr 1.000.010.548, jejjejr 1.000.000.000 TL vardı.
+- İstemci: save() çevrimdışıyken ne localStorage'a ne hesaba yazar; hesap bağlanırken (OFFL.pend) kayıt bekletilir. Çevrimdışı oynanmışsa girişte bellek atılır, hesaptaki kayıt yüklenir. Yeni hesap SVDEF (31 TL) ile açılır. Sunucu reddederse (sfix) hesaptaki kayda döner. Oyun içinde "ÇEVRİMDIŞI · ilerleme kaydedilmez · para sınırsız" rozeti, lobide sarı hesap yazısı, para kutusunda ∞.
+- Sunucu: 1e9+ / sonlu olmayan para kaydı reddedilir; açılışta ve girişte eski sızıntı onarılır (1e9 düşülür, en az 31); kayıtta para 31'e sabitlenir; admin para verme 1e9 altında kalır; OW_MAX 50.
+- Eklendi: tests/offline-save.cjs (18 kontrol), package.json test:offline. Değişti: server.js, js/core.js, js/mp.js, js/ui.js, css/style.css, index.html (build 0325, 60 ?v), tests/run.cjs, server-hit-collision.bin (yalnız js/core.js kaynak özeti; geometri birebir aynı doğrulandı), IS_PLANI.md. Çıkarıldı: kayıt olurken çevrimdışı ilerlemenin hesaba taşınması.
+- Test: npm test baştan sona PASS (çıkış 0, 89 PASS, 0 FAIL): sunucu vuruş, HTTP 5/5, hareket, smoke, atmosfer, audit 7 mod + lobi 99 tıklama, offline-save 18/18. Tam çıktı test-results/npm-test-cevrimdisi-0325.txt.
+- NOT: server.js değişti → sunucu YENİDEN BAŞLATILMALI (onarım açılışta çalışır: neggastr → 10.548 TL, jejjejr → 31 TL; seviye/eşyalar kalır). Oyuncular Ctrl+F5.
+- Bilinen sınır: sunucu istemci kaydına hâlâ güvenir (para dışındaki alanlar doğrulanmıyor); hile koruması ayrı iş. Sızan parayla alınmış eşyalar hesaplarda kaldı.
+- Yedek: _yedek/claude-cevrimdisi-0325/

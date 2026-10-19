@@ -158,6 +158,8 @@ function onText(c, s) {
   if (m.t === 'save') {
     if (!c.acc || !m.data || typeof m.data !== 'object') return;
     const s = JSON.stringify(m.data); if (s.length > 1500000) return;
+    // Çevrimdışı sınırsız para (1e9) ya da bozuk para hesaba yazılamaz: reddet, hesaptaki kaydı geri gönder.
+    if (!saveMoneyOk(m.data)) { console.log('! ' + c.acc.name + ' geçersiz kayıt reddedildi (tl=' + String(m.data.tl).slice(0, 20) + ')'); send(c, { t: 'sfix', save: c.acc.save, ts: c.acc.ts }); return; }
     c.acc.save = m.data; c.acc.ts = now; accDirty = true; send(c, { t: 'saved', ts: c.acc.ts }); return;
   }
   if (m.t === 'aimscore') {
@@ -247,6 +249,18 @@ function onText(c, s) {
     }
   }
 }
+/* Berkan kuralı (2026-10-19): çevrimdışı = para sınırsız ve kayıt yok; online hesap 31 TL ile başlar. */
+const START_TL = 31, INF_TL = 1e9;
+function saveMoneyOk(sv) { const t = sv && sv.tl; return typeof t === 'number' && Number.isFinite(t) && t < INF_TL; }
+/* Eski açık: çevrimdışı 1e9 TL hesaplara sızdı. Girişte onarılır: sızan 1e9 düşülür, en az 31 TL kalır. */
+function repairSave(a, now) {
+  if (!a.save || typeof a.save !== 'object' || saveMoneyOk(a.save)) return;
+  const old = a.save.tl, t = Number(old);
+  a.save.tl = Number.isFinite(t) ? Math.max(START_TL, Math.round(t - INF_TL)) : START_TL;
+  if (a.save.tl >= INF_TL) a.save.tl = START_TL;
+  a.ts = now; accDirty = true; console.log('! ' + a.name + ' kaydı onarıldı: tl ' + old + ' -> ' + a.save.tl);
+}
+for (const k in ACC) repairSave(ACC[k], Date.now()); // açılışta tüm hesaplar (admin listesi de doğru görünsün)
 function doAuth(c, m, now) {
   if (c.user) return;
   const reply = (ok, err, extra) => send(c, Object.assign({ t: 'auth', ok, err }, extra || {}));
@@ -262,7 +276,7 @@ function doAuth(c, m, now) {
     if (a) return reply(0, 'Bu kullanıcı adı alınmış. Başka bir ad dene ya da giriş yap.');
     const salt = crypto.randomBytes(16).toString('hex');
     a = ACC[key] = { name, salt, hash: hashPw(pw, salt), toks: [], ts: 0, save: null, created: now };
-    if (m.save && typeof m.save === 'object' && JSON.stringify(m.save).length < 1500000) { a.save = m.save; a.ts = now; }
+    if (m.save && typeof m.save === 'object' && JSON.stringify(m.save).length < 1500000) { a.save = m.save; a.save.tl = START_TL; a.ts = now; }
     accDirty = true; console.log('+ yeni hesap: ' + name);
   } else if (m.mode === 'token') {
     if (!a || typeof m.tok !== 'string' || !a.toks.includes(m.tok)) return reply(0, 'Oturum süresi dolmuş. Tekrar giriş yap.');
@@ -276,7 +290,8 @@ function doAuth(c, m, now) {
   const old = users.get(key); if (old && old !== c) { send(old, { t: 'kicked' }); leave(old); old.acc = null; old.user = null; try { old.sock.end(); } catch (e) { } }
   c.user = key; c.acc = a; users.set(key, c);
   c.admin = !!c.local || ADMINS.has(key);
-  reply(1, null, { name: a.name, tok, admin: c.admin, save: m.mode === 'register' ? null : a.save, ts: a.ts });
+  repairSave(a, now);
+  reply(1, null, { name: a.name, tok, admin: c.admin, save: a.save, ts: a.ts });
 }
 function respawn(v) {
   if (!players.has(v.id) || CUR.roundOver) return;
@@ -417,7 +432,7 @@ function admMsg(c, m) {
       if (!a) return send(c, { t: 'afb', m: 'Oyuncu bulunamadı.' }), true;
       const amt = Math.round(num(m.amt, -1e9, 1e9, 0)); if (!amt) return true;
       if (o && o.sock.writable) send(o, { t: 'adm', k: 'give', amt });
-      else if (a.save) { a.save.tl = Math.max(0, Math.round((a.save.tl || 0) + amt)); a.ts = now; accDirty = true; }
+      else if (a.save) { a.save.tl = Math.min(INF_TL - 1, Math.max(0, Math.round((a.save.tl || 0) + amt))); a.ts = now; accDirty = true; }
       send(c, { t: 'afb', m: a.name + ' hesabına ' + amt + ' TL ' + (amt > 0 ? 'verildi' : 'düşüldü') + (o ? '' : ' (çevrimdışı, girince görür)') }); console.log('[admin] ' + c.name + ' -> ' + a.name + ' ' + amt + ' TL'); return true;
     }
     case 'aclr': {
@@ -438,7 +453,7 @@ function admMsg(c, m) {
 }
 
 /* ---------- Açık dünya odası (ortak mob, PvE/PvP) ---------- */
-const OWP = new Map(); let nextOid = 1000;
+const OWP = new Map(), OW_MAX = 50; let nextOid = 1000; // herkes tek ortak açık dünyada
 const owMobs = new Map(), owOwner = new Map();
 const owpub = c => ({ id: c.oid, name: c.name, ch: c.ch, w: c.w, x: r2(c.x), y: r2(c.y), z: r2(c.z), yaw: r2(c.yaw), pvp: c.pvp ? 1 : 0, lvl: c.lvl });
 function obcast(o, except) { const b = frame(1, Buffer.from(JSON.stringify(o))); for (const c of OWP.values()) if (c !== except && c.sock.writable) { try { c.sock.write(b); } catch (e) { } } }
@@ -453,7 +468,7 @@ function owMsg(c, m, now) {
     if (!c.acc) return true;
     if (c.ow) return true;
     if (c.joined) leave(c);
-    if (OWP.size >= 24) { send(c, { t: 'err', m: 'Açık dünya dolu (24 oyuncu).' }); return true; }
+    if (OWP.size >= OW_MAX) { send(c, { t: 'err', m: 'Açık dünya dolu (' + OW_MAX + ' oyuncu).' }); return true; }
     c.oid = nextOid++; c.ow = true; c.name = c.acc.name; c.ch = cleanId(m.ch) || 'c0'; c.w = cleanId(m.w) || 's0';
     c.pvp = !!m.pvp; c.lvl = num(m.lvl, 1, 60, 1); c.x = c.z = 0; c.y = 0; c.yaw = 0; c.pitch = 0; c.vx = c.vz = 0; c.fl = 1; c.sw = -1; c.cb = 0; c.hpf = 1; c.ot = 0; c.pvT = 0; c.hmT = 0;
     const mobs = []; for (const [i, w] of owMobs) if (w.dead || w.hp < w.max) mobs.push([i, Math.round(w.hp), w.max, w.dead ? 1 : 0]);

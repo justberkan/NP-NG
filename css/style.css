@@ -117,6 +117,8 @@ h1{font-size:38px;margin:0 0 6px;letter-spacing:-.5px}
 .mode[data-m=mp]{background:linear-gradient(150deg,#1d3a5c,#4b1f5e)}.mode[data-m=mp]:before{content:'🌐'}
 #acct{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:5;padding:4px 14px;border-radius:14px;border:1px solid #3a4a5a;background:#0c1118cc;color:#9aa8b8;font:12px system-ui;cursor:pointer}
 #acct.ok{color:#7dff9a;border-color:#2c7a4a}
+#acct.offl{color:#ffcf5a;border-color:#7a5a2c}
+#offb{position:absolute;top:36px;left:12px;z-index:55;pointer-events:none;padding:3px 12px;border-radius:12px;background:#0c1118d0;border:1px solid #7a5a2c;color:#ffcf5a;font:600 12px system-ui,sans-serif;letter-spacing:.3px;white-space:nowrap}
 #mpd{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:#000a;overflow:auto}
 #mpd.off{display:none}
 #mpd .card{max-width:520px;width:calc(100% - 32px);text-align:left}

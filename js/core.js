@@ -127,7 +127,8 @@ const key={},joy={x:0,y:0};
 /* --- Kayıt --- */
 const WKEYS=['rifle','smg','pistol','dual','knife','sword','gsword'];
 const OWDEF=()=>({lvl:1,xp:0,med:2,kills:0,mw:'s0',sw:['s0'],su:{},inv:{},sk:[null,null,null,null,null]});
-const SVDEF=()=>({v:3,tl:200,gold:0,own:['c0','x0','g0','o0'],eq:{c:'c0',x:'x0',w:'rifle',o:'o0'},sk:{},xp:0,bp:[],t0:Date.now(),ow:OWDEF()});
+const START_TL=31; /* Berkan kuralı (2026-10-19): online hesap 31 TL ile başlar */
+const SVDEF=()=>({v:3,tl:START_TL,gold:0,own:['c0','x0','g0','o0'],eq:{c:'c0',x:'x0',w:'rifle',o:'o0'},sk:{},xp:0,bp:[],t0:Date.now(),ow:OWDEF()});
 let SV=null;
 try{SV=JSON.parse(localStorage.getItem('mmofps_sv'))}catch(e){}
 function ensureSV(){
@@ -155,7 +156,25 @@ function ensureSV(){
  if(!SV.op1){SV.op1=1;if(SV.eq.c==='c0')SV.eq.c='c6'}
  if(typeof ensureEco==='function')ensureEco(); if(typeof save==='function')save();
 }
-/* çevrimdışı (sunucuya giriş yapılmamış) modda para sonsuz; sunucu hesabında normal ekonomi */
+/* Berkan kuralı (2026-10-19): çevrimdışı (hesaba bağlı değil) = para sınırsız, HİÇBİR ilerleme kaydedilmez.
+   Ne bu bilgisayara ne hesaba yazılır; hesaba bağlanınca bellekteki çevrimdışı durum atılır, hesaptaki kayıt yüklenir.
+   OFFL.pend: hesap bağlantısı sürüyor (açılışta ya da yeniden bağlanırken); o sırada kayıt bekletilir, karar verilince yapılır. */
 const INF_TL=1e9;
+var OFFL={pend:true,later:false,touched:false};
 function offInf(){try{return !MPL.authed}catch(e){return true}}
-function save(){if(SV&&offInf()&&!(SV.tl>=INF_TL))SV.tl=INF_TL;try{localStorage.setItem('mmofps_sv',JSON.stringify(SV))}catch(e){}}
+function offBadge(){
+ let b=document.getElementById('offb');const on=offInf()&&!OFFL.pend;
+ if(!on){if(b)b.style.display='none';return}
+ if(!b){b=document.createElement('div');b.id='offb';b.textContent='ÇEVRİMDIŞI · ilerleme kaydedilmez · para sınırsız';(document.getElementById('hud')||document.body).appendChild(b)} /* oyun içi; lobide alttaki hesap yazısı söyler */
+ b.style.display='';
+}
+function offSettle(){OFFL.pend=false;if(OFFL.later){OFFL.later=false;save()}if(typeof mpChip==='function')mpChip();else offBadge();if(typeof bal==='function'&&document.getElementById('bal'))bal()}
+function save(){
+ if(!SV)return;
+ if(offInf()){
+  if(OFFL.pend){OFFL.later=true;return}
+  if(!(SV.tl>=INF_TL))SV.tl=INF_TL;
+  OFFL.touched=true;offBadge();return;
+ }
+ try{localStorage.setItem('mmofps_sv',JSON.stringify(SV))}catch(e){}
+}

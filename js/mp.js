@@ -30,8 +30,9 @@ function mpChip(){
  let c=$('acct');
  if(!c){c=document.createElement('button');c.id='acct';$('lb').appendChild(c);c.onclick=()=>mpOpenDialog()}
  const st=mpLoad();
- c.className=MPL.authed?'ok':'';
- c.textContent=MPL.authed?'☁ '+MPL.acct+' · ilerlemen sunucuda saklanıyor':(st.tok&&st.name&&!MPL.manual?'☁ '+st.name+' · bağlanılıyor...':'☁ Giriş yap / kayıt ol (ilerlemen sunucuda saklansın)');
+ c.className=MPL.authed?'ok':(OFFL.pend?'':'offl');
+ c.textContent=MPL.authed?'☁ '+MPL.acct+' · ilerlemen sunucuda saklanıyor':(st.tok&&st.name&&!MPL.manual&&OFFL.pend?'☁ '+st.name+' · bağlanılıyor...':'☁ ÇEVRİMDIŞI · ilerleme kaydedilmez — giriş yap / kayıt ol');
+ if(typeof offBadge==='function')offBadge();
 }
 
 /* ---------- Giriş / Kayıt / Sunucu aç penceresi ---------- */
@@ -115,27 +116,28 @@ function mpConnect(addr,name,pass,mdl,quiet){
  if(MPL.ws){MPL.manual=true;try{MPL.ws.close()}catch(e){}MPL.authed=false;mpArenaReset()}
  if(!quiet)mpStatus('Bağlanılıyor: '+addr+' ...');
  let ws,done=false;
- try{ws=new WebSocket(addr)}catch(e){if(!quiet)mpStatus('Adres geçersiz.',1);return}
+ OFFL.pend=true; /* hesap kararı verilene kadar kayıt bekletilir (bkz. core.js save) */
+ try{ws=new WebSocket(addr)}catch(e){if(!quiet)mpStatus('Adres geçersiz.',1);offSettle();return}
  MPL.ws=ws;MPL.manual=false;MPL.addr=addr;
- const to=setTimeout(()=>{if(!done){done=true;if(!quiet)mpStatus('Sunucuya ulaşılamadı. Adres doğru mu? Sunucu açık mı?',1);try{ws.close()}catch(e){}}},8000);
+ const to=setTimeout(()=>{if(!done){done=true;if(!quiet)mpStatus('Sunucuya ulaşılamadı. Adres doğru mu? Sunucu açık mı?',1);try{ws.close()}catch(e){}offSettle()}},8000);
  ws.onopen=()=>{
   if(mdl==='token')mpSend({t:'auth',mode:'token',name,tok:mpLoad().tok});
-  else mpSend({t:'auth',mode:mdl,name,pass,save:mdl==='register'?Object.assign({},SV,{tl:Math.min(SV.tl,200)}):undefined});
+  else mpSend({t:'auth',mode:mdl,name,pass,save:mdl==='register'?SVDEF():undefined}); /* yeni hesap temiz başlar (31 TL); çevrimdışı ilerleme taşınmaz */
  };
  ws.onmessage=ev=>{
   let m;try{m=JSON.parse(ev.data)}catch(e){return}
   if(m.t==='auth'){done=true;clearTimeout(to);m.quiet=quiet;m.addr=addr}
   try{mpMsg(m)}catch(e){console.error('mp',e)}
  };
- ws.onerror=()=>{if(!done){done=true;clearTimeout(to);if(!quiet)mpStatus('Bağlantı kurulamadı. Adres ve sunucu açık mı kontrol et.',1)}};
+ ws.onerror=()=>{if(!done){done=true;clearTimeout(to);if(!quiet)mpStatus('Bağlantı kurulamadı. Adres ve sunucu açık mı kontrol et.',1);offSettle()}};
  ws.onclose=()=>{
   clearTimeout(to);
   if(MPL.ws!==ws)return;
   const was=MPL.authed,manual=MPL.manual,wasReady=MPL.ready;
-  MPL.ws=null;MPL.authed=false;mpArenaReset();mpChip();
+  MPL.ws=null;MPL.authed=false;mpArenaReset();offSettle();mpChip();
   if(!manual&&was){
    if(wasReady&&!lobbyOn&&state!=='menu')toLobby();
-   alert2('Sunucu bağlantısı koptu, yeniden deneniyor...');
+   alert2('Sunucu bağlantısı koptu, yeniden deneniyor... (bu arada ilerleme kaydedilmez)');
    if(MPL.retry<12){MPL.retry++;setTimeout(()=>{if(!MPL.ws&&!MPL.manual)mpAuto()},5000)}
   }else if(!done&&!manual&&!quiet){done=true;mpStatus('Bağlantı kapandı.',1)}
  };
@@ -143,7 +145,7 @@ function mpConnect(addr,name,pass,mdl,quiet){
 function mpAuto(){
  const st=mpLoad();
  const ad=st.addr||(/^https?:$/.test(location.protocol)?location.host:'');
- if(!st.tok||!st.name||!ad||MPL.ws)return;
+ if(!st.tok||!st.name||!ad||MPL.ws){if(!MPL.ws)offSettle();return}
  mpConnect(mpNormAddr(ad),st.name,null,'token',true);
 }
 function alert2(t){const el=document.createElement('div');el.className='kfi';el.style.cssText='position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:60;font-size:16px';el.textContent=t;document.body.appendChild(el);setTimeout(()=>el.remove(),4000)}
@@ -157,27 +159,29 @@ function mpFlushSave(){
 const _save0=save;
 save=function(){
  _save0();
+ if(!MPL.authed)return; /* çevrimdışı: hiçbir şey kaydedilmez, hesaba da gitmez */
  try{localStorage.setItem('mmofps_dirty','1')}catch(e){}
- if(MPL.authed&&!MPL.q)MPL.q=setTimeout(()=>{MPL.q=0;mpFlushSave()},4000);
+ if(!MPL.q)MPL.q=setTimeout(()=>{MPL.q=0;mpFlushSave()},4000);
 };
 function mpAdopt(m){ // sunucudaki kayıtla yereli karşılaştır
  const st=mpLoad(),same=st.adopted===m.name;
  let dirty='0';try{dirty=localStorage.getItem('mmofps_dirty')}catch(e){}
  let useServer=false;
  if(m.save&&m.ts){
-  if(!same)useServer=true;
+  if(!same||OFFL.touched)useServer=true; /* çevrimdışı oynanan bellekteki durum hesaba asla gitmez */
   else if(m.ts>(st.sts||0)){
    useServer=dirty!=='1'||confirm('Sunucudaki kaydın daha yeni (başka bir yerden oynamışsın).\nTamam: sunucudaki kaydı yükle\nİptal: bu bilgisayardaki kaydı sunucuya yaz');
   }
  }
- if(useServer){
-  try{if(!same)localStorage.setItem('mmofps_sv_backup',localStorage.getItem('mmofps_sv')||'');localStorage.setItem('mmofps_sv',JSON.stringify(m.save));localStorage.setItem('mmofps_dirty','0')}catch(e){}
-  mpStore({adopted:m.name,sts:m.ts});
+ const fresh=!m.save&&(!same||OFFL.touched); /* hesapta kayıt yok: 31 TL ile temiz başlangıç */
+ if(useServer||fresh){
+  try{if(!same)localStorage.setItem('mmofps_sv_backup',localStorage.getItem('mmofps_sv')||'');localStorage.setItem('mmofps_sv',JSON.stringify(fresh?SVDEF():m.save));localStorage.setItem('mmofps_dirty',fresh?'1':'0')}catch(e){}
+  mpStore({adopted:m.name,sts:fresh?0:m.ts});
   MPL.reloading=true;if(MPL.q){clearTimeout(MPL.q);MPL.q=0}
   location.reload();return true;
  }
  mpStore({adopted:m.name});
- if(!m.save||dirty==='1'||!same)mpFlushSave();
+ if(!m.save||dirty==='1')mpFlushSave();
  return false;
 }
 addEventListener('beforeunload',()=>{if(MPL.authed&&!MPL.reloading)try{MPL.ws.send(JSON.stringify({t:'save',data:SV}))}catch(e){}});
@@ -279,15 +283,20 @@ function mpMsg(m){
    if(m.tok)mpStore({tok:m.tok});
    mpChip();if(typeof frAsk==='function'){frAsk();frRender()}
    if(mpAdopt(m))return;
+   offSettle();
    if(mpDlg)mpDlg.classList.add('off');
    {const cb=MPL.cb;MPL.cb=null;if(cb)cb()}
   }else{
    if(m.quiet){mpStore({tok:null});mpChip()}
-   mpStatus(m.err||'Giriş başarısız.',1);
+   mpStatus(m.err||'Giriş başarısız.',1);offSettle();
    if(m.quiet&&mpDlg===null){}
   }
   break;
  case'saved':mpStore({sts:m.ts});if(!MPL.q)try{localStorage.setItem('mmofps_dirty','0')}catch(e){}break;
+ case'sfix': /* sunucu geçersiz kaydı reddetti (ör. çevrimdışı sınırsız para): hesaptaki kaydı yükle */
+  try{localStorage.setItem('mmofps_sv',JSON.stringify(m.save||SVDEF()));localStorage.setItem('mmofps_dirty','0')}catch(e){}
+  mpStore({sts:m.ts||0});MPL.reloading=true;if(MPL.q){clearTimeout(MPL.q);MPL.q=0}
+  alert2('Çevrimdışı para hesaba geçemez. Hesabındaki kayıt yükleniyor...');setTimeout(()=>location.reload(),1500);break;
  case'kicked':MPL.manual=true;alert2('Bu hesapla başka yerden giriş yapıldı.');break;
  case'welcome':
   mpClockOffset=Number.isFinite(m.serverAt)?m.serverAt-Date.now():0;
