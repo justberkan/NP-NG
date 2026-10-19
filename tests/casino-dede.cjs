@@ -57,6 +57,37 @@ let child=null,log='';const dir=fs.mkdtempSync(path.join(os.tmpdir(),'npng-dede-
       return {before,amt,exp,st,tag,after,credit,st2,r2,old:SV.cas.d[d-9]===undefined}});
     check('Haftalık bonus: son 7 günün net kaybının %10’u, 8+ gün öncesi sayılmaz',s.st==='ready'&&s.tag==='HAZIR'&&s.amt===s.exp&&s.amt>0&&s.after===s.before+s.amt&&s.credit===s.after&&s.old,s);
     check('Haftalık bonus haftada bir alınır',s.st2==='claimed'&&s.r2.amount===0&&s.r2.reason==='already-claimed',{st2:s.st2,r2:s.r2});
+    /* Bedava çevirme (Berkan 2026-10-20): satın alma 10 × bahis, iki kez basınca; para yalnız oyunda; 4 dede donu doğal tetikler */
+    const until=async(f,ms)=>page.waitForFunction(f,null,{timeout:ms||90000,polling:100});
+    s=await page.evaluate(async()=>{const api=CGD.api,doc=CGD.f.contentDocument,w=CGD.f.contentWindow;
+      if(!/off/.test(doc.getElementById('turbo').className)){}else doc.getElementById('turbo').click(); /* turbo açık */
+      SV.tl=Math.max(SV.tl,500);dedeSync();api.setBet(10);w.renderCredit();
+      const price=doc.getElementById('buyfs-p').textContent,t0=SV.tl,b0=SV.cas.d[casDay()][0],w0=SV.cas.d[casDay()][1];
+      doc.getElementById('buyfs').click();await new Promise(r=>setTimeout(r,150));
+      const armed=/arm/.test(doc.getElementById('buyfs').className),t1=SV.tl;
+      doc.getElementById('buyfs').click();await new Promise(r=>setTimeout(r,150));
+      const t2=SV.tl,b2=SV.cas.d[casDay()][0];
+      window.__fsSeen=0;const iv=setInterval(()=>{if(doc.getElementById('fsbar').classList.contains('on'))window.__fsSeen=1},50);window.__fsIv=iv;
+      return {price,t0,armed,t1,t2,bets:b2-b0,w0}});
+    check('Satın alma: ilk basış yalnız onay ister, ikinci basış 10 × bahis (₺100) düşer',s.price==='₺100'&&s.armed&&s.t1===s.t0&&s.t2===s.t0-100&&s.bets===100,s);
+    await until(()=>!CGD.api.spinning);
+    let q=await page.evaluate(async()=>{clearInterval(window.__fsIv);const api=CGD.api,d=SV.cas.d[casDay()];return {fs:window.__fsSeen,tl:SV.tl,credit:api.credit,wins:d[1]}});
+    check('Satın alınan 10 bedava çevirme oynar, kazanç oyuna geçer, bakiye eşit',q.fs===1&&q.tl===q.credit&&q.tl===s.t2+(q.wins-s.w0),{...q,once:s.t2,kazanc:q.wins-s.w0});
+    s=await page.evaluate(async()=>{const api=CGD.api,doc=CGD.f.contentDocument;SV.tl=50;dedeSync();const t0=SV.tl;
+      doc.getElementById('buyfs').click();await new Promise(r=>setTimeout(r,150));doc.getElementById('buyfs').click();await new Promise(r=>setTimeout(r,300));
+      return {t0,t1:SV.tl,spinning:api.spinning,msg:doc.getElementById('msg').textContent}});
+    check('Bakiye yetmezse satın alınamaz',s.t1===s.t0&&!s.spinning&&/Yetersiz/.test(s.msg),s);
+    s=await page.evaluate(async()=>{const api=CGD.api,doc=CGD.f.contentDocument,C=api._core.CATS,orig=C.map(c=>c[1]);
+      SV.tl=500;dedeSync();C.forEach(c=>c[1]=c[0]==='fs'?1:0); /* bir sonraki çevirmede 4 dede donu */
+      const t0=SV.tl,w0=SV.cas.d[casDay()][1];let scat=0,fs=0;
+      const iv=setInterval(()=>{const n=doc.querySelectorAll('.cell.scat').length;if(n>scat)scat=n;if(doc.getElementById('fsbar').classList.contains('on'))fs=1},40);
+      doc.getElementById('spin').click();await new Promise(r=>setTimeout(r,300));C.forEach((c,j)=>c[1]=orig[j]);
+      await new Promise(r=>{const t=setInterval(()=>{if(!api.spinning){clearInterval(t);r()}},100)});clearInterval(iv);
+      const dons=[...doc.querySelectorAll('.cell')].length;
+      return {scat,fs,t0,tl:SV.tl,credit:api.credit,kazanc:SV.cas.d[casDay()][1]-w0,dons}});
+    check('4 dede donu düşünce donlar parlar ve 10 bedava çevirme başlar',s.scat>=4&&s.fs===1,s);
+    check('Doğal bedava çevirme: yalnız bahis düşer, kazanç oyuna geçer',s.tl===s.credit&&s.tl===s.t0-10+s.kazanc,s);
+    await page.screenshot({path:path.join(out,'dede-bedava.png')});
     /* kumarhaneden çıkınca otomatik çevirme durur, iframe gizlenir */
     s=await page.evaluate(async()=>{view('casino');await new Promise(r=>setTimeout(r,300));const doc=CGD.f.contentDocument;doc.getElementById('auto').click();
       await new Promise(r=>setTimeout(r,400));view('home');const a=CGD.api;await new Promise(r=>{const t=setInterval(()=>{if(!a.spinning){clearInterval(t);r()}},50)});

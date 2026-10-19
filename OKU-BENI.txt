@@ -10,6 +10,11 @@ SUNUCU BILGISAYARI (evdeki pc):
  4) Linki arkadaslarina gonder. Port ayari / modem ayari GEREKMEZ.
  5) Kapatmak icin DURDUR.bat.
  Hesaplar ve ilerleme "data" klasorunde saklanir. O klasoru yedekle.
+ 6) Adminlik (sunucu bilgisayarinda, komut satirindan):
+      ADMIN.bat ver kullaniciadi   -> admin yapar
+      ADMIN.bat al kullaniciadi    -> adminligi alir
+      ADMIN.bat liste              -> adminleri gosterir   (ya da ADMIN.bat'a cift tikla, soru sorar)
+    Sunucu acikken 3 sn icinde gecerli olur, yeniden baslatma gerekmez. Sunucu bilgisayarindan girenler zaten hep admindir.
 
 ARKADASLAR:
  Linke tikla > Cevrimici Arena > Kayit ol (kullanici adi + sifre) > BAGLAN > OYNA.

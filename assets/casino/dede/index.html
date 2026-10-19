@@ -48,22 +48,37 @@
     background:linear-gradient(180deg,#4a1030,#2a0a20);
     border-radius:14px; border:2px solid rgba(247,215,116,.5);
     box-shadow:inset 0 0 30px rgba(0,0,0,.7);
-    transition:filter .18s;
+    overflow:hidden; /* taşlar tahtanın üstünden düşüp altından çıkar (dönme yok — Berkan 2026-10-20) */
   }
-  #reels.blur{filter:blur(3px) saturate(1.3)}
   .cell{
     position:relative; display:flex; align-items:center; justify-content:center;
     background:radial-gradient(circle at 50% 35%, rgba(255,255,255,.08), rgba(0,0,0,.35));
-    border-radius:10px; border:1px solid rgba(255,255,255,.06); overflow:hidden;
+    border-radius:10px; border:1px solid rgba(255,255,255,.06);
   }
-  .cell svg{width:82%; height:82%; display:block}
+  .cell svg{width:82%; height:82%; display:block; will-change:transform}
+  .cell.scat{animation:scatpulse .5s ease-in-out 3; z-index:3}
+  .cell.scat::after{content:""; position:absolute; inset:-2px; border-radius:12px; box-shadow:0 0 22px 6px rgba(255,120,200,.85), inset 0 0 14px rgba(255,220,240,.9)}
+  @keyframes scatpulse{50%{transform:scale(1.18) rotate(-4deg)}}
+  #fsbar{position:absolute; left:50%; top:4px; transform:translateX(-50%); z-index:7; display:none; gap:14px; align-items:center;
+    background:linear-gradient(180deg,#7a1a5a,#3a0a2a); border:2px solid var(--gold1); border-radius:12px; padding:4px 14px;
+    font-weight:900; font-size:15px; letter-spacing:1px; color:#fff; box-shadow:0 0 18px rgba(247,215,116,.6); white-space:nowrap}
+  #fsbar.on{display:flex}
+  #fsbar b{color:var(--gold1)} #fsbar i{font-style:normal; color:var(--ok)}
+  #buyfs{line-height:1.15; min-width:196px; background:linear-gradient(180deg,#9a2a6a,#4a0a32); border:2px solid var(--gold1); color:#fff; box-shadow:0 0 14px rgba(255,120,200,.45)}
+  #buyfs small{display:block; font-size:11px; color:var(--gold1); letter-spacing:.5px}
+  #buyfs.arm{background:linear-gradient(180deg,#b01a1a,#5a0808); border-color:#ffb0b0; animation:armglow .6s ease-in-out infinite alternate}
+  @keyframes armglow{to{box-shadow:0 0 26px 6px rgba(255,90,90,.85)}}
+  @media (max-width:820px){ #buyfs{min-width:0; font-size:11px; padding:6px 8px} #title{font-size:26px} .hbox{min-width:0} }
+  /* dar telefon (dikey): başlık iki satır, tahta ekrana sığar */
+  @media (max-width:560px){ #app{grid-template-columns:minmax(0,1fr) !important; padding:8px; gap:6px; height:auto; min-height:min(94vh,660px)}
+    header{flex-wrap:wrap; gap:6px} #title{font-size:22px} #title small{letter-spacing:3px}
+    .hbox{padding:4px 8px} .hbox span{font-size:15px} #buyfs{order:9; flex:1 1 100%}
+    #reels{gap:4px; padding:6px} footer{gap:6px} .btn{padding:7px 9px; font-size:12px} }
   .cell.win{animation:winpulse .55s ease-in-out 2; z-index:2}
   .cell.win::after{content:""; position:absolute; inset:0; border-radius:10px; box-shadow:0 0 18px 4px rgba(247,215,116,.9), inset 0 0 12px rgba(247,215,116,.8)}
   .cell.dim{opacity:.35; filter:saturate(.4)}
-  .cell.drop{animation:drop .34s cubic-bezier(.2,.7,.3,1.15) backwards}
   .cell.struck{animation:struck .5s ease-out}
   @keyframes winpulse{50%{transform:scale(1.12)}}
-  @keyframes drop{from{transform:translateY(-110%);opacity:.2}}
   @keyframes struck{0%{filter:brightness(2.4)}100%{filter:none}}
   /* yildirim carpmasi */
   .bolt{position:absolute; width:6px; z-index:6; pointer-events:none; transform-origin:top center; animation:boltin .3s ease-out forwards}
@@ -132,12 +147,14 @@
 <div id="app">
   <header>
     <div id="title">DEDE<small>NPNG KUMARHANE</small></div>
+    <button class="btn" id="buyfs" title="10 bedava çevirme satın al (fiyat: 10 × bahis)">BEDAVA ÇEVİRME AL<small id="buyfs-p">₺10.000</small></button>
     <div class="hbox"><b>BAKİYE</b><span id="credit">0</span></div>
     <div class="hbox"><b>SON KAZANÇ</b><span id="lastWin">0</span></div>
   </header>
 
   <div id="stage">
     <div id="reels"></div>
+    <div id="fsbar"><span>BEDAVA ÇEVİRME <b id="fs-n">1/10</b></span><span>ÇARPAN <b id="fs-g">×1</b></span><span>TOPLAM <i id="fs-t">₺0</i></span></div>
     <div id="winbar"><div class="amt" id="win-amt"></div></div>
   </div>
 
@@ -202,17 +219,20 @@ POOL.push([SCATTER,0.5],[ORB,1]);
 const POOL_W=POOL.reduce((s,e)=>s+e[1],0);
 
 function pickSym(){let r=rng()*POOL_W;for(const[k,w]of POOL){if((r-=w)<0)return k}return 'blue'}
+/* düşüşle gelen yeni taşlarda çarpan küresi olmaz: çarpan yalnız ilk tahtadakilerden sayılır (cascade), ekranda sayılmayan küre görünmesin */
+function pickRefill(){let s;do{s=pickSym()}while(s===ORB);return s}
 function genBoard(){const b=new Array(N);for(let i=0;i<N;i++){const s=pickSym();b[i]=s===ORB?{o:ORB_VALUES[Math.floor(rng()*ORB_VALUES.length)]}:s}return b}
 
 /* kategori tablosu — RTP hedefi ~%96 (simülasyonla doğrulanır, %95-97 bandı) */
 const CATS=[
   ['near', 0.110,  null,                0   ],
-  ['small',0.125,  ()=>0.4+rng()*1.6,   0   ],
+  ['small',0.117,  ()=>0.4+rng()*1.6,   0   ],
   ['big',  0.011,  ()=>2+rng()*13,      0.15],
   ['mega', 0.0038, ()=>15+rng()*35,     0.15],
   ['epic', 0.0008, ()=>50+rng()*150,    0.15],
   ['leg',  0.00015,()=>250+rng()*500,   0.20],
   ['jack', 0.00002,()=>1500+rng()*1500, 0.25],
+  ['fs',   0.0024, null,                1   ], /* yalnız 4 dede donu: bedava çevirme (ara sıra, Berkan) */
   ['loss', 0,      null,                0   ],
 ];
 CATS[CATS.length-1][1]=1-CATS.slice(0,-1).reduce((s,c)=>s+c[1],0);
@@ -227,6 +247,13 @@ function catProb(c){
   if(c[0]==='loss'&&!CONFIG.nearMiss){const n=CATS.find(x=>x[0]==='near');return c[1]+(n?n[1]:0)}
   return c[1];
 }
+/* Bedava çevirme (Berkan 2026-10-20): ekrana aynı anda 4+ DEDE DONU (scatter) düşerse 10 bedava çevirme;
+   ya da "BEDAVA ÇEVİRME AL": fiyat = 10 × bahis, 10 çevirme. Satın alınan turun ortalaması fiyatının ~%96'sı
+   (normal oyunla aynı geri ödeme) olacak şekilde simülasyonla ayarlıdır — doğal tur daha cömerttir, satın alınan
+   tur bedavaya para basmaz. Kapı: tests/casino-rtp.cjs (her iki RTP %95-97). */
+const FS={spins:10,retrig:5,buyCost:10,
+  natural:{pw:0.30,po:0.10},
+  bought:{pw:0.30,po:0.0171}}; /* po: 200 bin satın almalık simülasyonla ~%96 */
 function drawCat(){const w=CATS.map(catProb);const tw=w.reduce((s,x)=>s+x,0);let r=rng()*tw;
   for(let i=0;i<CATS.length;i++){if((r-=w[i])<0)return CATS[i]}return CATS[CATS.length-1]}
 
@@ -275,7 +302,7 @@ function dropRefill(board){
   const b=board.slice();
   for(let c=0;c<COLS;c++){
     const col=[];for(let r=0;r<ROWS;r++){const v=b[r*COLS+c];if(v!==null)col.push(v)}
-    while(col.length<ROWS)col.unshift(genBoard()[0]);
+    while(col.length<ROWS)col.unshift(pickRefill());
     for(let r=0;r<ROWS;r++)b[r*COLS+c]=col[r];
   }
   return b;
@@ -301,19 +328,21 @@ function cascade(board){
 }
 
 /* ---------------- ÇEKİRDEK: bir spin ---------------- */
-function runSpin(bet,inBonus){
+function runSpin(bet,inBonus,fm){
   let board=genBoard(),bonusTrig=false,catName=inBonus?'bonus':'loss';
   if(!inBonus){
     const cat=drawCat();catName=cat[0];
     if(cat[0]==='near')plantNear(board);
+    else if(cat[0]==='fs'){clearOrbs(board);plantScatters(board,4);bonusTrig=true}
     else if(cat[2]){
       if(rng()<cat[3]){plantScatters(board,4);bonusTrig=true}
       else forceWin(board,cat[2]());
     }
     else clearOrbs(board);
   }else{
-    if(rng()<0.30)forceWin(board,0.5+rng()*1.5);
-    if(rng()<0.10)plantOrbs(board,2+Math.floor(rng()*10));
+    fm=fm||FS.natural;
+    if(rng()<fm.pw)forceWin(board,0.5+rng()*1.5);
+    if(rng()<fm.po)plantOrbs(board,2+Math.floor(rng()*10));
     else clearOrbs(board);
   }
   const res=cascade(board);
@@ -322,16 +351,24 @@ function runSpin(bet,inBonus){
   if(typeof DBG!=='undefined'&&!inBonus){DBG.byCat[catName]=DBG.byCat[catName]||{n:0,win:0};DBG.byCat[catName].n++;DBG.byCat[catName].win+=win}
   return {board,res,win,bonusTrig};
 }
-function runBonus(bet){
-  let spins=15,total=0,glob=1,log=[];
-  while(spins-->0){
-    const r=runSpin(bet,true);
+function runBonus(bet,bought){
+  const fm=bought?FS.bought:FS.natural;
+  let spins=FS.spins,total=0,glob=1,log=[],extra=0;
+  while(spins-->0&&log.length<60){
+    const r=runSpin(bet,true,fm);
     glob+=Math.min(r.res.orbSum,10);
     const w=r.res.base*glob;
-    total+=w;log.push({win:w,glob});
-    if(r.res.scat>=3)spins+=5;
+    total+=w;
+    const re=r.res.scat>=3;if(re){spins+=FS.retrig;extra+=FS.retrig}
+    log.push({win:w,glob,res:r.res,board:r.board,retrig:re});
   }
-  return {total:Math.min(total,5000),log};
+  return {total:Math.min(total,5000),log,spins:FS.spins+extra};
+}
+/* satın alınan bedava çevirmelerin geri ödemesi (fiyat FS.buyCost × bahis) */
+function simulateBuy(n){
+  let spent=0,won=0,maxWin=0;
+  for(let i=0;i<n;i++){spent+=FS.buyCost;const w=runBonus(1,true).total;won+=w;if(w>maxWin)maxWin=w}
+  return {buys:n,rtp:Math.round(won/spent*10000)/100,avg:Math.round(won/n*100)/100,maxWin:Math.round(maxWin)};
 }
 var DBG={byCat:{}};
 
@@ -473,6 +510,14 @@ const QUIPS={
     {id:'bonus-2',t:'Bedava çevirme mi? Dede cömertliği işte.'},
     {id:'bonus-3',t:'Al bakalım, şimşekler yağacak.'},
   ],
+  'don':[
+    {id:'don-1',t:'Hey! O benim donum! Al on bedava çevirme, geri ver onu.'},
+    {id:'don-2',t:'Dört don birden mi? Dolabımı mı karıştırdın evlat?!'},
+  ],
+  'satin':[
+    {id:'satin-1',t:'Parayla bedava alıyor, ahahah!'},
+    {id:'satin-2',t:'Bedava dediğin parayla olur evlat.'},
+  ],
   'ses-kapali':[
     {id:'sessiz-1',t:'Aç sesimi, biraz dalga geçeceğim.'},
   ],
@@ -501,7 +546,13 @@ function symSVG(s){
   }
   const g=inner=>`<svg viewBox="0 0 64 64">${inner}</svg>`;
   switch(s){
-    case SCATTER:return g(`<circle cx="32" cy="32" r="24" fill="#3a2a08" stroke="#f7d774" stroke-width="3"/><path d="M34 12 L20 34 L30 34 L26 52 L44 28 L33 28 L39 12 Z" fill="#ffe9a8"/>`);
+    /* DEDE DONU (scatter): 4+ aynı anda düşerse 10 bedava çevirme */
+    case SCATTER:return g(`<circle cx="32" cy="32" r="30" fill="#5a0e3a" stroke="#f7d774" stroke-width="3"/>`+
+      `<path d="M12 21 H52 L55 47 Q46 51 37 48 L32 35 L27 48 Q18 51 9 47 Z" fill="#fbf6e4" stroke="#7a6a48" stroke-width="2" stroke-linejoin="round"/>`+
+      `<rect x="11" y="14" width="42" height="8" rx="3" fill="#e9eef7" stroke="#7a6a48" stroke-width="2"/><rect x="11" y="16.5" width="42" height="2.4" fill="#4a7ad8"/>`+
+      `<path d="M32 22 V34" stroke="#b9a77c" stroke-width="1.6"/><circle cx="19" cy="30" r="2.2" fill="#e0334a"/><circle cx="45" cy="29" r="2.2" fill="#e0334a"/><circle cx="25" cy="40" r="2" fill="#e0334a"/><circle cx="41" cy="40" r="2" fill="#e0334a"/>`+
+      `<rect x="40" y="33" width="8" height="7" rx="1" fill="#c9b07a" stroke="#7a6a48" stroke-width="1" transform="rotate(-12 44 36)"/><path d="M41 36 h6 M44 33.5 v5" stroke="#7a6a48" stroke-width=".8" transform="rotate(-12 44 36)"/>`+
+      `<text x="32" y="60" font-size="8" font-weight="900" text-anchor="middle" fill="#f7d774">DON</text>`);
     case 'crown':return g(`<path d="M12 44 L14 22 L26 32 L32 14 L38 32 L50 22 L52 44 Z" fill="#f7d774" stroke="#8a6508" stroke-width="2"/><rect x="12" y="44" width="40" height="7" rx="3" fill="#b8860b"/>`);
     case 'cup':  return g(`<path d="M18 16 H46 V34 C46 46 38 50 32 50 C26 50 18 46 18 34 Z" fill="#f7d774" stroke="#8a6508" stroke-width="2"/><rect x="29" y="50" width="6" height="8" fill="#b8860b"/><rect x="22" y="58" width="20" height="4" rx="2" fill="#b8860b"/>`);
     case 'ring': return g(`<circle cx="32" cy="36" r="16" fill="none" stroke="#f7d774" stroke-width="6"/><path d="M24 20 L32 10 L40 20 Z" fill="#ff5f8f" stroke="#a02050" stroke-width="1.5"/>`);
@@ -519,7 +570,7 @@ function buildGrid(){
   paint(genBoard());
 }
 function paint(board){for(let i=0;i<N;i++)cellEls[i].innerHTML=symSVG(board[i])}
-function renderCredit(){$('credit').textContent=fmt(credit);$('bet-v').textContent=fmt(bet)}
+function renderCredit(){$('credit').textContent=fmt(credit);$('bet-v').textContent=fmt(bet);const bp=$('buyfs-p');if(bp)bp.textContent='₺'+fmt(FS.buyCost*bet)}
 function showMsg(t){const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(showMsg._t);showMsg._t=setTimeout(()=>m.style.display='none',2400)}
 
 /* --- Dede poz yönetimi --- */
@@ -611,10 +662,64 @@ const turboRef={on:false};
 /* ---------------- spin akışı ---------------- */
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 let lossStreak=0,carpanQuipped=false;
+/* --- düşme animasyonu (Berkan 2026-10-20: "yukarıdan aşağı tek tek kayma, hepsi aynı anda ama doluyor hissi, dönme getirme")
+   Eski tahta aşağı düşüp çıkar; yeni taşlar tahtanın üstünden düşer, her sütun alttan üste dolar, sütunlar soldan sağa
+   kısa arayla — hepsi neredeyse aynı anda. Dönen makara/bulanıklık yok. */
+const reduceMotion=typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+function pitch(){const a=cellEls[0],b=cellEls[COLS];return a&&b?Math.max(20,b.offsetTop-a.offsetTop):80}
+function svgOf(i){return cellEls[i]&&cellEls[i].firstElementChild}
+function animY(el,from,to,dur,delay,ease,fill){
+  if(!el||typeof el.animate!=='function'||reduceMotion)return;
+  const k=from<to?[{transform:`translateY(${from}px)`},{transform:`translateY(${to}px)`}]
+    :[{transform:`translateY(${from}px)`},{transform:`translateY(${to+Math.min(6,-from*.04)}px)`,offset:.84},{transform:`translateY(${to}px)`}];
+  el.animate(k,{duration:dur,delay,easing:ease||'cubic-bezier(.55,0,1,.45)',fill:fill||'backwards'});
+}
+async function dropOut(T){
+  const P=pitch(),dur=T?140:230;let mx=0;
+  for(let i=0;i<N;i++){const r=Math.floor(i/COLS),c=i%COLS,dl=c*(T?14:28)+(ROWS-1-r)*(T?10:20);mx=Math.max(mx,dl);
+    animY(svgOf(i),0,(ROWS-r)*P+P*.3,dur,dl,'cubic-bezier(.55,0,1,.45)','forwards')}
+  await sleep(mx+dur+10);
+}
+async function dropIn(board,T){
+  paint(board);
+  const P=pitch(),dur=T?230:380,cs=T?30:55,rs=T?22:42;let mx=0;
+  for(let i=0;i<N;i++){const r=Math.floor(i/COLS),c=i%COLS,dl=c*cs+(ROWS-1-r)*rs;mx=Math.max(mx,dl);animY(svgOf(i),-ROWS*P-P*.2,0,dur,dl,'ease-in')}
+  for(let c=0;c<COLS;c++)setTimeout(()=>sfx.tick(),c*cs+dur);
+  await sleep(mx+dur+20);
+}
+/* kazanan taşlar patlar; üstteki taşlar boşluğa kayar, yeni taşlar yukarıdan gelir (yalnız değişen sütun parçaları hareket eder) */
+async function popCells(cells,T){
+  for(const i of cells){const el=svgOf(i);if(el&&typeof el.animate==='function'&&!reduceMotion)el.animate([{transform:'scale(1)',opacity:1},{transform:'scale(1.25)',opacity:1,offset:.35},{transform:'scale(0)',opacity:0}],{duration:T?140:230,fill:'forwards'})}
+  await sleep(T?150:240);
+}
+async function cascadeDrop(board,removed,T){
+  paint(board);
+  const P=pitch(),dur=T?200:320,rm=new Set(removed||[]);let mx=0;
+  for(let c=0;c<COLS;c++){
+    const gone=[],keep=[];for(let r=0;r<ROWS;r++)(rm.has(r*COLS+c)?gone:keep).push(r);
+    const n=gone.length;if(!n)continue;
+    for(let j=0;j<ROWS;j++){
+      const i=j*COLS+c;
+      if(j<n){const dl=60+(n-1-j)*(T?22:40)+c*(T?8:15);mx=Math.max(mx,dl);animY(svgOf(i),-(n+.2)*P,0,dur,dl,'ease-in')}
+      else{const from=keep[j-n],d=(j-from)*P;if(d>0)animY(svgOf(i),-d,0,dur,c*(T?8:15),'ease-in')}
+    }
+  }
+  await sleep(mx+dur+20);
+}
+/* çarpan küreleri: ilk tahtadakiler sayılır (aynı nesneler düşüşte yer değiştirir); kazanç varsa en sonda çakar */
+function liveOrbs(res,board){
+  const first=res.steps[0]&&res.steps[0].board;if(!first||!board)return [];
+  const set=new Set(first.filter(x=>typeof x==='object'&&x));
+  const o=[];for(let i=0;i<N;i++)if(set.has(board[i]))o.push({i,v:board[i].o});return o;
+}
+async function strikeOrbs(orbs,T){
+  for(const o of orbs){strikeCell(o.i,o.v);if(!carpanQuipped){carpanQuipped=true;quip('carpan')}await sleep(T?90:180)}
+}
+
 async function spin(){
   if(spinning)return;
   if(credit<bet){showMsg(external?'Yetersiz bakiye!':'Yetersiz bakiye! Zombi moduna dönüp para kas. (demo)');autoStop();return}
-  spinning=true;$('spin').disabled=true;
+  spinning=true;$('spin').disabled=true;buyBtn();
   dedePose('spin');
   addCredit(-bet);
   betListeners.forEach(f=>{try{f(bet)}catch(e){}});
@@ -623,70 +728,40 @@ async function spin(){
   const T=turboRef.on;
   audio();
   quip('spin');
-  $('reels').classList.add('blur');
-  let col=0;const stopAt=Array.from({length:COLS},(_,i)=>Date.now()+500+i*(T?90:160));
   try{
-  const blurIv=setInterval(()=>{
-    for(let i=0;i<N;i++)cellEls[i].innerHTML=symSVG(pickSym());
-    sfx.tick();
-    const now=Date.now();
-    while(col<COLS&&now>=stopAt[col]){
-      for(let r=0;r<ROWS;r++){const i=r*COLS+col;cellEls[i].innerHTML=symSVG(rng()<.5?'blue':'red')}
-      col++;
-    }
-    if(col>=COLS)clearInterval(blurIv);
-  },T?45:70);
-  await sleep(stopAt[COLS-1]-Date.now()+80);
-  $('reels').classList.remove('blur');
-
   const r=runSpin(bet,false);
-  const board=r.res.steps.length?lastBoard(r.res.steps):r.board;
-  paint(board);
   carpanQuipped=false;
+  await dropOut(T);
+  await dropIn(r.res.steps[0].board,T);
   await playSteps(r.res,T);
+  if(r.res.base>0){const fin=lastBoard(r.res.steps);await strikeOrbs(liveOrbs(r.res,fin),T)}
   finishWin(r.win);
-  if(r.bonusTrig){quip('bonus');await bonusFlow()}
-  lossStreak=r.win>0?0:lossStreak+1;
-  if(r.win<=0){
+  if(r.bonusTrig){await showDons(T);await bonusFlow(false)}
+  lossStreak=r.win>0||r.bonusTrig?0:lossStreak+1;
+  if(r.win<=0&&!r.bonusTrig){
     if(lossStreak>=3||bet>=10000){dedePose('buyuk',3400);quip('buyuk-kayip')}
     else{dedePose('kayip',2600);quip('kayip')}
   }
   }catch(err){
     console.error('spin hatasi:',err);
-    $('reels').classList.remove('blur');
   }finally{
-    spinning=false;$('spin').disabled=false;
+    spinning=false;$('spin').disabled=false;buyBtn();
   }
   if(autoOn&&autoLeft>0){autoLeft--;if(autoLeft<=0)autoStop();await sleep(T?120:400);if(autoOn)spin()}
 }
 function lastBoard(steps){for(let i=steps.length-1;i>=0;i--)if(steps[i].type==='drop'||steps[i].type==='board')return steps[i].board;return null}
 async function playSteps(res,T){
+  let removed=null;
   for(const st of res.steps){
-    if(st.type==='board'||st.type==='drop'){
-      if(st.orbs&&st.orbs.length){
-        for(const o of st.orbs){
-          strikeCell(o.i,o.v);
-          if(!carpanQuipped){carpanQuipped=true;quip('carpan')}
-        }
-        if(st.type==='drop'&&st.board){paint(st.board);
-          cellEls.forEach((c,i)=>{const row=Math.floor(i/COLS);c.classList.add('drop');c.style.animationDelay=(row*40)+'ms'});
-          await sleep(T?200:420);
-          cellEls.forEach(c=>{c.classList.remove('drop');c.style.animationDelay=''});
-          continue;
-        }
-      }
-      if(st.type==='drop'&&st.board){
-        paint(st.board);
-        cellEls.forEach((c,i)=>{const row=Math.floor(i/COLS);c.classList.add('drop');c.style.animationDelay=(row*40)+'ms'});
-        await sleep(T?200:420);
-        cellEls.forEach(c=>{c.classList.remove('drop');c.style.animationDelay=''});
-      }
-    }else if(st.type==='win'){
+    if(st.type==='drop'&&st.board){await cascadeDrop(st.board,removed,T);removed=null}
+    else if(st.type==='win'){
       cellEls.forEach((c,i)=>{if(st.cells.includes(i)){c.classList.add('win')}else{c.classList.add('dim')}});
       $('winbar').classList.add('on');$('win-amt').textContent='₺'+fmt(st.pay*bet);
+      sfx.coin(3);
       await sleep(T?260:520);
       cellEls.forEach(c=>c.classList.remove('win','dim'));
       $('winbar').classList.remove('on');
+      await popCells(st.cells,T);removed=st.cells;
     }
   }
   $('winbar').classList.remove('on');
@@ -705,24 +780,77 @@ function finishWin(winMult){
   quip('kazanc');
   if(winMult>=15)bigWinShow(tierOf(winMult),amount);
 }
-async function bonusFlow(){
-  showMsg('⚡ BONUS: 15 ÜCRETSİZ ÇEVİRME!');
+/* 4+ dede donu: donlar parlar, dede kızar */
+async function showDons(T){
+  cellEls.forEach(c=>{if(c.querySelector('text')&&c.textContent.includes('DON'))c.classList.add('scat')});
+  sfx.bonus();quip('don');dedePose('kazanc',2600);
+  showMsg('👙 4 DEDE DONU! 10 BEDAVA ÇEVİRME');
+  await sleep(T?900:1700);
+  cellEls.forEach(c=>c.classList.remove('scat'));
+}
+async function bonusFlow(bought){
+  const T=turboRef.on,bar=$('fsbar');
+  const b=runBonus(bet,bought);let paid=0,k=0;
+  if(!bought)showMsg('⚡ 10 BEDAVA ÇEVİRME BAŞLIYOR!');
   sfx.bonus();
-  const b=runBonus(bet);let paid=0;
+  const upd=(g)=>{$('fs-n').textContent=Math.min(k,b.spins)+'/'+b.spins;$('fs-g').textContent='×'+fmt(g);$('fs-t').textContent='₺'+fmt(paid*bet)};
+  k=1;upd(1);bar.classList.add('on');
+  let g0=1;
   for(const t of b.log){
-    $('winbar').classList.add('on');$('win-amt').textContent='×'+fmt(t.glob);
+    upd(g0);
+    carpanQuipped=false;
+    await dropOut(T);
+    await dropIn(t.res.steps[0].board,T);
+    await playSteps(t.res,T);
+    const orbs=liveOrbs(t.res,lastBoard(t.res.steps));
+    if(orbs.length){await strikeOrbs(orbs,T);upd(t.glob);$('fs-g').animate&&$('fs-g').animate([{transform:'scale(1.8)'},{transform:'scale(1)'}],{duration:350})}
+    g0=t.glob;
     const w=Math.max(0,Math.min(t.win,b.total-paid));paid+=w; /* toplam 5000x tavanını aşma */
-    addCredit(w*bet);
-    if(w>0)winListeners.forEach(f=>{try{f(w*bet)}catch(e){}});
-    if(!external)flowLog.push({t:Date.now(),bet:0,win:w*bet});
-    $('lastWin').textContent='₺'+fmt(w*bet);
-    await sleep(turboRef.on?150:320);
+    if(w>0){
+      addCredit(w*bet);winListeners.forEach(f=>{try{f(w*bet)}catch(e){}});
+      if(!external)flowLog.push({t:Date.now(),bet:0,win:w*bet});
+      $('lastWin').textContent='₺'+fmt(w*bet);
+      $('winbar').classList.add('on');$('win-amt').textContent='₺'+fmt(w*bet);sfx.coin(5);
+      await sleep(T?260:600);$('winbar').classList.remove('on');
+    }
+    if(t.retrig){showMsg('👙 +'+FS.retrig+' BEDAVA ÇEVİRME!');sfx.bonus();await sleep(T?300:700)}
+    k++;upd(g0);
+    await sleep(T?80:220);
   }
-  $('winbar').classList.remove('on');
+  bar.classList.remove('on');
   const tot=b.total*bet;
   $('lastWin').textContent='₺'+fmt(tot);
   if(b.total>=15)bigWinShow(tierOf(b.total),tot);
-  else{sfx.coin(8)}
+  else{showMsg('Bedava çevirme bitti: ₺'+fmt(tot));sfx.coin(8)}
+  if(tot>0){dedePose('kazanc',2600);quip('kazanc')}else{dedePose('kayip',2600);quip('kayip')}
+}
+/* --- bedava çevirme satın al: fiyat 10 × bahis, iki kez bas (yanlışlıkla büyük harcama olmasın) --- */
+let buyArmT=0;
+function buyBtn(){const b=$('buyfs');if(!b)return;b.disabled=spinning;b.classList.toggle('off',spinning);if(spinning||Date.now()>buyArmT){b.classList.remove('arm');b.firstChild.textContent='BEDAVA ÇEVİRME AL'}}
+async function buyFS(){
+  if(spinning)return;
+  const price=FS.buyCost*bet;
+  if(credit<price){showMsg('Yetersiz bakiye! 10 bedava çevirme ₺'+fmt(price)+' (10 × bahis)');return}
+  if(Date.now()>buyArmT){buyArmT=Date.now()+3500;const b=$('buyfs');b.classList.add('arm');b.firstChild.textContent='EMİN MİSİN? TEKRAR BAS';setTimeout(buyBtn,3600);return}
+  buyArmT=0;autoStop();
+  spinning=true;$('spin').disabled=true;buyBtn();
+  addCredit(-price);
+  betListeners.forEach(f=>{try{f(price)}catch(e){}});
+  if(!external)flowLog.push({t:Date.now(),bet:price,win:0});
+  $('lastWin').textContent='0';audio();
+  const T=turboRef.on;
+  try{
+    quip('satin');dedePose('spin');
+    await dropOut(T);
+    const bd=genBoard();for(let i=0;i<N;i++)if(bd[i]===SCATTER||(typeof bd[i]==='object'&&bd[i]))bd[i]='blue';
+    const sp=[];while(sp.length<4){const i=Math.floor(Math.random()*N);if(!sp.includes(i))sp.push(i)}for(const i of sp)bd[i]=SCATTER;
+    await dropIn(bd,T);
+    cellEls.forEach((c,i)=>{if(sp.includes(i))c.classList.add('scat')});sfx.bonus();
+    showMsg('👙 10 BEDAVA ÇEVİRME SATIN ALINDI (₺'+fmt(price)+')');
+    await sleep(T?700:1400);cellEls.forEach(c=>c.classList.remove('scat'));
+    await bonusFlow(true);
+  }catch(err){console.error('satın alma hatası:',err)}
+  finally{spinning=false;$('spin').disabled=false;buyBtn()}
 }
 function autoStop(){autoOn=false;autoLeft=0;$('auto').textContent='OTO: KAPALI';$('spin').classList.remove('auto-on')}
 
@@ -777,6 +905,7 @@ if(typeof document!=='undefined'){
   });
   $('fxreduce').addEventListener('change',e=>{fxReduce=e.target.checked;$('dede').classList.toggle('idle',!fxReduce)});
   $('weekly').addEventListener('click',weeklyClick);
+  $('buyfs').addEventListener('click',()=>{audio();buyFS()});
   $('turbo').classList.add('off');
   voiceOn=true;$('voice').checked=true;
   weeklyRefresh();
@@ -799,14 +928,16 @@ const API={
   stopAuto:()=>autoStop(),         // oyun kumarhaneden çıkınca çağırır
   get spinning(){return spinning},
   simulate,
+  simulateBuy,
+  buyCost:()=>FS.buyCost*bet,
   seed:s=>{rng=mulberry32(s)},
   unseed:()=>{rng=Math.random},
   config:{get rtpTarget(){return 0.96},
           get nearMiss(){return CONFIG.nearMiss},
           set nearMiss(v){CONFIG.nearMiss=!!v},
           WEEKLY:CONFIG.WEEKLY},
-  _core:{runSpin,runBonus,cascade,evaluate,genBoard,CATS,DBG,forceWin,plantOrbs,plantNear,orbCells},
-  _ui:{dedePose,bubble,quip,strikeCell}, // entegrasyon/ekran testi kancalari
+  _core:{FS,runSpin,runBonus,cascade,evaluate,genBoard,CATS,DBG,forceWin,plantOrbs,plantNear,orbCells},
+  _ui:{dedePose,bubble,quip,strikeCell,buyFS,dropIn}, // entegrasyon/ekran testi kancalari
 };
 if(typeof window!=='undefined')window.NPNG_CASINO=API;
 if(typeof document!=='undefined')document.dispatchEvent(new CustomEvent('npng-casino-ready'));

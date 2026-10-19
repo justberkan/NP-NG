@@ -53,6 +53,8 @@ yedek kullanır):
 - `sessiz-1`: ses kapalıyken: "Aç sesimi, biraz dalga geçeceğim."
 - `haftalik-1`–`haftalik-2`: "Al bakalım, dededen kötü gün tazminatı."
 - `bonus-1`–`bonus-3`: haftalık bonus kısa açıklaması.
+- `don-1`–`don-2` (2026-10-20): 4 dede donu düşünce: "Hey! O benim donum! Al on bedava çevirme, geri ver onu." vb.
+- `satin-1`–`satin-2` (2026-10-20): bedava çevirme satın alınınca: "Parayla bedava alıyor, ahahah!" vb.
 
 **Ses yalnızca oyuncu sayfada ilk kez tıkladıktan sonra çalar** (tarayıcı
 kısıtı). "Dedenin sesi" kutucuğu kapalıyken ne mp3 ne speechSynthesis konuşur;
@@ -134,3 +136,34 @@ node tests/casino-ui.cjs    # yalnız tema testi
 - Sayfada yapılan küçük değişiklikler: bahis basamakları 10 TL'den başlar (yeni hesap 31 TL), `stopAuto`/`spinning`/`weeklyStatus`
   API'ye eklendi, bonus adım ödemeleri hesaplanan 5000x tavanını aşamaz, çevrimdışı bonus mesajı.
 - Test: `tests/casino-rtp.cjs` (npm test kapısı: RTP %95–97, near-miss kapalı), `tests/casino-dede.cjs` (oyun içi para/bonus/çıkış).
+
+## Bedava çevirme + düşme animasyonu (Claude, 2026-10-20 · build 202610200230 · Berkan isteği)
+
+- **Animasyon:** dönen/bulanık makara kaldırıldı. Çevirince eski taşlar aşağı düşüp çıkar, yenileri tahtanın üstünden
+  düşer; her sütun alttan üste dolar, sütunlar soldan sağa kısa arayla (hepsi neredeyse aynı anda). Kazanan taşlar
+  patlar, yalnız üstlerindeki taşlar kayar ve boşluğa yukarıdan yeni taş gelir.
+- **Dede donu (scatter):** eski şimşek simgesi yerine puanlı, yamalı dede donu. Ekrana aynı anda **4+ don** düşerse
+  **10 bedava çevirme** (eskiden 15). Bedava çevirmede 3+ don = +5 çevirme. Çarpan küreleri turu boyunca birikir.
+- **Bedava çevirme satın al:** üstteki pembe düğme. Fiyat **10 × bahis** (100 TL bahiste 1.000 TL), 10 çevirme.
+  İlk basış "EMİN MİSİN?" der, 3,5 sn içinde ikinci basış satın alır (yanlışlıkla büyük harcama olmasın).
+- **Ekonomi:** satın alınan tur kendi fiyatının ortalama ~%96'sını geri verir (normal oyunla aynı). Doğal (4 don ile)
+  tur daha cömerttir (~26× bahis); satın alınan tur ~9,6× bahis. Satın alınan tur doğal turla aynı güçte olsaydı
+  10× fiyatla her alışta ortalama ~2,6 kat kâr olurdu ve sanal para ekonomisi patlardı. Doğal turun gücünde bir satın
+  alma isteniyorsa fiyat ~27× bahis olmalı (karar Berkan'ın).
+- Doğal bedava çevirme artık daha sık: ~1/209 çevirme (eskiden ~1/398).
+- Çarpan küresi yalnız ilk tahtada düşer (sonradan düşen taşlarda küre yok; zaten sayılmıyorlardı). Kazanç varsa
+  küreler en sonda çakar.
+
+`node tests/casino-rtp.cjs` (2026-10-20):
+
+```
+düz simülasyon (1M, tohum 20261019) : %96,60   bedava çevirme 1/209, en büyük 2.830x
+katmanlı tahmin (kapı)              : %96,46   (bant %95–97)
+satın alma (100 bin kez, fiyat 10x)  : %96,32   ortalama dönüş 9,63x, en büyük 248x (bant %95–97,5)
+```
+
+Kapı neden katmanlı: jackpot (1/50.000) ve efsane (1/6.700) kategorileri düz simülasyonu 1M çevirmede ±%1,3
+oynatıyor; kod değişip rastgele sayı sırası kayınca kapı şans eseri geçip kalabiliyordu. Katmanlı tahmin her
+kategoriyi kendi içinde yeterince çevirip olasılığıyla tartar (aynı oyun, daha kesin ölçüm).
+
+Test: `tests/casino-dede.cjs` satın alma (onay, 10× düşüş, kazanç oyuna), yetersiz bakiye, 4 don ile doğal tetikleme.

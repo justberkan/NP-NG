@@ -340,3 +340,17 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Test: npm test baştan sona PASS (çıkış 0, 149 PASS, 0 FAIL); voice 7/7 (iki tarayıcı: bas-konuş, açık mikrofon, Duy kapalı/açık, mikrofon kapatma).
 - NOT: server.js değişti → yan bilgisayarda GUNCELLE.bat; oyuncular Ctrl+F5 (eski sürümdeki oyuncu yeniyi duyamaz). Kulaklık önerilir (hoparlörde yankı yapabilir).
 - Yedek: _yedek/claude-0140/
+
+### 2026-10-20 02:30 · Claude · build 202610200230 zombi-dede-admin-v1
+- İşlem: Berkan isteği: komut satırından adminlik; açık dünya çok boş → Minecraft zombileri; DEDE slot düşme animasyonu, dede donu ile 10 bedava çevirme, bedava çevirme satın alma (10 × bahis).
+- Eklendi: admin.cjs + ADMIN.bat (`ADMIN.bat ver/al/liste <kullanıcı>` → data/admins.txt). Sunucu admins.txt'yi 3 sn'de bir okur, bağlı oyuncunun admin düğmesi yeniden bağlanmadan açılır/kapanır ('admf'). İnternetten (tünel başlığı olan) bağlantı hiçbir zaman "yerel admin" sayılmaz.
+- Eklendi: açık dünyaya 120 yaban Minecraft zombi sürüsü (2-4'lük, toplam 361 zombi; mob sayısı 348 → 709). Ayrı tohum, OW.mobs SONUNA eklenir: eski kamp mobları aynı sırada (çevrimiçi eşleme bozulmaz, testte parmak izi). Köye, kampların ve engellerin üstüne düşmez. Minecraft modeliyle çizilir, 9 m'ye yaklaşanı sürü halinde kendiliğinden kovalar, köye (30 m) girince bırakır; ölünce kısa ceset. Mini haritada küçük nokta, büyük haritada yok.
+- Değişti: Minecraft modelinin ragdoll'u her modda kısa cesede düşer (açık dünyada insan iskeleti arayıp çökmesin); ceset zemin yüksekliğinde devrilir.
+- Değişti (DEDE): dönen/bulanık makara yerine düşme animasyonu (eski taşlar aşağı düşer, yenileri yukarıdan; sütunlar alttan üste dolar, hepsi neredeyse aynı anda; kazanan taşlar patlar, üsttekiler kayar). Scatter = dede donu; 4+ don → 10 bedava çevirme (eskiden 15), bedava çevirmede her çevirme tahtada oynanır, üstte sayaç/çarpan/toplam. "BEDAVA ÇEVİRME AL" üstte: fiyat 10 × bahis, iki kez bas onayı. Yeni replikler don-1/2, satin-1/2. Dar telefonda (≤560 px) sayfa ekrana sığar.
+- Ekonomi: satın alınan tur fiyatının ~%96'sını geri verir (simülasyonla ayarlı, ort. 9,6× bahis); doğal tur ~26× bahis ve artık ~1/209 çevirmede (eskiden ~1/398). Ana RTP katmanlı tahminle %96,46, düz 1M %96,60. Düşüşle gelen yeni taşlarda çarpan küresi yok (zaten sayılmıyordu).
+- Değişti (test): tests/casino-rtp.cjs kapısı katmanlı tahmin (düz simülasyon jackpot yüzünden ±%1,3 oynuyordu) + satın alma RTP kapısı (%95–97,5).
+- Çıkarıldı: DEDE'de bulanık makara dönüşü (Berkan: "dönme getirme").
+- Dosyalar: admin.cjs, ADMIN.bat, server.js, js/admin.js, js/world.js, js/owui.js, js/wave-corridor-visuals.js, assets/casino/dede/index.html, index.html, OKU-BENI.txt, docs/casino/BENIOKU.md, tests/admin-cli.cjs, tests/ow-zombies.cjs, tests/casino-rtp.cjs, tests/casino-dede.cjs, tests/run.cjs
+- Test: npm test baştan sona PASS (çıkış 0, 173 PASS, 0 FAIL); yeni: admin-cli 8/8 (internetten giren admin değil, ver/al 3 sn içinde, yanlış ad reddi), ow-zombies 10/10 (eski mob parmak izi aynı, yerleşim, model, kovalama, köyde bırakma, ceset, ganimet), casino-dede +5 (satın alma onayı/10× düşüş/kazanç, yetersiz bakiye, 4 don ile doğal tetik), casino-rtp katmanlı %96,46 + satın alma %96,32. Gerçek iOS Safari ve gerçek telefon denenmedi.
+- NOT: server.js değişti → bu bilgisayarda DURDUR.bat sonra SUNUCU-INTERNET.bat; oyuncular Ctrl+F5. Yan bilgisayar: GUNCELLE.bat (sonra).
+- Yedek: _yedek/claude-0230/
