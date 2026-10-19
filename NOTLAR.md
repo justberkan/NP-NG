@@ -276,3 +276,5 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 2026-10-19 12:40 · Claude · 202610191230 dede-v1 · Kimi'nin DEDE slotu (PR #10) oyuna eklendi: Kumarhane → DEDE ⚡; para yalnız oyunda, haftalık kayıp bonusu (%10, tavan 25.000, çevrimdışı yok), RTP %96,28 (near-miss kapalı). npm test PASS.
 
 - 2026-10-19 13:40 · Claude · 202610191325 suzulme-naruto-v1 · Paraşüt titremesi düzeltildi (süzülme yüksek FPS'te sürekli aç-kapa yapıyordu); Naruto koşusu yalnız açık dünyada, diğer modlarda Shift normal hızlı koşu. Berkan'ın 19 Ekim listesi takip tablosunda (A-14…A-20, Y-01).
+
+- 2026-10-19 13:50 · Claude · sunucu paketi · Yan bilgisayar için kurulum gerektirmeyen tam sunucu paketi (Node + tünel içinde). Başlatma betikleri artık klasördeki node\node.exe'yi kullanıyor ve hatada pencere açık kalıyor.

@@ -294,3 +294,10 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Eklendi: tests/glide-sprint.cjs (11 kontrol; eski kodda A-16 kontrollerinin düştüğü doğrulandı), package.json test:glide. Değişti: js/player.js, js/rig.js, index.html (build 1325, 60 ?v), tests/run.cjs, docs/HATA_DENETIMI_20261017.md (A-14…A-20, Y-01 eklendi; A-16/A-20 bitti). Çıkarıldı: yok.
 - Test: npm test baştan sona PASS (çıkış 0, 109 PASS, 0 FAIL) — sunucu vuruş, HTTP, hareket, smoke, atmosfer, audit 7 mod + lobi, offline-save, DEDE RTP + casino-dede, glide-sprint 11/11. Tam çıktı test-results/npm-test-suzulme-1325.txt.
 - Yedek: _yedek/claude-suzulme-1325/
+
+### 2026-10-19 13:50 İstanbul · Claude · sunucu paketi (oyun kodu değişmedi, build 1325 aynı)
+- İşlem: Berkan yan bilgisayarı sunucu yapıyor; USB ile kopyalanan klasörde bağlantı kurulamadı. Kurulum gerektirmeyen tam sunucu paketi hazırlandı ve sohbete gönderildi: NPNG-SUNUCU-1325.zip (109 MB).
+- Paket: oyun dosyaları (main ile aynı), node\node.exe (Node 22.23.1, OpenJS Foundation imzalı), cloudflared.exe (Cloudflare imzalı), data\accounts.json (ana bilgisayardaki son kopya; yeni sunucu açılışta 1e9 sızıntısını onarır), KURULUM.txt.
+- Değişti: SUNUCU-BASLAT.bat ve sunucu-link.ps1 — klasördeki node\node.exe varsa onu kullanır (Node kurulumu gerekmez); zip içinden çalıştırılırsa ve beklenmeyen hatada pencere kapanmadan sebebi yazar. .gitignore'a node/ eklendi.
+- Test: paket klasöründen sunucu açıldı; gerçek hesap kopyasında onarım çalıştı (neggastr → 10.548, jejjejr → 31); audit 7 mod + lobi 99 tıklama paket sunucusuna karşı PASS (0 sayfa hatası, 0 eksik dosya). PowerShell betiği sözdizimi denetimi PASS. Windows'ta .bat/.ps1 gerçek çalıştırma Berkan'da.
+- Yedek: _yedek/claude-sunucu-paketi/

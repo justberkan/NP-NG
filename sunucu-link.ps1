@@ -1,9 +1,29 @@
 $ErrorActionPreference = 'Stop'
+# Beklenmeyen hata olursa pencere aninda kapanmasin: hatayi goster ve bekle
+trap {
+  Write-Host ''
+  Write-Host ('HATA: ' + $_) -ForegroundColor Red
+  Write-Host 'Bu pencerenin fotografini Claude''a gonder.' -ForegroundColor Yellow
+  Read-Host 'Cikmak icin Enter'
+  exit 1
+}
 Set-Location $PSScriptRoot
 $port = 3000
-if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+if (-not (Test-Path (Join-Path $PSScriptRoot 'server.js'))) {
+  Write-Host 'server.js bulunamadi. Zip''i once bir klasore CIKAR, sonra bu dosyayi o klasorden calistir.' -ForegroundColor Red
+  Read-Host 'Cikmak icin Enter'
+  exit
+}
+# Tam sunucu paketinde node\node.exe hazir gelir (kurulum gerekmez); yoksa bilgisayarda kurulu Node.js
+$node = Join-Path $PSScriptRoot 'node\node.exe'
+if (-not (Test-Path $node)) {
+  $cmd = Get-Command node -ErrorAction SilentlyContinue
+  $node = if ($cmd) { $cmd.Source } else { $null }
+}
+if (-not $node) {
   Write-Host ''
-  Write-Host 'Node.js kurulu degil. Acilan sayfadan LTS surumunu indirip kur, sonra bu dosyayi tekrar calistir.' -ForegroundColor Yellow
+  Write-Host 'Node.js bulunamadi: bu klasorde node\node.exe yok, bilgisayarda da kurulu degil.' -ForegroundColor Yellow
+  Write-Host 'Tam sunucu paketini kullan ya da acilan sayfadan LTS surumunu kur.' -ForegroundColor Yellow
   Start-Process 'https://nodejs.org'
   Read-Host 'Cikmak icin Enter'
   exit
@@ -15,7 +35,7 @@ if (-not (Test-Path '.\cloudflared.exe')) {
 }
 # Eski tunel ve sunucu surecleri kalmasin (eski link zaten gecersiz olur)
 Get-Process cloudflared -ErrorAction SilentlyContinue | Stop-Process -Force
-$srv = Start-Process node -ArgumentList 'server.js', $port -PassThru -WindowStyle Minimized
+$srv = Start-Process $node -ArgumentList 'server.js', $port -WorkingDirectory $PSScriptRoot -PassThru -WindowStyle Minimized
 
 # 1) Sunucu gercekten ayaga kalkti mi?
 $local = $false

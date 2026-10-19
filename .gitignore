@@ -12,3 +12,4 @@ cloudflared.exe
 LINK.txt
 .DS_Store
 Thumbs.db
+node/
