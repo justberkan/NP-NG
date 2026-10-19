@@ -331,3 +331,12 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Test: npm test baştan sona PASS (çıkış 0, 142 PASS, 0 FAIL): sunucu vuruş, HTTP, hareket, smoke, atmosfer, audit 7 mod + lobi, offline-save, DEDE RTP + casino-dede, glide-sprint, mobile 12/12, ow-slam-auto 8/8, ow-loot 13/13.
 - NOT: server.js değişti → yan bilgisayarda GUNCELLE.bat (sunucu yeniden başlar, link değişir); oyuncular Ctrl+F5.
 - Yedek: _yedek/claude-0050/
+
+### 2026-10-20 01:45 İstanbul · Claude · build 202610200140 ses-sunucu-v1
+- Sorun (Berkan): "oyun içi ses gitmiyor". Sesli sohbet WebRTC eşler arası ve yalnız STUN ile çalışıyordu; mobil hat / CGNAT / bazı modemlerde eşler doğrudan bağlanamıyor (TURN yok; oyun sunucusu tünelden yalnız HTTP/WS geçiriyor). Ayrıca dinlemek için de mikrofon açmak gerekiyordu ve mobilde ses düğmesine ulaşılamıyordu (yalnız Enter ile açılan kutudaydı).
+- Düzeltme: ses artık oyunun kendi WebSocket'inden gider: mikrofon → 16 kHz mono → μ-law 8 bit → 60 ms paket (~21 KB/sn, yalnız konuşurken; sessizlik kapısı) → sunucu aynı odadaki, sesi kapatmamış herkese iletir (saniyede en fazla 25 paket) → WebAudio ile ~80 ms tamponla çalınır. Oyun bağlanabiliyorsa ses de gider.
+- Mikrofon kapalıyken de diğerleri duyulur; yeni "🔈 Duy: Açık/Kapalı" düğmesi gelen sesi keser (sunucu da yollamaz). Konuşanın adı "🔊 ad" olarak görünür. Mobilde ses düğmeleri hep görünür; dokunmatikte 🎤 Kapalı ↔ Açık mikrofon.
+- Değişti: js/chat.js (eşler arası WebRTC kaldırıldı), server.js ('va' ses aktarma, 'vm' gelen sesi kapat; 'vs' sinyali artık kullanılmıyor), css/style.css, index.html (build 0140, 60 ?v), tests/run.cjs, package.json. Eklendi: tests/voice.cjs (iki gerçek tarayıcı, sahte mikrofon; 7 kontrol).
+- Test: npm test baştan sona PASS (çıkış 0, 149 PASS, 0 FAIL); voice 7/7 (iki tarayıcı: bas-konuş, açık mikrofon, Duy kapalı/açık, mikrofon kapatma).
+- NOT: server.js değişti → yan bilgisayarda GUNCELLE.bat; oyuncular Ctrl+F5 (eski sürümdeki oyuncu yeniyi duyamaz). Kulaklık önerilir (hoparlörde yankı yapabilir).
+- Yedek: _yedek/claude-0140/

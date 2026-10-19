@@ -171,7 +171,7 @@ function onText(c, s) {
   }
   if (m.t === 'quit') { if (c.rm) useRoom(c.rm); leave(c); owLeave(c); return; }
   if (c.rm && c.joined) useRoom(c.rm);
-  if (m.t === 'chat' || m.t === 'vj' || m.t === 'vs' || m.t === 'vl') return chatMsg(c, m, now);
+  if (m.t === 'chat' || m.t === 'vj' || m.t === 'va' || m.t === 'vm') return chatMsg(c, m, now);
   if (m.t[0] === 'a' && m.t !== 'auth') { if (['alist', 'agive', 'aclr', 'akick', 'atools', 'aheal'].includes(m.t)) return admMsg(c, m); }
   if (m.t[0] === 'o' && owMsg(c, m, now)) return;
   if (m.t[0] === 'f' && frMsg(c, m)) return;
@@ -401,11 +401,16 @@ function chatMsg(c, m, now) {
     sendRoom(c, { t: 'vp', id: r.id, on: c.voice }, c);
     return;
   }
-  if (m.t === 'vs') { // sinyal aktar
-    const to = r.map.get(m.to | 0); if (!to || to === c || !c.voice) return;
-    const d = JSON.stringify(m.d || {}); if (d.length > 8000) return;
-    send(to, { t: 'vs', from: r.id, d: m.d });
+  /* Sesli sohbet sunucudan geçer (2026-10-20): eşler arası WebRTC mobil hat/CGNAT'ta bağlanamıyordu.
+     İstemci 60 ms μ-law paketleri yollar (~21 KB/sn, yalnız konuşurken); sunucu aynı odadaki, sesi kapatmamış herkese iletir. */
+  if (m.t === 'va') {
+    if (!c.voice || typeof m.d !== 'string' || m.d.length > 2000) return;
+    if (now - (c.vaT || 0) > 1000) { c.vaT = now; c.vaN = 0; } if (++c.vaN > 25) return; // saniyede en fazla 25 paket
+    const o = { t: 'va', from: r.id, d: m.d };
+    for (const p of r.map.values()) if (p !== c && !p.vmute) send(p, o);
+    return;
   }
+  if (m.t === 'vm') { c.vmute = !!m.on; return; } // gelen sesi kapat/aç
 }
 
 function leave(c) {

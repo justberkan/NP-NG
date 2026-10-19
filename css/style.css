@@ -484,6 +484,9 @@ body.npcnear.mow #be.owonly,body.tedit #be.owonly{display:flex}
 #chm{background:rgba(8,12,20,.7);color:#cfe;border:1px solid #456;border-radius:6px;padding:5px 9px;font:12px system-ui;cursor:pointer;display:none}
 #chb.typing #chm,#chm.on{display:block}
 #chm.on{border-color:#2ee59d;color:#2ee59d}
+#chh{background:rgba(8,12,20,.7);color:#cfe;border:1px solid #456;border-radius:6px;padding:5px 9px;font:12px system-ui;cursor:pointer;display:none;white-space:nowrap}
+#chb.typing #chh,#chh.mute{display:block}#chh.mute{border-color:#ff6a5a;color:#ff8a7a}
+#chb.tch #chm,#chb.tch #chh{display:block} /* mobil: Enter yok, ses düğmeleri hep görünür (2026-10-20) */
 #chv{color:#2ee59d;font-size:11px;margin-top:3px;text-shadow:0 1px 2px #000}
 
 /* can barı */
