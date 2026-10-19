@@ -9,6 +9,7 @@ function admMsg(m){
   else if(m.k==='clrdebt'){SV.eco.debts=[];save();alert2('Admin borçlarını sildi')}
   return true;
  }
+ if(m.t==='admf'){MPL.admin=!!m.on;admBtn();alert2(m.on?'Admin yetkisi verildi (🛡 Admin düğmesi lobide)':'Admin yetkin kaldırıldı');return true}
  if(m.t==='kickedby'){MPL.manual=true;MPL.reloading=true;alert2('Admin seni oyundan attı'+(m.min?' ('+m.min+' dk giremezsin)':''));setTimeout(()=>location.reload(),1800);return true}
  return false;
 }

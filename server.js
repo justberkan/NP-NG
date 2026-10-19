@@ -422,7 +422,15 @@ function leave(c) {
 }
 
 /* ---------- Admin: sunucu PC'sinden (localhost) giren hesap ya da data/admins.txt'teki isimler ---------- */
-const ADMINS = new Set(); try { for (const l of fs.readFileSync(path.join(DATA, 'admins.txt'), 'utf8').split(/\r?\n/)) if (l.trim()) ADMINS.add(l.trim().toLowerCase()); } catch (e) { }
+const ADMINS = new Set(); let admT = -1;
+/* data/admins.txt: ADMIN.bat / node admin.cjs ile düzenlenir; 3 sn'de bir değişiklik okunur, bağlı oyuncunun yetkisi anında güncellenir (2026-10-20) */
+function loadAdmins() {
+  let t = 0; try { t = fs.statSync(path.join(DATA, 'admins.txt')).mtimeMs; } catch (e) { }
+  if (t === admT) return; admT = t; ADMINS.clear();
+  try { for (const l of fs.readFileSync(path.join(DATA, 'admins.txt'), 'utf8').split(/\r?\n/)) if (l.trim()) ADMINS.add(l.trim().toLowerCase()); } catch (e) { }
+  for (const [k, c] of users) { const a = !!c.local || ADMINS.has(k); if (a !== !!c.admin) { c.admin = a; if (!a) c.adtools = null; send(c, { t: 'admf', on: a }); console.log('[admin] ' + (c.acc ? c.acc.name : k) + (a ? ' admin yapıldı' : ' adminlikten çıkarıldı')); } }
+}
+loadAdmins(); setInterval(loadAdmins, 3000);
 const BANS = new Map(); // anahtar -> bitiş zamanı
 function debtOf(sv) { let t = 0; if (sv && sv.eco && Array.isArray(sv.eco.debts)) for (const d of sv.eco.debts) t += Math.max(0, (d.total || 0) - (d.paid || 0)); return Math.round(t); }
 function admMsg(c, m) {
