@@ -73,7 +73,7 @@ function owMini(){
   let al=0;for(const m of cm.mem)if(m.state!=='dead')al++;
   if(!al)continue;
   c.fillStyle=cm.boss?'#b040ff':lvCol(cm.L);c.strokeStyle='#000a';c.lineWidth=1.5;
-  c.beginPath();c.arc(x,y,cm.boss?4.5:3.5,0,6.2832);c.fill();c.stroke();
+  c.beginPath();c.arc(x,y,cm.boss?4.5:cm.wild?2.2:3.5,0,6.2832);c.fill();c.stroke();
  }
  for(const m of OW.act){
   if(m.state!=='aggro')continue;
@@ -98,6 +98,7 @@ function owBig(){
  for(const l of lab)c.fillText(l[0],(l[1]+OWH)*sc,(l[2]+OWH)*sc);
  c.shadowBlur=0;
  for(const cm of OW.camps){
+  if(cm.wild)continue; /* yaban zombi sürüleri büyük haritayı doldurmasın, yalnız mini haritada */
   let al=0;for(const m of cm.mem)if(m.state!=='dead')al++;
   if(!al)continue;
   const x=(cm.x+OWH)*sc,y=(cm.z+OWH)*sc;

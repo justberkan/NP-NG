@@ -31,11 +31,12 @@ const _wcMcAnim=animHuman;animHuman=function(h,c,dt){
 // Eski ragdoll'lar 9 sn fizik çalıştırıyordu. Koridorda en çok iki kısa ceset.
 const WCMC_CORPSES=[];let wcRagClock=-10;
 const _wcMcRagdoll=spawnRagdoll;spawnRagdoll=function(h,...args){
- if(mode!=='wc'||!WCG.pool.some(e=>e.rig===h))return _wcMcRagdoll(h,...args);
- if(h.wcMC){const root=new THREE.Group(),model=h.visual.clone(true);h.root.updateMatrixWorld(true);h.root.matrixWorld.decompose(root.position,root.quaternion,root.scale);root.add(model);S.add(root);WCMC_CORPSES.push({root,t:0});while(WCMC_CORPSES.length>2)S.remove(WCMC_CORPSES.shift().root);return null}
+ /* Minecraft modelinin insan iskeleti yok: her modda (açık dünya yaban zombileri dahil) kısa devrilen ceset olur */
+ if(!(h&&h.wcMC)&&(mode!=='wc'||!WCG.pool.some(e=>e.rig===h)))return _wcMcRagdoll(h,...args);
+ if(h.wcMC){const root=new THREE.Group(),model=h.visual.clone(true);h.root.updateMatrixWorld(true);h.root.matrixWorld.decompose(root.position,root.quaternion,root.scale);root.add(model);S.add(root);WCMC_CORPSES.push({root,t:0,y0:root.position.y});while(WCMC_CORPSES.length>(mode==='wc'?2:6))S.remove(WCMC_CORPSES.shift().root);return null}
  if(clock-wcRagClock<.18)return null;wcRagClock=clock;while(RAGS.length+GLBDEAD.length>=2){if(RAGS.length)S.remove(RAGS.shift().root);else S.remove(GLBDEAD.shift().g)}const r=_wcMcRagdoll(h,...args);if(r)r.t=r.glb?7.6:6.6;return r;
 };
-function wcCorpseTick(dt){for(let i=WCMC_CORPSES.length-1;i>=0;i--){const c=WCMC_CORPSES[i];c.t+=dt;c.root.rotation.x=Math.min(Math.PI/2,c.t*3);c.root.position.y=-Math.max(0,c.t-1.5)*.5;if(c.t>2.4){S.remove(c.root);WCMC_CORPSES.splice(i,1)}}}
+function wcCorpseTick(dt){for(let i=WCMC_CORPSES.length-1;i>=0;i--){const c=WCMC_CORPSES[i];c.t+=dt;c.root.rotation.x=Math.min(Math.PI/2,c.t*3);c.root.position.y=(c.y0||0)-Math.max(0,c.t-1.5)*.5;if(c.t>2.4){S.remove(c.root);WCMC_CORPSES.splice(i,1)}}}
 function wcWarmPool(dt){
  if(WCG.ended||!['spawner','round'].includes(WCG.game.state)||WCG.pool.length>=WC.maxAlive)return;WCG.warmCd=(WCG.warmCd||0)-dt;if(WCG.warmCd>0)return;WCG.warmCd=.18;const e=wcCreateMinecraftEntity();WCG.pool.push(e);
 }

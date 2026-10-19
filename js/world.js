@@ -52,6 +52,9 @@ const MT={
  tox:{n:'Zehirli Mutant',hp:1.3,dmg:1.15,sp:.95,cols:CB({j:0x3a5a2a,j2:0x32502a,pa:0x2a3a22,v:0x44662c,v2:0x34502a,sk:0x6fa040,ey:0xd0ff40,pu:0x80c000,sc:1.12,bo:0x1a2418,bd:spineSp(0xd8e890,6,.2).concat(shSp(0xd8e890,.16))})},
  lav:{n:'Lav Canavarı',hp:1.2,dmg:1.15,sp:.95,cols:CB({j:0x4a1e16,j2:0x3e1812,pa:0x2c1410,v:0x5a2418,v2:0x3a1810,sk:0x7a2a1a,ey:0xffa020,pu:0xff4000,sc:1.15,bo:0x1a0c08,bd:shSp(0xff7a1a,.2)})},
  mut:{n:'Kızıl Mutant',hp:1.35,dmg:1.25,sp:.95,cols:CB({j:0x5a2820,j2:0x4a201a,pa:0x2a1612,v:0x7a3224,v2:0x5a2418,sk:0x8a3a2c,ey:0xff2a1a,pu:0xff2a1a,sc:1.2,bo:0x1a0c08,bd:spineSp(0xd8c8b0,7,.22).concat(shSp(0xd8c8b0,.22)),hd:horns(0xd8c8b0,.16)})},
+ /* Minecraft zombisi (açık dünya yaban sürüleri, Berkan 2026-10-20): model assets/corridor/minecraft_zombie.glb (CC BY 4.0, JoohnElkes);
+    model yüklenmeden etkinleşen olursa aynı renklerde bloklu insan çizilir. hostile: yakına geleni kendisi kovalar */
+ mcz:{n:'Minecraft Zombi',hp:.9,dmg:.95,sp:1.05,mc:true,hostile:9,cols:CB({j:0x2f9a9a,j2:0x2a8c8c,pa:0x3b3f9a,v:0x2f9a9a,v2:0x2a8c8c,sk:0x5f9a4a,ey:0x101010,pu:0x101010,bo:0x4a4a4a,nohat:1})},
  /* zırhlı dev: kızıl gözlü, göğsünde parlayan çekirdek, omuz zırhı */
  gol:{n:'Zırhlı Dev',hp:2.1,dmg:1.5,sp:.7,cols:CB({j:0x2b2d33,j2:0x24262c,pa:0x1e2025,v:0x3a3d45,v2:0x2a2c33,sk:0x5a4a48,ey:0xff2a1a,pu:0xff4a30,sc:1.55,bo:0x15161a,nohat:1,
   bd:[{w:.14,h:.14,d:.03,x:0,y:.33,z:.13,c:0xff3020},{w:.16,h:.14,d:.16,x:-.28,y:.52,z:0,c:0x4a4e58},{w:.16,h:.14,d:.16,x:.28,y:.52,z:0,c:0x4a4e58},{w:.1,h:.1,d:.1,x:-.28,y:.62,z:0,c:0x5a5f6a},{w:.1,h:.1,d:.1,x:.28,y:.62,z:0,c:0x5a5f6a}].concat(spineSp(0x6a4a44,5,.18)),
@@ -188,8 +191,42 @@ function owBuild(){
   }
  }
  OW.grid=gr;
+ owWildPacks(gr);
  owBuildMap();
  OW.built=true;
+}
+/* ----- Yaban Minecraft zombi sürüleri (Berkan 2026-10-20: "açık dünya çok boş, Minecraft zombilerinden ekleyelim") -----
+   Kamplar arasındaki boşluklara 2-4'lük sürüler. AYRI rastgele tohum ve OW.mobs SONUNA eklenir: eski mobların sırası
+   (çevrimiçi eşleme bu sıraya göre) değişmez. Köye (45 m) girmez, kampların, ağaçların, kayaların üstüne düşmez. */
+function owWildPacks(gr){
+ const r=mul32(20261020),camps=OW.camps.slice(),packs=[];
+ const blocked=(x,z,pad)=>{
+  const gx=Math.floor((x+gr.o)/gr.cs),gz=Math.floor((z+gr.o)/gr.cs);
+  if(gx<0||gz<0||gx>=gr.n||gz>=gr.n)return true;
+  for(const b of gr.c[gz*gr.n+gx]||[])if(x>b.x1-pad&&x<b.x2+pad&&z>b.z1-pad&&z<b.z2+pad)return true;
+  return false;
+ };
+ for(let t=0;packs.length<120&&t<12000;t++){
+  const x=(r()*2-1)*(OWH-30),z=(r()*2-1)*(OWH-30);
+  if(Math.hypot(x,z)<45||blocked(x,z,2))continue;
+  if(camps.some(c=>Math.hypot(c.x-x,c.z-z)<22)||packs.some(q=>Math.hypot(q.x-x,q.z-z)<24))continue;
+  packs.push({x,z});
+ }
+ const def=MT.mcz;
+ for(const c of packs){
+  const L0=owZoneL(c.x,c.z),camp={id:OW.camps.length,x:c.x,z:c.z,L:L0,bi:owBiome(c.x,c.z),boss:false,mem:[],wild:true};
+  const cnt=2+Math.floor(r()*3);
+  for(let i=0;i<cnt;i++){
+   let hx=c.x,hz=c.z;
+   for(let k=0;k<6;k++){const a=r()*6.2832,rr=1.5+r()*3.5;hx=c.x+Math.cos(a)*rr;hz=c.z+Math.sin(a)*rr;if(!blocked(hx,hz,.8))break;hx=c.x;hz=c.z}
+   const L=Math.max(1,L0+Math.floor(r()*3)-1),max=Math.round((60+L*38)*def.hp);
+   const m={id:OW.mobs.length,camp,tk:'mcz',def,L,boss:false,hp:max,max,x:hx,z:hz,hx,hz,yaw:r()*6.28,state:'idle',tx:null,tz:null,wt:r()*4,respT:0,
+    dmg:(4+L*.65)*def.dmg,dmgR:(3+L*.5)*def.dmg,spd:Math.min(4.9,(2.6+Math.min(1.6,L*.04))*def.sp),
+    sc:.95+r()*.1,name:def.n,g:null,rig:null,cd:r(),atk:0,flinch:0,kk:0,flash:0,adsT:0,rs:0,dir:1,ph0:r()*10,mob:true,team:2,kind:'m',agT:0};
+   camp.mem.push(m);OW.mobs.push(m);
+  }
+  OW.camps.push(camp);
+ }
 }
 /* Harita için biyom resmi (3 m/px) */
 function owBuildMap(){
@@ -238,7 +275,9 @@ function mstep(m,dx,dz){
 function owAct(m){
  const def=m.def,cols=Object.assign({},def.cols);
  cols.sc=m.sc;
- const rig=mkHuman(cols,!def.r);
+ const mc=def.mc&&typeof wcMinecraftRig==='function'?wcMinecraftRig():null;
+ if(mc)mc.root.scale.setScalar(m.sc);
+ const rig=mc||mkHuman(cols,!def.r);
  if(def.r)holderSet(rig,def.wk,SKIN('g0'));
  m.rig=rig;m.g=rig.root;rig.root.userData={tg:1,e:m};
  rig.root.position.set(m.x,owH(m.x,m.z),m.z);rig.root.rotation.y=m.yaw;
@@ -462,7 +501,7 @@ function owMob(m,dt){
   if(m.g)m.g.position.set(m.x,owH(m.x,m.z),m.z);return;
  }
  if(m.state==='aggro'){
-  if(!T.ok||d>85||Math.hypot(m.x-m.camp.x,m.z-m.camp.z)>(m.boss?BOSS_R+10:65))m.state='return';
+  if(!T.ok||d>85||Math.hypot(m.x-m.camp.x,m.z-m.camp.z)>(m.boss?BOSS_R+10:65)||(m.camp.wild&&Math.hypot(T.x,T.z)<30))m.state='return';
   else{
    const nx=dx/d,nz=dz/d;
    m.cd-=dt;
@@ -502,7 +541,8 @@ function owMob(m,dt){
   else{m.yaw=angLerp(m.yaw,Math.atan2(hx,hz),Math.min(1,8*dt));mstep(m,hx/hd*5*dt,hz/hd*5*dt)}
  }else if(m.state==='idle'){
   m.wt-=dt;
-  if(m.wt<=0){m.wt=2.5+Math.random()*5;if(Math.random()<.6){m.tx=m.hx+rnd(-3,3);m.tz=m.hz+rnd(-3,3)}else m.tx=null}
+  if(m.wt<=0){m.wt=2.5+Math.random()*5;const wr=m.camp.wild?7:3;if(Math.random()<.6){m.tx=m.hx+rnd(-wr,wr);m.tz=m.hz+rnd(-wr,wr)}else m.tx=null}
+  if(def.hostile&&p.dead<=0&&Math.hypot(p.x,p.z)>32&&Math.hypot(p.x-m.x,p.z-m.z)<def.hostile&&Math.abs(p.y-gh)<4)owAggro(m);
   if(m.tx!=null){
    const wx=m.tx-m.x,wz=m.tz-m.z,wd=Math.hypot(wx,wz);
    if(wd<.3)m.tx=null;else{m.yaw=angLerp(m.yaw,Math.atan2(wx,wz),Math.min(1,5*dt));mstep(m,wx/wd*1.1*dt,wz/wd*1.1*dt)}
@@ -562,7 +602,7 @@ function owUpdate(dt){
  }
  OW.medCd-=dt;OW.perfT=Math.max(0,(OW.perfT||0)-dt);
  owStream(dt);owBossBar();ownTick(dt);
- owLootUpd(dt);owNpcTick(dt);
+ owLootUpd(dt);owNpcTick(dt);if(typeof wcCorpseTick==='function')wcCorpseTick(dt);
  for(let i=OW.act.length-1;i>=0;i--)owMob(OW.act[i],dt);
  for(let i=OW.dead.length-1;i>=0;i--){
   const m=OW.dead[i];m.respT-=dt;
@@ -587,9 +627,11 @@ function owEnter(){
  boxes.length=0;OW.solids.forEach(b=>boxes.push(b));
  boxMeshes.length=0;OW.solids.forEach(b=>boxMeshes.push(b.m));
  BG=OW.grid;OW.root.visible=true;OW.on=true;
+ if(typeof wcLoadMinecraft==='function')wcLoadMinecraft(); /* yaban zombileri için (34 KB, bir kez) */
 }
 function owLeave(){
  for(const m of OW.act.slice())owDeact(m);
+ if(typeof WCMC_CORPSES!=='undefined'){for(const c of WCMC_CORPSES)S.remove(c.root);WCMC_CORPSES.length=0}
  OW.root.visible=false;OW.on=false;BG=null;
  boxes.length=0;OW.arena.boxes.forEach(b=>boxes.push(b));
  boxMeshes.length=0;OW.arena.meshes.forEach(m=>boxMeshes.push(m));
