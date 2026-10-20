@@ -23,6 +23,9 @@ const {createValidator,LIMITS:HIT_LIMITS}=require('./server-hit-validation');
 const HIT=createValidator();
 const SPAWNS = [];
 const WCNET = require('./server-wavecorridor')({send,weapons:WPN});
+const SLNET = require('./server-sociallobby')({send});
+/* Kumarhane kazanç bandı (son 10, herkese yayınlanır) */
+const WINS = [];
 for (const x of [-10, -5, 0, 5, 10]) { SPAWNS.push([x, 24]); SPAWNS.push([x, -24]); }
 
 /* ---------- HTTP: oyun dosyalarını sun ---------- */
@@ -35,6 +38,7 @@ const server = http.createServer((req, res) => {
   try { u = decodeURIComponent((req.url || '/').split('?')[0]); }
   catch (e) { res.writeHead(400); res.end('400'); return; }
   if (u === '/api/info') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify({ game: 'mmofps', players: totalPlayers(), max: MAXP })); return; }
+  if (u === '/api/wins') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify({ wins: WINS })); return; }
   if (u === '/') u = '/index.html';
   const parts = u.split('/');
   const publicPath = u === '/index.html' || /^\/(assets|js|css|lib)\//.test(u);
@@ -75,7 +79,7 @@ server.on('upgrade', (req, sock) => {
   const c = { ip, local: lo, user: null, acc: null, sock, buf: Buffer.alloc(0), frag: null, id: 0, joined: false, seen: Date.now(), msgs: 0, msgT: Date.now() };
   sock.on('data', d => { c.buf = Buffer.concat([c.buf, d]); c.seen = Date.now(); parse(c); });
   conns.add(c);
-  sock.on('close', () => { WCNET.leave(c); leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
+  sock.on('close', () => { SLNET.leave(c); WCNET.leave(c); leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
   sock.on('error', () => { try { sock.destroy(); } catch (e) { } });
 });
 function parse(c) {
@@ -156,6 +160,23 @@ function onText(c, s) {
   let m; try { m = JSON.parse(s); } catch (e) { return; }
   if (!m || typeof m.t !== 'string') return;
   if (m.t.startsWith('wc_')) return WCNET.handle(c,m,now);
+  if (m.t.startsWith('sl_')) return SLNET.handle(c,m,now);
+  if (m.t === 'cwin') { // kumarhane kazanç bandı (ticker): istemciden gelir, herkese yayınlanır
+    if (!c.acc) return;
+    const a = Math.floor(Number(m.amount));
+    if (!isFinite(a) || a <= 0 || a > 1e12) return;
+    if (c.cwinT && now - c.cwinT < 2000) return; c.cwinT = now; // en fazla 2 sn'de bir
+    WINS.unshift({ n: String(c.acc.name).slice(0, 16), a: a });
+    if (WINS.length > 10) WINS.length = 10; // bandın içeriği kısa kalsın
+    for (const o of conns) send(o, { t: 'cwin', n: WINS[0].n, a: WINS[0].a });
+    return;
+  }
+  if (m.t === 'cst') { // oyuncu durumu (arkadaş/lobi listelerinde görünür); yalnız beyaz listedeki değerler
+    if (!c.acc) return;
+    const v = String(m.v || '').slice(0, 24);
+    if (['Kumarhane', 'Yarış', 'Aim Training', ''].includes(v)) c.cst = v;
+    return;
+  }
   if (m.t === 'auth') return doAuth(c, m, now);
   if (m.t === 'save') {
     if (!c.acc || !m.data || typeof m.data !== 'object') return;
@@ -590,7 +611,7 @@ setInterval(() => {
 }, 80);
 
 /* ---------- Arkadaşlar ve aktif oyuncular ---------- */
-const where = c => c.ow ? 'Açık Dünya' : c.joined ? (c.rm && c.rm.kind === 'tm' ? '5v5 Online' : c.rm && c.rm.kind === 'zo' ? 'Zombi Co-op' : 'Arena') : 'Lobi';
+const where = c => c.cst ? c.cst : c.slroom ? 'Sosyal Lobi · ODA ' + c.slroom.code : c.wcroom ? 'Koridor · ODA ' + c.wcroom.code : c.icroom ? 'Inlı Cinlı · ODA ' + c.icroom.code : c.ow ? 'Açık Dünya' : c.joined ? (c.rm && c.rm.kind === 'tm' ? '5v5 Online' : c.rm && c.rm.kind === 'zo' ? 'Zombi Co-op' : 'Arena') : 'Lobi';
 function flFor(c) {
   const a = c.acc, av = k => { const s = ACC[k] && ACC[k].save; return (s && s.av) || 'a0'; };
   const fr = (a.fr || []).map(k => { const o = users.get(k); return [ACC[k] ? ACC[k].name : k, o && o.sock.writable ? 1 : 0, o ? where(o) : '', av(k)]; });

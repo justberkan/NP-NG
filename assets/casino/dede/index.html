@@ -942,5 +942,31 @@ const API={
 if(typeof window!=='undefined')window.NPNG_CASINO=API;
 if(typeof document!=='undefined')document.dispatchEvent(new CustomEvent('npng-casino-ready'));
 </script>
+<!-- Kazanç bandı (ticker): sunucudaki son kazançlar sağdan sola kayar. Kimi sosyal-lobi yaması. -->
+<div id="winband"><div id="wintrack"></div></div>
+<style>
+#winband{position:fixed;left:0;right:0;bottom:0;height:26px;overflow:hidden;z-index:60;
+ background:rgba(8,10,18,.85);border-top:1px solid rgba(255,255,255,.12);pointer-events:none}
+#wintrack{display:inline-block;white-space:nowrap;line-height:26px;padding-left:100%;
+ font:12px/26px system-ui,sans-serif;color:#ffd75e;animation:slw 22s linear infinite;will-change:transform}
+#wintrack b{color:#7dff9a;font-weight:600}
+#wintrack i{font-style:normal;color:#556;margin:0 14px}
+@keyframes slw{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+@media (prefers-reduced-motion:reduce){#wintrack{animation:none;padding-left:12px}}
+</style>
+<script>
+(function(){ /* Son 10 kazanç: önce /api/wins ile dolar, sonra 5 sn'de bir tazelenir. */
+ var track=document.getElementById('wintrack');if(!track)return;
+ var last=[];
+ function fmt(a){return Math.floor(+a||0).toLocaleString('tr-TR')}
+ function draw(){ if(!last.length){track.textContent='';return}
+  var s=last.map(function(w){return w.n+'  <b>'+fmt(w.a)+' TL</b> kazandı'}).join('<i>•</i>');
+  track.innerHTML=s+'<i>•</i>'+s; /* kesintisiz döngü için çift kopya */
+ }
+ function take(j){ if(j&&Array.isArray(j.wins)){last=j.wins.slice(0,10);draw()} }
+ try{fetch('/api/wins').then(function(r){return r.json()}).then(take).catch(function(){})}catch(e){}
+ setInterval(function(){try{fetch('/api/wins').then(function(r){return r.json()}).then(take).catch(function(){})}catch(e){}},5000);
+})();
+</script>
 </body>
 </html>

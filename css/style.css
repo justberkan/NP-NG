@@ -740,3 +740,15 @@ body.kb-cap{cursor:crosshair}
 /* DEDE kumarhane (2026-10-19): iframe #lb içinde sabit, yer tutucunun üstüne oturur */
 #cgdede{height:calc(100vh - 230px);min-height:300px}
 #dedef{position:fixed;border:0;border-radius:10px;z-index:6;display:none;background:#120a1e;transform-origin:0 0;box-shadow:0 10px 40px #000a}
+
+/* ===== Sosyal lobi paneli (sociallobby.js) ===== */
+#slbox{margin:0 0 6px}
+#slbox.off{display:none}
+#slbox .frp.sl{border:1px solid rgba(46,229,157,.35)}
+#slbox .slrow{display:flex;gap:6px;align-items:center;margin:6px 0;flex-wrap:wrap}
+#slbox .slrow input{width:90px;background:#0d1420;border:1px solid #243242;color:#dfe7f0;padding:4px 8px;border-radius:6px;font:inherit}
+#slbox select{background:#0d1420;border:1px solid #243242;color:#dfe7f0;padding:4px 6px;border-radius:6px;font:inherit}
+#slbox .chip.off{opacity:.65}
+#slbox .chip.go{background:#2ee59d;color:#04140c;font-weight:700}
+#slbox .fi2 em{font-style:normal;font-size:10px;color:#7dff9a;border:1px solid rgba(125,255,154,.4);border-radius:4px;padding:0 4px}
+#slbox .fi2 em.nr{color:#ffb020;border-color:rgba(255,176,32,.4)}

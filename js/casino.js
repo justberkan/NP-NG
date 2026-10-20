@@ -282,7 +282,7 @@ function dedeBind(){
  let api=null;try{api=CGD.f.contentWindow.NPNG_CASINO}catch(e){}
  if(!api)return;CGD.api=api;
  api.onBet(b=>{b=Math.floor(+b||0);if(b<=0)return;SV.tl-=b;casLog(b,0);save();bal();dedeSync()});
- api.onWin(w=>{w=Math.floor(+w||0);if(w<=0)return;SV.tl+=w;casLog(0,w);save();bal();dedeSync()});
+ api.onWin(w=>{w=Math.floor(+w||0);if(w<=0)return;SV.tl+=w;casLog(0,w);save();bal();dedeSync();if(MPL.authed)mpSend({t:'cwin',amount:w})});
  api.claimWeeklyBonus=casWeekly;api.weeklyStatus=casWeekStatus;
  if(api.getBet()>Math.max(10,SV.tl))api.setBet(10);
  dedeSync();
