@@ -1,0 +1,79 @@
+{
+  "results": [
+    {
+      "name": "No copy: offline button disabled",
+      "ok": true
+    },
+    {
+      "name": "Close captures only approved seed keys",
+      "ok": true,
+      "details": [
+        "npng_legal_v1",
+        "npng_map"
+      ]
+    },
+    {
+      "name": "Offline launch returns success",
+      "ok": true,
+      "details": {
+        "ok": true
+      }
+    },
+    {
+      "name": "Offline origin and no account token",
+      "ok": true
+    },
+    {
+      "name": "Sandboxed offline window, no preload",
+      "ok": true,
+      "details": {
+        "sandbox": true,
+        "isolation": true,
+        "node": false,
+        "title": "N.P.N.G. — Çevrimdışı"
+      }
+    },
+    {
+      "name": "Offline aim starts",
+      "ok": true
+    },
+    {
+      "name": "Offline ow starts",
+      "ok": true
+    },
+    {
+      "name": "Casino DEDE iframe exists in current main",
+      "ok": true
+    },
+    {
+      "name": "DEDE same-origin page loaded",
+      "ok": true
+    },
+    {
+      "name": "No page errors",
+      "ok": true,
+      "details": []
+    },
+    {
+      "name": "No unexpected failed requests",
+      "ok": true,
+      "details": []
+    },
+    {
+      "name": "VSync restart changes only two switches",
+      "ok": true,
+      "details": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ]
+    },
+    {
+      "name": "Cache available after launcher restart",
+      "ok": true
+    }
+  ],
+  "profile": "C:\\Users\\berkan\\AppData\\Local\\Temp\\npng-v030-vFdIot\\profile"
+}

@@ -1,7 +1,7 @@
 'use strict';
 const http=require('node:http'),https=require('node:https');
 const {gameURL}=require('./policy.cjs');
-function settings(o={}){if(!o||typeof o!=='object')o={};return{fullscreen:o.fullscreen!==false,keepAwake:o.keepAwake!==false}}
+function settings(o={}){if(!o||typeof o!=='object')o={};return{fullscreen:o.fullscreen!==false,keepAwake:o.keepAwake!==false,vsync:o.vsync===true}}
 function probe(value,timeout=4500){
  let url;try{url=gameURL(value)}catch(e){return Promise.resolve({ok:false,error:e.message})}
  return new Promise(resolve=>{let done=false;const start=performance.now();let timer;

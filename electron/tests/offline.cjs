@@ -25,3 +25,7 @@ test('Real HTTP: two transfers, changed-only download, atomic failure, 404, prot
  fs.rmSync(path.join(home,'offline-game.old'),{recursive:true,force:true});fs.renameSync(path.join(home,'offline-game'),path.join(home,'offline-game.old'));await o.recover(home);assert.equal((await o.status(home)).available,true);
  }finally{await new Promise(r=>server.close(r));clean(home)}
 });
+
+test('Offline MIME matches the server table',()=>{const vm=require('node:vm'),src=fs.readFileSync(path.join(__dirname,'../../server.js'),'utf8');const mime=vm.runInNewContext('('+src.match(/const MIME = (\{[^\n]+\});/)[1]+')');assert.deepEqual(JSON.parse(JSON.stringify(mime)),o.MIME)});
+
+test('All approved seed formats round-trip; 5001 files rejected',()=>{const seed={mmofps_sv:'{"v":3}',mmofps_set:'{}',mmofps_kb:'{}',mmofps_fov:'90',mmofps_pvp:'0',npng_legal_v1:'1',npng_map:'dust2'};assert.deepEqual(o.validateSeed(seed),seed);assert.throws(()=>o.validateManifest({build:'1',files:Array(5001).fill({p:'index.html',size:0,sha256:hash('')})}))});

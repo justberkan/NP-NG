@@ -26,7 +26,7 @@ test.before(async()=>{
     fs.mkdirSync(path.dirname(path.join(root,f)),{recursive:true});
     fs.copyFileSync(path.join(__dirname,'..',f),path.join(root,f));
   }
-  for(const [name,body] of Object.entries({'index.html':'<h1>NPNG fixture</h1>','js/test.js':'window.fixture=1;','assets/model.glb':'fixture-model','.git/config':'private-git','data/accounts.json':'{}','_yedek/private.txt':'private-backup','.env':'private-env','NOTLAR.md':'private-notes','tests/private.txt':'private-test','assets/.env':'private-nested'})){
+  for(const [name,body] of Object.entries({'index.html':'<h1>NPNG fixture</h1>build 202610191415','js/test.js':'window.fixture=1;','assets/model.glb':'fixture-model','.git/config':'private-git','data/accounts.json':'{}','_yedek/private.txt':'private-backup','.env':'private-env','NOTLAR.md':'private-notes','tests/private.txt':'private-test','assets/.env':'private-nested'})){
     const file=path.join(root,name);fs.mkdirSync(path.dirname(file),{recursive:true});fs.writeFileSync(file,body);
   }
   port=await new Promise((resolve,reject)=>{const s=net.createServer();s.on('error',reject);s.listen(0,'127.0.0.1',()=>{const p=s.address().port;s.close(()=>resolve(p))})});
@@ -69,7 +69,7 @@ test('Bozuk yüzde kodlaması sunucuyu kapatmaz',async()=>{
 
 test('Manifest yalnız public dosyalar; doğru hash, cache güncelleme ve silme',async()=>{
  const crypto=require('node:crypto');const get=async()=>{const r=await request('/api/manifest');assert.equal(r.status,200);return JSON.parse(r.body)};
- const m=await get();assert(m.files.length>0);for(const f of m.files){assert(f.p==='index.html'||/^(assets|js|css|lib)\//.test(f.p));assert(!f.p.split('/').some(x=>x.startsWith('.')));const b=fs.readFileSync(path.join(root,f.p));assert.equal(f.size,b.length);assert.equal(f.sha256,crypto.createHash('sha256').update(b).digest('hex'))}
+ const m=await get();assert.equal(m.build,'202610191415');assert(m.files.length>0);for(const f of m.files){assert(f.p==='index.html'||/^(assets|js|css|lib)\//.test(f.p));assert(!f.p.split('/').some(x=>x.startsWith('.')));const b=fs.readFileSync(path.join(root,f.p));assert.equal(f.size,b.length);assert.equal(f.sha256,crypto.createHash('sha256').update(b).digest('hex'))}
  assert(!m.files.some(f=>/accounts|private|server\.js/.test(f.p)));
  const f=path.join(root,'js/test.js');fs.writeFileSync(f,'window.fixture=2;');const next=await get();assert.notEqual(m.files.find(x=>x.p==='js/test.js').sha256,next.files.find(x=>x.p==='js/test.js').sha256);
  fs.unlinkSync(path.join(root,'assets/new.js'));assert(!(await get()).files.some(x=>x.p==='assets/new.js'));

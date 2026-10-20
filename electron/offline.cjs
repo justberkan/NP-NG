@@ -18,7 +18,7 @@ async function digest(f){const hash=crypto.createHash('sha256');let size=0;for a
 async function boundedJSON(res,limit){let size=0;const chunks=[];for await(const b of res.body){size+=b.length;if(size>limit)throw Error('Response too large');chunks.push(Buffer.from(b))}return JSON.parse(Buffer.concat(chunks).toString('utf8'))}
 async function atomicJSON(f,data){await pfs.mkdir(path.dirname(f),{recursive:true});const tmp=f+'.tmp';await pfs.writeFile(tmp,JSON.stringify(data));await pfs.rename(tmp,f)}
 // Recovery keeps the last complete directory after a crash between the two renames.
-async function recover(home){await pfs.mkdir(home,{recursive:true});const live=path.join(home,'offline-game'),old=live+'.old';if(!fs.existsSync(live)&&fs.existsSync(old))await pfs.rename(old,live);return live}
+async function recover(home,force=false){await pfs.mkdir(home,{recursive:true});const live=path.join(home,'offline-game'),old=live+'.old';if((force||!jobs.has(path.resolve(home)))&&!fs.existsSync(live)&&fs.existsSync(old))await pfs.rename(old,live);return live}
 async function status(home){try{const live=await recover(home),meta=JSON.parse(await pfs.readFile(path.join(live,'offline-meta.json'),'utf8'));await regular(live,'index.html');return {available:true,...meta}}catch(e){return{available:false}}}
 const jobs=new Map();
 function sync(home,url,onProgress=()=>{}){
@@ -28,7 +28,7 @@ function sync(home,url,onProgress=()=>{}){
 async function syncCopy(home,url,onProgress){
  const base=new URL(url);if(!['http:','https:'].includes(base.protocol)||base.username||base.password)throw Error('Invalid origin');
  const response=await fetch(new URL('/api/manifest',base),{redirect:'error',signal:AbortSignal.timeout(30000)});if(response.status===404)return{skipped:true};if(!response.ok)throw Error('Manifest HTTP '+response.status);
- const m=validateManifest(await boundedJSON(response,LIMITS.manifest)),live=await recover(home),stage=live+'.new',old=live+'.old';
+ const m=validateManifest(await boundedJSON(response,LIMITS.manifest)),live=await recover(home,true),stage=live+'.new',old=live+'.old';
  // All deletion targets are fixed children of the application profile, never manifest paths.
  await pfs.rm(stage,{recursive:true,force:true});await pfs.mkdir(stage);let done=0,cursor=0,failed;
  onProgress({state:'syncing',percent:0});

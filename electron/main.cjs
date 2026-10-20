@@ -12,7 +12,7 @@ function captureSeed(win){const task=seedCapture.catch(()=>{}).then(()=>captureS
 async function captureSeedNow(win){if(!win||win.isDestroyed()||!/^https?:/.test(win.webContents.getURL()))return;try{const data=await win.webContents.executeJavaScript('(()=>{const o={};for(const k of '+JSON.stringify(offline.SEED_KEYS)+')o[k]=localStorage.getItem(k);if(new TextEncoder().encode(JSON.stringify(o)).length>2097152)throw Error("Seed too large");return o})()');await offline.saveSeed(offlineHome(),data)}catch(e){/* Untrusted/closing renderer: retain the last valid seed. */}}
 
 const {settings,probe,startLocal}=require('./services.cjs');
-const {PERFORMANCE_SWITCHES,gameURL,canNavigate,shortcut}=require('./policy.cjs');
+const {PERFORMANCE_SWITCHES,performanceSwitches,gameURL,canNavigate,shortcut}=require('./policy.cjs');
 const {spawn}=require('node:child_process');
 /* Sunucu linki (SUNUCU.json) GitHub üzerinden paylaşılır. Token koda gömülmez;
    push yalnızca makinedeki git kimliği (credential manager) ile çalışır. */
@@ -60,9 +60,11 @@ async function autoPublish(){
  }catch(e){}
 }
 // GPU ve zamanlama anahtarları Electron hazır olmadan eklenir.
-for(const name of PERFORMANCE_SWITCHES)app.commandLine.appendSwitch(name);
+
 app.setName('NPNG');
 if(process.env.NPNG_USER_DATA)app.setPath('userData',path.resolve(process.env.NPNG_USER_DATA));
+let startupVsync=false;try{startupVsync=JSON.parse(fs.readFileSync(path.join(app.getPath('userData'),'server.json'),'utf8')).vsync===true}catch(e){}
+for(const name of performanceSwitches(startupVsync))app.commandLine.appendSwitch(name);
 let sleepBlocker=null;
 function stopSleepBlocker(){if(sleepBlocker!==null){powerSaveBlocker.stop(sleepBlocker);sleepBlocker=null}}
 let launcher,game,quitting=false,connecting=false,gameOrigin='',lastError='',configuredSession;
@@ -148,7 +150,7 @@ async function connect(value,options,isOffline=false){
 }
 ipcMain.handle('npng:preferences',event=>{
  if(event.sender!==launcher?.webContents||event.senderFrame?.url!==launcherURL)throw new Error('İzin verilmeyen pencere');
- return{...readPreferences(),error:lastError,version:app.getVersion()};
+ return{...readPreferences(),error:lastError,version:app.getVersion(),startupVsync};
 });
 ipcMain.handle('npng:connect',(event,url,options)=>{
  if(event.sender!==launcher?.webContents||event.senderFrame?.url!==launcherURL)throw new Error('İzin verilmeyen pencere');
@@ -158,7 +160,7 @@ function trusted(event){if(event.sender!==launcher?.webContents||event.senderFra
 ipcMain.handle('npng:offline-status',async event=>{trusted(event);return {...await offline.status(offlineHome()),progress:offlineProgress}});
 ipcMain.handle('npng:offline-play',async event=>{trusted(event);if(!(await offline.status(offlineHome())).available)return{ok:false,error:'Önce bir kez internetle bağlan.'};return connect('',readPreferences(),true)});
 ipcMain.handle('npng:probe',async(event,url)=>{trusted(event);return probe(url)});
-ipcMain.handle('npng:settings',(event,value)=>{trusted(event);const opts=settings(value);savePreferences(opts);return opts});
+ipcMain.handle('npng:settings',(event,value)=>{trusted(event);const opts=settings(value);savePreferences(opts);return {...opts,restartRequired:opts.vsync!==startupVsync}});
 async function diagnostics(){
  const gpu=await app.getGPUInfo('basic').catch(()=>({gpuDevice:[]}));
  return {created:new Date().toISOString(),launcher:app.getVersion(),electron:process.versions.electron,os:os.platform()+' '+os.release(),cpu:os.cpus()[0]?.model||'Bilinmiyor',ramGB:Math.round(os.totalmem()/1073741824),graphics:app.getGPUFeatureStatus(),adapters:(gpu.gpuDevice||[]).map(d=>({vendorId:d.vendorId,deviceId:d.deviceId,active:d.active})),switches:PERFORMANCE_SWITCHES.map(name=>({name,active:app.commandLine.hasSwitch(name)})),settings:settings(readPreferences())};

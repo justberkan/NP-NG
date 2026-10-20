@@ -3,6 +3,7 @@ const PERFORMANCE_SWITCHES=Object.freeze([
  'disable-frame-rate-limit','disable-gpu-vsync','force_high_performance_gpu',
  'disable-background-timer-throttling','disable-renderer-backgrounding'
 ]);
+function performanceSwitches(vsync=false){return vsync?PERFORMANCE_SWITCHES.filter(n=>n!=='disable-frame-rate-limit'&&n!=='disable-gpu-vsync'):[...PERFORMANCE_SWITCHES]}
 function gameURL(value){
  if(typeof value!=='string'||value.length>2048)throw new Error('Geçerli bir sunucu adresi yaz.');
  let u;try{u=new URL(value.trim())}catch(e){throw new Error('Adres http:// veya https:// ile başlamalı.');}
@@ -20,4 +21,4 @@ function shortcut(input){
  if(key==='browserback'||key==='browserforward')return 'block';
  return 'game';
 }
-module.exports={PERFORMANCE_SWITCHES,gameURL,canNavigate,shortcut};
+module.exports={PERFORMANCE_SWITCHES,performanceSwitches,gameURL,canNavigate,shortcut};

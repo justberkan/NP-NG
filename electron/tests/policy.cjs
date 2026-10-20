@@ -16,3 +16,5 @@ test('W/R ve oyun tuşları korunur; tarayıcı pencere/sekme kısayolları enge
 test('Zorunlu beş performans anahtarı mevcut',()=>{
  for(const s of ['disable-frame-rate-limit','disable-gpu-vsync','force_high_performance_gpu','disable-background-timer-throttling','disable-renderer-backgrounding'])assert.ok(PERFORMANCE_SWITCHES.includes(s));
 });
+
+test('VSync defaults off, on removes only the two uncapping switches',()=>{const {performanceSwitches}=require('../policy.cjs');assert.deepEqual(performanceSwitches(),[...PERFORMANCE_SWITCHES]);assert.deepEqual(performanceSwitches(true),['force_high_performance_gpu','disable-background-timer-throttling','disable-renderer-backgrounding']);assert.equal(require('../services.cjs').settings({vsync:true}).vsync,true)});
