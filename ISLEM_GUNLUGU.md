@@ -382,4 +382,4 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Birleştirme (Claude): index.html/server.js/run.cjs/http.cjs/style.css çakışmaları iki taraf korunarak çözüldü (LOKUM/Çivi/Canlı BJ/cihaz düzeltmesi duruyor); eski hesaptan atılan bağlantı korku odasından da çıkarılıyor (HORNET.leave).
 - NOT: Model lisansları belirsiz (CS:GO haritaları, Momo, Slenderman); Berkan prototip/ticari değil diye kabul etti. Repo herkese açık.
 - Dosyalar: js/horror.js, server-horror.js, assets/horror/*, docs/horror/*, index.html, server.js, js/main.js, css/style.css, tests/run.cjs, tests/http.cjs, tests/horror*.cjs
-- Test: TESTSONUCU
+- Test: npm test baştan sona PASS (çıkış 0; 230 PASS + http 5/5, 0 FAIL; horror ve horror-open dahil). Backrooms açılış görüntüsü test-results/ic-ingame.png.
