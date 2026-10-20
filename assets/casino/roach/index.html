@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Böcek Mutfak: XXX Scatter</title>
+<style>
+ *{box-sizing:border-box;margin:0;padding:0;user-select:none}
+ html,body{width:100%;height:100%;overflow:hidden;background:#0f0d0b;color:#fff;
+  font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif}
+ body{display:flex;justify-content:center;align-items:center}
+ #rk{width:1200px;height:790px;position:relative;flex:none;
+  background:
+   radial-gradient(circle at 50% 30%,rgba(90,67,40,.25),transparent 60%),
+   linear-gradient(180deg,#241c14 0%,#0d0a07 100%);
+  display:flex;padding:16px;gap:14px}
+ /* ---- sol panel ---- */
+ .lft{width:210px;display:flex;flex-direction:column;gap:12px}
+ .box{background:linear-gradient(180deg,#3a2b1c 0%,#1a120b 100%);
+  border:2px solid #8c683c;border-radius:8px;padding:10px;text-align:center;box-shadow:inset 0 0 10px #000}
+ .box .t{font-size:12px;color:#d4af37;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+ .mult{font-size:36px;color:#ff0055;font-weight:900;text-shadow:0 0 10px #ff0055;margin-top:4px}
+ .fsv{font-size:30px;color:#00ffcc;font-weight:800}
+ #hist{flex:1;overflow:hidden;text-align:left;font-size:12px;color:#aaa;line-height:1.6}
+ #hist b{color:#ffd700}
+ /* ---- orta panel ---- */
+ .mid{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:space-between;min-width:0}
+ #tw{height:44px;font-size:22px;font-weight:900;color:#ffd700;text-shadow:2px 2px #000;text-align:center}
+ #grid{display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(5,1fr);gap:7px;
+  width:100%;flex:1;background:rgba(0,0,0,.55);border:3px solid #7a5c36;border-radius:10px;padding:9px}
+ .cell{background:rgba(40,30,20,.85);border:1px solid #4a3820;border-radius:6px;
+  display:flex;justify-content:center;align-items:center;font-size:44px;position:relative;
+  transition:transform .18s,opacity .18s}
+ .cell.win{animation:pl .35s infinite alternate;background:rgba(255,215,0,.28);border-color:#ffd700}
+ @keyframes pl{0%{transform:scale(.94)}100%{transform:scale(1.06)}}
+ /* ---- alt bar ---- */
+ .bar{width:100%;background:#15100c;border:2px solid #4a3820;border-radius:8px;padding:8px 14px;
+  display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+ .stats{display:flex;gap:26px}
+ .sl{font-size:10px;color:#888;text-transform:uppercase}
+ .sv{font-size:17px;font-weight:800}
+ #balv{color:#fff}#betv{color:#ffd700}#winv{color:#00ff66}
+ .ctl{display:flex;align-items:center;gap:10px}
+ .rnd{width:38px;height:38px;border-radius:50%;border:2px solid #8c683c;background:#241a10;color:#ffd700;
+  font-size:18px;font-weight:900;cursor:pointer}
+ .rnd:active{transform:scale(.94)}
+ #spin{width:72px;height:72px;border-radius:50%;border:3px solid #ffcc00;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#ffb340,#cc6600);color:#fff;font-weight:900;font-size:16px;
+  box-shadow:0 0 18px rgba(255,153,0,.55);transition:.08s}
+ #spin:active{transform:scale(.94)}
+ #spin:disabled{background:#3a3a3a;border-color:#666;box-shadow:none;cursor:not-allowed}
+ #auto{height:30px;padding:0 12px;border-radius:15px;border:2px solid #8c683c;background:#241a10;
+  color:#d4af37;font-weight:700;font-size:12px;cursor:pointer}
+ #auto.on{background:#7a2020;border-color:#ff0055;color:#fff}
+ /* ---- sağ panel: böcek ---- */
+ .rgt{width:250px;display:flex;flex-direction:column;align-items:center}
+ #bub{background:#fff;color:#000;padding:10px 12px;border-radius:12px;font-weight:700;font-size:13px;
+  position:relative;margin-bottom:12px;width:100%;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.5);
+  min-height:52px;display:flex;align-items:center;justify-content:center}
+ #bub:after{content:'';position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  border-width:10px 10px 0;border-style:solid;border-color:#fff transparent}
+ #roach{width:230px;height:230px;margin-top:8px;border-radius:12px;object-fit:cover;object-position:top;
+  border:2px solid #5a4328;box-shadow:0 10px 18px rgba(0,0,0,.7);
+  animation:sway 4s ease-in-out infinite}
+ @keyframes sway{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1.2deg)}}
+ #note{position:absolute;left:16px;bottom:4px;font-size:11px;color:#8a7a5a}
+ #snd{position:absolute;right:16px;bottom:4px;font-size:11px;color:#d4af37;cursor:pointer}
+ /* kazanç bandı */
+ #winband{position:fixed;left:0;right:0;bottom:0;height:24px;overflow:hidden;z-index:60;
+  background:rgba(8,10,18,.85);border-top:1px solid rgba(255,255,255,.1);pointer-events:none}
+ #wintrack{display:inline-block;white-space:nowrap;line-height:24px;padding-left:100%;
+  font:12px/24px system-ui,sans-serif;color:#ffd75e;animation:slw 22s linear infinite;will-change:transform}
+ #wintrack b{color:#7dff9a;font-weight:600}
+ #wintrack i{font-style:normal;color:#556;margin:0 14px}
+ @keyframes slw{from{transform:translateX(0)}to{transform:translateX(-100%)}}
+ @media (prefers-reduced-motion:reduce){#wintrack{animation:none;padding-left:12px}#roach{animation:none}}
+</style>
+</head>
+<body>
+<div id="rk">
+ <div class="lft">
+  <div class="box"><div class="t">Toplam Çarpan</div><div class="mult" id="mult">1x</div></div>
+  <div class="box"><div class="t">Bedava Dönüş</div><div class="fsv" id="fs">0</div></div>
+  <div class="box" id="hist"><b>KAZANÇLAR:</b><br>—</div>
+ </div>
+ <div class="mid">
+  <div id="tw">&nbsp;</div>
+  <div id="grid"></div>
+  <div class="bar">
+   <div class="stats">
+    <div><div class="sl">Bakiye</div><div class="sv" id="balv">0 TL</div></div>
+    <div><div class="sl">Bahis</div><div class="sv" id="betv">10 TL</div></div>
+    <div><div class="sl">Kazanç</div><div class="sv" id="winv">0 TL</div></div>
+   </div>
+   <div class="ctl">
+    <button class="rnd" id="bminus">−</button>
+    <button id="spin">SPIN</button>
+    <button class="rnd" id="bplus">+</button>
+    <button id="auto">AUTO</button>
+   </div>
+  </div>
+ </div>
+ <div class="rgt">
+  <div id="bub">Ne bakıyon birader? Çevir çevir!</div>
+  <img id="roach" src="roach.jpg" alt="Kral Böcek">
+ </div>
+ <div id="note">Sanal para — gerçek para değeri yoktur.</div>
+ <div id="snd">SES: AÇIK</div>
+</div>
+<div id="winband"><div id="wintrack"></div></div>
+<script>
+'use strict';
+/* Böcek Mutfak: XXX Scatter — scatter-pay (8+ eşleşme), çarpan bombası, 4+ scatter = 15 bedava dönüş.
+   Para yalnız oyundadır: sayfa onBet/onWin bildirir, setCredit oyundan gelir.
+   Tek başına açılırsa (setCredit hiç çağrılmazsa) demo para localStorage'da tutulur. */
+const $=id=>document.getElementById(id);
+const SYMBOLS=[
+ {id:'pizza',icon:'🍕',pay:0.5},
+ {id:'beer',icon:'🍺',pay:1.0},
+ {id:'cd',icon:'💿',pay:2.0},
+ {id:'cash',icon:'💵',pay:5.0},
+ {id:'scatter',icon:'🪳',isScatter:true},
+ {id:'bomb',icon:'💣',isMultiplier:true}
+];
+const DIALOG={
+ lose:["Makareyiz, piçiz, oçuz abi...","Sıfırı tükettik amk!","Şansını sileyim senin.","Böcek bozdu, tabela değişti."],
+ win:["Aha vurdu parayı amcık!","Çorba parası çıktı en azından.","Devam et lan kesme!"],
+ big:["VAY BABANIN AMK!","Kasayı boşalttı piç!","Abi büyücü müssün bu ne kazanç?"],
+ bonus:["GELDİ BE! Üşüşün amına koyayım!"],
+ idle:["Ne bakıyon birader? Çevir artık!","Biram bitti lan çabuk oyna."]
+};
+let rng=Math.random;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+let embedded=false,credit=1000,bet=10,fs=0,mult=1,spinning=false,auto=false,soundOn=true;
+let grid=[];
+const betL=[],winL=[],chgL=[];
+try{credit=Math.max(0,Math.floor(+localStorage.getItem('npng_roach_demo')||1000))}catch(e){}
+function saveDemo(){if(!embedded)try{localStorage.setItem('npng_roach_demo',String(credit))}catch(e){}}
+function audio(){if(!soundOn)return;try{const C=audio.C||(audio.C=new (window.AudioContext||window.webkitAudioContext)());const o=C.createOscillator(),g=C.createGain();o.connect(g);g.connect(C.destination);return[C,o,g]}catch(e){return null}}
+function beep(f,d=.08,v=.05){const A=audio();if(!A)return;const[C,o,g]=A;o.frequency.value=f;g.gain.setValueAtTime(v,C.currentTime);g.gain.exponentialRampToValueAtTime(.0001,C.currentTime+d);o.start();o.stop(C.currentTime+d)}
+function say(kind){const L=DIALOG[kind]||DIALOG.idle;$('bub').textContent=L[Math.floor(rng()*L.length)]}
+function fmt(n){return Math.floor(n).toLocaleString('tr-TR')}
+function renderCredit(){$('balv').textContent=fmt(credit)+' TL';$('betv').textContent=fmt(bet)+' TL';saveDemo();chgL.forEach(f=>{try{f(credit)}catch(e){}})}
+function pick(){const r=rng();
+ if(r<.05)return SYMBOLS[4];
+ if(r<.12)return SYMBOLS[5];
+ if(r<.35)return SYMBOLS[3];
+ if(r<.55)return SYMBOLS[2];
+ if(r<.75)return SYMBOLS[1];
+ return SYMBOLS[0]}
+function fill(force){
+ grid=[];
+ for(let i=0;i<30;i++)grid.push(force?force[i]:pick());
+ const g=$('grid');g.innerHTML='';
+ grid.forEach(s=>{const c=document.createElement('div');c.className='cell';c.textContent=s.icon;g.appendChild(c)});
+}
+function evaluate(b){
+ /* Tek hamlede sayım: 8+ eşleşme öder, bombalar kazançlı elde çarpanı büyütür, 4+ scatter bedava dönüş verir. */
+ const counts={},bombs=[];let sc=0;
+ grid.forEach(s=>{if(s.isScatter)sc++;else if(s.isMultiplier)bombs.push(2+Math.floor(rng()*11));else counts[s.id]=(counts[s.id]||0)+1});
+ let base=0,details=[];
+ SYMBOLS.forEach(s=>{if(!s.isScatter&&!s.isMultiplier&&counts[s.id]>=8){const v=counts[s.id]*s.pay*bet;base+=v;details.push(counts[s.id]+'x '+s.icon)}});
+ if(base>0&&bombs.length)mult+=bombs.reduce((a,b)=>a+b,0);
+ const win=Math.floor(base*mult);
+ return{sc,win,details,bombs:bombs.length};
+}
+function spin(){
+ if(spinning)return;
+ if(fs===0){
+  if(bet<10||bet>credit){say('lose');if(auto)autoStop();return}
+  credit-=bet;betL.forEach(f=>{try{f(bet)}catch(e){}});mult=1;$('mult').textContent='1x';
+ }else{fs--;$('fs').textContent=fs}
+ spinning=true;$('spin').disabled=true;$('winv').textContent='0 TL';
+ fill();
+ const r=evaluate(bet);
+ /* kısa bekleme: semboller görünür, sonra hesap */
+ setTimeout(()=>{
+  if(r.sc>=4){fs+=15;$('fs').textContent=fs;say('bonus');beep(700,.25,.07);$('roach').src='roach-koltuk.jpg';
+   document.querySelectorAll('#grid .cell').forEach(c=>{if(c.textContent==='🪳')c.classList.add('win')});
+  }
+  if(r.win>0){
+   credit+=r.win;winL.forEach(f=>{try{f(r.win)}catch(e){}});
+   $('winv').textContent=fmt(r.win)+' TL';
+   $('tw').textContent=r.win>=bet*15?'ULTRA VURUŞ!':'TUMBLE WIN';
+   setTimeout(()=>{$('tw').innerHTML='&nbsp;'},1600);
+   $('hist').innerHTML='<b>KAZANÇLAR:</b><br>'+r.details.join('<br>');
+   document.querySelectorAll('#grid .cell').forEach(c=>{if(countsIcon(c.textContent)>=8)c.classList.add('win')});
+   setTimeout(()=>document.querySelectorAll('#grid .cell.win').forEach(c=>c.classList.remove('win')),1500);
+   say(r.win>bet*15?'big':'win');beep(900,.2,.07);setTimeout(()=>beep(1200,.2,.06),120);
+  }else if(r.sc<4){say(fs>0?'idle':'lose');beep(180,.15,.06)}
+  $('mult').textContent=mult+'x';
+  if(fs===0&&$('roach').src.indexOf('koltuk')>=0)$('roach').src='roach.jpg';
+  renderCredit();
+  spinning=false;$('spin').disabled=false;
+  if(auto)setTimeout(()=>{if(auto)spin()},350);
+ },420);
+}
+function countsIcon(ic){let n=0;grid.forEach(s=>{if(s.icon===ic)n++});return n}
+function autoStop(){auto=false;$('auto').classList.remove('on')}
+$('spin').onclick=()=>{spin()};
+$('auto').onclick=()=>{auto=!auto;$('auto').classList.toggle('on',auto);if(auto)spin()};
+$('bminus').onclick=()=>{bet=Math.max(10,bet-10);renderCredit()};
+$('bplus').onclick=()=>{bet=Math.min(100000,bet+10);renderCredit()};
+$('snd').onclick=()=>{soundOn=!soundOn;$('snd').textContent='SES: '+(soundOn?'AÇIK':'KAPALI')};
+function setCredit(v){embedded=true;credit=Math.max(0,Math.floor(+v||0));renderCredit()}
+let forceNext=null; /* test kancası: sonraki fill() için */
+const _fill=fill;
+fill=function(f){_fill(forceNext||f);forceNext=null};
+/* kazanç bandı (sunucudan; yoksa sessizce boş kalır) */
+(function(){const t=$('wintrack');let last=[];
+ function draw(){t.innerHTML=last.length?last.map(w=>w.n+'  <b>'+fmt(w.a)+' TL</b> kazandı').join('<i>•</i>')+'<i>•</i>'+last.map(w=>w.n+'  <b>'+fmt(w.a)+' TL</b> kazandı').join('<i>•</i>'):''}
+ function take(j){if(j&&Array.isArray(j.wins)){last=j.wins.slice(0,10);draw()}}
+ const pull=()=>{try{fetch('/api/wins').then(r=>r.json()).then(take).catch(()=>{})}catch(e){}};
+ pull();setInterval(pull,5000);
+})();
+fill();renderCredit();say('idle');
+/* dışa açık API (oyun bu sayfayı iframe içinde kullanır) */
+const API={
+ get credit(){return credit},
+ getCredit:()=>credit,
+ setCredit,
+ addCredit:v=>{credit+=Math.floor(+v||0);renderCredit()}, /* demo/geri uyumluluk; oyunda kullanma */
+ getBet:()=>bet,
+ setBet:v=>{bet=Math.max(10,Math.round(+v||10));renderCredit()},
+ onBet:f=>betL.push(f),
+ onWin:f=>winL.push(f),
+ onChange:f=>chgL.push(f),
+ stopAuto:autoStop,
+ get spinning(){return spinning},
+ get freeSpins(){return fs},
+ seed:s=>{rng=mulberry32(s)},
+ unseed:()=>{rng=Math.random},
+ _core:{SYMBOLS,evaluate,spin,fill:arr=>{forceNext=arr}},
+ _ui:{say},
+};
+if(typeof window!=='undefined')window.NPNG_CASINO=API;
+if(typeof document!=='undefined')document.dispatchEvent(new CustomEvent('npng-casino-ready'));
+</script>
+</body>
+</html>
