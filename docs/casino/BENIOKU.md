@@ -41,9 +41,10 @@ seçeneği açıkken yıldırım sarsıntısı ve parçacık sayısı düşer.
 ## Diyalog balonu
 
 Replikler olay havuzlarından rastgele seçilir; **son 4 id tekrar etmez**.
-Kazanacağını vaat eden laf YOK. Ses sesli replik id listesi (mp3'ler sonraki
-adımda `edge-tts` ile üretilecek, dosya yoksa tarayıcı `speechSynthesis` tr-TR
-yedek kullanır):
+Kazanacağını vaat eden laf YOK. Sesli replikler `assets/casino/dede/ses/<id>.mp3`
+altında — **geçici edge-tts (tr-TR) üretimi — Berkan'ın kayıtlarıyla değiştirilecek**.
+Tümü mono, 24 kHz, 64 kbps, toplam ~0,9 MB. Dosya eksikse tarayıcı
+`speechSynthesis` tr-TR yedeği devreye girer:
 
 - `spin-1`–`spin-5`: "Hadi bakalım, şansını göreyim!" vb.
 - `kayip-1`–`kayip-6`: "Paranı aldım, teşekkürler evlat!", "Ahahah, olmadı yine!" vb.
