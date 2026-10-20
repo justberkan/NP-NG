@@ -393,3 +393,10 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Test: npm test baştan sona PASS (çıkış 0; 246 PASS + http 5/5, 0 FAIL). Yeni rooms-lobby 16/16: şifreli oda listede kilitli, şifre düz saklanmaz, şifresiz/yanlış giriş reddi, davetli şifresiz girer, yalnız arkadaş davet edilir, arkadaş listesinde oda; tarayıcıda LOBİLER→şifre→oda paneli; Inlı Cinlı 1,6× harita, 250 doğma hücresinin hepsi içeride, dışarı çıkılamaz, çift zıplama/kanca kapalı, canavar yürüme salınımı.
 - NOT: sunucu değişti → yeniden başlat; Ctrl+F5.
 - Yedek: _yedek/claude-1745/
+
+### 2026-10-21 00:10 · Claude · build 202610201510 inli-harita-v2
+- İşlem: Berkan: Inlı Cinlı'da takım arkadaşları silah modeli (holografik silah skin paketi) olarak görünüyordu; harita hâlâ küçük, zıplayarak haritadan çıkılabiliyor.
+- Değişti (js/horror.js): takım arkadaşı = envanterde seçtiği karakter + elindeki silah (mkHuman/CHAR, ic_state ve anlık görüntüye ch/w), yürüme animasyonu; harita 2,6× (yükseklik 1,5×); duvar çarpışması en az 9 m (zıplayarak aşılamaz). server-horror.js ch/w alanlarını süzerek iletir.
+- Dosyalar: js/horror.js, server-horror.js, index.html, tests/rooms-lobby.cjs
+- Test: npm test baştan sona PASS (çıkış 0; 246 PASS + http 5/5). Ek kontrol: takım arkadaşı c1 karakteriyle tüfekli insan modeli; 300 zıplamada en yüksek 1,25 m, harita içinde.
+- Yedek: _yedek/claude-1510/

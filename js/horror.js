@@ -10,7 +10,8 @@ const ICMAPS=['backrooms','lego','starttrack'];
 const IC_DOOR_REWARD=1000;
 const IC_MON={momo:{hp:420,sp:4.55,dmg:30},slender:{hp:520,sp:4.35,dmg:38}};
 /* Harita büyütme (Claude 2026-10-20, Berkan: "harita biraz daha büyük"): yatayda 1,6×, dikeyde 1,15× (tavan çok yükselmesin) */
-const IC_SX=1.6,IC_SY=1.15;
+const IC_SX=2.6,IC_SY=1.5; /* 2. büyütme (Berkan 2026-10-20: "map çok küçük") */
+const IC_WALLH=9; /* duvarlar zıplayarak aşılamasın: çarpışma kutusu en az bu yükseklikte */
 
 /* ---------- Varlık yükleme (oda ekranında, maç öncesi) ---------- */
 function icLoadGLB(url){return new Promise((res,rej)=>{new THREE.GLTFLoader().load(url,g=>res(g.scene),undefined,rej)})}
@@ -102,7 +103,8 @@ function icOpen(cb){
 }
 
 /* ---------- Oyuncu listesi / para ---------- */
-function icPlayers(){const list=[{id:IC.id,position:{x:p.x,y:p.y,z:p.z},alive:p.dead<=0&&p.hp>0,hp:p.hp,name:'Sen'}];for(const [id,q] of IC.peers)if(id!==IC.id)list.push({id,position:{x:q.x||0,y:q.y||0,z:q.z==null?0:q.z},alive:q.hp>0,hp:q.hp,name:q.name});return list}
+const icMyCh=()=>typeof chWithKit==='function'?chWithKit(SV.eq.c):SV.eq.c;
+function icPlayers(){const list=[{id:IC.id,position:{x:p.x,y:p.y,z:p.z},alive:p.dead<=0&&p.hp>0,hp:p.hp,name:'Sen',ch:icMyCh(),w:wk,yaw:p.yaw}];for(const [id,q] of IC.peers)if(id!==IC.id)list.push({id,position:{x:q.x||0,y:q.y||0,z:q.z==null?0:q.z},alive:q.hp>0,hp:q.hp,name:q.name,ch:q.ch,w:q.w,yaw:q.yaw});return list}
 function icMoney(n){if(!Number.isFinite(n)||n<=0)return;SV.tl+=n;save();bal();if(IC.net&&IC.owner)mpSend({t:'ic_event',event:'reward',amount:n})}
 
 /* ---------- Başlatma ---------- */
@@ -122,7 +124,7 @@ function icStart(){
  IC.mapMeshes=[];IC.mapGroup.traverse(o=>{if(o.isMesh)IC.mapMeshes.push(o)});
  /* çarpışma kutuları (şeffaf mesh: mermi duvarı, görünmez) */
  const tmat=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false});
- for(const b of IC.col.boxes){const w=b[2]-b[0],d=b[3]-b[1],h=Math.max(1,b[4]);
+ for(const b of IC.col.boxes){const w=b[2]-b[0],d=b[3]-b[1],h=Math.max(IC_WALLH,b[4]);
   const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),tmat);m.position.set((b[0]+b[2])/2,h/2,(b[1]+b[3])/2);S.add(m);
   const box={m,x1:b[0],x2:b[2],z1:b[1],z2:b[3],h};boxes.push(box);boxMeshes.push(m)}
  /* el feneri */
@@ -266,24 +268,26 @@ function icTick(dt){
  if(p.hp<=0&&p.dead<=0){p.dead=1e9;firing=false;hudHp()}
  /* ağ senkronu */
  if(IC.net&&!IC.ended){IC.sendT-=dt;if(IC.sendT<=0){IC.sendT=.1;
-  mpSend({t:'ic_state',d:{x:p.x,y:p.y,z:p.z,yaw:p.yaw,hp:p.hp,flash:IC.flash,skin:IC.skin}});
+  mpSend({t:'ic_state',d:{x:p.x,y:p.y,z:p.z,yaw:p.yaw,hp:p.hp,flash:IC.flash,skin:IC.skin,ch:icMyCh(),w:wk}});
   if(IC.owner)mpSend({t:'ic_snapshot',d:icSnapshot()})}}
  /* akran avatarları (holografik cinler) */
  for(const [id,q] of IC.peers){
   if(id===IC.id)continue;
   let av=IC.avatars.get(id);
-  if(!av){av=icMakeAvatar(q.skin||0);IC.avatars.set(id,av);S.add(av.root)}
+  if(av&&(av.ch!==(q.ch||'c0')||av.w!==q.w)){freeActor(av.root);IC.avatars.delete(id);av=null}
+  if(!av){av=icMakeAvatar(q);IC.avatars.set(id,av);S.add(av.root)}
   av.root.visible=q.hp>0;
   const qy=q.y||0;
-  av.root.position.set(q.x||0,qy+Math.abs(Math.sin(clock*7+id))*.05,q.z==null?0:q.z);
-  av.root.rotation.y=(q.yaw||0)+Math.PI;
+  const nx=q.x||0,nz=q.z==null?0:q.z,sp=Math.hypot(nx-av.root.position.x,nz-av.root.position.z)/Math.max(dt,1e-3);
+  av.root.position.set(nx,qy,nz);av.root.rotation.y=q.yaw||0;
+  animHuman(av.rig,{t:clock+id,speed:Math.min(sp,9),fwd:1,air:false,pitch:0,lookYaw:0,flinch:0,ads:0,kick:0,kickR:0,kickL:0,rq:-1,flash:0,flashL:0,bob:0,lr:0,sw:-1},dt);
  }
  icHud();
 }
 function icSnapshot(){
  return{level:IC.level,door:{x:IC.doorPos.x,z:IC.doorPos.z},
   mons:IC.mons.filter(e=>e.dead<=0).map(e=>({id:e.id,k:e.kind,x:e.g.position.x,y:e.g.position.y,z:e.g.position.z,hp:e.hp,max:e.max,sp:e.sp})),
-  players:icPlayers().map(q=>({id:q.id,x:q.position.x,y:q.position.y,z:q.position.z,hp:q.hp}))};
+  players:icPlayers().map(q=>({id:q.id,x:q.position.x,y:q.position.y,z:q.position.z,hp:q.hp,ch:q.ch,w:q.w,yaw:q.yaw}))};
 }
 function icApplySnapshot(d){
  IC.snapshot=d;IC.level=d.level;
@@ -312,20 +316,11 @@ function icPeerMonTick(dt){
 }
 
 /* ---------- Holografik cin avatarı ---------- */
-function icMakeAvatar(skinIdx){
- const info=(IC.skins||[])[skinIdx%((IC.skins||[]).length||1)]||{name:null,s:1,cx:0,cz:0};
- let mesh=null;
- if(info.name&&IC.loaded.skins){IC.loaded.skins.traverse(o=>{if(!mesh&&o.isMesh&&o.name===info.name)mesh=o})}
- const root=new THREE.Group();
- if(mesh){
-  const geo=mesh.geometry.clone();geo.computeBoundingBox();
-  const bb=geo.boundingBox;geo.translate(-(bb.min.x+bb.max.x)/2,-bb.min.y,-(bb.min.z+bb.max.z)/2);
-  const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x66f6ff,transparent:true,opacity:.75,wireframe:false}));
-  m.scale.setScalar(info.s);root.add(m);
-  const wire=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xbffbff,wireframe:true,transparent:true,opacity:.25}));
-  wire.scale.setScalar(info.s*1.002);root.add(wire);
- }else{const geo=new THREE.SphereGeometry(.34,8,8);const bm=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x66f6ff}));bm.position.y=1.5;root.add(bm);const bm2=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0x66f6ff}));bm2.position.y=.6;root.add(bm2)}
- return{root};
+/* takım arkadaşı: envanterde seçtiği karakter + elindeki silah (eski holografik paket silah skiniydi, Berkan 2026-10-20) */
+function icMakeAvatar(q){
+ const ch=q.ch||'c0',w=WP[q.w]?q.w:'rifle';
+ const rig=mkHuman(CHAR(ch),false);holderSet(rig,w,SKIN('g0'));setShadow(rig.root);
+ return{root:rig.root,rig,ch,w:q.w};
 }
 
 /* ---------- Ağ ---------- */
@@ -361,7 +356,7 @@ function icDispose(){
  if(IC.glow){S.remove(IC.glow);IC.glow=null}
  if(IC.door){S.remove(IC.door);IC.door=null}
  for(const e of IC.mons)S.remove(e.g);IC.mons=[];
- for(const av of IC.avatars.values())S.remove(av.root);IC.avatars.clear();IC.peers.clear();
+ for(const av of IC.avatars.values())freeActor(av.root);IC.avatars.clear();IC.peers.clear();
  if(IC.mapGroup){S.remove(IC.mapGroup);IC.mapGroup=null}
  if(IC.baseBoxes){boxes.length=0;boxMeshes.length=0;for(const b of IC.baseBoxes){boxes.push(b);boxMeshes.push(b.m);b.m.visible=true}IC.baseBoxes=null}
  if(IC.env){floor.position.y=IC.env.floor;S.fog.near=IC.env.fog[0];S.fog.far=IC.env.fog[1];S.fog.color.setHex(IC.env.fogColor);S.background.setHex(IC.env.sky);IC.env=null}

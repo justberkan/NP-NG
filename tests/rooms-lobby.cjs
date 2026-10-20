@@ -3,7 +3,7 @@
    1) Ham bağlantılar: oda şifreyle açılır, listede kilitli görünür (üyeler, sahip), şifresiz/yanlış şifreyle girilemez,
       doğru şifreyle girilir; arkadaş daveti şifresiz sokar; yalnız arkadaş davet edilebilir; arkadaş listesinde oda bilgisi.
    2) Tarayıcı: LOBİLER listesinde oda görünür, kilitliye basınca şifre sorulur, girince oda paneli iki kişiyi gösterir.
-   3) Inlı Cinlı: harita büyüdü (1,6×), tüm doğma hücreleri dış duvarların içinde, oyuncu/canavar harita dışına çıkamaz,
+   3) Inlı Cinlı: harita büyüdü (2,6×), tüm doğma hücreleri dış duvarların içinde, oyuncu/canavar harita dışına çıkamaz,
       çift zıplama ve kanca kapalı, canavar yürürken bacak/kol salınımı çalışır, dururken durur. */
 const {chromium}=require('playwright');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path'),net=require('node:net'),{spawn}=require('node:child_process');
@@ -103,7 +103,7 @@ async function player(port,name){const p=await peer(port);p.send({t:'auth',mode:
       const ox=e.g.position.x,oz=e.g.position.z;IC.owner=false;for(let i=0;i<90;i++){e.tx=ox;e.ty=0;e.tz=oz;e.g.position.x=ox;e.g.position.z=oz;p.inv=99;tick(1/60)}IC.owner=true;
       const legStop=e.wu.uLeg.value;
       return {olcek:[+sc.x.toFixed(2),+sc.y.toFixed(2)],bounds:b,safe:safe.length,kotuHucre:bad,pIn,mIn,itildi:pushed,dj,hook,leg0,legWalk:+legWalk.toFixed(3),legStop:+legStop.toFixed(3),ph:+ph.toFixed(2),tur:e.kind}});
-    check('Inlı Cinlı: harita 1,6× büyük, tüm doğma hücreleri dış duvarların içinde ve boş',r.olcek[0]===1.6&&r.safe>50&&r.kotuHucre===0,{olcek:r.olcek,safe:r.safe,kotu:r.kotuHucre});
+    check('Inlı Cinlı: harita 2,6× büyük, tüm doğma hücreleri dış duvarların içinde ve boş',r.olcek[0]===2.6&&r.safe>50&&r.kotuHucre===0,{olcek:r.olcek,safe:r.safe,kotu:r.kotuHucre});
     check('Oyuncu ve canavar harita içinde doğar; oyuncu dışarı itilse de çıkamaz',r.pIn&&r.mIn&&r.itildi,r);
     check('Bu modda çift zıplama ve kanca kapalı',r.dj===0&&r.hook===false,{dj:r.dj,kanca:r.hook});
     check('Canavar yürürken bacak/kol salınır, dururken salınım söner',r.legWalk>.15&&r.legStop<.05&&r.ph>0,{tur:r.tur,yururken:r.legWalk,dururken:r.legStop});

@@ -23,7 +23,7 @@ module.exports=function({send,weapons}){
   const host=r.members.get(r.host);
   if(m.t==='ic_state'){
    const d=m.d||{},finite=(v,a,b)=>Math.max(a,Math.min(b,Number.isFinite(v)?v:0));
-   send(host,{t:'ic_state',id:c.icid,d:{x:finite(d.x,-400,400),y:finite(d.y,c.admin&&c.adtools?.noclip?-500:-40,c.admin&&c.adtools?.noclip?500:60),z:finite(d.z,-400,400),yaw:finite(d.yaw,-1000,1000),hp:finite(d.hp,0,100),flash:!!d.flash,skin:d.skin|0,adminGod:!!(c.admin&&c.adtools?.god),adminFly:!!(c.admin&&c.adtools?.noclip)}});
+   send(host,{t:'ic_state',id:c.icid,d:{x:finite(d.x,-400,400),y:finite(d.y,c.admin&&c.adtools?.noclip?-500:-40,c.admin&&c.adtools?.noclip?500:60),z:finite(d.z,-400,400),yaw:finite(d.yaw,-1000,1000),hp:finite(d.hp,0,100),flash:!!d.flash,skin:d.skin|0,ch:String(d.ch||'').replace(/[^A-Za-z0-9_.-]/g,'').slice(0,40),w:String(d.w||'').replace(/[^A-Za-z0-9_]/g,'').slice(0,16),adminGod:!!(c.admin&&c.adtools?.god),adminFly:!!(c.admin&&c.adtools?.noclip)}});
   }else if(m.t==='ic_snapshot'&&c.icid===r.host){
    const d=m.d;if(!d||!Array.isArray(d.mons)||d.mons.length>8||!Array.isArray(d.players)||JSON.stringify(d).length>60000)return true;
    r.snapshot=d;emit(r,{t:'ic_snapshot',d},c);
