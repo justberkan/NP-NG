@@ -400,3 +400,11 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Dosyalar: js/horror.js, server-horror.js, index.html, tests/rooms-lobby.cjs
 - Test: npm test baştan sona PASS (çıkış 0; 246 PASS + http 5/5). Ek kontrol: takım arkadaşı c1 karakteriyle tüfekli insan modeli; 300 zıplamada en yüksek 1,25 m, harita içinde.
 - Yedek: _yedek/claude-1510/
+
+### 2026-10-21 02:15 · Claude · build 202610210215 inli-duvar-v3
+- İşlem: Berkan: "duvarların önünde görünmez duvarlar var, hitbox daha detaylı".
+- Neden: Kimi'nin çarpışma verisi 22 kaba kutuydu (duvarlardan metrelerce taşıyordu).
+- Değişti (js/horror.js): çarpışma artık haritanın kendi duvar üçgenlerinden üretiliyor (0,4 m ızgara, oyuncu gövde yüksekliğindeki dik yüzeyler, birleştirilmiş kutular; kapı üstü kirişler engel değil). Ölçüm: Backrooms 310 yönde 1, Lego 991 yönde 2 sapma (ızgara kenarı), Starttrack eğik duvarlarda en çok ~1,3 m.
+- Dosyalar: js/horror.js, index.html, tests/rooms-lobby.cjs
+- Test: npm test baştan sona PASS (çıkış 0; 247 PASS + http 5/5); rooms-lobby yeni kontrol: Backrooms 310 yönde görünmez duvar 1 (≤3).
+- Yedek: _yedek/claude-0215/

@@ -34,9 +34,34 @@ async function icAssets(force){
  const pad=1.2*IC_SX;IC.bounds={x1:X1+pad,x2:X2-pad,z1:Z1+pad,z2:Z2-pad};
  IC.nav=nav.cells.map(c=>[c[0]*IC_SX,c[1]*IC_SX]).filter(c=>icIn(c[0],c[1],.6));
  IC.skins=skins;
+ /* ayrıntılı çarpışma (Berkan 2026-10-21: "duvarların önünde görünmez duvarlar var"): eski 22 kaba kutu yerine
+    haritanın kendi duvar üçgenlerinden 0,4 m'lik ızgara → birleştirilmiş kutular. Yalnız oyuncu boyundaki dik yüzeyler sayılır
+    (kapı üstü kirişler ve tavan engel değil). Dış sınır eskisi gibi. */
+ const fine=icMeshCol(sc);if(fine.length>4)IC.col.boxes=fine;
+ IC.nav=IC.nav.filter(c=>!IC.col.boxes.some(b=>c[0]>b[0]-.5&&c[0]<b[2]+.5&&c[1]>b[1]-.5&&c[1]<b[3]+.5));
  IC.assetsReady=true;
 }
 
+function icMeshCol(scene){
+ const C=.4,b=IC.bounds,nx=Math.ceil((b.x2-b.x1+4)/C),nz=Math.ceil((b.z2-b.z1+4)/C),ox=b.x1-2,oz=b.z1-2,grid=new Uint8Array(nx*nz);
+ const sm=new THREE.Matrix4().makeScale(IC_SX,IC_SY,IC_SX);scene.updateMatrixWorld(true);
+ const A=new THREE.Vector3(),B=new THREE.Vector3(),Cc=new THREE.Vector3(),M=new THREE.Matrix4(),e1=new THREE.Vector3(),e2=new THREE.Vector3(),n=new THREE.Vector3(),P=new THREE.Vector3();
+ scene.traverse(o=>{if(!o.isMesh)return;M.multiplyMatrices(sm,o.matrixWorld);const g=o.geometry,pos=g.attributes.position,idx=g.index,cnt=idx?idx.count:pos.count;
+  for(let t=0;t<cnt;t+=3){const i0=idx?idx.getX(t):t,i1=idx?idx.getX(t+1):t+1,i2=idx?idx.getX(t+2):t+2;
+   A.fromBufferAttribute(pos,i0).applyMatrix4(M);B.fromBufferAttribute(pos,i1).applyMatrix4(M);Cc.fromBufferAttribute(pos,i2).applyMatrix4(M);
+   e1.subVectors(B,A);e2.subVectors(Cc,A);n.crossVectors(e1,e2);const L=n.length();if(L<1e-6)continue;if(Math.abs(n.y/L)>.5)continue;
+   const y0=Math.min(A.y,B.y,Cc.y),y1=Math.max(A.y,B.y,Cc.y);if(y1<.8||y0>1.4)continue;
+   const st=Math.max(2,Math.ceil(Math.max(e1.length(),e2.length())/(C*.5)));
+   for(let u=0;u<=st;u++)for(let v=0;v<=st-u;v++){P.copy(A).addScaledVector(e1,u/st).addScaledVector(e2,v/st);if(P.y<.8||P.y>1.4)continue;
+    const gx=Math.floor((P.x-ox)/C),gz=Math.floor((P.z-oz)/C);if(gx>=0&&gz>=0&&gx<nx&&gz<nz)grid[gz*nx+gx]=1}}});
+ /* satır satır parçaları birleştir, aynı parçalar alt alta ise uzat */
+ const out=[],open=new Map();
+ for(let z=0;z<=nz;z++){const runs=new Map();
+  if(z<nz)for(let x=0;x<nx;x++){if(!grid[z*nx+x])continue;let e=x;while(e+1<nx&&grid[z*nx+e+1])e++;runs.set(x+','+e,1);x=e}
+  for(const [k,bx] of open){if(runs.has(k)){bx[3]=oz+(z+1)*C;runs.delete(k)}else{out.push(bx);open.delete(k)}}
+  for(const k of runs.keys()){const [a,e]=k.split(',').map(Number);open.set(k,[ox+a*C,oz+z*C,ox+(e+1)*C,oz+(z+1)*C,IC_WALLH])}}
+ return out;
+}
 const icIn=(x,z,m)=>{const b=IC.bounds;return !b||(x>b.x1+(m||0)&&x<b.x2-(m||0)&&z>b.z1+(m||0)&&z<b.z2-(m||0))};
 const icCenter=()=>{const b=IC.bounds;return b?[(b.x1+b.x2)/2,(b.z1+b.z2)/2]:[0,0]};
 /* doğulabilir hücre: sınırın içinde ve duvar/kutu içinde değil (icStart çarpışma kutularını kurduktan sonra hesaplanır) */

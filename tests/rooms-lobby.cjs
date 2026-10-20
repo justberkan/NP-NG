@@ -107,6 +107,13 @@ async function player(port,name){const p=await peer(port);p.send({t:'auth',mode:
     check('Oyuncu ve canavar harita içinde doğar; oyuncu dışarı itilse de çıkamaz',r.pIn&&r.mIn&&r.itildi,r);
     check('Bu modda çift zıplama ve kanca kapalı',r.dj===0&&r.hook===false,{dj:r.dj,kanca:r.hook});
     check('Canavar yürürken bacak/kol salınır, dururken salınım söner',r.legWalk>.15&&r.legStop<.05&&r.ph>0,{tur:r.tur,yururken:r.legWalk,dururken:r.legStop});
+    /* görünmez duvar yok (Berkan 2026-10-21): her doğma hücresinden 4 yöne, çarpışma kutusu görünen duvardan en fazla 0,7 m önce başlar */
+    const gw=await page.evaluate(()=>{IC.mapGroup.updateMatrixWorld(true);const sides=[];for(const m of IC.mapMeshes)for(const q of (Array.isArray(m.material)?m.material:[m.material])){sides.push([q,q.side]);q.side=THREE.DoubleSide}
+      const rc=new THREE.Raycaster(),inb=(x,z)=>boxes.some(b=>x>b.x1&&x<b.x2&&z>b.z1&&z<b.z2);let n=0,bad=0;const cells=icSafeCells();
+      for(let i=0;i<cells.length;i+=3){const c=cells[i];for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){rc.set(new THREE.Vector3(c[0],1,c[1]),new THREE.Vector3(dx,0,dz));rc.far=30;
+        const h=rc.intersectObjects(IC.mapMeshes,false)[0];if(!h)continue;let d=0;while(d<30&&!inb(c[0]+dx*d,c[1]+dz*d))d+=.05;n++;if(h.distance-d>.7)bad++}}
+      for(const [q,sd] of sides)q.side=sd;return {olcum:n,gorunmez:bad,kutu:boxes.length}});
+    check('Backrooms: duvar çarpışması duvarın kendisinde (görünmez duvar yok)',gw.olcum>100&&gw.gorunmez<=3,gw);
     await page.evaluate(()=>{const e=IC.mons[0];p.x=e.g.position.x;p.z=e.g.position.z+5;p.yaw=Math.PI;p.pitch=0;tick(1/60);R.render(S,cam)});
     await page.screenshot({path:path.join(out,'canavar.png')});
     check('Sayfa hatası yok',!errors.length,errors.slice(0,3));

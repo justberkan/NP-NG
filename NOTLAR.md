@@ -289,3 +289,4 @@ Her iş sonunda bir satır ekle: tarih · kim · build · ne değişti · dokunu
 - 2026-10-20 13:20 · Claude · 202610201320 inli-cinli-v1 · Kimi'nin korku modu (Inlı Cinlı: Backrooms, Lego, Starttrack haritaları) oyuna eklendi: Mod seç → Inlı Cinlı. Sunucu değişti → yeniden başlat.
 - 2026-10-20 17:45 · Claude · 202610201745 lobi-oda-v1 · Inlı Cinlı: harita 1,6× büyük, harita dışında doğma yok, çift zıplama/kanca kapalı, Momo/Slenderman yürüyor. Lobide LOBİLER: açık co-op odaları, kodla katıl, şifreli oda, arkadaş listesinde Katıl/Davet, oyunda oda paneli. Sunucu değişti → yeniden başlat.
 - 2026-10-21 · Claude · 202610201510 inli-harita-v2 · Inlı Cinlı: takım arkadaşları artık kendi seçtikleri karakterle görünüyor; harita 2,6× büyük; duvarlar zıplayarak aşılamıyor. Sunucu değişti → yeniden başlat.
+- 2026-10-21 02:15 · Claude · 202610210215 inli-duvar-v3 · Inlı Cinlı: görünmez duvarlar kalktı, çarpışma haritanın gerçek duvarlarından. Yalnız oyun dosyası → Ctrl+F5 yeter.
