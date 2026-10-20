@@ -375,3 +375,11 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Dosyalar: js/core.js, js/views.js, index.html, server-hit-collision.bin (core.js değişti → yeniden üretildi, geometri birebir aynı), tests/mobile.cjs, tests/casino-dede.cjs
 - Test: npm test baştan sona PASS (çıkış 0; 211 PASS + http 5/5, 0 FAIL). mobile +2 (Berkan'ın PC'si gibi maxTouchPoints 10 + fare → bilgisayar; ?cihaz=mobil kalıcı, Ayarlar → Otomatik ile geri). Önceki koşuda: çarpışma verisi yenilenmemişti (yenilendi); casino-dede ses kontrolü yük altında 404 geç gelince iki aşamayı karıştırıyordu (her aşama kendi cevabını bekliyor, ayrı cümleler); smoke bir kez OYNA tıklamasında zaman aşımına düştü, tek başına ve son tam koşuda geçti. Gerçek dokunmatik ekranlı bilgisayarda sonuç Berkan'ın Chrome ölçümüne göre tahmin: pointer fine → bilgisayar.
 - Yedek: _yedek/claude-1225/
+
+### 2026-10-20 13:20 · Claude · build 202610201320 inli-cinli-v1
+- İşlem: Berkan: Kimi'nin backrooms/korku modunu ekle ("prototip, test amaçlı, ticari hedef yok, ekle gitsin"). kimi/inli-cinli dalı (onaysız, PR'sız yapılmıştı) main'e birleştirildi.
+- Eklendi (Kimi): Inlı Cinlı korku modu (js/horror.js, server-horror.js): haritalar Backrooms / Lego / Starttrack, canavarlar, el feneri, stamina, çıkış kapısı +1000 TL, sınırsız co-op; assets/horror/*; tests/horror.cjs, horror-open.cjs.
+- Birleştirme (Claude): index.html/server.js/run.cjs/http.cjs/style.css çakışmaları iki taraf korunarak çözüldü (LOKUM/Çivi/Canlı BJ/cihaz düzeltmesi duruyor); eski hesaptan atılan bağlantı korku odasından da çıkarılıyor (HORNET.leave).
+- NOT: Model lisansları belirsiz (CS:GO haritaları, Momo, Slenderman); Berkan prototip/ticari değil diye kabul etti. Repo herkese açık.
+- Dosyalar: js/horror.js, server-horror.js, assets/horror/*, docs/horror/*, index.html, server.js, js/main.js, css/style.css, tests/run.cjs, tests/http.cjs, tests/horror*.cjs
+- Test: TESTSONUCU

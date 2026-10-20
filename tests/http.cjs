@@ -20,6 +20,7 @@ test.before(async()=>{
   fs.copyFileSync(path.join(__dirname,'../server.js'),path.join(root,'server.js'));
   fs.copyFileSync(path.join(__dirname,'../server-wavecorridor.js'),path.join(root,'server-wavecorridor.js'));
   fs.copyFileSync(path.join(__dirname,'../server-blackjack.js'),path.join(root,'server-blackjack.js')); /* canlı blackjack modülü (2026-10-20) */
+  fs.copyFileSync(path.join(__dirname,'../server-horror.js'),path.join(root,'server-horror.js'));
   for(const f of ['server-hit-validation.js','server-hit-collision.js','server-hit-collision.bin','js/mapcol.js']){
     fs.mkdirSync(path.dirname(path.join(root,f)),{recursive:true});
     fs.copyFileSync(path.join(__dirname,'..',f),path.join(root,f));
