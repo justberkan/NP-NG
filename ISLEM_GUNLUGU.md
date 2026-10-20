@@ -366,3 +366,12 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Test: npm test baştan sona PASS (çıkış 0; 209 PASS + http 5/5, 0 FAIL). Yeni: casino-games (Çivi Topu 27 tablo kesin RTP, LOKUM katmanlı RTP 3 yol, oyun içi para/satın alma/şans 2×/sekme/oto), live-blackjack 20/20 (ham 3 oyuncu: sıra, bekleme, kurallara uygun ödeme, süre dolunca dur, kopanın kazancı girişte + tarayıcıda oturup oynama). İlk koşuda http testi yeni sunucu modülünü kopyalamadığı için düştü; test kopyalama listesi düzeltildi, tam koşu yeniden yapıldı. Gerçek telefon ve iki gerçek kişiyle canlı masa denenmedi.
 - NOT: server.js ve yeni server-blackjack.js → sunucuyu yeniden başlat (DURDUR.bat, SUNUCU-INTERNET.bat); oyuncular Ctrl+F5.
 - Yedek: _yedek/claude-1135/
+
+### 2026-10-20 12:25 · Claude · build 202610201225 cihaz-pc-v1
+- İşlem: Berkan: "bilgisayarda mobil görünüm var, bilgisayarı mobil sanıyor".
+- Neden (Berkan'ın Chrome'unda ölçüldü): navigator.maxTouchPoints = 10 (Windows'ta dokunmatik/kalem sürücüsü), ana işaretçi fare (pointer: fine). Oyun "dokunma desteği varsa mobil" diye bakıyordu.
+- Değişti: js/core.js — mobil yalnız ANA işaretçi parmaksa (pointer: coarse); elle seçim localStorage 'npng_cihaz' ve adres ?cihaz=pc / mobil / oto. js/views.js — Ayarlar → Mobil → "Cihaz türü" (Otomatik / Bilgisayar / Mobil, Uygula sayfayı yeniler).
+- Eklendi: yok (ayar seçeneği dışında). Çıkarıldı: yok.
+- Dosyalar: js/core.js, js/views.js, index.html, server-hit-collision.bin (core.js değişti → yeniden üretildi, geometri birebir aynı), tests/mobile.cjs, tests/casino-dede.cjs
+- Test: npm test baştan sona PASS (çıkış 0; 211 PASS + http 5/5, 0 FAIL). mobile +2 (Berkan'ın PC'si gibi maxTouchPoints 10 + fare → bilgisayar; ?cihaz=mobil kalıcı, Ayarlar → Otomatik ile geri). Önceki koşuda: çarpışma verisi yenilenmemişti (yenilendi); casino-dede ses kontrolü yük altında 404 geç gelince iki aşamayı karıştırıyordu (her aşama kendi cevabını bekliyor, ayrı cümleler); smoke bir kez OYNA tıklamasında zaman aşımına düştü, tek başına ve son tam koşuda geçti. Gerçek dokunmatik ekranlı bilgisayarda sonuç Berkan'ın Chrome ölçümüne göre tahmin: pointer fine → bilgisayar.
+- Yedek: _yedek/claude-1225/

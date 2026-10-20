@@ -201,7 +201,7 @@ function setV(ig){
   `<p class='note'>Doku: modeller şimdilik doku kullanmıyor, renkli yüzeylerle çiziliyor. Silah skin dokuları gelince doku kalitesi ayarı da eklenecek.</p>
   <p class='note'>FPS sınırı "Limitsiz" = yapay sınır yok. V-Sync tarayıcıda otomatik açık ve kapatılamıyor: üst sınır ekranının yenileme hızıdır (örn. 144 Hz ekranda en fazla 144 FPS). Sınır seçince sistem ısınmasını ve fan sesini azaltırsın; Limitsiz'de mümkün olan en yüksek değeri alırsın. Ekranın yenileme hızının üstüne (ör. 300-500 FPS) çıkmak için oyunu klasördeki <b>OYNA-SINIRSIZ-FPS.bat</b> ile aç: Chrome/Edge V-Sync kapalı açılır. EXE sürümünde de bu ayar kapalı gelecek.</p>
   <p class='note'>Zayıf bilgisayar: "Çok düşük" ön ayarını seç. En çok FPS kazandıran ayar çözünürlük ölçeğidir.</p>`;
- }else if(setTab==='mob')b=cRange('Dokunmatik bakış hassasiyeti','touchSens',.4,2.5,.05,'x')+`<div class='row' style='margin-top:10px'><button class='btn alt' id='tle2'>Tuş düzenini değiştir</button></div><p class='note'>Düğmeleri sürükleyip yerleştirir, boyutlarını ayarlarsın. Dokunmatik cihazda en rahat çalışır.</p>`;
+ }else if(setTab==='mob')b=`<div class='sr2'><span>Cihaz türü</span><span style='display:flex;gap:6px;align-items:center;flex-wrap:wrap'><select id='cihaz'><option value=''${!cihazSecim?' selected':''}>Otomatik (şu an: ${cihazOto?'mobil':'bilgisayar'})</option><option value='pc'${cihazSecim==='pc'?' selected':''}>Bilgisayar (klavye + fare)</option><option value='mobil'${cihazSecim==='mobil'?' selected':''}>Mobil (dokunmatik)</option></select><button class='btn sm' id='cihazok'>Uygula</button></span></div><p class='note'>Şu an <b>${touch?'mobil':'bilgisayar'}</b> arayüzü açık. Uygula sayfayı yeniler (maçtaysan maç biter).</p>`+cRange('Dokunmatik bakış hassasiyeti','touchSens',.4,2.5,.05,'x')+`<div class='row' style='margin-top:10px'><button class='btn alt' id='tle2'>Tuş düzenini değiştir</button></div><p class='note'>Düğmeleri sürükleyip yerleştirir, boyutlarını ayarlarsın. Dokunmatik cihazda en rahat çalışır.</p>`;
  else if(setTab==='ctl')b=typeof kontrollerHTML==='function'?kontrollerHTML():'';
  else if(setTab==='cr')b=creditsHTML();
  else if(setTab==='mk'){
@@ -245,6 +245,7 @@ function wireSettings(a,view){
  a.querySelectorAll('.xhsw').forEach(b=>b.onclick=()=>{SET.xhColor=b.dataset.xh;const ci=$('xhcol');if(ci)ci.value=b.dataset.xh;saveSet();applyCrosshair();a.querySelectorAll('.xhsw').forEach(x=>x.style.borderColor=x===b?'#27e0ff':'#243242')});
  wireSensitivity(a);
  const t2=$('tle2');if(t2){t2.onclick=()=>startTouchEdit()}
+ const ck=$('cihazok');if(ck)ck.onclick=()=>{const v=$('cihaz').value;try{if(v)localStorage.setItem(CIHAZ_KEY,v);else localStorage.removeItem(CIHAZ_KEY)}catch(e){}const u=new URL(location.href);u.searchParams.delete('cihaz');location.replace(u.toString())};
  if(typeof kontrollerWire==='function')kontrollerWire(a);
  a.querySelectorAll('[data-tr]').forEach(c=>c.onchange=()=>{SV.eco.tr[c.dataset.tr]=c.checked;save()});
  const r1=$('rst1');if(r1)r1.onclick=()=>{

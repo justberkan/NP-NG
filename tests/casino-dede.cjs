@@ -94,11 +94,13 @@ let child=null,log='';const dir=fs.mkdtempSync(path.join(os.tmpdir(),'npng-dede-
       const c1=a.credit,t1=SV.tl;await new Promise(r=>setTimeout(r,2500));return {hidden:CGD.f.style.display==='none',same:a.credit===c1&&SV.tl===t1,eq:a.credit===SV.tl,auto:doc.getElementById('auto').textContent}});
     check('Kumarhaneden çıkınca otomatik çevirme durur, süren çevirme ödenir',s.hidden&&s.same&&s.eq&&/KAPALI/.test(s.auto),s);
     /* Türkçe ses yoksa sentez İngilizce aksanla okumasın (Berkan, 2026-10-19): mp3 yokken yalnız tr sesle konuşur */
-    s=await page.evaluate(async()=>{const w=CGD.f.contentWindow,ss=w.speechSynthesis;let n=0;
-      w.SpeechSynthesisUtterance=function(t){this.text=t};const T='Test cümlesi 7';ss.speak=u=>{if(u&&u.text===T)n++}; /* yalnız bizim cümleyi say (sayfanın kendi boşta replikleri karışmasın) */w.eval('interacted=true;voiceOn=true');
-      ss.getVoices=()=>[{lang:'en-US'}];w.dedeSes('yok-test-1',T);await new Promise(r=>setTimeout(r,800));const en=n;
-      ss.getVoices=()=>[{lang:'en-US'},{lang:'tr-TR'}];w.dedeSes('yok-test-2',T);await new Promise(r=>setTimeout(r,800));
-      return {yalnizIngilizce:en,turkceVarken:n-en}});
+    /* her çağrının mp3 hatası (404) gelip ses seçimi yapılana kadar beklenir: yük altında 404 geç gelince ikinci aşamaya karışıyordu */
+    s=await page.evaluate(async()=>{const w=CGD.f.contentWindow,ss=w.speechSynthesis;const n={};let asked=0;
+      w.SpeechSynthesisUtterance=function(t){this.text=t};ss.speak=u=>{if(u&&/^Test cümlesi/.test(u.text))n[u.text]=(n[u.text]||0)+1}; /* yalnız bizim cümleleri say */w.eval('interacted=true;voiceOn=true');
+      const until=async f=>{const t=Date.now();while(!f()&&Date.now()-t<8000)await new Promise(r=>setTimeout(r,50))};
+      ss.getVoices=()=>{asked++;return [{lang:'en-US'}]};w.dedeSes('yok-test-1','Test cümlesi 1');await until(()=>asked>=1);await new Promise(r=>setTimeout(r,200));
+      const a1=asked;ss.getVoices=()=>{asked++;return [{lang:'en-US'},{lang:'tr-TR'}]};w.dedeSes('yok-test-2','Test cümlesi 2');await until(()=>asked>a1);await new Promise(r=>setTimeout(r,200));
+      return {yalnizIngilizce:n['Test cümlesi 1']||0,turkceVarken:n['Test cümlesi 2']||0,soruldu:asked}});
     check('DEDE: Türkçe ses yoksa konuşmaz, varsa Türkçe konuşur',s.yalnizIngilizce===0&&s.turkceVarken===1,s);
     check('Sayfa hatası ve 4xx yok',!errors.length&&!http.length,[...errors,...http].slice(0,4));
   }finally{await browser.close()}

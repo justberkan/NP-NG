@@ -65,6 +65,21 @@ const check=(name,ok,detail)=>{results.push({name,ok,detail});if(!ok)failed++;co
     const bf=await page.evaluate(()=>{const r=document.getElementById('bf').getBoundingClientRect();return {x:Math.round(r.left),y:Math.round(r.top),r:Math.round(r.right),b:Math.round(r.bottom),W:innerWidth,H:innerHeight}});
     check('Düğme sürüklenince tamamı ekranda kalır',bf.r<=bf.W&&bf.b<=bf.H&&bf.x>=0&&bf.y>=0,bf);
     await page.evaluate(()=>document.getElementById('te-s').click());
+    /* Cihaz türü (Berkan 2026-10-20: "bilgisayarı mobil sanıyor"): Chrome dokunmatik sürücülü PC'de maxTouchPoints=10 ama ana işaretçi fare.
+       Böyle bir PC bilgisayar sayılmalı; elle seçim (?cihaz=pc / mobil / oto ve Ayarlar → Mobil → Cihaz türü) her şeyi geçersiz kılar. */
+    {const pc=await browser.newContext({viewport:{width:1280,height:720}});const q=await pc.newPage();
+     await q.addInitScript(()=>{try{localStorage.setItem('npng_legal_v1','1')}catch(e){}Object.defineProperty(Navigator.prototype,'maxTouchPoints',{get:()=>10})});
+     q.on('pageerror',e=>errors.push('pc: '+String(e.message||e).slice(0,200)));
+     await q.goto(baseURL+'/index.html',{waitUntil:'load'});await q.waitForFunction(()=>typeof touch!=='undefined');
+     const r=await q.evaluate(()=>({touch,mtp:navigator.maxTouchPoints,govde:document.body.classList.contains('touch')}));
+     check('Dokunmatik sürücülü bilgisayar (maxTouchPoints 10, fare) bilgisayar arayüzü açar',r.mtp===10&&r.touch===false&&!r.govde,r);
+     await q.goto(baseURL+'/index.html?cihaz=mobil',{waitUntil:'load'});const m1=await q.evaluate(()=>touch);
+     await q.goto(baseURL+'/index.html',{waitUntil:'load'});const m2=await q.evaluate(()=>touch);
+     await q.evaluate(()=>{SV.casOk=SV.casOk;setTab='mob';view('settings')});const sel=await q.evaluate(()=>{const s=document.getElementById('cihaz');return s&&s.value});
+     await q.evaluate(()=>{document.getElementById('cihaz').value='';document.getElementById('cihazok').click()});await q.waitForLoadState('load');await q.waitForFunction(()=>typeof touch!=='undefined');
+     const m3=await q.evaluate(()=>({touch,kayit:localStorage.getItem('npng_cihaz')}));
+     check('Elle seçim: ?cihaz=mobil kalıcı olur, Ayarlar → Cihaz türü → Otomatik ile geri döner',m1===true&&m2===true&&sel==='mobil'&&m3.touch===false&&m3.kayit===null,{m1,m2,sel,m3});
+     await pc.close()}
     check('Sayfa hatası yok',!errors.length,errors.slice(0,3));
   }finally{await browser.close()}
 })().catch(e=>{console.error(e);failed++}).finally(()=>{

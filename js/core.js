@@ -1,7 +1,14 @@
 'use strict';
 /* ===== Çekirdek: yardımcılar, sahne, arena, ses, kayıt ===== */
 const $=id=>document.getElementById(id);
-const touch='ontouchstart' in window||navigator.maxTouchPoints>0;
+/* Mobil (dokunmatik) arayüz mü? (2026-10-20 · Berkan: "bilgisayarı mobil sanıyor")
+   Eskiden ekranda dokunma desteği VARSA mobil sayılıyordu: dokunmatik ekranlı / kalem tabletli bilgisayarlar da mobil açılıyordu.
+   Şimdi ANA işaretçi parmaksa (pointer: coarse) mobil; farenin olduğu bilgisayar dokunmatik ekranlı olsa da bilgisayar sayılır.
+   Elle seçim: Ayarlar → Mobil → Cihaz türü (ya da adrese ?cihaz=pc / ?cihaz=mobil). */
+const CIHAZ_KEY='npng_cihaz';
+const cihazSecim=(()=>{let o='';try{const q=new URLSearchParams(location.search).get('cihaz');if(q==='pc'||q==='mobil'||q==='oto'){o=q==='oto'?'':q;if(o)localStorage.setItem(CIHAZ_KEY,o);else localStorage.removeItem(CIHAZ_KEY)}else o=localStorage.getItem(CIHAZ_KEY)||''}catch(e){}return o==='pc'||o==='mobil'?o:''})();
+const cihazOto=(()=>{const has='ontouchstart' in window||navigator.maxTouchPoints>0;let coarse=has;try{if(window.matchMedia)coarse=matchMedia('(pointer: coarse)').matches||(!matchMedia('(any-pointer: fine)').matches&&has)}catch(e){}return has&&coarse})();
+const touch=cihazSecim?cihazSecim==='mobil':cihazOto;
 if(touch)document.body.classList.add('touch');
 const V3=(x,y,z)=>new THREE.Vector3(x||0,y||0,z||0);
 const hex=c=>'#'+c.toString(16).padStart(6,'0');
