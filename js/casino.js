@@ -2,7 +2,7 @@
 /* ===== Kumarhane: slot, blackjack, rulet, Aviator (oyun içi para, gerçek para değil) ===== */
 let cgGame='dede',cgBet=50,cgTimers=[],cgRaf=0,cgBusy=false;
 const cgSet=(fn,ms)=>{const t=setTimeout(fn,ms);cgTimers.push(t);return t};
-function casinoStop(){dedeHide();cgTimers.forEach(clearTimeout);cgTimers=[];cancelAnimationFrame(cgRaf);cgRaf=0;cgBusy=false;if(cgCrash.on&&cgCrash.phase==='fly'){/* uçuş sırasında çıkılırsa bahis yanar */cgCrash.on=false;cgCrash.phase='idle'}}
+function casinoStop(){dedeHide();if(typeof lbjLeave==='function')lbjLeave();cgTimers.forEach(clearTimeout);cgTimers=[];cancelAnimationFrame(cgRaf);cgRaf=0;cgBusy=false;if(cgCrash.on&&cgCrash.phase==='fly'){/* uçuş sırasında çıkılırsa bahis yanar */cgCrash.on=false;cgCrash.phase='idle'}}
 const cgMsg=(t,cls)=>{const e=$('cgm');if(e){e.textContent=t;e.className='cgm '+(cls||'')}};
 function cgBetHTML(){
  return `<div class='row'><label class='note'>Bahis (TL)</label><input type='number' id='bet' value='${cgBet}' min='10' step='10'>${[10,50,100,500,1000].map(v=>`<button class='chip' data-b='${v}'>${v}</button>`).join('')}<button class='chip' data-b='max'>Hepsi</button></div>`;
@@ -258,35 +258,48 @@ function crashEnd(){
    Para yalnız oyunda (SV.tl): sayfa onBet/onWin bildirir, oyun setCredit ile geri yollar.
    iframe #lb içinde bir kez açılır ve yerinde kalır: sekmeden çıkınca süren çevirme arka planda biter ve ödenir
    (yeniden yüklense yarım kalan kazanç kaybolurdu). Çıkışta otomatik çevirme durur. */
-const CGD={f:null,api:null,ro:null};
-function dedeHTML(){return `<div id='cgdede'><p class='note'>DEDE yükleniyor…</p></div>`}
+/* Ayrı sayfa oyunlar (Claude 2026-10-20: DEDE'ye ek olarak LOKUM ve Çivi Topu) — hepsi aynı API: setCredit/onBet/onWin/stopAuto/spinning.
+   Her oyunun iframe'i ilk açılışta bir kez yüklenir, sekme değişince gizlenir (süren çevirme/top arka planda biter ve ödenir). */
+const CGF={
+ dede:{src:'assets/casino/dede/index.html',title:'DEDE kumarhane',W:1200,H:790,f:null,api:null,ro:null},
+ lokum:{src:'assets/casino/lokum/index.html',title:'LOKUM şeker slotu',W:1200,H:790,f:null,api:null,ro:null},
+ civi:{src:'assets/casino/civi/index.html',title:'Çivi Topu',W:1200,H:760,f:null,api:null,ro:null},
+};
+const CGD=CGF.dede; /* eski ad: haftalık bonus ve testler */
+let cgfCur='dede',cgfEv=false;
+const cgfHTML=k=>()=>`<div id='cgf'><p class='note'>${CGF[k].title} yükleniyor…</p></div>`;
 function dedeVer(){const s=document.querySelector('script[src*="js/casino.js"]');return s&&s.src.split('v=')[1]||'1'}
-function dedeWire(){
- let f=CGD.f;
- if(!f){f=CGD.f=document.createElement('iframe');f.id='dedef';f.title='DEDE kumarhane';f.setAttribute('allow','autoplay');
-  f.onload=dedeBind;f.src='assets/casino/dede/index.html?v='+dedeVer();$('lb').appendChild(f);
-  addEventListener('resize',dedePlace);document.addEventListener('scroll',dedePlace,true)}
+const cgfWire=k=>()=>{
+ const o=CGF[k];cgfCur=k;let f=o.f;
+ for(const q in CGF)if(q!==k)cgfHideOne(q);
+ if(!f){f=o.f=document.createElement('iframe');f.className='cgfr';if(k==='dede')f.id='dedef';else f.id='cgf-'+k;f.title=o.title;f.setAttribute('allow','autoplay');
+  f.onload=()=>cgfBind(k);f.src=o.src+'?v='+dedeVer();$('lb').appendChild(f)}
+ if(!cgfEv){cgfEv=true;addEventListener('resize',dedePlace);document.addEventListener('scroll',dedePlace,true)}
  f.style.display='block';dedePlace();requestAnimationFrame(dedePlace);setTimeout(dedePlace,350);
- if(window.ResizeObserver){if(CGD.ro)CGD.ro.disconnect();CGD.ro=new ResizeObserver(dedePlace);CGD.ro.observe($('cgdede'))}
- dedeSync();
-}
-/* Sayfa 1200×790 tasarım boyutunda çizilir, sekmelerin altındaki alana ölçeklenip ortalanır (kesilme olmaz) */
+ if(window.ResizeObserver){if(o.ro)o.ro.disconnect();o.ro=new ResizeObserver(dedePlace);const h=$('cgf');if(h)o.ro.observe(h)}
+ cgfSync(k);
+};
+const dedeHTML=cgfHTML('dede'),dedeWire=cgfWire('dede');
+/* Sayfa tasarım boyutunda çizilir, sekmelerin altındaki alana ölçeklenip ortalanır (kesilme olmaz) */
 const DEDE_W=1200,DEDE_H=790;
-function dedePlace(){const h=$('cg'),f=CGD.f;if(!h||!f||f.style.display==='none')return;
- const top=Math.max(0,h.getBoundingClientRect().top),k=Math.max(.3,Math.min(1.25,(innerWidth-32)/DEDE_W,(innerHeight-top-12)/DEDE_H));
- f.style.width=DEDE_W+'px';f.style.height=DEDE_H+'px';f.style.transform='scale('+k.toFixed(4)+')';
- f.style.left=Math.round((innerWidth-DEDE_W*k)/2)+'px';f.style.top=Math.round(top)+'px'}
-function dedeHide(){if(!CGD.f)return;CGD.f.style.display='none';if(CGD.ro){CGD.ro.disconnect();CGD.ro=null}try{if(CGD.api)CGD.api.stopAuto()}catch(e){}}
-function dedeSync(){try{if(CGD.api){CGD.api.setCredit(Math.max(0,Math.floor(SV.tl)));const w=CGD.f.contentWindow;if(w&&typeof w.weeklyRefresh==='function')w.weeklyRefresh()}}catch(e){}}
-function dedeBind(){
- let api=null;try{api=CGD.f.contentWindow.NPNG_CASINO}catch(e){}
- if(!api)return;CGD.api=api;
+function dedePlace(){const o=CGF[cgfCur],h=$('cg'),f=o&&o.f;if(!h||!f||f.style.display==='none')return;
+ const top=Math.max(0,h.getBoundingClientRect().top),k=Math.max(.3,Math.min(1.25,(innerWidth-32)/o.W,(innerHeight-top-12)/o.H));
+ f.style.width=o.W+'px';f.style.height=o.H+'px';f.style.transform='scale('+k.toFixed(4)+')';
+ f.style.left=Math.round((innerWidth-o.W*k)/2)+'px';f.style.top=Math.round(top)+'px'}
+function cgfHideOne(k){const o=CGF[k];if(!o||!o.f)return;o.f.style.display='none';if(o.ro){o.ro.disconnect();o.ro=null}try{if(o.api)o.api.stopAuto()}catch(e){}}
+function dedeHide(){for(const k in CGF)cgfHideOne(k)}
+function cgfSync(k){const o=CGF[k];try{if(o&&o.api){o.api.setCredit(Math.max(0,Math.floor(SV.tl)));const w=o.f.contentWindow;if(k==='dede'&&w&&typeof w.weeklyRefresh==='function')w.weeklyRefresh()}}catch(e){}}
+function dedeSync(){for(const k in CGF)cgfSync(k)}
+function cgfBind(k){
+ const o=CGF[k];let api=null;try{api=o.f.contentWindow.NPNG_CASINO}catch(e){}
+ if(!api)return;o.api=api;
  api.onBet(b=>{b=Math.floor(+b||0);if(b<=0)return;SV.tl-=b;casLog(b,0);save();bal();dedeSync()});
  api.onWin(w=>{w=Math.floor(+w||0);if(w<=0)return;SV.tl+=w;casLog(0,w);save();bal();dedeSync()});
- api.claimWeeklyBonus=casWeekly;api.weeklyStatus=casWeekStatus;
- if(api.getBet()>Math.max(10,SV.tl))api.setBet(10);
- dedeSync();
+ if(k==='dede'){api.claimWeeklyBonus=casWeekly;api.weeklyStatus=casWeekStatus}
+ if(api.getBet()>Math.max(10,SV.tl))api.setBet(k==='civi'?1:10);
+ cgfSync(k);
 }
+function dedeBind(){cgfBind('dede')}
 /* Haftalık kumarhane kayıp bonusu (Kimi önerisi, Berkan varsayılanı: %10, tavan 25.000; kesin oran Berkan'da).
    Tüm kumarhane oyunlarının son 7 günlük net kaybı; haftada bir. Kayıt hesapta (SV.cas). Çevrimdışıyken verilmez. */
 const CAS_WEEK={rate:.10,cap:25000};
@@ -302,7 +315,109 @@ function casWeekly(){
  const amount=casWeekAmount();SV.cas.wk=casWeekId();SV.tl+=amount;save();bal();dedeSync();
  return Promise.resolve({amount});
 }
-const CGAMES=[['dede','DEDE ⚡',dedeHTML,dedeWire],['slot','Meyve slot',slotHTML,slotWire],['bj','Blackjack',bjHTML,bjWire],['rl','Rulet',rHTML,rWire],['av','Aviator',crashHTML,crashWire]];
+/* ---------- Canlı Blackjack (Claude 2026-10-20 · Berkan: "canlı oynanabilir, aktif biri varsa masaya katılır, turunu bekler") ----------
+   Masa sunucuda (server-blackjack.js): kartları sunucu dağıtır. Para oyuncuda: kabul edilen bahis 'bjok' ile düşer,
+   el sonunda kazanç 'bjpay' ile eklenir. Sekmeden/kumarhaneden çıkınca masadan kalkılır (süren el otomatik "dur" ile biter, kazanç ödenir). */
+const LBJ={st:null,list:[],tb:1,pend:0,at:0,iv:0,on:false};
+const LBJ_SUIT={s:'♠',h:'♥',d:'♦',c:'♣'};
+const lbjCard=c=>c?`<span class='lbjc ${c[1]==='h'||c[1]==='d'?'red':''}'><b>${c[0]==='T'?'10':c[0]}</b><i>${LBJ_SUIT[c[1]]}</i></span>`:`<span class='lbjc back'></span>`;
+const LBJ_DEALER=`<svg viewBox="0 0 200 170" class='lbjdl'><defs><linearGradient id='lbjhair' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#5a3418'/><stop offset='1' stop-color='#2e180a'/></linearGradient></defs>
+<path d='M40 170 Q44 112 100 104 Q156 112 160 170 Z' fill='#f4f1ea'/><path d='M40 170 Q44 116 84 106 L100 150 L116 106 Q156 116 160 170 Z' fill='#16181d'/>
+<path d='M90 106 L100 120 L110 106 Z' fill='#f4f1ea'/><path d='M88 112 L100 118 L112 112 L112 122 L100 118 L88 122 Z' fill='#b3122e'/>
+<circle cx='100' cy='134' r='2' fill='#c9a44a'/><circle cx='100' cy='148' r='2' fill='#c9a44a'/>
+<rect x='122' y='124' width='22' height='8' rx='2' fill='#c9a44a'/><text x='133' y='130.5' font-size='5.5' text-anchor='middle' fill='#2a1a08' font-weight='700'>SELİN</text>
+<rect x='92' y='88' width='16' height='18' rx='6' fill='#e8b48f'/>
+<path d='M64 56 Q62 18 100 16 Q138 18 136 56 Q140 84 128 100 Q126 70 120 50 Q100 40 80 50 Q74 70 72 100 Q60 84 64 56 Z' fill='url(#lbjhair)'/>
+<ellipse cx='100' cy='62' rx='28' ry='33' fill='#f0c09c'/>
+<path d='M72 52 Q86 28 112 34 Q128 40 129 56 Q118 42 100 44 Q84 46 72 52 Z' fill='url(#lbjhair)'/>
+<ellipse cx='89' cy='62' rx='4' ry='4.6' fill='#fff'/><ellipse cx='111' cy='62' rx='4' ry='4.6' fill='#fff'/><circle cx='89.5' cy='63' r='2.6' fill='#3b6f2e'/><circle cx='111.5' cy='63' r='2.6' fill='#3b6f2e'/>
+<path d='M83 55 Q89 52 95 55 M105 55 Q111 52 117 55' stroke='#3a2412' stroke-width='1.8' fill='none' stroke-linecap='round'/>
+<path d='M100 66 Q98 74 101 76' stroke='#c98d6a' stroke-width='1.5' fill='none'/><path d='M92 82 Q100 88 108 82' stroke='#b3434f' stroke-width='3' fill='none' stroke-linecap='round'/>
+<circle cx='84' cy='74' r='4' fill='#f29a9a' opacity='.35'/><circle cx='116' cy='74' r='4' fill='#f29a9a' opacity='.35'/></svg>`;
+function lbjHTML(){
+ if(!MPL.authed)return `<div class='pn2'><h3>Canlı Blackjack</h3><p>Canlı masada başka oyuncularla aynı masada oynarsın; kartları sunucu dağıtır.</p><p class='note'>Çevrimiçi giriş yapmalısın (lobide ☁ düğmesi). Çevrimdışı tek kişilik masa: "Blackjack" sekmesi.</p></div>`;
+ return `<div id='lbj'><div id='lbjstage'><div class='lbjtop'><div id='lbjtabs'></div><div id='lbjst' class='lbjst'>Masaya bağlanılıyor…</div></div>
+ <div class='lbjtable'><div class='lbjdealer'>${LBJ_DEALER}</div><div class='lbjdc' id='lbjd'></div><div class='lbjfelt'><div class='lbjrule'>BLACKJACK 3:2 ÖDER · KRUPİYE YUMUŞAK 17'DE DURUR</div></div><div id='lbjseats'></div></div>
+ <div class='lbjctl' id='lbjctl'></div><div class='lbjlast' id='lbjlast'></div></div></div>`;
+}
+/* masa 1000×600 tasarım boyutunda çizilir, kumarhane alanına ölçeklenir (dar ekranda üst üste binmez) */
+function lbjFit(){const w=$('lbj'),s=$('lbjstage');if(!w||!s)return;const k=Math.max(.35,Math.min(1.2,w.clientWidth/1000,(innerHeight-w.getBoundingClientRect().top-8)/600));s.style.transform='scale('+k.toFixed(4)+')';w.style.height=Math.round(600*k)+'px';s.style.left=Math.max(0,Math.round((w.clientWidth-1000*k)/2))+'px'}
+function lbjWire(){
+ if(!MPL.authed)return;
+ LBJ.on=true;mpSend({t:'bjjoin',tb:LBJ.tb});lbjFit();requestAnimationFrame(lbjFit);
+ if(!LBJ.rs){LBJ.rs=1;addEventListener('resize',lbjFit)}
+ clearInterval(LBJ.iv);LBJ.iv=setInterval(()=>{if(!LBJ.on||!$('lbj')){clearInterval(LBJ.iv);return}lbjTick()},250);
+ cgSet(()=>mpSend({t:'bjlist'}),3000);
+}
+function lbjLeave(){if(LBJ.on){LBJ.on=false;clearInterval(LBJ.iv);mpSend({t:'bjleave'})}}
+const lbjMe=()=>String(MPL.acct||'').toLowerCase();
+function lbjMySeat(st){st=st||LBJ.st;if(!st)return -1;return st.seats.findIndex(x=>x&&x.n.toLowerCase()===lbjMe()&&!x.away)}
+function lbjMsg(m){
+ if(typeof m.t!=='string'||m.t.slice(0,2)!=='bj')return false;
+ switch(m.t){
+  case'bjok':{const a=Math.floor(+m.a||0);if(a>0){SV.tl-=a;casLog(a,0);save();bal()}break}
+  case'bjpay':{const a=Math.floor(+m.a||0);if(a>0){SV.tl+=a;casLog(0,a);save();bal();alert2((m.pend?'Canlı blackjack (bağlı değilken biten el): ':'Canlı blackjack: ')+'+₺'+a.toLocaleString('tr-TR'))}break}
+  case'bjs':LBJ.st=m;LBJ.at=Date.now();if(m.ph==='end')LBJ.endSt=m;if(LBJ.on&&$('lbj'))lbjRender();break;
+  case'bjlist':LBJ.list=m.l||[];if(LBJ.on&&$('lbj'))lbjTabs();break;
+  case'bjmsg':if($('lbj'))lbjToast(m.m);else alert2(m.m);break;
+ }
+ return true;
+}
+function lbjToast(t){const e=$('lbjst');if(!e)return;e.dataset.msg=t;e.dataset.mt=Date.now()+3500;lbjTick()}
+function lbjTabs(){const e=$('lbjtabs');if(!e)return;const st=LBJ.st;e.innerHTML=(LBJ.list.length?LBJ.list:[[1,'Masa 1',10,0],[2,'Masa 2',100,0],[3,'Masa 3 · VIP',1000,0]]).map(r=>st&&st.tb===r[0]?[r[0],r[1],r[2],st.seats.filter(Boolean).length]:r).map(r=>`<button class='lbjtab ${r[0]===LBJ.tb?'on':''}' data-tb='${r[0]}'>${r[1]}<small>min ₺${r[2].toLocaleString('tr-TR')} · ${r[3]}/5</small></button>`).join('');
+ e.querySelectorAll('[data-tb]').forEach(b=>b.onclick=()=>{const t=+b.dataset.tb;if(t===LBJ.tb)return;const st=LBJ.st;if(st&&lbjMySeat()>=0&&st.ph!=='idle'){lbjToast('Elin sürerken masa değiştiremezsin.');return}LBJ.tb=t;LBJ.pend=0;mpSend({t:'bjjoin',tb:t})})}
+const LBJ_PH={idle:'Bahis bekleniyor',bet:'Bahisler açık',deal:'Kartlar dağıtılıyor',play:'Oyuncular oynuyor',dealer:'Krupiye oynuyor',end:'El bitti'};
+const LBJ_RES={win:'KAZANDI',lose:'KAYBETTİ',push:'BERABERE',bj:'BLACKJACK!'};
+function lbjRender(){
+ const st=LBJ.st;if(!st||st.tb!==LBJ.tb)return;
+ lbjTabs();lbjFit();
+ $('lbjd').innerHTML=st.d.map(lbjCard).join('')+(st.d.length?`<em class='lbjv'>${st.dv}${st.d.some(c=>!c)?'+?':''}</em>`:'');
+ const me=lbjMySeat(st);
+ $('lbjseats').innerHTML=st.seats.map((x,i)=>{
+  if(!x)return `<div class='lbjseat empty s${i}'>${me<0?`<button class='btn sm' data-sit='${i}'>OTUR</button>`:'<span>boş</span>'}</div>`;
+  const mine=i===me,turn=st.turn&&st.turn[0]===i;
+  const hands=x.hands.map((h,hi)=>`<div class='lbjhand ${turn&&st.turn[1]===hi?'cur':''} ${h.res}'><div class='lbjcards'>${h.c.map(lbjCard).join('')}</div><div class='lbjhv'>${h.v}${h.s&&h.v<21?' (yumuşak)':''}${h.res?' · '+LBJ_RES[h.res]:h.st==='bust'?' · BATTI':''}</div><div class='lbjchip'>₺${h.bet.toLocaleString('tr-TR')}</div></div>`).join('');
+  const tag=x.wait?'sıradaki eli bekliyor':x.away?'masadan kalktı':(!x.bet&&(st.ph==='idle'||st.ph==='bet'))?'bahis bekleniyor':'';
+  return `<div class='lbjseat s${i} ${mine?'me':''} ${turn?'turn':''}'><div class='lbjname'>${mine?'⭐ ':''}${x.n}${turn?` <i class='lbjtm' data-tm='1'></i>`:''}</div>${hands||(x.bet?`<div class='lbjchip'>₺${x.bet.toLocaleString('tr-TR')}</div>`:'')}<div class='lbjtag'>${tag}${x.win&&st.ph==='end'?'+₺'+x.win.toLocaleString('tr-TR'):''}</div></div>`;
+ }).join('');
+ document.querySelectorAll('#lbjseats [data-sit]').forEach(b=>b.onclick=()=>mpSend({t:'bjsit',s:+b.dataset.sit}));
+ lbjCtl();
+ $('lbjlast').innerHTML=(st.last||[]).slice(0,4).map(r=>`<span>El ${r.rd}: krupiye ${r.d>21?'battı':r.d} · ${r.r.map(q=>q[0]+' '+(q[1]>=0?'+':'')+q[1].toLocaleString('tr-TR')).join(', ')}</span>`).join('');
+ lbjTick();
+}
+function lbjCtl(){
+ const st=LBJ.st,c=$('lbjctl');if(!c||!st)return;const me=lbjMySeat(st);
+ if(me<0){c.innerHTML=`<p class='note'>İzliyorsun. Oynamak için boş bir koltukta <b>OTUR</b>'a bas. Bakiye ₺${Math.floor(SV.tl).toLocaleString('tr-TR')}</p>`;return}
+ const x=st.seats[me];let h='';
+ if(x.wait)h=`<p class='note'>El sürüyor: sıradaki elde oynayacaksın.</p>`;
+ else if((st.ph==='idle'||st.ph==='bet')&&!x.bet){
+  const ch=[1,5,10,50,100].map(k=>k*st.min);
+  h=`<div class='row'>${ch.map(v=>`<button class='chip' data-ch='${v}'>₺${v>=1000?(v/1000)+'B':v}</button>`).join('')}<button class='chip' data-ch='0'>Sıfırla</button>
+   <button class='btn' id='lbjbet' ${LBJ.pend>=st.min?'':'disabled'}>BAHİS KOY ₺${LBJ.pend.toLocaleString('tr-TR')}</button></div><p class='note'>Masa: ₺${st.min.toLocaleString('tr-TR')} – ₺${st.max.toLocaleString('tr-TR')} · Bakiye ₺${Math.floor(SV.tl).toLocaleString('tr-TR')}</p>`;
+ }else if(st.ph==='play'&&st.turn&&st.turn[0]===me){
+  const H=x.hands[st.turn[1]],two=H&&H.c.length===2,pair=two&&x.hands.length===1&&lbjCv(H.c[0])===lbjCv(H.c[1]);
+  h=`<div class='row lbjact'><button class='btn' data-a='hit'>KART ÇEK</button><button class='btn alt' data-a='stand'>DUR</button>${two&&SV.tl>=H.bet?`<button class='btn' data-a='double'>2× KATLA</button>`:''}${pair&&SV.tl>=H.bet?`<button class='btn' data-a='split'>BÖL</button>`:''}</div>`;
+ }else h=`<p class='note'>${x.bet?'Bahsin: ₺'+x.bet.toLocaleString('tr-TR'):'Bu elde bahsin yok'} · ${LBJ_PH[st.ph]||''}</p>`;
+ c.innerHTML=h+`<button class='btn sm alt lbjup' id='lbjup'>KALK</button>`;
+ c.querySelectorAll('[data-ch]').forEach(b=>b.onclick=()=>{const v=+b.dataset.ch;LBJ.pend=v?Math.min(st.max,LBJ.pend+v):0;if(LBJ.pend>SV.tl)LBJ.pend=Math.floor(Math.min(SV.tl,st.max));lbjCtl()});
+ const bb=$('lbjbet');if(bb)bb.onclick=()=>{if(LBJ.pend<st.min||LBJ.pend>SV.tl){lbjToast('Bakiyen yetmiyor.');return}mpSend({t:'bjbet',a:LBJ.pend,tl:Math.floor(SV.tl)});bb.disabled=true};
+ c.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{c.querySelectorAll('[data-a]').forEach(q=>q.disabled=true);mpSend({t:'bjact',a:b.dataset.a,tl:Math.floor(SV.tl)})});
+ $('lbjup').onclick=()=>{mpSend({t:'bjstand'});LBJ.pend=0};
+}
+const lbjCv=c=>c[0]==='A'?11:'TJQK'.includes(c[0])?10:+c[0];
+function lbjTick(){
+ if(LBJ.on&&MPL.authed&&Date.now()-(LBJ.at||0)>10000&&Date.now()-(LBJ.rj||0)>10000){LBJ.rj=Date.now();mpSend({t:'bjjoin',tb:LBJ.tb})} /* bağlantı yenilendiyse masaya yeniden bağlan */
+ const st=LBJ.st,e=$('lbjst');if(!e||!st)return;
+ const left=Math.max(0,Math.ceil((st.ms-(Date.now()-LBJ.at))/1000));
+ let t=st.n+' · El '+st.rd+' · '+(LBJ_PH[st.ph]||'');
+ if(st.ph==='bet')t+=': '+left+' sn';
+ if(st.ph==='play'&&st.turn){const x=st.seats[st.turn[0]];t+=' · Sıra: '+(x?x.n:'?')+' ('+left+' sn)'}
+ if(st.ph==='end')t+=' · yeni el '+left+' sn sonra';
+ if(e.dataset.msg&&Date.now()<+e.dataset.mt)t=e.dataset.msg;
+ e.textContent=t;
+ const tm=document.querySelector('#lbjseats .lbjtm');if(tm)tm.textContent=left+' sn';
+}
+const CGAMES=[['dede','DEDE ⚡',dedeHTML,dedeWire],['lokum','LOKUM 🍭',cgfHTML('lokum'),cgfWire('lokum')],['civi','Çivi Topu',cgfHTML('civi'),cgfWire('civi')],['slot','Meyve slot',slotHTML,slotWire],['lbj','Canlı Blackjack 🃏',lbjHTML,lbjWire],['bj','Blackjack',bjHTML,bjWire],['rl','Rulet',rHTML,rWire],['av','Aviator',crashHTML,crashWire]];
 /* İlk girişte (hesap başına bir kez) 18 yaş onayı. Onay hesabın kayıtlı verisinde (SV.casOk) tutulur. */
 function casinoGateV(){
  return `<div class='pn2 cgate'><h3>Kumarhane · Giriş onayı</h3>

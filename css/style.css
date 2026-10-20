@@ -738,5 +738,47 @@ body.kb-cap{cursor:crosshair}
 #lm [data-m="cmp"]{order:-1;border-color:#48d6e3;background:linear-gradient(120deg,#12343d,#11202b)}
 .wc-dialog{position:fixed;inset:0;z-index:65;display:none;align-items:center;justify-content:center;padding:18px;background:#03080eeb}.wc-card{width:min(680px,100%);background:linear-gradient(135deg,#1d292a,#121a21);border:1px solid #68816d;border-radius:16px;padding:28px;box-shadow:0 20px 80px #000b}.wc-card h1{font-size:clamp(26px,5vw,40px);color:#c8e2a8;margin:8px 0}.wc-card .row{margin-top:18px;flex-wrap:wrap}.wc-card input{min-width:0;max-width:100%;padding:12px;background:#0c141b;color:#fff;border:1px solid #657a71;border-radius:6px}.wc-kicker{font-size:11px;letter-spacing:2px;color:#a7c385}#wchud{position:absolute;top:46px;left:50%;transform:translateX(-50%);max-width:92vw;width:440px;text-align:center;padding:12px;background:#101b23e8;border:1px solid #5c7855;border-radius:9px;color:#e9f1df;pointer-events:none}.wc-meter{height:5px;background:#0007;margin:8px 0}.wc-meter i{display:block;height:100%;background:#e07d49;transition:width .1s}#lm [data-m="wc"]{border-color:#799e59;background:#1c2d24}
 /* DEDE kumarhane (2026-10-19): iframe #lb içinde sabit, yer tutucunun üstüne oturur */
-#cgdede{height:calc(100vh - 230px);min-height:300px}
-#dedef{position:fixed;border:0;border-radius:10px;z-index:6;display:none;background:#120a1e;transform-origin:0 0;box-shadow:0 10px 40px #000a}
+#cgdede,#cgf{height:calc(100vh - 230px);min-height:300px}
+#dedef,.cgfr{position:fixed;border:0;border-radius:10px;z-index:6;display:none;background:#120a1e;transform-origin:0 0;box-shadow:0 10px 40px #000a}
+/* ---------- Canlı Blackjack (2026-10-20) — 1000×600 sahne, js lbjFit ile ölçeklenir ---------- */
+#lbj{position:relative;width:100%;overflow:hidden}
+#lbjstage{position:absolute;left:0;top:0;width:1000px;height:600px;transform-origin:0 0}
+.lbjtop{position:absolute;left:0;right:0;top:0;height:46px;display:flex;align-items:center;gap:10px}
+#lbjtabs{display:flex;gap:6px}
+.lbjtab{background:#1b2430;border:1px solid #3a4a5c;color:#dfe8f0;border-radius:10px;padding:5px 12px;font-weight:800;cursor:pointer;text-align:left;line-height:1.15}
+.lbjtab small{display:block;font-weight:600;font-size:11px;color:#9fb2c4}
+.lbjtab.on{background:#1f5f3a;border-color:#4fe08a}
+.lbjst{margin-left:auto;font-weight:800;color:#ffe08a;font-size:14px;background:#000a;border-radius:8px;padding:6px 12px;max-width:520px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbjtable{position:absolute;left:0;top:50px;width:1000px;height:440px;border-radius:14px;overflow:hidden;background:radial-gradient(900px 300px at 50% 0%,#4a2a1a,#1e0f08 70%)}
+.lbjdealer{position:absolute;left:50%;top:0;width:170px;transform:translateX(-50%);z-index:1}
+.lbjdealer svg{width:100%;display:block}
+.lbjfelt{position:absolute;left:2%;right:2%;top:140px;bottom:-150px;border-radius:0 0 50% 50%/0 0 100% 100%;
+ background:radial-gradient(ellipse at 50% 20%,#2f8a4a,#1a5a2c 70%);border:14px solid #6b3a1a;border-top:10px solid #8a5228;box-shadow:inset 0 0 40px #0008,0 6px 20px #000a}
+.lbjrule{position:absolute;left:50%;top:72px;transform:translateX(-50%);color:#f3d27a;font-weight:800;font-size:12px;letter-spacing:2px;opacity:.85;white-space:nowrap}
+.lbjdc{position:absolute;left:50%;top:150px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:4px}
+.lbjv{font-style:normal;margin-left:14px;background:#000a;color:#fff;font-weight:900;border-radius:12px;padding:2px 8px}
+.lbjc{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:38px;height:54px;background:#fafafa;border-radius:5px;border:1px solid #888;color:#111;box-shadow:0 2px 4px #0006;margin-right:-10px;animation:lbjin .3s ease-out}
+.lbjc b{font-size:16px;line-height:1}.lbjc i{font-style:normal;font-size:16px;line-height:1}
+.lbjc.red{color:#c0261d}.lbjc.back{background:repeating-linear-gradient(45deg,#8a1c2c 0 6px,#a8293c 6px 12px);border-color:#f3d27a}
+@keyframes lbjin{from{transform:translateY(-30px) rotate(-8deg);opacity:0}}
+#lbjseats{position:absolute;inset:0;z-index:2}
+.lbjseat{position:absolute;width:170px;min-height:96px;border-radius:12px;padding:6px;text-align:center;background:#0005;border:2px dashed #ffffff30;color:#fff}
+.lbjseat.s0{left:15px;top:190px}.lbjseat.s1{left:190px;top:262px}.lbjseat.s2{left:415px;top:298px}.lbjseat.s3{left:640px;top:262px}.lbjseat.s4{left:815px;top:190px}
+.lbjseat.empty{display:flex;align-items:center;justify-content:center;color:#ffffff60;font-size:12px}
+.lbjseat.me{border:2px solid #ffe08a;background:#0007}
+.lbjseat.turn{border:2px solid #4fe08a;box-shadow:0 0 18px #4fe08a88}
+.lbjname{font-weight:900;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbjtm{font-style:normal;color:#4fe08a;margin-left:4px}
+.lbjhand{margin-top:4px;border-radius:8px;padding:2px}
+.lbjhand.cur{outline:2px solid #4fe08a}
+.lbjhand.win,.lbjhand.bj{background:#1f6f3a99}.lbjhand.lose{opacity:.7}.lbjhand.push{background:#5a5a2a99}
+.lbjcards{display:flex;justify-content:center;padding-right:10px}
+.lbjhv{font-size:12px;font-weight:800}
+.lbjchip{display:inline-block;margin-top:2px;background:radial-gradient(circle,#ffd84a 0 45%,#c99a00 46% 60%,#ffd84a 61%);color:#2a1a00;font-weight:900;font-size:11px;border-radius:12px;padding:2px 8px}
+.lbjtag{font-size:11px;color:#ffe08a;font-weight:700;min-height:14px}
+.lbjctl{position:absolute;left:0;right:0;top:496px;height:64px;display:flex;align-items:center;gap:10px;background:#000a;border-radius:10px;padding:6px 12px}
+.lbjctl .row{gap:6px;flex-wrap:nowrap;margin:0}
+.lbjctl .note{margin:0}
+.lbjact .btn{font-size:15px;padding:10px 18px}
+.lbjup{margin-left:auto}
+.lbjlast{position:absolute;left:0;right:0;top:566px;display:flex;gap:12px;font-size:11px;color:#c9d6e2;white-space:nowrap;overflow:hidden}

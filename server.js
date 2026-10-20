@@ -75,7 +75,7 @@ server.on('upgrade', (req, sock) => {
   const c = { ip, local: lo, user: null, acc: null, sock, buf: Buffer.alloc(0), frag: null, id: 0, joined: false, seen: Date.now(), msgs: 0, msgT: Date.now() };
   sock.on('data', d => { c.buf = Buffer.concat([c.buf, d]); c.seen = Date.now(); parse(c); });
   conns.add(c);
-  sock.on('close', () => { WCNET.leave(c); leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
+  sock.on('close', () => { WCNET.leave(c); BJ.leave(c); leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
   sock.on('error', () => { try { sock.destroy(); } catch (e) { } });
 });
 function parse(c) {
@@ -113,6 +113,7 @@ setInterval(flushAcc, 5000); process.on('exit', flushAcc); process.on('SIGINT', 
 process.on('SIGHUP', () => process.exit()); if (process.platform === 'win32') process.on('SIGBREAK', () => process.exit());
 const hashPw = (pw, salt) => crypto.scryptSync(String(pw), salt, 32).toString('hex');
 const users = new Map(), fails = new Map(), conns = new Set();
+const BJ = require('./server-blackjack')({ send, users, ACC, dirty: () => { accDirty = true; }, log: s => console.log(s) }); // canlı blackjack masaları (2026-10-20)
 console.log('Kayıtlı hesap sayısı: ' + Object.keys(ACC).length);
 
 /* ---------- Oyun durumu ---------- */
@@ -170,6 +171,7 @@ function onText(c, s) {
     send(c, { t: 'aimtop', top, me: c.acc.aim }); return;
   }
   if (m.t === 'quit') { if (c.rm) useRoom(c.rm); leave(c); owLeave(c); return; }
+  if (m.t.startsWith('bj')) return BJ.handle(c, m, now);
   if (c.rm && c.joined) useRoom(c.rm);
   if (m.t === 'chat' || m.t === 'vj' || m.t === 'va' || m.t === 'vm') return chatMsg(c, m, now);
   if (m.t[0] === 'a' && m.t !== 'auth') { if (['alist', 'agive', 'aclr', 'akick', 'atools', 'aheal'].includes(m.t)) return admMsg(c, m); }
@@ -289,11 +291,12 @@ function doAuth(c, m, now) {
   }
   fails.delete(c.ip);
   let tok = null; if (m.mode !== 'token') { tok = crypto.randomBytes(24).toString('hex'); a.toks.push(tok); if (a.toks.length > 6) a.toks.shift(); accDirty = true; }
-  const old = users.get(key); if (old && old !== c) { send(old, { t: 'kicked' }); leave(old); old.acc = null; old.user = null; try { old.sock.end(); } catch (e) { } }
+  const old = users.get(key); if (old && old !== c) { send(old, { t: 'kicked' }); BJ.leave(old); leave(old); old.acc = null; old.user = null; try { old.sock.end(); } catch (e) { } }
   c.user = key; c.acc = a; users.set(key, c);
   c.admin = !!c.local || ADMINS.has(key);
   repairSave(a, now);
   reply(1, null, { name: a.name, tok, admin: c.admin, save: a.save, ts: a.ts });
+  BJ.onAuth(c); // bağlı değilken biten canlı blackjack kazancı
 }
 function respawn(v) {
   if (!players.has(v.id) || CUR.roundOver) return;

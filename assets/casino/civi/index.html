@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>ÇİVİ TOPU — NPNG Kumarhane</title>
+<style>
+  :root{--bg:#0f212e;--panel:#1a2c38;--panel2:#213743;--line:#2f4553;--txt:#e8f1f7;--mut:#8fa6b5;--go:#00e701;--go2:#1fff20;--gold:#ffc000;--red:#ff003f}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-user-select:none;user-select:none}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:"Segoe UI",system-ui,sans-serif}
+  #app{position:absolute;inset:0;display:grid;grid-template-columns:300px 1fr 74px;background:var(--bg)}
+  #side{background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:12px;border-right:1px solid var(--line)}
+  #title{font-weight:900;font-size:26px;letter-spacing:2px;color:#fff}
+  #title small{display:block;font-size:10px;letter-spacing:4px;color:var(--mut);font-weight:700}
+  .tabs{display:flex;background:var(--bg);border-radius:999px;padding:4px}
+  .tabs button{flex:1;border:0;border-radius:999px;padding:9px 0;background:transparent;color:var(--txt);font-weight:800;font-size:14px;cursor:pointer}
+  .tabs button.on{background:var(--panel2)}
+  label.l{font-size:12px;font-weight:700;color:var(--mut);display:flex;justify-content:space-between}
+  .amt{display:flex;background:var(--panel2);border:2px solid var(--line);border-radius:6px;overflow:hidden}
+  .amt input{flex:1;min-width:0;background:var(--bg);border:0;color:#fff;font-size:16px;font-weight:700;padding:9px 10px;outline:none;-webkit-user-select:text;user-select:text}
+  .amt button{border:0;border-left:1px solid var(--line);background:var(--panel2);color:#fff;font-weight:800;width:46px;cursor:pointer}
+  .amt button:hover{background:#2c4756}
+  select{width:100%;background:var(--bg);border:2px solid var(--line);border-radius:6px;color:#fff;font-size:15px;font-weight:700;padding:9px 8px;outline:none;cursor:pointer}
+  select:disabled,input:disabled{opacity:.55;cursor:not-allowed}
+  #play{border:0;border-radius:6px;background:var(--go);color:#05250a;font-size:17px;font-weight:900;padding:15px 0;cursor:pointer;letter-spacing:1px;box-shadow:0 4px 0 #00a300}
+  #play:hover{background:var(--go2)} #play:active{transform:translateY(2px);box-shadow:0 2px 0 #00a300}
+  #play.stop{background:#ff4d6a;color:#fff;box-shadow:0 4px 0 #b3203a}
+  .auto-only{display:none} #app.auto .auto-only{display:flex} #app.auto .man-only{display:none}
+  .credit{margin-top:auto;background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center}
+  .credit b{font-size:11px;color:var(--mut);letter-spacing:2px} .credit span{font-size:20px;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums}
+  .row{display:flex;gap:8px;align-items:center}
+  .chk{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--mut);cursor:pointer}
+  .note{font-size:10.5px;color:var(--mut);text-align:center;line-height:1.35}
+  #stage{position:relative;overflow:hidden}
+  #cv{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #last{display:flex;flex-direction:column;gap:6px;padding:12px 8px;align-items:stretch;background:var(--bg);border-left:1px solid var(--line)}
+  #last div{border-radius:6px;font-size:13px;font-weight:900;text-align:center;padding:9px 0;color:#1a0b00;animation:pop .25s ease-out}
+  @keyframes pop{from{transform:scale(.4);opacity:0}}
+  #msg{position:absolute;left:50%;top:14px;transform:translateX(-50%);background:rgba(0,0,0,.75);border:1px solid var(--line);padding:8px 16px;border-radius:20px;font-size:13px;display:none;z-index:5;white-space:nowrap}
+  #win{position:absolute;right:16px;top:12px;font-size:15px;font-weight:900;color:var(--go2);text-shadow:0 2px 6px #000;font-variant-numeric:tabular-nums}
+  @media (max-width:700px){#app{grid-template-columns:1fr;grid-template-rows:auto 1fr}#side{border-right:0;padding:10px;gap:8px}#last{display:none}#title{font-size:20px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="side">
+    <div id="title">ÇİVİ TOPU<small>NPNG KUMARHANE</small></div>
+    <div class="tabs"><button id="t-man" class="on">Manuel</button><button id="t-auto">Otomatik</button></div>
+    <div><label class="l">Bahis <span id="bet-tl"></span></label>
+      <div class="amt"><input id="bet" type="number" min="1" step="1" value="10" inputmode="numeric"><button id="half">½</button><button id="dbl">2×</button></div></div>
+    <div><label class="l">Risk</label><select id="risk"><option value="low">Düşük</option><option value="medium" selected>Orta</option><option value="high">Yüksek</option></select></div>
+    <div><label class="l">Sıra</label><select id="rows"></select></div>
+    <div class="auto-only" style="flex-direction:column;gap:4px"><label class="l">Top sayısı <span>(0 = sınırsız)</span></label>
+      <div class="amt"><input id="cnt" type="number" min="0" step="1" value="10" inputmode="numeric"></div></div>
+    <button id="play">BIRAK</button>
+    <label class="chk"><input type="checkbox" id="snd" checked> Ses</label>
+    <div class="credit"><b>BAKİYE</b><span id="credit">0</span></div>
+    <div class="note">Sanal para ile oynanır — gerçek para değeri yoktur.<br>Kazanma oranı (RTP) ~%96,5 · her top bağımsız.</div>
+  </div>
+  <div id="stage"><canvas id="cv"></canvas><div id="win"></div><div id="msg"></div></div>
+  <div id="last"></div>
+</div>
+<script>
+'use strict';
+/* =====================================================================
+   ÇİVİ TOPU — NPNG Kumarhane (Claude, 2026-10-20 · Berkan isteği, Plinko tarzı)
+   Top her sırada bir çiviye çarpar, %50 sola %50 sağa sapar; düştüğü kutunun çarpanı ödenir.
+   Çarpan tabloları özgün, kesin hesapla her risk/sıra için geri ödeme %95,9–%97,0 (tests/casino-games.cjs kapısı).
+   PARA: sayfa para tutmaz. Oyun setCredit ile bakiye verir; sayfa onBet(miktar) ve onWin(miktar) bildirir.
+   ===================================================================== */
+const TABLES={low:{8:[4,2.5,1.3,0.8,0.5,0.8,1.3,2.5,4],9:[5.5,3,1.5,1,0.6,0.6,1,1.5,3,5.5],10:[7,4.5,2,1.2,0.7,0.5,0.7,1.2,2,4.5,7],11:[8.5,5,2.5,1.3,0.9,0.6,0.6,0.9,1.3,2.5,5,8.5],12:[10,5.5,3,1.7,1.1,0.7,0.5,0.7,1.1,1.7,3,5.5,10],13:[12,7.5,3.5,2,1.3,0.8,0.6,0.6,0.8,1.3,2,3.5,7.5,12],14:[13,7.5,4.5,2.5,1.5,1,0.7,0.5,0.7,1,1.5,2.5,4.5,7.5,13],15:[15,8.5,5,3,1.9,1.1,0.8,0.6,0.6,0.8,1.1,1.9,3,5,8.5,15],16:[16,9.5,6,3,2,1.4,1,0.7,0.5,0.7,1,1.4,2,3,6,9.5,16]},medium:{8:[12,3.5,1.3,0.6,0.4,0.6,1.3,3.5,12],9:[16,5,1.8,0.7,0.5,0.5,0.7,1.8,5,16],10:[20,6.5,2.5,1,0.6,0.4,0.6,1,2.5,6.5,20],11:[27,8.5,4,1.4,0.7,0.4,0.4,0.7,1.4,4,8.5,27],12:[35,12,5,2,1,0.5,0.3,0.5,1,2,5,12,35],13:[45,17,6.5,3,1.2,0.6,0.4,0.4,0.6,1.2,3,6.5,17,45],14:[59,22,8.5,4,1.7,0.8,0.5,0.3,0.5,0.8,1.7,4,8.5,22,59],15:[77,30,12,5,2.5,1.1,0.5,0.4,0.4,0.5,1.1,2.5,5,12,30,77],16:[100,39,17,7,3,1.5,0.8,0.4,0.3,0.4,0.8,1.5,3,7,17,39,100]},high:{8:[28,4.5,1.1,0.4,0.2,0.4,1.1,4.5,28],9:[44,7.5,1.7,0.6,0.2,0.2,0.6,1.7,7.5,44],10:[68,13,2.5,0.8,0.3,0.2,0.3,0.8,2.5,13,68],11:[110,19,4.5,1.2,0.4,0.2,0.2,0.4,1.2,4.5,19,110],12:[170,30,6.5,1.8,0.6,0.3,0.2,0.3,0.6,1.8,6.5,30,170],13:[260,47,11,2.5,0.9,0.4,0.2,0.2,0.4,0.9,2.5,11,47,260],14:[410,74,16,4,1.3,0.5,0.3,0.2,0.3,0.5,1.3,4,16,74,410],15:[640,120,25,6.5,1.9,0.8,0.3,0.2,0.2,0.3,0.8,1.9,6.5,25,120,640],16:[1000,180,38,9.5,3,1,0.5,0.3,0.1,0.3,0.5,1,3,9.5,38,180,1000]}};
+const RISKS=['low','medium','high'],ROWS_MIN=8,ROWS_MAX=16;
+function binom(n,k){let r=1;for(let i=1;i<=k;i++)r=r*(n-k+i)/i;return r}
+function rtpOf(risk,n){const m=TABLES[risk][n];let s=0;for(let k=0;k<=n;k++)s+=m[k]*binom(n,k)/2**n;return s}
+let rng=Math.random;
+function makePath(n){const d=[];for(let i=0;i<n;i++)d.push(rng()<.5?0:1);return d}
+
+/* ---------------- para ---------------- */
+const listeners=[],betListeners=[],winListeners=[];
+let credit=100000,external=false,bet=10,risk='medium',rows=16,soundOn=true;
+function setCredit(v){external=true;credit=Math.max(0,Math.round(v));render()}
+function fmt(v){return Math.round(v).toLocaleString('tr-TR')}
+const $=id=>document.getElementById(id);
+function render(){$('credit').textContent=fmt(credit);listeners.forEach(f=>{try{f(credit)}catch(e){}})}
+function showMsg(t){const m=$('msg');m.textContent=t;m.style.display='block';clearTimeout(showMsg._t);showMsg._t=setTimeout(()=>m.style.display='none',2200)}
+
+/* ---------------- ses ---------------- */
+let AC=null,lastTick=0;
+function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
+function tone(f,dur,type,vol){const ac=AC;if(!ac||!soundOn||ac.state!=='running')return;const o=ac.createOscillator(),g=ac.createGain();o.type=type||'sine';o.frequency.value=f;g.gain.setValueAtTime(vol||.05,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0008,ac.currentTime+dur);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+dur+.02)}
+
+/* ---------------- geometri ---------------- */
+const cv=$('cv'),cx=cv.getContext('2d');let W=0,H=0,DPR=1,G=null;
+function geom(){
+  const r=cv.getBoundingClientRect();DPR=Math.min(2,window.devicePixelRatio||1);W=r.width;H=r.height;
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);cx.setTransform(DPR,0,0,DPR,0,0);
+  const n=rows,top=Math.max(40,H*.08),bh=Math.max(26,Math.min(40,H*.06)),bot=H-bh-24;
+  const sx=Math.min((W-40)/(n+2),(bot-top)/(n-1)*1.15),sy=Math.min(sx/1.15,(bot-top)/(n-1));
+  G={n,top,sx,sy,cxm:W/2,pegR:Math.min(5,Math.max(2.2,sx*.09)),ballR:Math.min(11,Math.max(4.5,sx*.24)),by:top+(n-1)*sy+sy*.9,bh,bw:sx*.9};
+}
+function pegX(r,j){return G.cxm+(j-(r+2)/2)*G.sx}
+function rowY(r){return G.top+r*G.sy}
+function bucketX(k){return G.cxm+(k-G.n/2)*G.sx}
+function mcol(k,n){const t=Math.abs(k-n/2)/(n/2);const a=[255,192,0],b=[255,0,63];return `rgb(${Math.round(a[0]+(b[0]-a[0])*t)},${Math.round(a[1]+(b[1]-a[1])*t)},${Math.round(a[2]+(b[2]-a[2])*t)})`}
+function mtxt(v){return (v>=100?Math.round(v):v)+'×'}
+
+/* ---------------- toplar ---------------- */
+const balls=[],bump=new Map();let raf=0,inFlight=0,autoOn=false,autoLeft=0,autoT=null;
+const ROW_MS=95,INTRO_MS=260;
+function flightMs(n){return INTRO_MS+n*ROW_MS+120}
+/* topun t anındaki konumu (geometri o an çizilen tabloya göre) */
+function ballPos(b,t){
+  const n=b.n,el=t-b.t0;
+  const ps=[0];for(let i=0;i<n;i++)ps.push(ps[i]+(b.path[i]?.5:-.5));
+  const yc=r=>rowY(r)-G.pegR-G.ballR*.9;
+  if(el<INTRO_MS){const k=el/INTRO_MS;return [G.cxm,G.top-G.sy*1.2+(yc(0)-(G.top-G.sy*1.2))*k*k]}
+  const s=(el-INTRO_MS)/ROW_MS,r=Math.floor(s),f=s-r;
+  if(r>=n)return [G.cxm+ps[n]*G.sx,G.by+G.bh*.3];
+  const x0=G.cxm+ps[r]*G.sx,x1=G.cxm+ps[r+1]*G.sx,y0=yc(r),y1=r+1<n?yc(r+1):G.by;
+  return [x0+(x1-x0)*f,y0+(y1-y0)*f*f-G.sy*.55*4*f*(1-f)*.6];
+}
+function drop(path){
+  const b={path:path||makePath(rows),n:rows,risk,bet,t0:performance.now(),k:0};
+  b.k=b.path.reduce((s,x)=>s+x,0);b.mult=TABLES[risk][rows][b.k];b.win=Math.round(bet*b.mult);
+  balls.push(b);inFlight++;
+  b.timer=setTimeout(()=>land(b),flightMs(b.n)); /* ödeme çizimden bağımsız: sekme gizliyken de öder */
+  if(!raf)raf=requestAnimationFrame(loop);
+  return b;
+}
+function land(b){
+  if(b.done)return;b.done=true;inFlight--;
+  const i=balls.indexOf(b);if(i>=0)balls.splice(i,1);
+  if(b.win>0){credit+=b.win;winListeners.forEach(f=>{try{f(b.win)}catch(e){}})}
+  bump.set(b.k,performance.now());
+  addLast(b.mult,b.k,b.n);
+  const net=b.win-b.bet;$('win').textContent=(net>=0?'+':'')+fmt(net)+' ₺ · '+mtxt(b.mult);
+  tone(b.mult>=10?880:b.mult>=1?620:330,.12,'triangle',b.mult>=10?.09:.05);
+  render();lockUI();
+}
+function addLast(m,k,n){const d=document.createElement('div');d.textContent=mtxt(m);d.style.background=mcol(k,n);const L=$('last');L.prepend(d);while(L.children.length>9)L.lastChild.remove()}
+function loop(t){
+  raf=0;if(!G)geom();draw(t);
+  if(balls.length||[...bump.values()].some(v=>t-v<400))raf=requestAnimationFrame(loop);
+}
+function draw(t){
+  cx.clearRect(0,0,W,H);const n=G.n;
+  /* çiviler */
+  cx.fillStyle='#fff';
+  for(let r=0;r<n;r++)for(let j=0;j<r+3;j++){cx.beginPath();cx.arc(pegX(r,j),rowY(r),G.pegR,0,6.2832);cx.fill()}
+  /* kutular */
+  const m=TABLES[risk][n],fs=Math.max(9,Math.min(14,G.sx*.32));
+  cx.font=`900 ${fs}px "Segoe UI",system-ui,sans-serif`;cx.textAlign='center';cx.textBaseline='middle';
+  for(let k=0;k<=n;k++){
+    const bt=bump.get(k),e=bt?Math.max(0,1-(t-bt)/380):0,x=bucketX(k),y=G.by+e*8;
+    cx.fillStyle=mcol(k,n);rr(x-G.bw/2,y,G.bw,G.bh,5);cx.fill();
+    cx.fillStyle='rgba(0,0,0,.25)';rr(x-G.bw/2,y+G.bh-4,G.bw,4,2);cx.fill();
+    cx.fillStyle='#1a0b00';cx.fillText(mtxt(m[k]).replace('×',G.sx<34?'':'×'),x,y+G.bh/2);
+  }
+  /* toplar */
+  for(const b of balls){if(b.n!==n)continue;const p=ballPos(b,t);
+    const g=cx.createRadialGradient(p[0]-G.ballR*.35,p[1]-G.ballR*.35,1,p[0],p[1],G.ballR);g.addColorStop(0,'#ff8fa6');g.addColorStop(1,'#ff1f4b');
+    cx.fillStyle=g;cx.beginPath();cx.arc(p[0],p[1],G.ballR,0,6.2832);cx.fill();
+    const row=Math.floor((t-b.t0-INTRO_MS)/ROW_MS);if(row>=0&&row<n&&row!==b.lr){b.lr=row;if(t-lastTick>35){lastTick=t;tone(1200+row*25,.03,'square',.012)}}
+  }
+}
+function rr(x,y,w,h,r){cx.beginPath();cx.moveTo(x+r,y);cx.arcTo(x+w,y,x+w,y+h,r);cx.arcTo(x+w,y+h,x,y+h,r);cx.arcTo(x,y+h,x,y,r);cx.arcTo(x,y,x+w,y,r);cx.closePath()}
+
+/* ---------------- oynama ---------------- */
+function readBet(){let v=Math.floor(+$('bet').value||0);if(v<1)v=1;bet=v;return v}
+function playOnce(){
+  audio();
+  const b=readBet();
+  if(b<1){showMsg('Bahis en az 1 ₺');return false}
+  if(credit<b){showMsg(external?'Yetersiz bakiye!':'Yetersiz bakiye (demo)');autoStop();return false}
+  credit-=b;betListeners.forEach(f=>{try{f(b)}catch(e){}});render();
+  drop();lockUI();return true;
+}
+function lockUI(){const busy=inFlight>0||autoOn;$('risk').disabled=busy;$('rows').disabled=busy;$('bet').disabled=autoOn;$('half').disabled=$('dbl').disabled=autoOn}
+function autoStart(){const c=Math.floor(+$('cnt').value||0);autoOn=true;autoLeft=c>0?c:Infinity;$('play').textContent='DURDUR';$('play').classList.add('stop');lockUI();autoTick()}
+function autoTick(){if(!autoOn)return;if(autoLeft<=0){autoStop();return}if(!playOnce()){autoStop();return}autoLeft--;autoT=setTimeout(autoTick,300)}
+function autoStop(){autoOn=false;clearTimeout(autoT);$('play').textContent=mode==='auto'?'OTOMATİK BAŞLAT':'BIRAK';$('play').classList.remove('stop');lockUI()}
+let mode='man';
+function setMode(m){if(autoOn)autoStop();mode=m;$('app').classList.toggle('auto',m==='auto');$('t-man').classList.toggle('on',m==='man');$('t-auto').classList.toggle('on',m==='auto');$('play').textContent=m==='auto'?'OTOMATİK BAŞLAT':'BIRAK'}
+
+/* ---------------- olaylar ---------------- */
+for(let n=ROWS_MIN;n<=ROWS_MAX;n++){const o=document.createElement('option');o.value=n;o.textContent=n;if(n===16)o.selected=true;$('rows').appendChild(o)}
+$('play').addEventListener('click',()=>{if(mode==='auto'){autoOn?autoStop():autoStart()}else playOnce()});
+$('half').addEventListener('click',()=>{$('bet').value=Math.max(1,Math.floor(readBet()/2))});
+$('dbl').addEventListener('click',()=>{$('bet').value=Math.max(1,Math.min(Math.max(1,credit),readBet()*2))});
+$('bet').addEventListener('change',readBet);
+$('risk').addEventListener('change',e=>{if(inFlight)return;risk=e.target.value;geom();loop(performance.now())});
+$('rows').addEventListener('change',e=>{if(inFlight)return;rows=+e.target.value;geom();loop(performance.now())});
+$('t-man').addEventListener('click',()=>setMode('man'));$('t-auto').addEventListener('click',()=>setMode('auto'));
+$('snd').addEventListener('change',e=>{soundOn=e.target.checked});
+addEventListener('resize',()=>{geom();loop(performance.now())});
+if(window.ResizeObserver)new ResizeObserver(()=>{geom();loop(performance.now())}).observe($('stage'));
+addEventListener('keydown',e=>{if(e.code==='Space'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();$('play').click()}});
+geom();render();loop(performance.now());
+
+/* ---------------- dışa açık API (DEDE ile aynı biçim) ---------------- */
+const API={
+  get credit(){return credit},getCredit:()=>credit,setCredit,
+  getBet:()=>readBet(),setBet:v=>{$('bet').value=Math.max(1,Math.round(v));readBet()},
+  onChange:f=>listeners.push(f),onBet:f=>betListeners.push(f),onWin:f=>winListeners.push(f),
+  stopAuto:()=>autoStop(),
+  get spinning(){return inFlight>0||autoOn},
+  tables:TABLES,rtp:rtpOf,
+  seed:s=>{let a=s|0;rng=function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}},
+  unseed:()=>{rng=Math.random},
+  _test:{drop:path=>{const b=readBet();if(credit<b)return null;credit-=b;betListeners.forEach(f=>f(b));render();return drop(path)},setRisk:v=>{risk=v;$('risk').value=v;geom()},setRows:v=>{rows=v;$('rows').value=v;geom()},flightMs},
+};
+window.NPNG_CASINO=API;
+document.dispatchEvent(new CustomEvent('npng-casino-ready'));
+</script>
+</body>
+</html>

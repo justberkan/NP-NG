@@ -275,6 +275,7 @@ function mpMsg(m){
  if(typeof chatMsgIn==='function'&&chatMsgIn(m))return;
  if(typeof ownMsg==='function'&&ownMsg(m))return;
  if(typeof admMsg==='function'&&admMsg(m))return;
+ if(typeof lbjMsg==='function'&&lbjMsg(m))return; /* canlı blackjack */
  switch(m.t){
  case'auth':
   if(m.ok){

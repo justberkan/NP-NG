@@ -38,5 +38,6 @@ ONLINE MODLAR (sunucu acik olmali, hesap ile giris gerekir)
  - Cevrimici Arena : herkes herkese, ilk 20 oldurme.
  - Acik Dunya : ortak mob ve oyuncular.
  - Aim Training : giris yaptiysan skorun sunucudaki siralamaya gider.
+ - Canli Blackjack : Kumarhane > Canli Blackjack. Ayni masaya 5 kisi oturur, sira bekler; kartlari sunucu dagitir.
  Not: Online modlarda bot yok (bot doldurma yapilmadi). Zombi co-op'ta zombiler kutularin icinden gecer.
  Sunucuyu guncelledikten sonra SUNUCU-BASLAT.bat / SUNUCU-INTERNET.bat'i kapatip yeniden ac.

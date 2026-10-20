@@ -167,3 +167,34 @@ oynatıyor; kod değişip rastgele sayı sırası kayınca kapı şans eseri ge�
 kategoriyi kendi içinde yeterince çevirip olasılığıyla tartar (aynı oyun, daha kesin ölçüm).
 
 Test: `tests/casino-dede.cjs` satın alma (onay, 10× düşüş, kazanç oyuna), yetersiz bakiye, 4 don ile doğal tetikleme.
+
+## Yeni oyunlar: LOKUM, Çivi Topu, Canlı Blackjack (Claude, 2026-10-20 · Berkan isteği)
+
+Gerçek marka adları ve çizimleri kullanılmadı (oynanış tarzı aynı, isimler/çizimler özgün).
+
+**LOKUM** (`assets/casino/lokum/index.html`) — şeker temalı 6×5 düşmeli slot.
+- Aynı şekerden ekranın herhangi bir yerinde 8+ = kazanç (8-9 / 10-11 / 12+), kazananlar patlar, yenileri düşer.
+- 4+ pamuk şeker = 10 bedava çevirme (bedava çevirmede 3+ = +5). Pamuk şeker ödemesi: 4 → 2×, 5 → 5×, 6+ → 50× bahis.
+- Bedava çevirmede çarpan şekerleri (2×–100×) düşer; o çevirmede kazanç varsa ekrandakilerin toplamı kazancı çarpar.
+- **Şansı 2× yap:** bahis %25 artar (20 → 25), bedava çevirme 2 kat sık gelir. Açıkken satın alma kapalı.
+- **Bedava çevirme satın al:** 100 × bahis (iki kez bas onayı). Satın alınan tur doğal turla aynı.
+- Doğal motor: sonuç planlanmaz, her taş ağırlıklı rastgele. Büyük ölçüm (milyonlarca çevirme):
+  normal ~%96,5 · şans 2× ~%96,6 · satın alma ~%96,3. Bedava çevirme ~1/400 (şans 2× ile ~1/195), ort. ~96× bahis. Tavan 5.000×.
+
+**Çivi Topu** (`assets/casino/civi/index.html`) — Plinko tarzı.
+- Risk düşük/orta/yüksek, 8–16 sıra; top her çivide %50 sola/sağa sapar, düştüğü kutunun çarpanı ödenir.
+- 27 çarpan tablosu özgün; her birinin geri ödemesi KESİN hesapla %95,9–%97,0 (yüksek risk 16 sıra: kenar 1.000×, orta 0,1×).
+- Manuel / Otomatik (top sayısı, 0 = sınırsız), aynı anda birden çok top. Ödeme çizimden bağımsız: sekme değişse de top öder.
+
+**Canlı Blackjack** (sunucu: `server-blackjack.js`, oyun: Kumarhane → Canlı Blackjack 🃏) — çevrimiçi, çok oyunculu.
+- 3 masa: Masa 1 (₺10–10.000), Masa 2 (₺100–100.000), Masa 3 · VIP (₺1.000–1.000.000), her biri 5 koltuk; herkes izleyebilir.
+- Akış: oturan bahis koyar → 12 sn bahis süresi (herkes koyunca hemen) → kartlar → soldan sağa sıra, her oyuncuya 15 sn
+  (süre dolunca otomatik "dur"; iki el üst üste süre dolarsa masadan kalkar) → krupiye → ödeme → 5 sn sonra yeni el.
+- El ortasında oturan sıradaki eli bekler. Hamleler: kart çek, dur, 2× katla, böl (bir kez; bölünen aslara birer kart).
+- Kurallar: 6 deste, krupiye yumuşak 17'de durur, blackjack 3:2, sigorta yok. Kartları sunucu karıştırır (hile yapılamaz).
+- Para: kabul edilen bahis/katlama/bölme anında düşer, kazanç el sonunda eklenir. Bağlantı koparsa el otomatik biter,
+  kazanç hesapta bekler ve sonraki girişte verilir. Sekmeden ya da kumarhaneden çıkınca masadan kalkılır.
+- Çevrimdışıyken canlı masa yok (tek kişilik "Blackjack" sekmesi duruyor).
+
+Testler: `tests/casino-games.cjs` (Çivi Topu kesin RTP, LOKUM katmanlı RTP, oyun içi para), `tests/live-blackjack.cjs`
+(ham bağlantılarla 3 oyuncu: sıra, bekleme, ödeme kuralları, süre, kopma + tarayıcı).
