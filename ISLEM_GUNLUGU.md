@@ -354,3 +354,15 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Test: npm test baştan sona PASS (çıkış 0, 173 PASS, 0 FAIL); yeni: admin-cli 8/8 (internetten giren admin değil, ver/al 3 sn içinde, yanlış ad reddi), ow-zombies 10/10 (eski mob parmak izi aynı, yerleşim, model, kovalama, köyde bırakma, ceset, ganimet), casino-dede +5 (satın alma onayı/10× düşüş/kazanç, yetersiz bakiye, 4 don ile doğal tetik), casino-rtp katmanlı %96,46 + satın alma %96,32. Gerçek iOS Safari ve gerçek telefon denenmedi.
 - NOT: server.js değişti → bu bilgisayarda DURDUR.bat sonra SUNUCU-INTERNET.bat; oyuncular Ctrl+F5. Yan bilgisayar: GUNCELLE.bat (sonra).
 - Yedek: _yedek/claude-0230/
+
+### 2026-10-20 11:35 · Claude · build 202610201135 kumarhane-canli-v1
+- İşlem: Berkan isteği: kumarhaneye Plinko ve Sweet Bonanza tarzı oyunlar ("bunları da ekle") + canlı, çok oyunculu blackjack ("aktif biri varsa masaya katılabilir, turunu bekler").
+- Eklendi: assets/casino/lokum/index.html — LOKUM şeker slotu (6×5, 8+ her yerde öder, düşme; 4+ pamuk şeker = 10 bedava çevirme; bedava çevirmede 2×–100× çarpan şekerleri; "Şansı 2× yap" bahis +%25; satın alma 100 × bahis). Doğal motor, büyük ölçümle RTP normal ~%96,5 / şans 2× ~%96,6 / satın alma ~%96,3.
+- Eklendi: assets/casino/civi/index.html — Çivi Topu (Plinko tarzı): risk düşük/orta/yüksek, 8–16 sıra, özgün 27 çarpan tablosu (kesin RTP %95,9–97,0), manuel/otomatik, çoklu top; ödeme çizimden bağımsız.
+- Eklendi: server-blackjack.js + Kumarhane → Canlı Blackjack 🃏 — 3 masa (min ₺10/₺100/₺1.000), 5 koltuk, izleyici; bahis 12 sn, sıra 15 sn (dolunca otomatik dur), el ortasında gelen sıradaki eli bekler; çek/dur/2× katla/böl; 6 deste, S17, BJ 3:2; kartları sunucu dağıtır. Para: bjok ile düşer, bjpay ile eklenir; koparsa kazanç hesapta bekler, sonraki girişte verilir. Krupiye çizimi özgün (normal krupiye yeleği).
+- Değişti: js/casino.js DEDE iframe kodu genelleştirildi (DEDE/LOKUM/Çivi Topu aynı API); yeni sekmeler; js/mp.js canlı masa mesajları; server.js masa modülü bağlandı; css masa ve iframe stilleri.
+- Çıkarıldı: yok. Gerçek marka adı/görseli kullanılmadı (Sweet Bonanza, Plinko).
+- Dosyalar: assets/casino/lokum/index.html, assets/casino/civi/index.html, server-blackjack.js, server.js, js/casino.js, js/mp.js, css/style.css, index.html, OKU-BENI.txt, docs/casino/BENIOKU.md, tests/casino-games.cjs, tests/live-blackjack.cjs, tests/run.cjs
+- Test: npm test baştan sona PASS (çıkış 0; 209 PASS + http 5/5, 0 FAIL). Yeni: casino-games (Çivi Topu 27 tablo kesin RTP, LOKUM katmanlı RTP 3 yol, oyun içi para/satın alma/şans 2×/sekme/oto), live-blackjack 20/20 (ham 3 oyuncu: sıra, bekleme, kurallara uygun ödeme, süre dolunca dur, kopanın kazancı girişte + tarayıcıda oturup oynama). İlk koşuda http testi yeni sunucu modülünü kopyalamadığı için düştü; test kopyalama listesi düzeltildi, tam koşu yeniden yapıldı. Gerçek telefon ve iki gerçek kişiyle canlı masa denenmedi.
+- NOT: server.js ve yeni server-blackjack.js → sunucuyu yeniden başlat (DURDUR.bat, SUNUCU-INTERNET.bat); oyuncular Ctrl+F5.
+- Yedek: _yedek/claude-1135/
