@@ -1,5 +1,6 @@
 'use strict';
 // Inli Cinli (korku) co-op odalari: wc'nin aynisi, KISI SINIRI YOK, daha buyuk snapshot.
+const ROOMS=require('./server-rooms');
 module.exports=function({send,weapons}){
  const rooms=new Map();let uid=1;
  const emit=(r,m,except)=>{for(const c of r.members.values())if(c!==except)send(c,m)};
@@ -12,8 +13,9 @@ module.exports=function({send,weapons}){
   if(m.t==='ic_create'||m.t==='ic_join'){
    if(c.joined){send(c,{t:'ic_error',message:'Önce mevcut çevrimiçi maçtan çık.'});return true}
    let code=String(m.code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8),r;
-   if(m.t==='ic_create'){code=require('crypto').randomBytes(3).toString('hex').toUpperCase();r={code,host:0,members:new Map(),snapshot:null};rooms.set(code,r)}else r=rooms.get(code);
+   if(m.t==='ic_create'){code=require('crypto').randomBytes(3).toString('hex').toUpperCase();r={code,host:0,members:new Map(),snapshot:null};ROOMS.setup(r,c,m,'ic');rooms.set(code,r)}else r=rooms.get(code);
    if(!r){send(c,{t:'ic_error',message:'Oda bulunamadı.'});return true} /* kişi sınırı yok */
+   if(m.t==='ic_join'){const e=ROOMS.check(r,c,m);if(e){send(c,{t:'ic_error',message:ROOMS.errText(e),need:'pass',code});return true}}
    leave(c);c.icid=uid++;c.icroom=r;r.members.set(c.icid,c);if(!r.host)r.host=c.icid;
    send(c,{t:'ic_welcome',id:c.icid,host:r.host,code,players:peers(r),snapshot:r.snapshot});emit(r,{t:'ic_peers',players:peers(r)});return true;
   }

@@ -6,6 +6,8 @@ const AIR={acc:80,cap:1.8,ignoreW:true}; // hava strafe: ivme (m/s²), yan hız 
 const p={x:0,y:0,z:20,vy:0,vx:0,vz:0,yaw:0,pitch:0,g:true,slide:0,st:ST,wcd:0,wj:0,dj:0,climb:0,eye:1.6,hp:100,dead:0};
 let wk=null,cw=WP.rifle,ammo=30,reload=0,fireCd=0,kickL=0,kickR=0,flashR=0,flashL=0,ads=false,adsT=0,swU=-1,swHit=false,swCombo=0,comboT=0,swT=1,tp=false,dualSide=0,pRagdoll=null;
 const wa={};
+/* modun kapattığı hareketler (2026-10-20 Berkan: Inlı Cinlı'da çift zıplama ve kanca yok) */
+const modeNoAir=()=>typeof mode!=='undefined'&&mode==='ic';
 let jBuf=0,firing=false,jHeld=false,jPress=false,sPress=false,qPress=false,lastSpd='',lastSt=-1;
 let gr=null,grCd=0,lastCh=1;
 const gv=V3();
@@ -214,10 +216,10 @@ function stepPlayer(dt){
    const hs0=Math.hypot(p.vx,p.vz);if(hs0>HOP_CAP){p.vx*=HOP_CAP/hs0;p.vz*=HOP_CAP/hs0}
    p.vy=7.5;p.g=false;p.at=0;jBuf=0;if(p.slide>0){p.slide=0;p.vx*=1.1;p.vz*=1.1}}
   else if(wall&&p.wcd<=0&&p.wj<3&&p.st>.3){p.vx=(wall.nx*8-sn*4)*SPD;p.vz=(wall.nz*8-cs*4)*SPD;p.vy=7.6;p.wcd=.3;p.wj++;p.wjT=.5;p.st-=.3;p.climb=0;snd(300,.1)}
-  else if(!p.dj){p.dj=1;p.wjT=.5;p.vy=7.5;p.vx+=wx*3;p.vz+=wz*3;snd(260,.1)}
+  else if(!p.dj&&!modeNoAir()){p.dj=1;p.wjT=.5;p.vy=7.5;p.vx+=wx*3;p.vz+=wz*3;snd(260,.1)}
  }
  jPress=false;p.wcd-=dt;
- if(qPress){qPress=false;if(!gr)grapple()}
+ if(qPress){qPress=false;if(!gr&&!modeNoAir())grapple()}
  if(gr&&gr.en){gr.t+=dt;grabStep(dt)}
  else if(gr){
   gr.t+=dt;

@@ -383,3 +383,13 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - NOT: Model lisansları belirsiz (CS:GO haritaları, Momo, Slenderman); Berkan prototip/ticari değil diye kabul etti. Repo herkese açık.
 - Dosyalar: js/horror.js, server-horror.js, assets/horror/*, docs/horror/*, index.html, server.js, js/main.js, css/style.css, tests/run.cjs, tests/http.cjs, tests/horror*.cjs
 - Test: npm test baştan sona PASS (çıkış 0; 230 PASS + http 5/5, 0 FAIL; horror ve horror-open dahil). Backrooms açılış görüntüsü test-results/ic-ingame.png.
+
+### 2026-10-20 17:45 · Claude · build 202610201745 lobi-oda-v1
+- İşlem: Berkan isteği: Inlı Cinlı haritası büyüsün, harita dışında doğma olmasın, bu modda çift zıplama ve kanca kapalı, Momo/Slenderman yürüme animasyonu; her co-op mod için lobi listesi, oda kodu, şifreli lobi, arkadaşın lobisine katılma/davet, lobidekiler birbirini görsün.
+- Değişti (js/horror.js): harita yatayda 1,6×, dikeyde 1,15×; çarpışma/gezinme aynı ölçekte. Sınır = dış duvarların içi (eski gezinme verisinde duvar dışına taşan hücreler vardı → harita dışında doğma). Doğma yalnız sınır içindeki boş hücrelerde; oyuncu/canavar dışarı çıkamaz, düşen geri konur. Canavar yürüyüşü: iskelet yok → parçalar model uzayına pişirildi, köşe gölgelendiricisinde bacak kalçadan, kol omuzdan sallanır; adım gerçek yer değiştirmeye bağlı, durunca durur; her canavarın kendi malzemesi.
+- Değişti (js/player.js): modeNoAir() — Inlı Cinlı'da çift zıplama ve kanca yok.
+- Eklendi: server-rooms.js (şifre yalnız özetle, davetli şifresiz), server.js 'rl' lobi listesi + 'rinv' davet + arkadaş listesinde oda bilgisi; js/rooms.js (LOBİLER penceresi, kodla bul, şifre sorma, davet bildirimi, oyunda oda paneli 👑); lobide LOBİLER düğmesi; Inlı Cinlı/Koridor oda ekranlarında şifre alanı + AÇIK LOBİLER; arkadaş listesinde Katıl/Davet.
+- Dosyalar: js/horror.js, js/player.js, js/rooms.js, js/owmp.js, js/wave-corridor-game.js, server.js, server-rooms.js, server-horror.js, server-wavecorridor.js, index.html, css/style.css, tests/rooms-lobby.cjs, tests/http.cjs, tests/run.cjs
+- Test: TESTSONUCU
+- NOT: sunucu değişti → yeniden başlat; Ctrl+F5.
+- Yedek: _yedek/claude-1745/

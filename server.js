@@ -178,6 +178,7 @@ function onText(c, s) {
   if (m.t === 'chat' || m.t === 'vj' || m.t === 'va' || m.t === 'vm') return chatMsg(c, m, now);
   if (m.t[0] === 'a' && m.t !== 'auth') { if (['alist', 'agive', 'aclr', 'akick', 'atools', 'aheal'].includes(m.t)) return admMsg(c, m); }
   if (m.t[0] === 'o' && owMsg(c, m, now)) return;
+  if (m.t === 'rl' || m.t === 'rinv') return roomMsg(c, m, now);
   if (m.t[0] === 'f' && frMsg(c, m)) return;
   if (m.t === 'join') {
     if (!c.acc) { send(c, { t: 'err', m: 'Önce giriş yapmalısın.' }); return; }
@@ -598,12 +599,30 @@ setInterval(() => {
 const where = c => c.ow ? 'Açık Dünya' : c.joined ? (c.rm && c.rm.kind === 'tm' ? '5v5 Online' : c.rm && c.rm.kind === 'zo' ? 'Zombi Co-op' : 'Arena') : 'Lobi';
 function flFor(c) {
   const a = c.acc, av = k => { const s = ACC[k] && ACC[k].save; return (s && s.av) || 'a0'; };
-  const fr = (a.fr || []).map(k => { const o = users.get(k); return [ACC[k] ? ACC[k].name : k, o && o.sock.writable ? 1 : 0, o ? where(o) : '', av(k)]; });
+  const fr = (a.fr || []).map(k => { const o = users.get(k), on = o && o.sock.writable, r = on ? coopOf(o) : null; return [ACC[k] ? ACC[k].name : k, on ? 1 : 0, o ? (r ? COOP.MODES[r.mode] + ' · oda ' + r.code : where(o)) : '', av(k), r ? r.mode : '', r ? r.code : '', r && r.pass && !r.inv.has(c.user) ? 1 : 0]; });
+  const myRoom = coopOf(c);
   const rq = (a.rq || []).map(k => ACC[k] ? ACC[k].name : k), act = [];
   for (const [k, o] of users) { if (o === c || !o.acc || !o.sock.writable) continue; act.push([o.acc.name, where(o), (a.fr || []).includes(k) ? 1 : 0, av(k)]); if (act.length >= 40) break; }
-  return { t: 'fl', fr, rq, act };
+  return { t: 'fl', fr, rq, act, room: myRoom ? { mode: myRoom.mode, code: myRoom.code } : null };
 }
 function sendFl(c) { if (!c.acc) return; const o = flFor(c), s = JSON.stringify(o); if (c.flS === s) return; c.flS = s; send(c, o); }
+/* Lobi listesi + arkadaş daveti (Claude 2026-10-20): Dalga Ağacı ve Inlı Cinlı odaları */
+const COOP = require('./server-rooms');
+const coopOf = c => c.icroom || c.wcroom || null;
+function roomMsg(c, m, now) {
+  if (!c.acc) return send(c, { t: 'rl', l: [], err: 'Lobileri görmek için giriş yap.' });
+  if (m.t === 'rl') {
+    const l = [...WCNET.rooms.values()].map(r => COOP.row(r, 4)).concat([...HORNET.rooms.values()].map(r => COOP.row(r, 0)));
+    return send(c, { t: 'rl', l: l.slice(0, 100) });
+  }
+  if (now - (c.invT || 0) < 1500) return send(c, { t: 'fm', m: 'Biraz bekle, sonra tekrar davet et.' }); c.invT = now;
+  const r = coopOf(c), key = String(m.n || '').trim().toLowerCase();
+  if (!r) return send(c, { t: 'fm', m: 'Davet için önce bir co-op odasında olmalısın.' });
+  if (!(c.acc.fr || []).includes(key)) return send(c, { t: 'fm', m: 'Yalnız arkadaşlarını davet edebilirsin.' });
+  const o = users.get(key); if (!o || !o.sock.writable) return send(c, { t: 'fm', m: 'Arkadaşın çevrimiçi değil.' });
+  r.inv.add(key); send(o, { t: 'rinv', from: c.acc.name, mode: r.mode, name: COOP.MODES[r.mode], code: r.code });
+  send(c, { t: 'fm', m: (ACC[key] ? ACC[key].name : key) + ' davet edildi.' });
+}
 function frMsg(c, m) {
   if (!c.acc || !c.user) return true;
   const a = c.acc; a.fr = a.fr || []; a.rq = a.rq || [];

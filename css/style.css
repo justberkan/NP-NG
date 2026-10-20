@@ -784,3 +784,17 @@ body.kb-cap{cursor:crosshair}
 .lbjlast{position:absolute;left:0;right:0;top:566px;display:flex;gap:12px;font-size:11px;color:#c9d6e2;white-space:nowrap;overflow:hidden}
 #ichud{position:absolute;top:46px;left:50%;transform:translateX(-50%);max-width:92vw;width:440px;text-align:center;padding:12px;background:#0d141fe8;border:1px solid #4a5f8a;border-radius:9px;color:#dfe7f5;pointer-events:none}
 #lm [data-m="ic"]{border-color:#7a5f9e;background:#221c2d}
+/* ---------- Lobi listesi, şifre, davet, oda paneli (2026-10-20) ---------- */
+#rlbtn{margin-left:6px}
+.rlcard{max-width:720px;width:min(94vw,720px)}
+.rll{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto;margin:8px 0;text-align:left}
+.rlr{display:flex;align-items:center;gap:10px;background:#0d1622;border:1px solid #2a3a4c;border-radius:9px;padding:8px 10px}
+.rlr.lock{border-color:#7a5f2a}
+.rlm{flex:1;min-width:0}.rlm b{display:block}.rlm small{color:#9fb2c4}.rlm code{color:#ffe08a;font-weight:800}
+.rlp{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}.rlp i{font-style:normal;font-size:11px;background:#1b2a3a;border-radius:6px;padding:1px 6px}.rlp i.host{background:#3a2f12;color:#ffe08a}
+.rlinv{position:fixed;right:16px;top:90px;z-index:70;background:#101a26f2;border:1px solid #4fe08a;border-radius:10px;padding:10px 12px;color:#e8f1f7;max-width:320px;box-shadow:0 8px 24px #000a;font-size:13px}
+.rlinv .row{margin-top:6px;gap:6px}
+#roomPanel{position:absolute;left:10px;top:120px;min-width:170px;max-width:230px;background:#0b121bd9;border:1px solid #2f4556;border-radius:9px;padding:7px 9px;color:#dfe8f0;font-size:12px;pointer-events:none}
+#roomPanel .rph{font-weight:800;margin-bottom:4px}#roomPanel .rph b{color:#ffe08a}#roomPanel .rph small{color:#9fb2c4;font-weight:600}
+#roomPanel .rpi{padding:1px 0}#roomPanel .rpi.me{color:#4fe08a;font-weight:800}#roomPanel .rpk{margin-top:4px;color:#7f93a6;font-size:10px}
+#fr .frj{background:#1f5f3a;border-radius:6px;padding:0 6px;font-size:11px;color:#dfffe8;cursor:pointer;margin-right:2px}

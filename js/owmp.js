@@ -211,8 +211,8 @@ function owAggroNet(mb){for(const o of mb.camp.mem)if(o.hp>0&&o.state!=='dead'){
 /* ===================== Arkadaşlar + aktif oyuncular ===================== */
 var FR={fr:[],rq:[],act:[],msg:'',sig:''};
 function frData(m){
- const s=JSON.stringify([m.fr,m.rq,m.act]);
- FR.fr=m.fr;FR.rq=m.rq;FR.act=m.act;
+ const s=JSON.stringify([m.fr,m.rq,m.act,m.room]);
+ FR.fr=m.fr;FR.rq=m.rq;FR.act=m.act;FR.room=m.room||null;
  if(s!==FR.sig){FR.sig=s;frRender()}
 }
 function frAsk(){if(MPL.authed)mpSend({t:'fl'})}
@@ -233,7 +233,7 @@ function frRender(){
  let lst='';
  for(const q of FR.rq)lst+='<div class="fi2 rq"><u class="fav">'+avSVG('a0')+'</u><span>'+frEsc(q)+'<small>istek</small></span><b data-a="acc" data-n="'+frEsc(q)+'">✓</b><b data-a="rej" data-n="'+frEsc(q)+'">✕</b></div>';
  const frs=FR.fr.slice().sort((a,b)=>b[1]-a[1]);
- for(const f of frs)lst+='<div class="fi2"><u class="fav">'+avSVG(f[3]||'a0')+'</u>'+st(f)+'<span>'+frEsc(f[0])+(f[1]?'<small>'+frEsc(f[2])+'</small>':'<small>çevrimdışı</small>')+'</span><b data-a="del" data-n="'+frEsc(f[0])+'" title="Arkadaşlıktan çıkar">✕</b></div>';
+ for(const f of frs)lst+='<div class="fi2"><u class="fav">'+avSVG(f[3]||'a0')+'</u>'+st(f)+'<span>'+frEsc(f[0])+(f[1]?'<small>'+frEsc(f[2])+'</small>':'<small>çevrimdışı</small>')+'</span>'+(f[1]&&f[4]?'<b class="frj" data-a="fjoin" data-m="'+frEsc(f[4])+'" data-c="'+frEsc(f[5])+'" data-l="'+(f[6]?1:0)+'" title="Lobisine katıl">Katıl</b>':'')+(f[1]&&FR.room&&f[5]!==FR.room.code?'<b class="frj" data-a="finv" data-n="'+frEsc(f[0])+'" title="Odana davet et">Davet</b>':'')+'<b data-a="del" data-n="'+frEsc(f[0])+'" title="Arkadaşlıktan çıkar">✕</b></div>';
  if(!lst)lst='<div class="frs">Henüz arkadaşın yok. Aşağıdaki aktif oyunculardan ya da isim yazarak ekle.</div>';
  let bot='<div class="frh">Aktif oyuncular <small>'+FR.act.length+'</small></div>';
  let al='';
@@ -251,6 +251,8 @@ function frRender(){
   if(a==='avp'){avCycle(-1);frRender();return}
   if(a==='avn'){avCycle(1);frRender();return}
   if(a==='send'){const i=el.querySelector('#frin');const v=i?i.value.trim():'';if(v){mpSend({t:'fadd',n:v});i.value=''}return}
+  if(a==='fjoin'){const m=b.dataset.m,c=b.dataset.c;if(+b.dataset.l)roomsAskPass(m,c);else roomJoin(m,c,'');return}
+  if(a==='finv'){mpSend({t:'rinv',n});return}
   if(a==='add')mpSend({t:'fadd',n:n});
   else if(a==='acc')mpSend({t:'facc',n:n});
   else if(a==='rej')mpSend({t:'frej',n:n});

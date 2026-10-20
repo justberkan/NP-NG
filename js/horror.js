@@ -9,6 +9,8 @@ const IC={on:false,net:false,owner:true,id:0,host:0,code:'',peers:new Map(),avat
 const ICMAPS=['backrooms','lego','starttrack'];
 const IC_DOOR_REWARD=1000;
 const IC_MON={momo:{hp:420,sp:4.55,dmg:30},slender:{hp:520,sp:4.35,dmg:38}};
+/* Harita büyütme (Claude 2026-10-20, Berkan: "harita biraz daha büyük"): yatayda 1,6×, dikeyde 1,15× (tavan çok yükselmesin) */
+const IC_SX=1.6,IC_SY=1.15;
 
 /* ---------- Varlık yükleme (oda ekranında, maç öncesi) ---------- */
 function icLoadGLB(url){return new Promise((res,rej)=>{new THREE.GLTFLoader().load(url,g=>res(g.scene),undefined,rej)})}
@@ -24,9 +26,51 @@ async function icAssets(force){
   fetch('assets/horror/map_'+map+'_col.json').then(r=>r.json()),
   fetch('assets/horror/map_'+map+'_nav.json').then(r=>r.json()),
   fetch('assets/horror/skins_holo.json').then(r=>r.json())]);
- IC.loaded={map:sc,mon:{momo:mo,slender:sl},skins:sk};
- IC.col=col;IC.nav=nav.cells;IC.skins=skins;
+ IC.loaded={map:sc,mon:{momo:icPrepMon(mo,'momo'),slender:icPrepMon(sl,'slender')},skins:sk};
+ /* ölçekli çarpışma + sınır: dış duvarların İÇİ. Eski gezinme verisinde duvar dışına taşan hücreler vardı (harita dışında doğma) */
+ IC.col={boxes:col.boxes.map(b=>[b[0]*IC_SX,b[1]*IC_SX,b[2]*IC_SX,b[3]*IC_SX,b[4]*IC_SY])};
+ let X1=1e9,X2=-1e9,Z1=1e9,Z2=-1e9;for(const b of IC.col.boxes){X1=Math.min(X1,b[0]);Z1=Math.min(Z1,b[1]);X2=Math.max(X2,b[2]);Z2=Math.max(Z2,b[3])}
+ const pad=1.2*IC_SX;IC.bounds={x1:X1+pad,x2:X2-pad,z1:Z1+pad,z2:Z2-pad};
+ IC.nav=nav.cells.map(c=>[c[0]*IC_SX,c[1]*IC_SX]).filter(c=>icIn(c[0],c[1],.6));
+ IC.skins=skins;
  IC.assetsReady=true;
+}
+
+const icIn=(x,z,m)=>{const b=IC.bounds;return !b||(x>b.x1+(m||0)&&x<b.x2-(m||0)&&z>b.z1+(m||0)&&z<b.z2-(m||0))};
+const icCenter=()=>{const b=IC.bounds;return b?[(b.x1+b.x2)/2,(b.z1+b.z2)/2]:[0,0]};
+/* doğulabilir hücre: sınırın içinde ve duvar/kutu içinde değil (icStart çarpışma kutularını kurduktan sonra hesaplanır) */
+function icSafeCells(){if(!IC.safe){IC.safe=IC.nav.filter(c=>icIn(c[0],c[1],.6)&&!hitBox(c[0],c[1],0));if(!IC.safe.length)IC.safe=[icCenter()]}return IC.safe}
+function icKeepIn(o){const b=IC.bounds;if(!b)return;o.x=clamp(o.x,b.x1+.4,b.x2-.4);o.z=clamp(o.z,b.z1+.4,b.z2-.4)}
+
+/* ---------- Canavar yürüyüşü (Claude 2026-10-20, Berkan: "Momo ve Slenderman'e yürüyüş animasyonu") ----------
+   Modellerde iskelet/animasyon yok (tek parça). Parçalar model uzayına pişirilir; yürürken bacaklar kalçadan,
+   kollar omuzdan ileri-geri sallanır (köşe gölgelendiricisinde). Adım hızı gerçek yer değiştirmeye bağlı: durunca durur. */
+const IC_WALK={momo:{leg:.5,arm:.25,hip:.42,sh:.74,legX:.2,armX:.2,stride:1.1,roll:.1},slender:{leg:.38,arm:.32,hip:.5,sh:.8,legX:.14,armX:.16,stride:1.6,roll:.03}};
+function icPrepMon(scene,kind){
+ scene.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(scene.matrixWorld).invert(),root=new THREE.Group(),bb=new THREE.Box3();
+ scene.traverse(o=>{if(!o.isMesh)return;const g=o.geometry.clone();g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv,o.matrixWorld));g.computeBoundingBox();bb.union(g.boundingBox);
+  const m=new THREE.Mesh(g,o.material);m.frustumCulled=false;root.add(m)});
+ const w=IC_WALK[kind],H=bb.max.y-bb.min.y,W=Math.max(bb.max.x-bb.min.x,.01);
+ root.userData.walk={hip:bb.min.y+H*w.hip,sh:bb.min.y+H*w.sh,cx:(bb.min.x+bb.max.x)/2,legX:W*w.legX,armX:W*w.armX,leg:w.leg,arm:w.arm,len:H};
+ return root;
+}
+function icWalkMat(mat,u){
+ const m=mat.clone();m.transparent=mat.transparent;
+ m.onBeforeCompile=sh=>{Object.assign(sh.uniforms,u);
+  sh.vertexShader='uniform float uPh,uLeg,uArm,uHip,uSh,uCx,uLegX,uArmX;\n'+sh.vertexShader.replace('#include <begin_vertex>',`#include <begin_vertex>
+  { float dx=transformed.x-uCx; float sd=dx<0.0?-1.0:1.0;
+    if(transformed.y<uHip&&abs(dx)<uLegX*2.5){ float a=sd*sin(uPh)*uLeg; float k=uHip-transformed.y; transformed.z+=sin(a)*k; transformed.y=uHip-cos(a)*k; }
+    else if(transformed.y<uSh&&abs(dx)>uArmX){ float a=-sd*sin(uPh)*uArm; float k=uSh-transformed.y; transformed.z+=sin(a)*k; transformed.y=uSh-cos(a)*k; } }`)};
+ m.customProgramCacheKey=()=>'icwalk';
+ return m;
+}
+function icWalkTick(e,dt){
+ const x=e.g.position.x,z=e.g.position.z,mv=e.wx==null?0:Math.hypot(x-e.wx,z-e.wz);e.wx=x;e.wz=z;
+ if(!e.wu)return;const w=IC_WALK[e.kind],sp=mv/Math.max(dt,1e-3);
+ e.wgt=(e.wgt||0)+((sp>.4?1:0)-(e.wgt||0))*Math.min(1,dt*6);
+ e.wu.uPh.value+=mv/(w.stride*.5)*Math.PI*.5; /* adım fazı yol ile ilerler */
+ e.wu.uLeg.value=e.ww.leg*e.wgt;e.wu.uArm.value=e.ww.arm*e.wgt;
+ if(e.body)e.body.rotation.z=Math.sin(e.wu.uPh.value)*w.roll*e.wgt;
 }
 
 /* ---------- Oda / seçim ekranı ---------- */
@@ -39,7 +83,8 @@ function icOpen(cb){
  <p class="note">Harita: <b>${IC.mapName==='starttrack'?'Starttrack':IC.mapName==='lego'?'Lego':'Backrooms (labirent)'}</b> · Holografik cin görünümü: <b>#${IC.skin+1}</b></p>
  <div class="row"><button class="btn alt" id="icmap">HARİTA DEĞİŞTİR</button><button class="btn alt" id="icskin">GÖRÜNÜM DEĞİŞTİR</button></div>
  <div class="row"><button class="btn" id="icsolo">TEK BAŞINA</button><button class="btn alt" id="iccreate">CO-OP ODA AÇ</button></div>
- <div class="row"><input id="iccode" maxlength="8" placeholder="Arkadaşının oda kodu" aria-label="Co-op oda kodu"><button class="btn alt" id="icjoin">ODAYA KATIL</button></div>
+ <div class="row"><input id="icpass" maxlength="32" placeholder="Oda şifresi (isteğe bağlı)" aria-label="Oda şifresi" autocomplete="off"></div>
+ <div class="row"><input id="iccode" maxlength="8" placeholder="Arkadaşının oda kodu" aria-label="Co-op oda kodu"><button class="btn alt" id="icjoin">ODAYA KATIL</button><button class="btn alt" id="iclist">AÇIK LOBİLER</button></div>
  <p id="icstatus" class="note">Co-op: aynı sunucuda SINIRSIZ oyuncu. Oda sahibi ayrılırsa maç biter.</p>
  <button class="btn alt" id="iccancel">GERİ</button></div>`;
  el.style.display='flex';
@@ -47,9 +92,12 @@ function icOpen(cb){
  $('icskin').onclick=()=>{IC.skin=(IC.skin+1)%20;el.style.display='none';icOpen(cb)};
  const go=async()=>{try{$('icstatus').textContent='Harita yükleniyor...';await icAssets()}catch(e){$('icstatus').textContent='Yükleme hatası: '+e.message;return}el.style.display='none';IC.chosen=true;cb()};
  $('icsolo').onclick=()=>{IC.pending=null;IC.net=false;IC.owner=true;IC.id=0;IC.code='';IC.peers.clear();go()};
- const join=create=>{const run=async()=>{if(IC.pending)return;const code=$('iccode').value.trim();if(!create&&!code){$('icstatus').textContent='Oda kodunu yaz.';return}try{$('icstatus').textContent='Harita yükleniyor...';await icAssets()}catch(e){$('icstatus').textContent='Yükleme hatası: '+e.message;return}const pend=()=>{el.style.display='none';IC.chosen=true;cb()};IC.pending=pend;$('icstatus').textContent='Sunucuya bağlanılıyor...';mpSend({t:create?'ic_create':'ic_join',code});setTimeout(()=>{if(IC.pending===pend){IC.pending=null;$('icstatus').textContent='Sunucu yanıt vermedi. Güncel server.js ile sunucuyu yeniden aç.'}},8000)};if(!MPL.authed)mpOpenDialog(run);else run()};
+ const join=create=>{const run=async()=>{if(IC.pending)return;const code=$('iccode').value.trim();if(!create&&!code){$('icstatus').textContent='Oda kodunu yaz.';return}try{$('icstatus').textContent='Harita yükleniyor...';await icAssets()}catch(e){$('icstatus').textContent='Yükleme hatası: '+e.message;return}const pend=()=>{el.style.display='none';IC.chosen=true;cb()};IC.pending=pend;$('icstatus').textContent='Sunucuya bağlanılıyor...';mpSend({t:create?'ic_create':'ic_join',code,pass:$('icpass').value,map:IC.mapName||ICMAPS[0]});setTimeout(()=>{if(IC.pending===pend){IC.pending=null;$('icstatus').textContent='Sunucu yanıt vermedi. Güncel server.js ile sunucuyu yeniden aç.'}},8000)};if(!MPL.authed)mpOpenDialog(run);else run()};
  $('iccreate').onclick=()=>join(true);
  $('icjoin').onclick=()=>join(false);
+ $('iclist').onclick=()=>{el.style.display='none';if(typeof roomsOpen==='function')roomsOpen('ic')};
+ /* lobi listesinden / arkadaştan / davetten gelindiyse kodu doldurup hemen katıl */
+ if(IC.joinReq){const q=IC.joinReq;IC.joinReq=null;$('iccode').value=q.code;$('icpass').value=q.pass||'';if(q.map&&ICMAPS.includes(q.map)&&q.map!==IC.mapName){IC.mapName=q.map;IC.assetsReady=false}join(false)}
  $('iccancel').onclick=()=>{IC.pending=null;el.style.display='none'};
 }
 
@@ -70,7 +118,7 @@ function icStart(){
  IC.lights=[];S.traverse(o=>{if(o.isAmbientLight||o.isDirectionalLight||o.isHemisphereLight||o.isPointLight){IC.lights.push([o,o.intensity]);o.intensity*=.1}});
  S.background.setHex(0x02030a);S.fog.near=4;S.fog.far=IC.mapName==='backrooms'?26:60;S.fog.color.setHex(0x000000);
  /* harita */
- IC.mapGroup=IC.loaded.map.clone(true);S.add(IC.mapGroup);
+ IC.mapGroup=IC.loaded.map.clone(true);IC.mapGroup.scale.multiply(new THREE.Vector3(IC_SX,IC_SY,IC_SX));S.add(IC.mapGroup);IC.safe=null;
  IC.mapMeshes=[];IC.mapGroup.traverse(o=>{if(o.isMesh)IC.mapMeshes.push(o)});
  /* çarpışma kutuları (şeffaf mesh: mermi duvarı, görünmez) */
  const tmat=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false});
@@ -82,7 +130,7 @@ function icStart(){
  IC.glow=new THREE.PointLight(0xa8c4ff,.55,7,1.6);S.add(IC.glow);
  /* oyuncu */
  p.hp=100;p.dead=0;p.inv=0;p.y=0;p.vy=0;hudHp();timeLeft=999999;
- const sp=icPickCells(1+IC.peers.size,10);p.x=sp[0][0];p.z=sp[0][1];p.vx=p.vz=0;
+ const sp=icPickCells(1+IC.peers.size,10);p.x=sp[0][0];p.z=sp[0][1];p.vx=p.vz=0;icKeepIn(p);
  icPlaceDoor();
  /* canavarlar */
  if(IC.owner)for(let i=0;i<1;i++)icSpawnMon(i%2?'slender':'momo');
@@ -91,14 +139,14 @@ function icStart(){
  icHud();$('msg').textContent='Onu duyabilirsin... Kapıyı bul.';
 }
 function icPickCells(n,minGap){
- const free=IC.nav.slice();const out=[];let guard=0;
+ const free=icSafeCells().slice();const out=[];let guard=0;
  while(out.length<n&&free.length&&guard++<400){const c=free.splice(Math.floor(Math.random()*free.length),1)[0];
   if(out.every(q=>Math.hypot(q[0]-c[0],q[1]-c[1])>=minGap))out.push(c)}
- while(out.length<n)out.push([0,0]);return out;
+ while(out.length<n)out.push(free[0]||icSafeCells()[0]);return out;
 }
 function icPlaceDoor(){
- const far=IC.nav.filter(c=>icPlayers().every(q=>Math.hypot(q.position.x-c[0],q.position.z-c[1])>14));
- const c=far.length?far[Math.floor(Math.random()*far.length)]:IC.nav[Math.floor(Math.random()*IC.nav.length)]||[0,0];
+ const safe=icSafeCells(),far=safe.filter(c=>icPlayers().every(q=>Math.hypot(q.position.x-c[0],q.position.z-c[1])>14));
+ const c=far.length?far[Math.floor(Math.random()*far.length)]:safe[Math.floor(Math.random()*safe.length)];
  IC.doorPos={x:c[0],z:c[1]};
  if(!IC.door){
   const g=new THREE.Group(),mat=new THREE.MeshBasicMaterial({color:0x36ff8a});
@@ -110,12 +158,14 @@ function icPlaceDoor(){
  IC.door.position.set(IC.doorPos.x,0,IC.doorPos.z);
 }
 function icSpawnMon(kind,at){
- const tpl=IC.loaded.mon[kind];const g=tpl.clone(true);
- g.traverse(o=>{if(o.isMesh){o.frustumCulled=true}});
- const e={id:++IC.monId,kind,g,hp:IC_MON[kind].hp,max:IC_MON[kind].hp,sp:IC_MON[kind].sp+IC.level*.12,dmg:IC_MON[kind].dmg,cd:2,atk:0,flinch:0,stuck:0,phase:0,yaw:0,lx:0,lz:0,dead:0};
+ const tpl=IC.loaded.mon[kind],body=tpl.clone(true),g=new THREE.Group();g.add(body);
+ /* her canavarın kendi malzemesi: yürüyüş fazı ve saydamlaşma diğerlerini etkilemesin */
+ const wd=tpl.userData.walk,wu={uPh:{value:Math.random()*6},uLeg:{value:0},uArm:{value:0},uHip:{value:wd.hip},uSh:{value:wd.sh},uCx:{value:wd.cx},uLegX:{value:wd.legX},uArmX:{value:wd.armX}};
+ body.traverse(o=>{if(o.isMesh){o.frustumCulled=false;o.material=Array.isArray(o.material)?o.material.map(m=>icWalkMat(m,wu)):icWalkMat(o.material,wu)}});
+ const e={wu,ww:wd,body,id:++IC.monId,kind,g,hp:IC_MON[kind].hp,max:IC_MON[kind].hp,sp:IC_MON[kind].sp+IC.level*.12,dmg:IC_MON[kind].dmg,cd:2,atk:0,flinch:0,stuck:0,phase:0,yaw:0,lx:0,lz:0,dead:0};
  g.userData.tg=1;g.userData.e=e;
- const spots=IC.nav.filter(c=>icPlayers().every(q=>Math.hypot(q.position.x-c[0],q.position.z-c[1])>18));
- const c=at||spots[Math.floor(Math.random()*spots.length)]||[0,0];
+ const safe=icSafeCells(),spots=safe.filter(c=>icPlayers().every(q=>Math.hypot(q.position.x-c[0],q.position.z-c[1])>18));
+ const c=at||spots[Math.floor(Math.random()*spots.length)]||safe[Math.floor(Math.random()*safe.length)];
  g.position.set(c[0],0,c[1]);S.add(g);IC.mons.push(e);return e;
 }
 
@@ -133,7 +183,8 @@ function icMonStep(e,dt){
   if(Math.hypot(e.g.position.x-e.lx,e.g.position.z-e.lz)<sp*dt*.4)e.stuck+=dt;else e.stuck=0;
   if(e.stuck>2.2){e.phase=2.6;e.stuck=0;icMonFade(e,.25)}
  }else{e.phase-=dt;e.g.position.x=nx;e.g.position.z=nz;icMonFade(e,.25+Math.abs(Math.sin(clock*9))*.35);if(e.phase<=0)icMonFade(e,1)}
- e.lx=e.g.position.x;e.lz=e.g.position.z;
+ icKeepIn(e.g.position);
+ e.lx=e.g.position.x;e.lz=e.g.position.z;icWalkTick(e,dt);
  e.yaw=angLerp(e.yaw,Math.atan2(dx,dz),Math.min(1,8*dt));e.g.rotation.y=e.yaw;
  e.g.position.y=Math.abs(Math.sin(clock*(ph?9:4.2)+e.id))*(ph?.14:.06);
  if(e.atk>0)e.atk-=dt;
@@ -209,6 +260,8 @@ function icTick(dt){
   }
   if(!icPlayers().some(q=>q.alive))icEnd('alldead');
  }
+ /* harita dışına çıkma / düşme yok */
+ if(p.dead<=0){icKeepIn(p);if(p.y<-15){const c=icSafeCells()[0];p.x=c[0];p.z=c[1];p.y=1;p.vy=0}}
  /* ölüm yönetimi */
  if(p.hp<=0&&p.dead<=0){p.dead=1e9;firing=false;hudHp()}
  /* ağ senkronu */
@@ -255,7 +308,7 @@ function icPeerMonTick(dt){
   e.g.position.y+=(e.ty-e.g.position.y)*Math.min(1,dt*8);
   e.g.position.z+=(e.tz-e.g.position.z)*Math.min(1,dt*8);
   e.g.rotation.y=angLerp(e.g.rotation.y,Math.atan2(p.x-e.g.position.x,p.z-e.g.position.z),Math.min(1,4*dt));
-  e.g.position.y+=Math.abs(Math.sin(clock*9+e.id))*.1;}
+  e.g.position.y+=Math.abs(Math.sin(clock*9+e.id))*.1;icWalkTick(e,dt);}
 }
 
 /* ---------- Holografik cin avatarı ---------- */
@@ -281,7 +334,7 @@ function icNetMsg(m){
   Object.assign(IC,{net:true,owner:m.id===m.host,id:m.id,host:m.host,code:m.code,snapshot:m.snapshot||null});
   IC.peers=new Map(m.players.map(q=>[q.id,{...q,hp:100,x:0,y:0,z:0,skin:0}]));
   const cb=IC.pending;IC.pending=null;if(cb)cb();else mpSend({t:'ic_leave'});return}
- if(m.t==='ic_error'){IC.pending=null;const el=$('icstatus');if(el)el.textContent=m.message;return}
+ if(m.t==='ic_error'){IC.pending=null;const el=$('icstatus');if(el)el.textContent=m.message;if(m.need==='pass'&&typeof roomsAskPass==='function')roomsAskPass('ic',m.code,m.message);return}
  if(m.t==='ic_peers'){const ids=new Set(m.players.map(q=>q.id));for(const id of IC.peers.keys())if(!ids.has(id)){IC.peers.delete(id);const av=IC.avatars.get(id);if(av)S.remove(av.root);IC.avatars.delete(id)}for(const q of m.players)IC.peers.set(q.id,{hp:100,x:0,y:0,z:0,skin:0,...IC.peers.get(q.id),...q});return}
  if(!IC.on||mode!=='ic')return;
  if(m.t==='ic_closed'){icEnd('closed');$('sub').textContent=m.reason;return}

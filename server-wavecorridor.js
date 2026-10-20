@@ -1,5 +1,6 @@
 'use strict';
 // Küçük, ayrı co-op odaları: simülasyon oda sahibinde, kimlik/mesaj yönlendirmesi sunucuda.
+const ROOMS=require('./server-rooms');
 module.exports=function({send,weapons}){
  const rooms=new Map();let uid=1;
  const emit=(r,m,except)=>{for(const c of r.members.values())if(c!==except)send(c,m)};
@@ -12,8 +13,9 @@ module.exports=function({send,weapons}){
   if(m.t==='wc_create'||m.t==='wc_join'){
    if(c.joined){send(c,{t:'wc_error',message:'Önce mevcut çevrimiçi maçtan çık.'});return true}
    let code=String(m.code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8),r;
-   if(m.t==='wc_create'){code=require('crypto').randomBytes(3).toString('hex').toUpperCase();r={code,host:0,members:new Map(),snapshot:null};rooms.set(code,r)}else r=rooms.get(code);
+   if(m.t==='wc_create'){code=require('crypto').randomBytes(3).toString('hex').toUpperCase();r={code,host:0,members:new Map(),snapshot:null};ROOMS.setup(r,c,m,'wc');rooms.set(code,r)}else r=rooms.get(code);
    if(!r||r.members.size>=4){send(c,{t:'wc_error',message:'Oda bulunamadı veya dolu (4 kişi).'});return true}
+   if(m.t==='wc_join'){const e=ROOMS.check(r,c,m);if(e){send(c,{t:'wc_error',message:ROOMS.errText(e),need:'pass',code});return true}}
    leave(c);c.wcid=uid++;c.wcroom=r;r.members.set(c.wcid,c);if(!r.host)r.host=c.wcid;
    send(c,{t:'wc_welcome',id:c.wcid,host:r.host,code,players:peers(r),snapshot:r.snapshot});emit(r,{t:'wc_peers',players:peers(r)});return true;
   }
