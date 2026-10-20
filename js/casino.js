@@ -264,6 +264,7 @@ const CGF={
  dede:{src:'assets/casino/dede/index.html',title:'DEDE kumarhane',W:1200,H:790,f:null,api:null,ro:null},
  lokum:{src:'assets/casino/lokum/index.html',title:'LOKUM şeker slotu',W:1200,H:790,f:null,api:null,ro:null},
  civi:{src:'assets/casino/civi/index.html',title:'Çivi Topu',W:1200,H:760,f:null,api:null,ro:null},
+ roach:{src:'assets/casino/roach/index.html',title:'Böcek Mutfak',W:1200,H:790,f:null,api:null,ro:null},
 };
 const CGD=CGF.dede; /* eski ad: haftalık bonus ve testler */
 let cgfCur='dede',cgfEv=false;
@@ -417,7 +418,7 @@ function lbjTick(){
  e.textContent=t;
  const tm=document.querySelector('#lbjseats .lbjtm');if(tm)tm.textContent=left+' sn';
 }
-const CGAMES=[['dede','DEDE ⚡',dedeHTML,dedeWire],['lokum','LOKUM 🍭',cgfHTML('lokum'),cgfWire('lokum')],['civi','Çivi Topu',cgfHTML('civi'),cgfWire('civi')],['slot','Meyve slot',slotHTML,slotWire],['lbj','Canlı Blackjack 🃏',lbjHTML,lbjWire],['bj','Blackjack',bjHTML,bjWire],['rl','Rulet',rHTML,rWire],['av','Aviator',crashHTML,crashWire]];
+const CGAMES=[['dede','DEDE ⚡',dedeHTML,dedeWire],['lokum','LOKUM 🍭',cgfHTML('lokum'),cgfWire('lokum')],['civi','Çivi Topu',cgfHTML('civi'),cgfWire('civi')],['roach','Böcek Mutfak 🪳',cgfHTML('roach'),cgfWire('roach')],['slot','Meyve slot',slotHTML,slotWire],['lbj','Canlı Blackjack 🃏',lbjHTML,lbjWire],['bj','Blackjack',bjHTML,bjWire],['rl','Rulet',rHTML,rWire],['av','Aviator',crashHTML,crashWire]];
 /* İlk girişte (hesap başına bir kez) 18 yaş onayı. Onay hesabın kayıtlı verisinde (SV.casOk) tutulur. */
 function casinoGateV(){
  return `<div class='pn2 cgate'><h3>Kumarhane · Giriş onayı</h3>
