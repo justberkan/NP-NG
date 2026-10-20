@@ -390,6 +390,6 @@ Not: 2026-10-17 07:00 öncesi kayıtlar dosya değişiklik saatlerinden ve NOTLA
 - Değişti (js/player.js): modeNoAir() — Inlı Cinlı'da çift zıplama ve kanca yok.
 - Eklendi: server-rooms.js (şifre yalnız özetle, davetli şifresiz), server.js 'rl' lobi listesi + 'rinv' davet + arkadaş listesinde oda bilgisi; js/rooms.js (LOBİLER penceresi, kodla bul, şifre sorma, davet bildirimi, oyunda oda paneli 👑); lobide LOBİLER düğmesi; Inlı Cinlı/Koridor oda ekranlarında şifre alanı + AÇIK LOBİLER; arkadaş listesinde Katıl/Davet.
 - Dosyalar: js/horror.js, js/player.js, js/rooms.js, js/owmp.js, js/wave-corridor-game.js, server.js, server-rooms.js, server-horror.js, server-wavecorridor.js, index.html, css/style.css, tests/rooms-lobby.cjs, tests/http.cjs, tests/run.cjs
-- Test: TESTSONUCU
+- Test: npm test baştan sona PASS (çıkış 0; 246 PASS + http 5/5, 0 FAIL). Yeni rooms-lobby 16/16: şifreli oda listede kilitli, şifre düz saklanmaz, şifresiz/yanlış giriş reddi, davetli şifresiz girer, yalnız arkadaş davet edilir, arkadaş listesinde oda; tarayıcıda LOBİLER→şifre→oda paneli; Inlı Cinlı 1,6× harita, 250 doğma hücresinin hepsi içeride, dışarı çıkılamaz, çift zıplama/kanca kapalı, canavar yürüme salınımı.
 - NOT: sunucu değişti → yeniden başlat; Ctrl+F5.
 - Yedek: _yedek/claude-1745/
