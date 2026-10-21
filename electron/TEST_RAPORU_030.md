@@ -1,6 +1,6 @@
 # Launcher 0.3.0 test raporu
 
-21.10.2026 · CODEX-EXE-1 · son doğrulama tabanı main e40aca3.
+21.10.2026 · CODEX-EXE-1 · son doğrulama tabanı main 2b0f714.
 
 - Kök npm test: exit 0; tüm kontroller PASS. Audit, offline-save, casino-rtp, casino-dede ve glide-sprint dahil.
 - Electron npm test: 12/12 PASS, sıfır skip.

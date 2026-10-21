@@ -38,13 +38,13 @@ PASS sword beyond range rejected
 PASS gsword range boundary accepted
 PASS gsword beyond range rejected
 PASS All catalog model firing rates accepted {"modelShots":1120}
-PASS Validation mean below 0.2ms {"count":1511,"meanMs":0.03268279285241559,"p95Ms":0.0556,"maxMs":1.9456}
-✔ Oyun dosyaları ve yeni dosya yeniden başlatmadan sunulur (263.0807ms)
-✔ Özel dosyalar HTTP üzerinden okunamaz (5.343ms)
-✔ HEAD gövdesiz, yazma yöntemleri reddedilir (4.9228ms)
-✔ API bilgi yanıtı ve sunucu canlılığı (0.7344ms)
-✔ Bozuk yüzde kodlaması sunucuyu kapatmaz (1.1604ms)
-✔ Manifest yalnız public dosyalar; doğru hash, cache güncelleme ve silme (52.2408ms)
+PASS Validation mean below 0.2ms {"count":1511,"meanMs":0.0621387160820649,"p95Ms":0.1147,"maxMs":0.959}
+✔ Oyun dosyaları ve yeni dosya yeniden başlatmadan sunulur (255.7486ms)
+✔ Özel dosyalar HTTP üzerinden okunamaz (4.7087ms)
+✔ HEAD gövdesiz, yazma yöntemleri reddedilir (3.6927ms)
+✔ API bilgi yanıtı ve sunucu canlılığı (0.5724ms)
+✔ Bozuk yüzde kodlaması sunucuyu kapatmaz (0.9425ms)
+✔ Manifest yalnız public dosyalar; doğru hash, cache güncelleme ve silme (38.7559ms)
 ℹ tests 6
 ℹ suites 0
 ℹ pass 6
@@ -52,7 +52,7 @@ PASS Validation mean below 0.2ms {"count":1511,"meanMs":0.03268279285241559,"p95
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 454.3811
+ℹ duration_ms 407.1164
 PASS Tarayıcı çalışma hatası yok
 PASS Koşu hızı 5.25 m/s
 PASS 30–240 FPS koşu farkı 0.1 mm altında
@@ -274,9 +274,9 @@ PASS Duraklatıldığında fizik ilerlemez
 PASS 66 HTTP dosyası birebir, 155 JS sözdizimi, lobi ve Aim Training açılışı
 PASS İstanbul takvimi, 4 mevsim, gün/gece, 5 görsel senaryo, kayıt/menü, mobil efekt bütçesi, model hata yedeği
 PASS aim: aç/oyna/lobiye dön (4 kez) hatasız
-PASS aim: maç başına doku/geometri sızıntısı yok — doku 24→82→82→82, geometri 93→481→481→481
+PASS aim: maç başına doku/geometri sızıntısı yok — doku 28→86→86→86, geometri 68→456→456→456
 PASS tdm: aç/oyna/lobiye dön (4 kez) hatasız
-PASS tdm: maç başına doku/geometri sızıntısı yok — doku 23→27→27→27, geometri 86→92→91→92
+PASS tdm: maç başına doku/geometri sızıntısı yok — doku 23→28→27→28, geometri 83→92→92→95
 PASS zom: aç/oyna/lobiye dön (4 kez) hatasız
 PASS zom: maç başına doku/geometri sızıntısı yok — doku 19→22→22→22, geometri 75→83→83→83
 PASS cmp: aç/oyna/lobiye dön (4 kez) hatasız
@@ -314,7 +314,7 @@ RTP    : %96.6
 VURUS  : %33.27 (kazanan spin orani)
 BONUS  : 4783 adet, sikligi 1/209
 MAXWIN : 2830 x bahis
-SÜRE   : 11736 ms
+SÜRE   : 10344 ms
 CAT_W  : 1.000000 (toplam ~1 OK)
 KATEGORI DAGILIMI (n / toplam kazanc / ort):
    loss     865001      198874       0.23x
@@ -325,7 +325,7 @@ KATEGORI DAGILIMI (n / toplam kazanc / ort):
    fs         2410         185       0.08x
    leg         178       86028      483.3x
    jack         19       28365    1492.89x
-FORCEWIN hedef tutma: %92 (4583/5000)
+FORCEWIN hedef tutma: %93 (4637/5000)
 KATMANLI (kategori başına):
    small  p=0.11700  ort=1.422x  pay=%16.63
    big    p=0.01100  ort=14.211x  pay=%15.63
@@ -359,12 +359,12 @@ casino-dede: hepsi PASS
 PASS Kumarhane ilk girişte 18 yaş onayı ister
 PASS Böcek Mutfak açılır, bakiye oyundan gelir (oyun = sayfa), bahis 10 TL — {"tl":1000000000,"credit":1000000000,"bet":10,"box":{"x":264,"y":214,"width":751.0799560546875,"height":494.4609375,"top":214,"right":1015.0799560546875,"bottom":708.4609375,"left":264}}
 PASS Böcek Mutfak ekrana sığıyor (kesilmiyor) — {"x":264,"y":214,"width":751.0799560546875,"height":494.4609375,"top":214,"right":1015.0799560546875,"bottom":708.4609375,"left":264}
-PASS Her çevirmede oyun parası = sayfa bakiyesi — [[1000001280,1000001280],[1000002150,1000002150],[1000004390,1000004390]]
-PASS Bahisler kumarhane kaydına işlendi (3×10) — {"steps":[[1000001280,1000001280],[1000002150,1000002150],[1000004390,1000004390]],"bets":30}
-PASS Kazanç tahtası: 10 pizza, net +40 TL (5x bahis - bahis) — {"s":{"t0":1000004390,"t1":1000004430,"fs":0,"credit":1000004430}}
-PASS Kazanç tahtası bedava dönüş tetiklemez — {"t0":1000004390,"t1":1000004430,"fs":0,"credit":1000004430}
-PASS 4+ scatter 15 bedava dönüş verir — {"t0":1000004430,"t1":1000004545,"fsAfterScatter":15,"fs":15}
-PASS Bedava dönüş bahis düşürmez — {"t1":1000004545,"t2":1000004545,"fs":14}
+PASS Her çevirmede oyun parası = sayfa bakiyesi — [[1000002370,1000002370],[1000002685,1000002685],[1000004495,1000004495]]
+PASS Ödenen bahisler kumarhane kaydına işlendi — {"steps":[[1000002370,1000002370],[1000002685,1000002685],[1000004495,1000004495]],"bets":20}
+PASS Kazanç tahtası: 10 pizza, net en az +40 TL — {"s":{"t0":1000004495,"t1":1000006560,"fs":0,"credit":1000006560}}
+PASS Kazanç tahtası bedava dönüş tetiklemez — {"t0":1000004495,"t1":1000006560,"fs":0,"credit":1000006560}
+PASS 4+ scatter 15 bedava dönüş verir — {"t0":1000006560,"t1":1000006675,"fsAfterScatter":15,"fs":15}
+PASS Bedava dönüş bahis düşürmez — {"t1":1000006675,"t2":1000006675,"fs":14}
 PASS Sekme değişince Böcek Mutfak gizlenir — {"disp":"none","spinning":false}
 PASS Sayfa hatası yok — []
 PASS HTTP 200 assets/horror/map_backrooms.glb 
@@ -376,7 +376,7 @@ PASS HTTP 200 assets/horror/skins_holo.glb
 PASS HTTP 200 assets/horror/map_backrooms_col.json 
 PASS HTTP 200 assets/horror/map_lego_nav.json 
 PASS HTTP 200 assets/horror/skins_holo.json 
-PASS Oda kuruldu · {"code":"BA8B0B"}
+PASS Oda kuruldu · {"code":"66F29D"}
 PASS 6 oyuncu aynı odada (kişi sınırı yok) 
 PASS Host 6 eşi görüyor · {"n":6}
 PASS ic_state hosta iletildi 
@@ -387,37 +387,37 @@ PASS Host ayrılınca oda kapandı
 PASS Bilinmeyen oda reddedildi 
 inli-cinli: hepsi PASS
 PASS Inlı Cinlı açılış {"mode":"ic","state":"play","level":1,"mon":1,"door":true,"nav":308,"boxes":22,"map":"","stamina":100,"flash":true}
-PASS Şifreli oda açılır ve lobi listesinde kilitli görünür (mod, kod, sahip, üyeler, harita) — {"mode":"ic","name":"Inlı Cinlı","code":"0753FD","owner":"odaSahibi","n":1,"max":0,"lock":1,"map":"backrooms","players":["odaSahibi"],"age":0}
+PASS Şifreli oda açılır ve lobi listesinde kilitli görünür (mod, kod, sahip, üyeler, harita) — {"mode":"ic","name":"Inlı Cinlı","code":"900EE8","owner":"odaSahibi","n":1,"max":0,"lock":1,"map":"backrooms","players":["odaSahibi"],"age":0}
 PASS Şifre sunucuya düz yazılmaz (listede şifre yok)
-PASS Şifresiz ve yanlış şifreyle girilemez (şifre sorulur) — {"e1":{"t":"ic_error","message":"Bu oda şifreli: şifreyi yaz.","need":"pass","code":"0753FD"},"e2":{"t":"ic_error","message":"Şifre yanlış.","need":"pass","code":"0753FD"}}
+PASS Şifresiz ve yanlış şifreyle girilemez (şifre sorulur) — {"e1":{"t":"ic_error","message":"Bu oda şifreli: şifreyi yaz.","need":"pass","code":"900EE8"},"e2":{"t":"ic_error","message":"Şifre yanlış.","need":"pass","code":"900EE8"}}
 PASS Doğru şifreyle girilir, iki taraf da üyeleri adlarıyla görür — [{"id":1,"name":"odaSahibi"},{"id":2,"name":"odaKonuk"}]
 PASS Arkadaş olmayana davet gönderilemez
-PASS Arkadaş listesinde arkadaşın odası (mod, kod, kilit) görünür → Katıl — ["odaSahibi",1,"Inlı Cinlı · oda 0753FD","a0","ic","0753FD",1]
-PASS Arkadaş odasına davet edilir — {"t":"rinv","from":"odaSahibi","mode":"ic","name":"Inlı Cinlı","code":"0753FD"}
+PASS Arkadaş listesinde arkadaşın odası (mod, kod, kilit) görünür → Katıl — ["odaSahibi",1,"Inlı Cinlı · oda 900EE8","a0","ic","900EE8",1]
+PASS Arkadaş odasına davet edilir — {"t":"rinv","from":"odaSahibi","mode":"ic","name":"Inlı Cinlı","code":"900EE8"}
 PASS Davetli şifre sormadan girer
 PASS Odadayken listede kendi odan bilinir (davet düğmesi için)
-PASS Koridor odası da listede (4 kişilik, kilitli) — {"mode":"wc","name":"Koridor: Dalga Ağacı","code":"A4C8D9","owner":"yabanci","n":1,"max":4,"lock":1,"map":"","players":["yabanci"],"age":0}
-PASS Tarayıcı: LOBİLER → kilitli odaya bas → şifre sorulur → girince oda panelinde ikisi de görünür — "Inlı Cinlı · ODA D95EE6 2 kişi👑 tarayiciOdalobiTar (sen)Arkadaş listesinden Davet ile çağır"
+PASS Koridor odası da listede (4 kişilik, kilitli) — {"mode":"wc","name":"Koridor: Dalga Ağacı","code":"B848D6","owner":"yabanci","n":1,"max":4,"lock":1,"map":"","players":["yabanci"],"age":0}
+PASS Tarayıcı: LOBİLER → kilitli odaya bas → şifre sorulur → girince oda panelinde ikisi de görünür — "Inlı Cinlı · ODA D94050 2 kişi👑 tarayiciOdalobiTar (sen)Arkadaş listesinden Davet ile çağır"
 PASS Inlı Cinlı: harita 2,6× büyük, tüm doğma hücreleri dış duvarların içinde ve boş — {"olcek":[2.6,1.5],"safe":308,"kotu":0}
-PASS Oyuncu ve canavar harita içinde doğar; oyuncu dışarı itilse de çıkamaz — {"olcek":[2.6,1.5],"bounds":{"x1":-29.38,"x2":29.38,"z1":-29.38,"z2":34.580000000000005},"safe":308,"kotuHucre":0,"pIn":true,"mIn":true,"itildi":true,"dj":0,"hook":false,"leg0":0.4999999994732762,"legWalk":0.5,"legStop":0,"ph":60.85,"tur":"momo"}
+PASS Oyuncu ve canavar harita içinde doğar; oyuncu dışarı itilse de çıkamaz — {"olcek":[2.6,1.5],"bounds":{"x1":-29.38,"x2":29.38,"z1":-29.38,"z2":34.580000000000005},"safe":308,"kotuHucre":0,"pIn":true,"mIn":true,"itildi":true,"dj":0,"hook":false,"leg0":0.4999999994732762,"legWalk":0.5,"legStop":0,"ph":33.92,"tur":"momo"}
 PASS Bu modda çift zıplama ve kanca kapalı — {"dj":0,"kanca":false}
 PASS Canavar yürürken bacak/kol salınır, dururken salınım söner — {"tur":"momo","yururken":0.5,"dururken":0}
 PASS Sayfa hatası yok — []
 rooms-lobby: hepsi PASS
 PASS Çivi Topu: 27 tablonun kesin geri ödemesi %95,5–97,5 — "low8:95.86 low9:96.13 low10:96.88 low11:96.65 low12:96.58 low13:96.27 low14:96.45 low15:96.40 low16:96.30 medium8:96.88 medium9:96.72 medium10:96.46 medium11:96.42 medium12:96.61 medium13:96.38 medium14:96.63 medium15:96.77 medium16:96.46 high8:97.03 high9:96.99 high10:96.62 high11:96.57 high12:96.78 high13:96.33 high14:96.49 high15:96.48 high16:96.64"
 PASS Çivi Topu: tablolar simetrik, ortadan kenara büyür
-LOKUM ölçüm {"normal":97.1,"sans2x":96.1,"satinAlma":96.52,"fsOrt":96.5,"fsSiklik":"1/389","fsSiklik2x":"1/196","sn":55}
+LOKUM ölçüm {"normal":97.1,"sans2x":96.1,"satinAlma":96.52,"fsOrt":96.5,"fsSiklik":"1/389","fsSiklik2x":"1/196","sn":47}
 PASS LOKUM: normal oyun geri ödemesi %95–97,8 — 97.1
 PASS LOKUM: "şansı 2× yap" (bahis 1,25) geri ödemesi %95–97,8 ve bedava çevirme ~2 kat sık — {"sans2x":96.1,"oran":1.98}
 PASS LOKUM: satın alma (100 × bahis) geri ödemesi %95–97,5 — 96.52
 PASS Kumarhanede LOKUM ve Çivi Topu sekmeleri var, LOKUM bakiyesi oyundan — ["DEDE ⚡","LOKUM 🍭","Çivi Topu","Böcek Mutfak 🪳","Meyve slot","Canlı Blackjack 🃏","Blackjack","Rulet","Aviator"]
 PASS LOKUM sayfası ekrana sığıyor — {"x":264,"y":214,"width":751.0799560546875,"height":494.4609375,"top":214,"right":1015.0799560546875,"bottom":708.4609375,"left":264}
-PASS LOKUM çevirme: bahis (₺20) düşer, kazanç oyuna geçer, bakiye eşit — {"t0":100000,"t1":99980,"d0":[0,0],"tl":100016,"credit":100016,"d":[20,36]}
-PASS Şansı 2× yap: çevirme 1,25 × bahis (₺25), açıkken satın alma kapalı — {"t0":100016,"t1":99991,"cost":25,"buyOff":true,"bet":"₺25"}
-PASS LOKUM satın alma: ilk basış onay ister, ikinci basış 100 × bahis (₺2.000) düşer — {"t0":99991,"t1":99991,"arm":true,"t2":97991,"d0":[45,36]}
-PASS Satın alınan 10 bedava çevirme oynar, kazanç oyuna geçer, bakiye eşit — {"fs":1,"tl":99277,"credit":99277,"d":[2045,1322],"once":97991}
-PASS Çivi Topu: sekme değişince LOKUM gizlenir; 3 top = 3 bahis düşer — {"hid":true,"t0":99277,"t1":99247,"t2":119248,"credit":119248,"beklenen":119248,"kaz":20001}
-PASS Çivi Topu: top düştüğü kutunun çarpanını öder (16 sıra yüksek: kenar 1000×, orta 0,1×) — {"hid":true,"t0":99277,"t1":99247,"t2":119248,"credit":119248,"beklenen":119248,"kaz":20001}
+PASS LOKUM çevirme: bahis (₺20) düşer, kazanç oyuna geçer, bakiye eşit — {"t0":100000,"t1":99980,"d0":[0,0],"tl":99994,"credit":99994,"d":[20,14]}
+PASS Şansı 2× yap: çevirme 1,25 × bahis (₺25), açıkken satın alma kapalı — {"t0":99994,"t1":99969,"cost":25,"buyOff":true,"bet":"₺25"}
+PASS LOKUM satın alma: ilk basış onay ister, ikinci basış 100 × bahis (₺2.000) düşer — {"t0":99969,"t1":99969,"arm":true,"t2":97969,"d0":[45,14]}
+PASS Satın alınan 10 bedava çevirme oynar, kazanç oyuna geçer, bakiye eşit — {"fs":1,"tl":105339,"credit":105339,"d":[2045,7384],"once":97969}
+PASS Çivi Topu: sekme değişince LOKUM gizlenir; 3 top = 3 bahis düşer — {"hid":true,"t0":105339,"t1":105309,"t2":125310,"credit":125310,"beklenen":125310,"kaz":20001}
+PASS Çivi Topu: top düştüğü kutunun çarpanını öder (16 sıra yüksek: kenar 1000×, orta 0,1×) — {"hid":true,"t0":105339,"t1":105309,"t2":125310,"credit":125310,"beklenen":125310,"kaz":20001}
 PASS Kumarhaneden çıkınca otomatik top durur, havadaki toplar ödenir — {"on":true,"hidden":true,"same":true,"eq":true,"spin":false}
 PASS Sayfa hatası ve 4xx yok — []
 casino-games: hepsi PASS
@@ -467,11 +467,11 @@ PASS Dokunmatik sürücülü bilgisayar (maxTouchPoints 10, fare) bilgisayar ara
 PASS Elle seçim: ?cihaz=mobil kalıcı olur, Ayarlar → Cihaz türü → Otomatik ile geri döner — {"m1":true,"m2":true,"sel":"mobil","m3":{"touch":false,"kayit":null}}
 PASS Sayfa hatası yok — []
 mobile: hepsi PASS
-PASS Havada saldırı yere vurmayı başlatır ve yerdeki mobu vurur — {"H":2,"basladi":true,"son":{"H":2,"r":3.9,"mult":1.12,"n":2},"hasar":71,"uzaklik":1.6,"inis":{"d":1.89,"dy":0.06,"ms":"aggro"}}
-PASS Yükseklik arttıkça hasar ve alan büyür — {"iki_m":{"H":2,"basladi":true,"son":{"H":2,"r":3.9,"mult":1.12,"n":2},"hasar":71,"uzaklik":1.6,"inis":{"d":1.89,"dy":0.06,"ms":"aggro"}},"dokuz_m":{"H":9,"basladi":true,"son":{"H":9,"r":7.05,"mult":2.24,"n":3},"hasar":109,"uzaklik":1.6,"inis":{"d":1.8,"dy":0.05,"ms":"dead"}}}
-PASS Yüksekten vuruş normal kılıç menzilinin dışındaki mobu da vurur (geniş alan) — {"H":9,"basladi":true,"son":{"H":9,"r":7.05,"mult":2.24,"n":1},"hasar":212,"uzaklik":5,"inis":{"d":5.22,"dy":0.15,"ms":"dead"}}
+PASS Havada saldırı yere vurmayı başlatır ve yerdeki mobu vurur — {"H":2,"basladi":true,"son":{"H":2,"r":3.9,"mult":1.12,"n":2},"hasar":71,"uzaklik":1.6,"inis":{"d":1.73,"dy":0.05,"ms":"aggro"}}
+PASS Yükseklik arttıkça hasar ve alan büyür — {"iki_m":{"H":2,"basladi":true,"son":{"H":2,"r":3.9,"mult":1.12,"n":2},"hasar":71,"uzaklik":1.6,"inis":{"d":1.73,"dy":0.05,"ms":"aggro"}},"dokuz_m":{"H":9,"basladi":true,"son":{"H":9,"r":7.05,"mult":2.24,"n":3},"hasar":109,"uzaklik":1.6,"inis":{"d":1.7,"dy":0.04,"ms":"dead"}}}
+PASS Yüksekten vuruş normal kılıç menzilinin dışındaki mobu da vurur (geniş alan) — {"H":9,"basladi":true,"son":{"H":9,"r":7.05,"mult":2.24,"n":1},"hasar":142,"uzaklik":5,"inis":{"d":5.46,"dy":0.16,"ms":"aggro"}}
 PASS Yerdeyken normal saldırı (yere vurma yok) — {"yerde":true}
-PASS Otomatik savaş: hedefe yeterince sokulur ve vurur — {"sc":1.04,"silah":"s0","menzil":4.7,"hedefMesafe":2.82,"enYakin":1.68,"hasar":1716}
+PASS Otomatik savaş: hedefe yeterince sokulur ve vurur — {"sc":1.04,"silah":"s0","menzil":4.7,"hedefMesafe":2.82,"enYakin":1.68,"hasar":1705}
 PASS Naruto koşusu açık dünyada Shift ile — {"shift":1,"dashOncesi":0,"dashBasladi":true,"dash":0.96,"agBayragi":8}
 PASS Dash atarken Naruto koşusu pozu (ağda da görünür) — {"shift":1,"dashOncesi":0,"dashBasladi":true,"dash":0.96,"agBayragi":8}
 PASS Sayfa hatası yok — []
@@ -480,10 +480,10 @@ PASS İki oyuncu açık dünyaya girdi
 PASS Öldürmeden ganimet bırakılamaz
 PASS Öldürenin ganimeti herkese görünür, sahibi öldüren — [[1,"ore",2,10,10,1000,0],[2,"fang",1,10,10,1000,0]]
 PASS Öldürme başına yalnız bir kez ganimet
-PASS 15 sn dolmadan başkası alamaz — {"t":"olr","id":1,"w":14680}
+PASS 15 sn dolmadan başkası alamaz — {"t":"olr","id":1,"w":14670}
 PASS Sahibi hemen alır, diğerinden kaybolur — {"g1":{"t":"olg","id":1,"it":"ore","n":2},"x1":{"t":"olx","id":1}}
 PASS Aynı ganimet ikinci kez alınamaz — {"t":"olx","id":1}
-PASS Sonradan katılan açık ganimeti görür — [[2,"fang",1,10,10,1000,405]]
+PASS Sonradan katılan açık ganimeti görür — [[2,"fang",1,10,10,1000,421]]
 PASS Serbest kalsa da uzaktan alınamaz
 PASS 15 sn sonra başkası alabilir — {"g2":{"t":"olg","id":2,"it":"fang","n":1},"x2":{"t":"olx","id":2}}
 PASS Tarayıcı: öldürünce ganimet sunucudan gelir ve öldürene ait — {"ganimet":5,"sahip":true,"kalan":0,"envDegisti":true,"env":{"ammo":1,"polish":1,"gtooth":1,"ore":1,"fang":2}}
@@ -503,11 +503,11 @@ PASS Mini/büyük harita çizimi hatasız — true
 PASS Sayfa hatası yok — []
 ow-zombies: hepsi PASS
 PASS Bas-konuş basılı değilken ses gitmez
-PASS Bas-konuş basılıyken ses sunucudan geçer ve karşıda çalınır — {"paket":35,"sira":0.02,"ctx":"running","vui":"🔊 sesA"}
-PASS Açık mikrofonda ses sürekli gider — {"once":35,"sonra":65,"gonderilen":65}
-PASS "Duy: Kapalı" gelen sesi keser (sunucu da yollamaz) — {"g3":65,"g4":65}
-PASS "Duy: Açık" ile ses geri gelir — {"g4":65,"g5":86}
-PASS Mikrofon kapanınca gönderim durur — {"g6":86,"g7":86}
+PASS Bas-konuş basılıyken ses sunucudan geçer ve karşıda çalınır — {"paket":35,"sira":0.04,"ctx":"running","vui":"🔊 sesA"}
+PASS Açık mikrofonda ses sürekli gider — {"once":35,"sonra":64,"gonderilen":64}
+PASS "Duy: Kapalı" gelen sesi keser (sunucu da yollamaz) — {"g3":64,"g4":64}
+PASS "Duy: Açık" ile ses geri gelir — {"g4":64,"g5":84}
+PASS Mikrofon kapanınca gönderim durur — {"g6":84,"g7":84}
 PASS Sayfa hatası yok — []
 voice: hepsi PASS
 PASS İnternetten giren yeni hesap admin değil — {"ok":1,"admin":false}
