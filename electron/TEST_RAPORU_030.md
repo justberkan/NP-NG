@@ -1,6 +1,6 @@
 # Launcher 0.3.0 test raporu
 
-20.10.2026 · CODEX-EXE-1 · taban main 2687125.
+21.10.2026 · CODEX-EXE-1 · son doğrulama tabanı main e40aca3.
 
 - Kök npm test: exit 0; tüm kontroller PASS. Audit, offline-save, casino-rtp, casino-dede ve glide-sprint dahil.
 - Electron npm test: 12/12 PASS, sıfır skip.
@@ -18,8 +18,9 @@ Boyut: 111130798 bayt. SHA-256: 37910ad10c2c8319f63557d231c38850a071bd160301f4f1
 
 Tam çıktılar: ../test-results/v030/npm-test-root.txt, npm-test-electron.txt, packaged.txt, http.txt, build.txt. Sonuçlar: packaged.json ve installer.json. Ekranlar aynı klasörde.
 
-## Önceki denemelerde çözülen sorunlar
+## Önceki denemelerdeki sonuçlar
 
+- Son tekrar sırasında mevcut yerel sunucu başlatma testi bir kez 3 saniyelik sınır içinde yanıt alamadı. Logda hata yoktu; değiştirilmeden tek başına ve tam Electron grubunda tekrarlandı, ikisi de PASS. Zaman sınırı artırılmadı; geçici başlatma başarısızlığının kök nedeni kesinleşmedi.
 - İlk tabanda DEDE yoktu; main rebase sonrası test tekrarlandı ve geçti.
 - Testin doğrudan Page.close çağrısı native pencere close olayını atlıyordu; gerçek BrowserWindow.close ile doğal kapatma test edildi.
 - Açık Dünya sınıf seçimi tamamlanmadan lobiye dönen test düzeltildi; oyun kodu değişmedi.
