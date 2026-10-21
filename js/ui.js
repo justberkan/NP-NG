@@ -2,7 +2,7 @@
 /* ===== Lobi arayüzü: gezinme, mağaza, envanter, battle pass, mod seçimi, ayarlar ===== */
 const RK=['Er','Onbaşı','Çavuş','Üstçavuş','Teğmen','Yüzbaşı','Binbaşı','Albay','General','Mareşal'];
 const VIEWS={},VIEWWIRE={};
-const NAV=[['home','lobi'],['stock','borsa'],['bank','beko bank'],['bp','battle pass'],['quest','görevler'],['shop','mağaza'],['inv','envanter'],['owc','açık dünya'],['casino','kumarhane'],['settings','ayarlar']];
+const NAV=[['home','lobi'],['trade','trade'],['bank','beko bank'],['bp','battle pass'],['quest','görevler'],['shop','mağaza'],['inv','envanter'],['owc','açık dünya'],['casino','kumarhane'],['settings','ayarlar']];
 let curView='home',vt='w',vs=null,vm='shop',vmsg='',vw='rifle';
 
 /* ----- Simgeler (SVG) ----- */

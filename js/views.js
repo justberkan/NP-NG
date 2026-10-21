@@ -1,7 +1,7 @@
 'use strict';
 /* ===== Ekranlar: Beko Bank, borsa, görevler, pazar, ayarlar ===== */
 const tl=n=>fmt(n)+' TL';
-let bkMsg='',stSel='beko',stMsg='',mkTab='buy',mkMsg='',setTab='game',qTab='d';
+let bkMsg='',mkTab='buy',mkMsg='',setTab='game',qTab='d';
 
 /* ----- Beko Bank ----- */
 function bankV(){
@@ -39,39 +39,7 @@ VIEWWIRE.bank=function(){
  a.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{const d=+b.dataset.t;SV.eco.off=d?SV.eco.off+d*DAY:0;questRoll();ecoTick();save();bal();view('bank')});
 };
 
-/* ----- Borsa ----- */
-function spark(c,days,w,h){
- const N=60,now=eNow(),pts=[];
- for(let i=0;i<=N;i++)pts.push(coinPrice(c,now-days*DAY+i*days*DAY/N));
- const mn=Math.min(...pts),mx=Math.max(...pts),rg=Math.max(1e-6,mx-mn);
- const P=pts.map((v,i)=>[i/N*w,h-3-(v-mn)/rg*(h-6)]);
- const up=pts[N]>=pts[0],col=up?'#7dff9a':'#ff6b6b';
- const line=P.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join('');
- return `<svg class='spark' viewBox='0 0 ${w} ${h}' preserveAspectRatio='none' style='height:${h}px'><path d='${line}L${w} ${h}L0 ${h}Z' fill='${col}22'/><path d='${line}' fill='none' stroke='${col}' stroke-width='2' vector-effect='non-scaling-stroke'/><circle cx='${P[N][0]}' cy='${P[N][1]}' r='3' fill='${col}'/></svg>`;
-}
-function stockV(){
- const sel=COINS.find(c=>c.id===stSel)||COINS[0],h=coinHold(sel.id),pr=coinPrice(sel),pf=portfolioValue();
- const rows=COINS.map(c=>{
-  const p=coinPrice(c),hh=SV.eco.coins[c.id],pc=coinWeekPct(c),up=pc>=0;
-  const val=hh?hh.q*p:0;
-  return `<tr data-c='${c.id}' class='${c.id===sel.id?'on':''}' style='cursor:pointer'><td><b style='color:${c.col}'>${c.sym}</b> ${c.n}</td><td>${p.toFixed(2)} TL</td><td class='${up?'up':'dn2'}'>${up?'▲':'▼'} bu hafta ${pc>0?'+':''}${pc.toFixed(0)}%</td><td>${hh&&hh.q>0?hh.q.toFixed(4):'-'}</td><td>${val>0?tl(val):'-'}</td></tr>`;
- }).join('');
- const pl=h.q>0?h.q*pr-h.cost:0;
- return `<div class='pn2'><h3>Borsa</h3><p class='note'>Fiyatlar haftalık olarak yön değiştirir. Alım ve satımda %1 komisyon var. Portföy değeri: <b>${tl(pf)}</b></p>
- <div style='overflow-x:auto'><table class='tbl'><tr><th>Coin</th><th>Fiyat</th><th>Hafta</th><th>Adet</th><th>Değer</th></tr>${rows}</table></div></div>
- <div class='dr'><div class='pn2'><h3 style='color:${sel.col}'>${sel.n} (${sel.sym})</h3>${spark(sel,14,420,110)}
-  <p class='note'>Son 14 gün · şimdi ${pr.toFixed(2)} TL</p></div>
- <div class='pn2'><div class='sr'><span>Elindeki</span><b>${h.q>0?h.q.toFixed(4)+' '+sel.sym:'yok'}</b></div>${h.q>0?`<div class='sr'><span>Kâr / zarar</span><b class='${pl>=0?'up':'dn2'}'>${pl>=0?'+':''}${tl(pl)}</b></div>`:''}
-  <div class='row' style='margin:8px 0'><input type='number' id='stamt' min='1' step='50' value='100'><button class='btn sm' id='stbuy'>AL (TL)</button></div>
-  <div class='row'><button class='chip' data-sf='.25'>%25 sat</button><button class='chip' data-sf='.5'>%50 sat</button><button class='chip' data-sf='1'>Hepsini sat</button></div><p class='ms'>${stMsg}</p></div></div>`;
-}
-VIEWS.stock=stockV;
-VIEWWIRE.stock=function(){
- const a=$('av');
- a.querySelectorAll('tr[data-c]').forEach(r=>r.onclick=()=>{stSel=r.dataset.c;stMsg='';view('stock')});
- $('stbuy').onclick=()=>{stMsg=coinBuy(stSel,+$('stamt').value)||'Alındı';bal();view('stock')};
- a.querySelectorAll('[data-sf]').forEach(b=>b.onclick=()=>{stMsg=coinSell(stSel,+b.dataset.sf)||'Satıldı';bal();view('stock')});
-};
+/* ----- Borsa kaldırıldı: yerine js/trade.js (TradingSim) geldi (Berkan 2026-10-21) ----- */
 
 /* ----- Görevler ----- */
 function questV(){
