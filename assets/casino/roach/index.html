@@ -154,20 +154,26 @@
 <script>
 'use strict';
 /* Böcek Mutfak v2 — DEDE animasyon motoru (düşüş/patlama/yıldırım/partikül) + Böcek teması.
-   Scatter pay (8+ eşleşme), çarpım küreleri (💣 2x-12x), 4+ scatter = 15 bedava dönüş (yeniden tetikleme +5).
+   Böcek Mutfak v3 — DEDE'nin BİREBİR şans motoru (Berkan: "aynı şans, %2 fazla"): 8 sembol (8-9/10-11/12+ kademeli ödeme),
+   çarpan küreleri (2x-100x, kazanç çarpanı), 4+ scatter = 10 bedava dönüş (retrig +5), RTP hedefi ~%98 (DEDE ~%96, katmanlı simülasyonla kalibre).
    Para yalnız oyundadır: sayfa onBet/onWin bildirir, setCredit oyundan gelir. */
 const $=id=>document.getElementById(id);
 const COLS=6,ROWS=5,N=30,SCAT='scat';
 const SYM={
- pizza:{icon:'🍕',pay:.5},
- beer:{icon:'🍺',pay:1},
- cd:{icon:'💿',pay:2},
- cash:{icon:'💵',pay:5}
+ pizza:{icon:'🍕',w:12,pay:[0.4,0.8,1.5]},
+ beer:{icon:'🍺',w:12,pay:[0.5,1.2,2.0]},
+ cheese:{icon:'🧀',w:10,pay:[0.6,1.4,2.5]},
+ bacon:{icon:'🥓',w:9,pay:[0.8,1.8,3.2]},
+ can:{icon:'🥫',w:8,pay:[1.0,2.0,4.0]},
+ chicken:{icon:'🍗',w:8,pay:[1.5,3.0,6.0]},
+ cd:{icon:'💿',w:7,pay:[2.0,4.0,8.0]},
+ cash:{icon:'💵',w:5,pay:[5.0,10.0,25.0]}
 };
-const ORB_VALUES=[2,3,4,5,6,8,10,12];
-const POOL=[['pizza',.25],['beer',.20],['cd',.20],['cash',.23],[SCAT,.05],[null,.07]]; /* null = çarpım küresi */
+const ORB_VALUES=[2,3,4,5,10,25,50,100];
+const POOL=[];for(const k in SYM)POOL.push([k,SYM[k].w]);
+POOL.push([SCAT,0.5],[null,1]); /* null = çarpan küresi */
 const POOL_W=POOL.reduce((s,p)=>s+p[1],0);
-const FS={spins:15,retrig:5};
+const FS={spins:10,retrig:5,natural:{pw:0.30,po:0.10}};
 const DIALOG={
  spin:["Hadi bakalım, şansını göreyim!","Çevir lan, bekletme!"],
  kayip:["Makareyiz, piçiz, oçuz abi...","Sıfırı tükettik amk!","Şansını sileyim senin.","Böcek bozdu, tabela değişti."],
@@ -184,6 +190,25 @@ let forceNext=null,lossStreak=0,carpanQuipped=false;
 const betL=[],winL=[],chgL=[];
 try{credit=Math.max(0,Math.floor(+localStorage.getItem('npng_roach_demo')||1000))}catch(e){}
 function saveDemo(){if(!embedded)try{localStorage.setItem('npng_roach_demo',String(credit))}catch(e){}}
+/* DEDE ile aynı kategori sistemi. Yapay "kıl payı kaçırma" yok (near varsayılan kapalı,
+   olasılığı loss absorbe eder). small 0.128: katmanlı 1M simülasyonla RTP ~%98 (DEDE ~%96'nın ~2 puan üstü). */
+const CONFIG={nearMiss:false};
+let CATS=[
+ ['near',0.110,null,0],
+ ['small',0.128,()=>0.4+rng()*1.6,0],
+ ['big',0.011,()=>2+rng()*13,0.15],
+ ['mega',0.0038,()=>15+rng()*35,0.15],
+ ['epic',0.0008,()=>50+rng()*150,0.15],
+ ['leg',0.00015,()=>250+rng()*500,0.20],
+ ['jack',0.00002,()=>1500+rng()*1500,0.25],
+ ['fs',0.0024,null,1],
+ ['loss',0,null,0],
+];
+CATS[CATS.length-1][1]=1-CATS.slice(0,-1).reduce((s,c)=>s+c[1],0);
+function catProb(c){if(c[0]==='near')return CONFIG.nearMiss?c[1]:0;
+ if(c[0]==='loss'&&!CONFIG.nearMiss){const n=CATS.find(x=>x[0]==='near');return c[1]+(n?n[1]:0)}return c[1]}
+function drawCat(){const w=CATS.map(catProb);const tw=w.reduce((s,x)=>s+x,0);let r=rng()*tw;
+ for(let i=0;i<CATS.length;i++){if((r-=w[i])<0)return CATS[i]}return CATS[CATS.length-1]}
 /* ---------------- ses ---------------- */
 let AC=null;
 function audio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC}
@@ -205,16 +230,32 @@ function plant(board,sym,count){let n=0;while(n<count){const i=Math.floor(rng()*
 function plantOrbs(board,sum){clearOrbs(board);let s=0,guard=0;
  while(s<sum&&guard++<60){const v=ORB_VALUES[Math.floor(rng()*ORB_VALUES.length)];
   if(s+v>sum*1.35)continue;
-  const free=[];for(let i=0;i<N;i++){const c=board[i];if(c!==SCAT&&typeof c!=='object')free.push(i)}
+  const free=[];for(let i=0;i<N;i++){const c=board[i];if(c!=='cash'&&c!==SCAT&&typeof c!=='object')free.push(i)}
   if(!free.length)break;
   board[free[Math.floor(rng()*free.length)]]={o:v};s+=v}
  return s}
 function plantScatters(board,count){clearSym(board,SCAT);let n=0;while(n<count){const i=Math.floor(rng()*N);if(board[i]===SCAT)continue;board[i]=SCAT;n++}}
-/* Berkan'ın ödeme tablosu: adet × katsayı × bahis (8+ eşleşme) */
+/* DEDE'den birebir: hedef kazanca göre tahta kurma (küçük hedef = 8'li sembol, büyük = cash + küreler) */
+function forceWin(board,target){
+ const capped=Math.min(target,5000);
+ if(capped<2.2){
+  const pick=capped<0.5?['pizza',8]:capped<0.9?['beer',8]:capped<1.3?['cheese',8]:capped<1.8?['bacon',8]:['can',8];
+  clearOrbs(board);clearSym(board,pick[0]);plant(board,pick[0],pick[1]);return;
+ }
+ clearSym(board,'cash');clearOrbs(board);
+ const cnt=8+Math.floor(rng()*3);
+ const base=SYM.cash.pay[cnt>=10?1:0];
+ const m=Math.max(1,Math.round(capped/base));
+ plant(board,'cash',cnt);
+ plantOrbs(board,m);
+}
+function plantNear(board){clearOrbs(board);clearSym(board,'cash');plant(board,'cash',7)}
+/* DEDE ödeme tablosu: 8+ eşleşme, kademe 8-9 / 10-11 / 12+ */
 function evaluate(board){
  const counts={};for(const s of board){if(typeof s==='string'&&s!==SCAT)counts[s]=(counts[s]||0)+1}
- let base=0,wins=[];
- for(const k in counts){if(counts[k]>=8){const pay=counts[k]*SYM[k].pay;base+=pay;wins.push({sym:k,count:counts[k],pay})}}
+ const wins=[];
+ for(const k in counts){if(counts[k]>=8){const p=SYM[k].pay;const pay=p[counts[k]>=12?2:counts[k]>=10?1:0];wins.push({sym:k,count:counts[k],pay})}}
+ const base=wins.reduce((s,w)=>s+w.pay,0);
  let orbSum=0;for(const s of board)if(typeof s==='object'&&s)orbSum+=s.o;
  let scat=0;for(const s of board)if(s===SCAT)scat++;
  return{wins,base,orbSum,scat};
@@ -246,25 +287,51 @@ function cascade(board){
  }
  return{base,orbSum:orbTotal,scat:first.scat,steps};
 }
-/* bir spin çekirdeği: bedava dönüşte küreler kalıcı çarpanı büyütür */
+/* bir spin çekirdeği: DEDE kategori motoru; kazanç = base × (1+küreler) × (bedavada glob çarpanı) */
 function runSpin(inBonus){
  const forced=!!forceNext;
  let board=genBoard(),bonusTrig=false;
  if(!forced){
-  if(inBonus){
-   if(rng()<.45){/* küçük garanti kazanç */
-    const pick=rng()<.5?['pizza',9]:['beer',9];
-    clearOrbs(board);clearSym(board,pick[0]);plant(board,pick[0],pick[1]);
-   }else if(rng()<.55){plantOrbs(board,2+Math.floor(rng()*10))}
+  if(inBonus){const fm=FS.natural;
+   if(rng()<fm.pw)forceWin(board,0.5+rng()*1.5);
+   if(rng()<fm.po)plantOrbs(board,2+Math.floor(rng()*10));else clearOrbs(board);
   }else{
-   if(rng()<.03){plantScatters(board,4);bonusTrig=true} /* doğal bonus sinyali */
+   const cat=drawCat();
+   if(cat[0]==='near')plantNear(board);
+   else if(cat[0]==='fs'){clearOrbs(board);plantScatters(board,4);bonusTrig=true}
+   else if(cat[2]){if(rng()<cat[3]){plantScatters(board,4);bonusTrig=true}else forceWin(board,cat[2]())}
+   else clearOrbs(board);
   }
  }
  const res=cascade(board);
- if(!inBonus&&res.scat>=4)bonusTrig=true;
+ if(!inBonus&&res.scat>=4&&!bonusTrig)bonusTrig=true;
  const mult=inBonus?glob:1;
- const win=Math.floor(res.base*mult*bet);
+ const win=Math.floor(Math.min(res.base*(1+res.orbSum),5000)*mult*bet);
  return{board,res,win,bonusTrig};
+}
+/* test/simülasyon API'si: UI ile aynı çekirdek (runSpin + glob güncellemesi) */
+function runBonusCore(){
+ let spins=FS.spins,total=0,extra=0,guard=0;
+ while(spins-->0&&guard++<60){
+  const r=runSpin(true);
+  total+=r.win;
+  glob=Math.min(glob+Math.min(r.res.orbSum,10),50);
+  if(r.res.scat>=4){spins+=FS.retrig;extra+=FS.retrig}
+ }
+ return Math.min(total,5000*bet)/bet;
+}
+function simulate(n){
+ const keepBet=bet;bet=1;
+ let spent=0,won=0,bonusHits=0;
+ for(let i=0;i<n;i++){
+  spent+=1;glob=1;
+  const r=runSpin(false);
+  let w=Math.min(r.res.base*(1+r.res.orbSum),5000);
+  if(r.bonusTrig){bonusHits++;w+=runBonusCore()}
+  won+=Math.min(w,5000);
+ }
+ bet=keepBet;glob=1;
+ return{spins:n,totalBet:spent,totalWin:won,rtp:Math.round(won/spent*10000)/100,bonusHits};
 }
 /* ---------------- DOM ---------------- */
 const cellEls=[];
@@ -423,7 +490,7 @@ function autoStop(){autoOn=false;$('auto').classList.remove('on')}
 async function showScats(){
  cellEls.forEach(c=>{if(c.textContent.includes('🪳'))c.classList.add('scat')});
  sfx.bonus();say('don');bugPose('koltuk',3000);
- showMsg('🪳 4+ BÖCEK! 15 BEDAVA DÖNÜŞ');
+ showMsg('🪳 4+ BÖCEK! '+FS.spins+' BEDAVA DÖNÜŞ');
  await sleep(1700);
  cellEls.forEach(c=>c.classList.remove('scat'));
 }
@@ -448,7 +515,7 @@ async function spin(){
   const fin=lastBoard(r.res.steps);
   const orbs=liveOrbs(r.res,fin);
   if(orbs.length){await strikeOrbs(orbs)}
-  if(inBonus&&r.res.orbSum>0){glob=Math.min(glob+r.res.orbSum,50);updFS(true)}
+  if(inBonus&&r.res.orbSum>0){glob=Math.min(glob+Math.min(r.res.orbSum,10),50);updFS(true)}
   finishWin(r.win);
   if(inBonus){fsPaid+=r.win;updFS()}
   if(!inBonus&&r.bonusTrig){fs+=FS.spins;await showScats();updFS()}
@@ -501,9 +568,9 @@ const API={
  get freeSpins(){return fs},
  seed:s=>{rng=mulberry32(s)},
  unseed:()=>{rng=Math.random},
- _core:{SYM,evaluate,cascade,
+ _core:{SYM,evaluate,cascade,CATS,FS,POOL,CONFIG,drawCat,runSpin,simulate,
   /* test kancası: sonraki spin bu tahtayla başlar (SYMBOLS nesneleri kabul eder) */
-  SYMBOLS:[{id:'pizza',icon:'🍕',pay:.5},{id:'beer',icon:'🍺',pay:1},{id:'cd',icon:'💿',pay:2},{id:'cash',icon:'💵',pay:5},{id:'scat',icon:'🪳',isScatter:true},{id:'orb',icon:'💣',isMultiplier:true}],
+  SYMBOLS:[{id:'pizza',icon:'🍕'},{id:'beer',icon:'🍺'},{id:'cheese',icon:'🧀'},{id:'bacon',icon:'🥓'},{id:'can',icon:'🥫'},{id:'chicken',icon:'🍗'},{id:'cd',icon:'💿'},{id:'cash',icon:'💵'},{id:'scat',icon:'🪳',isScatter:true},{id:'orb',icon:'💣',isMultiplier:true}],
   fill:arr=>{forceNext=arr.map(s=>s.isScatter?SCAT:s.isMultiplier?{o:2}:s.id)},
   resetFS:()=>{fs=0;glob=1;fsPaid=0;updFS()}},
  _ui:{say,bubble,bugPose,strikeCell},
