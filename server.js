@@ -606,7 +606,7 @@ function flFor(c) {
   return { t: 'fl', fr, rq, act, room: myRoom ? { mode: myRoom.mode, code: myRoom.code } : null };
 }
 function sendFl(c) { if (!c.acc) return; const o = flFor(c), s = JSON.stringify(o); if (c.flS === s) return; c.flS = s; send(c, o); }
-/* Lobi listesi + arkadaş daveti (Claude 2026-10-20): Dalga Ağacı ve Inlı Cinlı odaları */
+/* Lobi listesi + arkadaş daveti (Claude 2026-10-20): Dalga Ağacı ve Korkunçlu odaları */
 const COOP = require('./server-rooms');
 const coopOf = c => c.icroom || c.wcroom || null;
 function roomMsg(c, m, now) {

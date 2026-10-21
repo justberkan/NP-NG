@@ -135,14 +135,15 @@ const key={},joy={x:0,y:0};
 const WKEYS=['rifle','smg','pistol','dual','knife','sword','gsword'];
 const OWDEF=()=>({lvl:1,xp:0,med:2,kills:0,mw:'s0',sw:['s0'],su:{},inv:{},sk:[null,null,null,null,null]});
 const START_TL=31; /* Berkan kuralı (2026-10-19): online hesap 31 TL ile başlar */
-const SVDEF=()=>({v:3,tl:START_TL,gold:0,own:['c0','x0','g0','o0'],eq:{c:'c0',x:'x0',w:'rifle',o:'o0'},sk:{},xp:0,bp:[],t0:Date.now(),ow:OWDEF()});
+const SVDEF=()=>({v:3,tl:START_TL,gold:0,own:['c0','x0','g0','o0'],eq:{c:'c0',x:'x0',w:'rifle',o:'o0',st:null},sk:{},stk:{},xp:0,bp:[],t0:Date.now(),ow:OWDEF()});
 let SV=null;
 try{SV=JSON.parse(localStorage.getItem('mmofps_sv'))}catch(e){}
 function ensureSV(){
  const d=SVDEF();
  if(!SV||typeof SV!=='object')SV=d;
  for(const k in d)if(SV[k]===undefined)SV[k]=d[k];
- SV.eq=Object.assign({c:'c0',x:'x0',w:'rifle',o:'o0'},SV.eq||{});
+ SV.eq=Object.assign({c:'c0',x:'x0',w:'rifle',o:'o0',st:null},SV.eq||{});
+ if(!SV.stk||typeof SV.stk!=='object')SV.stk={};
  /* eski sürüm: formalar karakterdi (k1-k4) → forma aksesuarına (f1-f4) çevir */
  if(SV.own){SV.own=SV.own.map(i=>/^k[1-4]$/.test(i)?'f'+i[1]:i)}
  if(/^k[1-4]$/.test(SV.eq.c||'')){SV.eq.f='f'+SV.eq.c[1];SV.eq.c='c0'}
@@ -184,4 +185,12 @@ function save(){
   OFFL.touched=true;offBadge();return;
  }
  try{localStorage.setItem('mmofps_sv',JSON.stringify(SV))}catch(e){}
+}
+/* StartTrack sayaç (2026-10-21): eklenti (st1) takılıysa yapılan her öldürmeyi silah slotuna göre sayar; takılı değilse saymaz */
+function stkKill(slot){
+ if(!SV||SV.eq.st!=='st1'||!slot)return;
+ if(!SV.stk||typeof SV.stk!=='object')SV.stk={};
+ SV.stk[slot]=(SV.stk[slot]||0)+1;
+ if(typeof cw!=='undefined'&&cw&&cw.stk&&cw.stk.userData.slot===slot&&typeof cw.stk.userData.redraw==='function')cw.stk.userData.redraw();
+ save();
 }

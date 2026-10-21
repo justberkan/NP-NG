@@ -6,7 +6,7 @@ const AIR={acc:80,cap:1.8,ignoreW:true}; // hava strafe: ivme (m/s²), yan hız 
 const p={x:0,y:0,z:20,vy:0,vx:0,vz:0,yaw:0,pitch:0,g:true,slide:0,st:ST,wcd:0,wj:0,dj:0,climb:0,eye:1.6,hp:100,dead:0};
 let wk=null,cw=WP.rifle,ammo=30,reload=0,fireCd=0,kickL=0,kickR=0,flashR=0,flashL=0,ads=false,adsT=0,swU=-1,swHit=false,swCombo=0,comboT=0,swT=1,tp=false,dualSide=0,pRagdoll=null;
 const wa={};
-/* modun kapattığı hareketler (2026-10-20 Berkan: Inlı Cinlı'da çift zıplama ve kanca yok) */
+/* modun kapattığı hareketler (2026-10-20 Berkan: Korkunçlu'da çift zıplama ve kanca yok) */
 const modeNoAir=()=>typeof mode!=='undefined'&&mode==='ic';
 let jBuf=0,firing=false,jHeld=false,jPress=false,sPress=false,qPress=false,lastSpd='',lastSt=-1;
 let gr=null,grCd=0,lastCh=1;

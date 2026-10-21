@@ -337,6 +337,7 @@ function owKill(m,info,norew){
  }
  if(norew){upd();return}
  kills++;score+=m.L*10;
+ if(info&&info.player){stkKill(wk);}
  const k=m.boss?12:1,coop=info&&info.coop?2:1,cm=info&&info.player?cmbMul():1,tl=Math.max(1,Math.round((1+m.L*.35)*(.8+Math.random()*.5)*k*cm))*coop,xp=Math.round((8+m.L*4)*k*cm);
  if(info&&info.player)cmbHit(true);
  SV.tl+=tl;SV.xp+=Math.ceil(m.L/6)*k;SV.ow.kills++;

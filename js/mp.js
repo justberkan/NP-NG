@@ -326,7 +326,7 @@ function mpMsg(m){
  case'zd':{
   const e=MPL.zs.get(m.id);
   if(e){e.hp=0;MPL.zs.delete(m.id);spawnRagdoll(e.rig,V3(e.vx||0,0,e.vz||0),V3(m.x,1.3,m.z),V3(m.x-p.x,.3,m.z-p.z).normalize(),m.hd?7:5);e.rig.root.visible=false}
-  if(m.by===MPL.id){score+=m.hd?200:100;hitFlash('kill');snd(900,.1,.06)}
+  if(m.by===MPL.id){score+=m.hd?200:100;stkKill(m.w);hitFlash('kill');snd(900,.1,.06)}
   upd();break}
  case'aimtop':
   if(state==='end'&&mode==='aim')$('res').innerHTML+='<br><br><b>Online Aim Sıralaması</b><br>'+m.top.map((r,i)=>(i+1)+'. '+r[0]+' — '+r[1]).join('<br>')+'<br>Senin en iyin: <b>'+m.me+'</b>';
@@ -373,7 +373,7 @@ function mpMsg(m){
   }else{
    const e=MPL.ents.get(m.id);
    if(e){e.hp=0;spawnRagdoll(e.rig,V3(e.pvx||0,0,e.pvz||0),V3(m.x,m.y+1.3,m.z),dir,m.hd?7:5);e.rig.root.visible=false;if(e.tag)e.tag.style.display='none'}
-   if(m.by===MPL.id){score+=m.hd?200:150;hitFlash('kill');snd(900,.1,.06)}
+   if(m.by===MPL.id){score+=m.hd?200:150;stkKill(m.w);hitFlash('kill');snd(900,.1,.06)}
   }
   break}
  case'resp':

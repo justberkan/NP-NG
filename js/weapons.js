@@ -171,6 +171,23 @@ function skinTint(root,sk){
   o.material=Array.isArray(o.material)?o.material.map(tint):tint(o.material);
  });
 }
+/* StartTrack sayaç (2026-10-21): silah gövdesine takılan küçük dijital ekran; kill aldıkça sayı artar (CS:GO StatTrak tarzı) */
+function stkModel(slot){
+ const g=new THREE.Group();
+ const body=boxMesh(.052,.032,.02,0,0,0,0x1a1f26);g.add(body);
+ const cv=document.createElement('canvas');cv.width=128;cv.height=64;
+ const tx=new THREE.CanvasTexture(cv);
+ const scr=new THREE.Mesh(new THREE.PlaneGeometry(.046,.023),new THREE.MeshBasicMaterial({map:tx}));
+ scr.position.set(0,.002,.0105);g.add(scr);
+ scr.geometry.userData.own=1;scr.material.userData.own=1;body.geometry.userData.own=1;body.material.userData.own=1;
+ g.userData.slot=slot;
+ g.userData.redraw=()=>{const c=cv.getContext('2d');c.fillStyle='#0a0d10';c.fillRect(0,0,128,64);
+  c.fillStyle='#ff9a2a';c.font='bold 40px monospace';c.textAlign='center';c.textBaseline='middle';
+  c.fillText(String(Math.min(99999,((typeof SV!=='undefined'&&SV.stk)||{})[slot]||0)).padStart(5,'0'),64,34);
+  tx.needsUpdate=true};
+ g.userData.redraw();
+ return {g,cy:.016};
+}
 function buildWeapon(k,sk,mid,own){
  sk=sk||SKIN('g0');
  const d=WP[k],parts=wparts(k,sk.c,sk.a);
@@ -188,6 +205,13 @@ function buildWeapon(k,sk,mid,own){
   const oid=own?(SV.eq.o||'o0'):'o0',om=optModel(oid);
   const y0=mm?pl.sh:(d.sh-.03),oz=mm?(mm.position.z):(d.dot?d.dot[1]:.1);
   om.g.position.set(0,y0,oz);g.add(om.g);W.sh=y0+om.cy;W.opt=oid;W.dotM=om.dot||null;
+ }
+ /* StartTrack sayaç: optiğin solundaki küçük dijital ekran (dual hariç) */
+ if(own&&typeof SV!=='undefined'&&SV.eq.st==='st1'&&!d.melee&&d.hold!=='dual'){
+  const stm=stkModel(k);
+  const y0=mm?pl.sh:d.sh,oz=mm?mm.position.z:(d.dot?d.dot[1]:.1);
+  stm.g.position.set(-.055,y0+.01,oz-.01);
+  g.add(stm.g);W.stk=stm.g;
  }
  if(d.mg){
   const mg=mm?mdlMagazine(mm,d.hold==='pistol'||d.hold==='dual'?'pistol':k,sp.mid):null;

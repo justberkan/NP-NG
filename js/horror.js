@@ -1,12 +1,12 @@
 'use strict';
-/* Inlı Cinlı (korku modu) — karanlık haritada canavardan kaç, çıkış kapısını bul.
+/* Korkunçlu (korku modu) — karanlık haritada canavardan kaç, çıkış kapısını bul.
    Dalga Ağacı (wc) deseni: setupMode/stepPlayer/updE/updPlayerView/toLobby kancaları + ic_* oda ağı. */
 const IC={on:false,net:false,owner:true,id:0,host:0,code:'',peers:new Map(),avatars:new Map(),
  mapName:'',mapGroup:null,mapMeshes:[],level:1,earned:0,ended:false,pending:null,chosen:false,sendT:0,
  mons:[],monId:0,door:null,doorPos:null,nav:[],stamina:100,stamCd:0,flash:true,skin:0,skins:null,
  hbT:0,snapshot:null,baseBoxes:null,lights:[],spot:null,spotTgt:null,loaded:{},assetsReady:false};
 
-const ICMAPS=['backrooms','lego','starttrack'];
+const ICMAPS=['backrooms','lego']; /* starttrack harita değil, silah eklentisi (StatTrak) oldu — Berkan 2026-10-21 */
 const IC_DOOR_REWARD=1000;
 const IC_MON={momo:{hp:420,sp:4.55,dmg:30},slender:{hp:520,sp:4.35,dmg:38}};
 /* Harita büyütme (Claude 2026-10-20, Berkan: "harita biraz daha büyük"): yatayda 1,6×, dikeyde 1,15× (tavan çok yükselmesin) */
@@ -34,9 +34,36 @@ async function icAssets(force){
  const pad=1.2*IC_SX;IC.bounds={x1:X1+pad,x2:X2-pad,z1:Z1+pad,z2:Z2-pad};
  IC.nav=nav.cells.map(c=>[c[0]*IC_SX,c[1]*IC_SX]).filter(c=>icIn(c[0],c[1],.6));
  IC.skins=skins;
+ /* ana zemin yüksekliği (Berkan 2026-10-21: "Lego map'te karakter map'in altındaki boşlukta doğuyor"):
+    harita yerel uzayında nav hücrelerinden aşağı ışın → vuruş yüksekliklerinin medyanı (dünya birimi).
+    Harita grubu bu kadar aşağı ötelenir, zemin tam y=0 olur (backrooms'ta ~0, davranış değişmez). */
+ IC.floorY=0;
+ sc.updateMatrixWorld(true);
+ {
+  /* zemin kuralı: hücre başına, gökyüzü kutusu (TOOLSSKYBOX vb.) ATLANIP yukarı bakan (normal.y>.7) EN ALÇAK vuruş.
+     lego: gökyüzü kabuğu 25,34'teyken oynanabilir lego platformu 0,29'da; backrooms: zemin 0,03'te.
+     eski "ilk vuruş" kuralı gökyüzü kutusunu zemin sanıyordu → karakter map altındaki boşlukta doğuyordu. */
+  const rc=new THREE.Raycaster(),org=new THREE.Vector3(),down=new THREE.Vector3(0,-1,0),n=new THREE.Vector3(),ys=[];
+  const cells=IC.nav.slice().sort(()=>Math.random()-.5).slice(0,160);
+  for(const c of cells){org.set(c[0]/IC_SX,1200,c[1]/IC_SX);rc.set(org,down);
+   let best=null;
+   for(const h of rc.intersectObject(sc,true)){
+    if(!h.face)continue;
+    let sky=false,o=h.object;
+    while(o){if(o.name&&/sky/i.test(o.name)){sky=true;break}o=o.parent}
+    if(sky)continue;
+    n.copy(h.face.normal).transformDirection(h.object.matrixWorld);
+    if(n.y<.7)continue;
+    const y=h.point.y*IC_SY;
+    if(best===null||y<best)best=y;
+   }
+   if(best!==null)ys.push(best)}
+  ys.sort((a,b)=>a-b);
+  if(ys.length)IC.floorY=ys[Math.floor(ys.length/2)];
+ }
  /* ayrıntılı çarpışma (Berkan 2026-10-21: "duvarların önünde görünmez duvarlar var"): eski 22 kaba kutu yerine
     haritanın kendi duvar üçgenlerinden 0,4 m'lik ızgara → birleştirilmiş kutular. Yalnız oyuncu boyundaki dik yüzeyler sayılır
-    (kapı üstü kirişler ve tavan engel değil). Dış sınır eskisi gibi. */
+    (kapı üstü kirişler ve tavan engel değil). Dış sınır eskisi gibi. Zemine göre öteleme bu matriste de uygulanır. */
  const fine=icMeshCol(sc);if(fine.length>4)IC.col.boxes=fine;
  IC.nav=IC.nav.filter(c=>!IC.col.boxes.some(b=>c[0]>b[0]-.5&&c[0]<b[2]+.5&&c[1]>b[1]-.5&&c[1]<b[3]+.5));
  IC.assetsReady=true;
@@ -44,7 +71,7 @@ async function icAssets(force){
 
 function icMeshCol(scene){
  const C=.4,b=IC.bounds,nx=Math.ceil((b.x2-b.x1+4)/C),nz=Math.ceil((b.z2-b.z1+4)/C),ox=b.x1-2,oz=b.z1-2,grid=new Uint8Array(nx*nz);
- const sm=new THREE.Matrix4().makeScale(IC_SX,IC_SY,IC_SX);scene.updateMatrixWorld(true);
+ const sm=new THREE.Matrix4().multiplyMatrices(new THREE.Matrix4().makeTranslation(0,-(IC.floorY||0),0),new THREE.Matrix4().makeScale(IC_SX,IC_SY,IC_SX));scene.updateMatrixWorld(true);
  const A=new THREE.Vector3(),B=new THREE.Vector3(),Cc=new THREE.Vector3(),M=new THREE.Matrix4(),e1=new THREE.Vector3(),e2=new THREE.Vector3(),n=new THREE.Vector3(),P=new THREE.Vector3();
  scene.traverse(o=>{if(!o.isMesh)return;M.multiplyMatrices(sm,o.matrixWorld);const g=o.geometry,pos=g.attributes.position,idx=g.index,cnt=idx?idx.count:pos.count;
   for(let t=0;t<cnt;t+=3){const i0=idx?idx.getX(t):t,i1=idx?idx.getX(t+1):t+1,i2=idx?idx.getX(t+2):t+2;
@@ -103,10 +130,10 @@ function icWalkTick(e,dt){
 function icOpen(cb){
  if(IC.on)icDispose();
  let el=$('icselect');if(!el){el=document.createElement('div');el.id='icselect';el.className='wc-dialog';document.body.appendChild(el)}
- el.innerHTML=`<div class="wc-card"><p class="wc-kicker">N.P.N.G. / KORKU MODU</p><h1>INLI CINLI</h1>
+ el.innerHTML=`<div class="wc-card"><p class="wc-kicker">N.P.N.G. / KORKU MODU</p><h1>KORKUNÇLU</h1>
  <p>Karanlık harita · El feneri (F) · Canavar seni kovalıyor · Çıkış kapısını bul: <b>+${IC_DOOR_REWARD} TL</b></p>
  <p class="note">Shift: koşu (stamina ile) · Kapı her seferinde rastgele bir yerde belirir; her kapıdan sonra canavar sayısı ve hızı artar. Ölen izler, herkes ölürse maç biter — kazanılan para hesabında kalır.</p>
- <p class="note">Harita: <b>${IC.mapName==='starttrack'?'Starttrack':IC.mapName==='lego'?'Lego':'Backrooms (labirent)'}</b> · Holografik cin görünümü: <b>#${IC.skin+1}</b></p>
+ <p class="note">Harita: <b>${IC.mapName==='lego'?'Lego':'Backrooms (labirent)'}</b> · Holografik cin görünümü: <b>#${IC.skin+1}</b></p>
  <div class="row"><button class="btn alt" id="icmap">HARİTA DEĞİŞTİR</button><button class="btn alt" id="icskin">GÖRÜNÜM DEĞİŞTİR</button></div>
  <div class="row"><button class="btn" id="icsolo">TEK BAŞINA</button><button class="btn alt" id="iccreate">CO-OP ODA AÇ</button></div>
  <div class="row"><input id="icpass" maxlength="32" placeholder="Oda şifresi (isteğe bağlı)" aria-label="Oda şifresi" autocomplete="off"></div>
@@ -134,7 +161,7 @@ function icMoney(n){if(!Number.isFinite(n)||n<=0)return;SV.tl+=n;save();bal();if
 
 /* ---------- Başlatma ---------- */
 function icStart(){
- if(!IC.assetsReady)throw new Error('Inlı Cinlı varlıkları yüklenmedi');
+ if(!IC.assetsReady)throw new Error('Korkunçlu varlıkları yüklenmedi');
  IC.on=true;IC.chosen=false;IC.ended=false;IC.level=1;IC.earned=0;IC.mons=[];IC.monId=0;IC.sendT=0;IC.stamina=100;IC.hbT=0;IC.flash=true;
  /* çevre yedekle + arena kutularını gizle */
  IC.baseBoxes=boxes.slice();IC.baseMeshes=boxMeshes.slice();
@@ -145,7 +172,7 @@ function icStart(){
  IC.lights=[];S.traverse(o=>{if(o.isAmbientLight||o.isDirectionalLight||o.isHemisphereLight||o.isPointLight){IC.lights.push([o,o.intensity]);o.intensity*=.1}});
  S.background.setHex(0x02030a);S.fog.near=4;S.fog.far=IC.mapName==='backrooms'?26:60;S.fog.color.setHex(0x000000);
  /* harita */
- IC.mapGroup=IC.loaded.map.clone(true);IC.mapGroup.scale.multiply(new THREE.Vector3(IC_SX,IC_SY,IC_SX));S.add(IC.mapGroup);IC.safe=null;
+ IC.mapGroup=IC.loaded.map.clone(true);IC.mapGroup.scale.multiply(new THREE.Vector3(IC_SX,IC_SY,IC_SX));IC.mapGroup.position.y=-(IC.floorY||0);S.add(IC.mapGroup);IC.safe=null;
  IC.mapMeshes=[];IC.mapGroup.traverse(o=>{if(o.isMesh)IC.mapMeshes.push(o)});
  /* çarpışma kutuları (şeffaf mesh: mermi duvarı, görünmez) */
  const tmat=new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false});
@@ -238,7 +265,7 @@ function icDoorFound(who){
 }
 function icEnd(reason){
  if(IC.ended)return;IC.ended=true;firing=false;state='end';if(document.exitPointerLock)document.exitPointerLock();
- $('ttl').textContent='INLI CINLI bitti';
+ $('ttl').textContent='KORKUNÇLU bitti';
  $('sub').textContent=reason==='alldead'?'Hepsi öldü...':'Maç sona erdi';
  $('res').innerHTML=`Ulaşılan seviye <b>${IC.level}</b> · Toplam kazanç <b>${fmt(IC.earned)} TL</b> hesabında kaldı.`;
  $('play').textContent='TEKRAR';$('ov').classList.remove('off');
@@ -250,7 +277,7 @@ function icHud(){
  let el=$('ichud');if(!el){el=document.createElement('div');el.id='ichud';$('hud').appendChild(el)}
  let near=1e9;for(const e of IC.mons)if(e.dead<=0){const d=Math.hypot(p.x-e.g.position.x,p.z-e.g.position.z);if(d<near)near=d}
  el.style.display='block';
- el.innerHTML=`<div class="wc-kicker">INLI CINLI${IC.net?' · ODA '+IC.code:''}</div>
+ el.innerHTML=`<div class="wc-kicker">KORKUNÇLU${IC.net?' · ODA '+IC.code:''}</div>
  <b>Seviye ${IC.level}</b> · ${fmt(IC.earned)} TL · ${IC.mons.filter(e=>e.dead<=0).length} canavar
  <div class="wc-meter"><i style="width:${IC.stamina}%;background:#39dfff"></i></div>
  <small>${IC.flash?'Fener açık (F)':'Fener kapalı (F)'} · Shift koşu${near<14?` · <b style="color:#ff5555">CANAVAR ${near<6?'ÇOK YAKIN':'YAKIN'}!</b>`:''}</small>

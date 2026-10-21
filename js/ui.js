@@ -37,7 +37,7 @@ function iconOf(id,wk0){
 }
 const lvl=()=>Math.min(20,1+Math.floor(SV.xp/200));
 const own=i=>i.t==='w'||i.t==='oi'||(i.t==='op'&&i.p===0)||(i.t==='f'&&i.p===0)||(i.t==='ws'?SV.ow.sw.includes(i.sid):SV.own.includes(i.id));
-const eqd=i=>i.t==='ws'?SV.ow.mw===i.sid:i.t==='oi'?false:i.t==='m'?(SV.mod[i.m.cls]===i.id&&(SV.eq.w===i.m.cls||(i.m.cls==='pistol'&&SV.eq.w==='dual'))):i.t==='w'?(SV.eq.w===i.w&&(i.w==='dual'||!SV.mod[i.w])):i.t==='g'?(SV.sk[vw]||'g0')===i.id:i.t==='c'?SV.eq.c===i.id:i.t==='f'?(SV.eq.f||'f0')===i.id:i.t==='op'?(SV.eq.o||'o0')===i.id:SV.eq.x===i.id;
+const eqd=i=>i.t==='st'?SV.eq.st===i.id:i.t==='ws'?SV.ow.mw===i.sid:i.t==='oi'?false:i.t==='m'?(SV.mod[i.m.cls]===i.id&&(SV.eq.w===i.m.cls||(i.m.cls==='pistol'&&SV.eq.w==='dual'))):i.t==='w'?(SV.eq.w===i.w&&(i.w==='dual'||!SV.mod[i.w])):i.t==='g'?(SV.sk[vw]||'g0')===i.id:i.t==='c'?SV.eq.c===i.id:i.t==='f'?(SV.eq.f||'f0')===i.id:i.t==='op'?(SV.eq.o||'o0')===i.id:SV.eq.x===i.id;
 function bal(){
  const dbt=typeof debtTotal==='function'?debtTotal():0;
  $('bal').innerHTML=`<span class='g'>para<b>${SV.tl>=INF_TL?'∞':fmt(SV.tl)}</b></span><span class='y'>altın<b>${fmt(SV.gold||0)}</b></span><span class='r'>borç<b>${dbt?'-'+fmt(dbt):'0'}</b></span>`;

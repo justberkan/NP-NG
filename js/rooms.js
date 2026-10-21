@@ -1,9 +1,9 @@
 'use strict';
 /* ===== Lobi listesi, şifreli oda, arkadaş davet/katıl, oda üyeleri paneli (Claude 2026-10-20 · Berkan isteği) =====
-   Co-op odaları (Koridor: Dalga Ağacı = wc, Inlı Cinlı = ic) sunucuda; burada yalnız görünüm ve katılma akışı.
+   Co-op odaları (Koridor: Dalga Ağacı = wc, Korkunçlu = ic) sunucuda; burada yalnız görünüm ve katılma akışı.
    Katılma: roomJoin(mod, kod, şifre) → modu seçer, modun oda ekranını açar, kodu doldurup ODAYA KATIL'a basar. */
 const RL={l:[],open:false,filter:'',iv:0,err:''};
-const RL_MODE={wc:'Koridor: Dalga Ağacı',ic:'Inlı Cinlı'};
+const RL_MODE={wc:'Koridor: Dalga Ağacı',ic:'Korkunçlu'};
 const rlEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function roomsModal(){let el=$('rlist');if(!el){el=document.createElement('div');el.id='rlist';el.className='wc-dialog';document.body.appendChild(el)}return el}
 function roomsOpen(filter){
@@ -18,7 +18,7 @@ function roomsRender(){
  const rows=RL.l.filter(r=>!RL.filter||r.mode===RL.filter);
  const tab=(k,t)=>`<button class="btn sm ${RL.filter===k?'':'alt'}" data-f="${k}">${t}</button>`;
  el.innerHTML=`<div class="wc-card rlcard"><p class="wc-kicker">N.P.N.G. / CO-OP</p><h1>Açık lobiler</h1>
- <div class="row">${tab('','Tümü')}${tab('wc','Koridor')}${tab('ic','Inlı Cinlı')}</div>
+ <div class="row">${tab('','Tümü')}${tab('wc','Koridor')}${tab('ic','Korkunçlu')}</div>
  <div class="row"><input id="rlcode" maxlength="8" placeholder="Oda kodu ile bul / katıl" autocomplete="off"><button class="btn" id="rlgo">KODLA KATIL</button></div>
  <div class="rll">${rows.length?rows.map(r=>`<div class="rlr${r.lock?' lock':''}"><div class="rlm"><b>${rlEsc(r.name)}</b><small>Kod <code>${rlEsc(r.code)}</code>${r.map?' · '+rlEsc(r.map):''} · ${r.max?r.n+'/'+r.max:r.n+' kişi'}${r.lock?' · 🔒 şifreli':''}</small>
    <span class="rlp">${r.players.map((n,i)=>`<i${i===0&&n===r.owner?' class="host"':''}>${i===0&&n===r.owner?'👑 ':''}${rlEsc(n)}</i>`).join('')}</span></div>
