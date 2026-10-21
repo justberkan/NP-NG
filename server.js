@@ -24,6 +24,7 @@ const HIT=createValidator();
 const SPAWNS = [];
 const WCNET = require('./server-wavecorridor')({send,weapons:WPN});
 const HORNET = require('./server-horror')({send,weapons:WPN});
+const KBKNET = require('./server-kbk')({send,weapons:WPN});
 for (const x of [-10, -5, 0, 5, 10]) { SPAWNS.push([x, 24]); SPAWNS.push([x, -24]); }
 
 /* ---------- HTTP: oyun dosyalarını sun ---------- */
@@ -95,7 +96,7 @@ server.on('upgrade', (req, sock) => {
   const c = { ip, local: lo, user: null, acc: null, sock, buf: Buffer.alloc(0), frag: null, id: 0, joined: false, seen: Date.now(), msgs: 0, msgT: Date.now() };
   sock.on('data', d => { c.buf = Buffer.concat([c.buf, d]); c.seen = Date.now(); parse(c); });
   conns.add(c);
-  sock.on('close', () => { WCNET.leave(c); HORNET.leave(c); BJ.leave(c); leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
+  sock.on('close', () => { WCNET.leave(c); HORNET.leave(c); KBKNET.leave(c); BJ.leave(c); leave(c); owLeave(c); conns.delete(c); if (c.user && users.get(c.user) === c) users.delete(c.user); });
   sock.on('error', () => { try { sock.destroy(); } catch (e) { } });
 });
 function parse(c) {
@@ -178,6 +179,7 @@ function onText(c, s) {
   if (!m || typeof m.t !== 'string') return;
   if (m.t.startsWith('wc_')) return WCNET.handle(c,m,now);
   if (m.t.startsWith('ic_')) return HORNET.handle(c,m,now);
+  if (m.t.startsWith('kbk_')) return KBKNET.handle(c,m,now);
   if (m.t === 'auth') return doAuth(c, m, now);
   if (m.t === 'save') {
     if (!c.acc || !m.data || typeof m.data !== 'object') return;
@@ -313,7 +315,7 @@ function doAuth(c, m, now) {
   }
   fails.delete(c.ip);
   let tok = null; if (m.mode !== 'token') { tok = crypto.randomBytes(24).toString('hex'); a.toks.push(tok); if (a.toks.length > 6) a.toks.shift(); accDirty = true; }
-  const old = users.get(key); if (old && old !== c) { send(old, { t: 'kicked' }); HORNET.leave(old); BJ.leave(old); leave(old); old.acc = null; old.user = null; try { old.sock.end(); } catch (e) { } }
+  const old = users.get(key); if (old && old !== c) { send(old, { t: 'kicked' }); HORNET.leave(old); KBKNET.leave(old); BJ.leave(old); leave(old); old.acc = null; old.user = null; try { old.sock.end(); } catch (e) { } }
   c.user = key; c.acc = a; users.set(key, c);
   c.admin = !!c.local || ADMINS.has(key);
   repairSave(a, now);
@@ -627,11 +629,11 @@ function flFor(c) {
 function sendFl(c) { if (!c.acc) return; const o = flFor(c), s = JSON.stringify(o); if (c.flS === s) return; c.flS = s; send(c, o); }
 /* Lobi listesi + arkadaş daveti (Claude 2026-10-20): Dalga Ağacı ve Korkunçlu odaları */
 const COOP = require('./server-rooms');
-const coopOf = c => c.icroom || c.wcroom || null;
+const coopOf = c => c.icroom || c.wcroom || c.kbkroom || null;
 function roomMsg(c, m, now) {
   if (!c.acc) return send(c, { t: 'rl', l: [], err: 'Lobileri görmek için giriş yap.' });
   if (m.t === 'rl') {
-    const l = [...WCNET.rooms.values()].map(r => COOP.row(r, 4)).concat([...HORNET.rooms.values()].map(r => COOP.row(r, 0)));
+    const l = [...WCNET.rooms.values()].map(r => COOP.row(r, 4)).concat([...HORNET.rooms.values()].map(r => COOP.row(r, 0))).concat([...KBKNET.rooms.values()].map(r => COOP.row(r, 0)));
     return send(c, { t: 'rl', l: l.slice(0, 100) });
   }
   if (now - (c.invT || 0) < 1500) return send(c, { t: 'fm', m: 'Biraz bekle, sonra tekrar davet et.' }); c.invT = now;

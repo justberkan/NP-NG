@@ -802,3 +802,24 @@ body.kb-cap{cursor:crosshair}
 /* Trade: mum grafiği tuvali kapsayıcıya hapsolsun (yoksa piksel boyutunda sayfayı kaplıyordu) */
 #trchart{position:relative}
 #trchart canvas{position:absolute;inset:0;width:100%!important;height:100%!important;display:block}
+
+/* KBK Escort & Hunt: HUD */
+#kbkhud{position:absolute;inset:0;pointer-events:none;z-index:5}
+#kbkcompass{position:absolute;top:54px;left:50%;transform:translateX(-50%);width:384px;height:44px;background:#0009;border:1px solid #22c55e88;border-radius:10px;overflow:hidden}
+#kbkstrip{position:absolute;left:50%;top:13px;white-space:nowrap;font:700 12px monospace;color:#9fb8a8;transform:translateX(0);display:flex}
+#kbkneedle{position:absolute;left:50%;top:0;bottom:0;width:2px;background:#22c55e;z-index:2}
+#kbkhome{position:absolute;top:2px;color:#ff5555;font:700 9px monospace;z-index:3;white-space:nowrap}
+#kbkstatus{position:absolute;top:102px;left:50%;transform:translateX(-50%);font:11px monospace;padding:2px 8px;border-radius:6px;background:#0008;color:#cbd5e1;white-space:nowrap}
+.kbk-ok{color:#4ade80}.kbk-warn{color:#fbbf24}
+#kbkbars{position:absolute;left:14px;bottom:64px;width:220px}
+.kbkbar{height:8px;background:#0007;border-radius:4px;overflow:hidden;border:1px solid #ffffff22}
+.kbkbar i{display:block;height:100%;width:100%}
+#kbkbadge{position:absolute;left:14px;bottom:80px;color:#f87171;font:700 12px monospace;text-shadow:0 0 6px #000}
+#kbkacts{position:absolute;right:14px;bottom:64px;display:flex;gap:8px;pointer-events:auto}
+.kbkbtn{background:#0b1118ee;border:1px solid #39dfff66;color:#e5f6ff;border-radius:10px;padding:10px 14px;font:700 12px monospace;cursor:pointer}
+.kbkbtn small{display:block;font-weight:400;opacity:.7}
+#kbkoverlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#300a;backdrop-filter:blur(4px);z-index:4}
+.kbk-big{font:900 34px Orbitron,sans-serif;color:#f87171;text-align:center}
+.kbk-big small{display:block;font:400 14px monospace;color:#fca5a5;margin-top:8px}
+#kbkcount{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font:900 60px Orbitron,sans-serif;color:#fff;text-shadow:0 0 20px #f59e0b}
+#kbkmsg{position:absolute;bottom:130px;left:50%;transform:translateX(-50%);color:#ffd9a0;font:700 14px monospace;text-shadow:0 0 8px #000;transition:opacity .4s;white-space:nowrap}
