@@ -20,30 +20,53 @@ function kbkSrand(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeA
 const KBK_Wrap=d=>((d+180)%360+360)%360-180;
 const KBK_Dirs=['N','NE','E','SE','S','SW','W','NW'];
 
-/* ---------- Oda / rol seçim ekranı ---------- */
+/* ---------- Oda / rol seçim ekranı (referans: karanlık orman sınıf kartları) ---------- */
 function kbkOpen(cb){
  if(KBK.on)kbkDispose();
  let el=$('kbkselect');if(!el){el=document.createElement('div');el.id='kbkselect';el.className='wc-dialog';document.body.appendChild(el)}
- const roleBtn=(r,n,tip)=>`<button class="btn ${KBK.role===r?'':'alt'}" data-role="${r}" style="flex:1">${n}<br><small style="opacity:.7;font-weight:400">${tip}</small></button>`;
- el.innerHTML=`<div class="wc-card"><p class="wc-kicker">N.P.N.G. / ESKORT & KAVUŞMA</p><h1>KBK ESCORT & HUNT</h1>
- <p>Karanlık ormanda Kırmızı Başlıklı Kız'ı (KBK) eve ulaştır ya da <b>kurt</b> olup kızı mağaraya kaçır. Eve ulaşma: <b>+${KBK_REWARD} TL</b> · Kurt kaçırırsa: <b>+${KBK_REWARD} TL</b></p>
- <p class="note">Tilki ısırığı kanama yapar (H: sargı) · Pusula: hareket ederken sallanır, durunca 1,2 sn'de sabitlenir · KBK silahsızdır, takımı yönlendirir (20 HP heal, düşeni kaldırma) · Kurt hızlıdır: Q ağır darbe (stun), E kaçırma · Kurt ölürse 15 sn sonra doğar.</p>
- <p class="wc-kicker" style="margin-top:6px">ROLÜNÜ SEÇ (oda açan için)</p>
- <div class="row">${roleBtn('guardian','🛡 KORUMA','Silahlı, KBK\'yı koru')}${roleBtn('kbk','👑 KBK','Silahsız, pusulayla yol göster')}${roleBtn('wolf','🐺 KURT','Kızı kaçır, korumaları sersemlet')}</div>
- <div class="row"><button class="btn" id="kbksolo">TEK BAŞINA</button><button class="btn alt" id="kbkcreate">CO-OP ODA AÇ</button></div>
- <div class="row"><input id="kbkcode" maxlength="8" placeholder="Arkadaşının oda kodu" aria-label="KBK oda kodu"><button class="btn alt" id="kbkjoin">ODAYA KATIL</button><button class="btn alt" id="kbklist">AÇIK LOBİLER</button></div>
- <div class="row"><input id="kbkpass" maxlength="32" placeholder="Oda şifresi (isteğe bağlı)" aria-label="Oda şifresi" autocomplete="off"></div>
- <p id="kbkstatus" class="note">Co-op: aynı sunucuda SINIRSIZ oyuncu. Oda sahibi ayrılırsa maç biter. Oda açan isterse kurt olur; KBK rolü ilk isteyene/son katılmayana verilir.</p>
- <button class="btn alt" id="kbkcancel">GERİ</button></div>`;
+ const card=(r,icon,portrait,name,desc)=>`
+  <div class="kbk-class ${KBK.role===r?'sel':''}" data-role="${r}" role="button" tabindex="0">
+   <div class="kbk-class-ic">${icon}</div>
+   <div class="kbk-class-portrait">${portrait}</div>
+   <div class="kbk-class-name">${name}</div>
+   <div class="kbk-class-desc">${desc}</div>
+   <div class="kbk-class-pick"><span class="kbk-class-ring"></span><span class="kbk-class-picktxt">${KBK.role===r?'SEÇİLDİ':'SEÇ'}</span></div>
+  </div>`;
+ el.innerHTML=`<div class="wc-card kbk-card">
+  <p class="wc-kicker">N.P.N.G. / ESKORT & KAVUŞMA</p>
+  <h1 class="kbk-title">KBK ESCORT & HUNT</h1>
+  <p class="kbk-sub">Karanlık ormanda Kırmızı Başlıklı Kız'ı eve ulaştır ya da <b>kurt</b> olup kızı mağaraya kaçır · Ödül: <b>+${KBK_REWARD} TL</b></p>
+  <div class="kbk-classes">
+   ${card('wolf','🐺','🐺','KURT','Sınırsız sprint · Q sersemletme · E kaçırma')}
+   ${card('guardian','🛡️','🪖','KORUMA','Silahlı + el feneri · KBK\'yı koru ve eve götür')}
+   ${card('kbk','👑','👧','KIRMIZI BAŞLIKLI KIZ','Silahsız VIP · pusulayla yol göster · takımı iyileştir')}
+  </div>
+  <p class="note kbk-note">Tilki ısırığı kanama yapar (H: sargı) · Pusula hareket ederken sallanır, durunca sabitlenir · KBK: 20 HP heal + düşeni kaldırma · Kurt ölürse 15 sn sonra doğar.</p>
+  <div class="kbk-actions">
+   <button class="kbk-btn kbk-btn-primary" id="kbksolo">▶ TEK BAŞINA BAŞLA</button>
+   <button class="kbk-btn" id="kbkcreate">CO-OP ODA AÇ</button>
+  </div>
+  <div class="kbk-joinrow">
+   <input id="kbkcode" maxlength="8" placeholder="Oda kodu" aria-label="KBK oda kodu">
+   <input id="kbkpass" maxlength="32" placeholder="Şifre (isteğe bağlı)" aria-label="Oda şifresi" autocomplete="off">
+   <button class="kbk-btn" id="kbkjoin">KATIL</button>
+   <button class="kbk-btn kbk-btn-ghost" id="kbklist">AÇIK LOBİLER</button>
+  </div>
+  <div class="kbk-foot">
+   <button class="kbk-btn kbk-btn-ghost" id="kbkcancel">◄ GERİ</button>
+   <span id="kbkdlgstatus" class="kbk-status">Co-op: SINIRSIZ oyuncu · Oda sahibi ayrılırsa maç biter · Kurt rolü oda açana verilir</span>
+   <span class="kbk-timer">🌙 +${KBK_REWARD} TL</span>
+  </div>
+ </div>`;
  el.style.display='flex';
- el.querySelectorAll('[data-role]').forEach(b=>b.onclick=()=>{KBK.role=b.dataset.role;KBK.rolePicked=true;el.style.display='none';kbkOpen(cb)});
+ el.querySelectorAll('[data-role]').forEach(b=>{const pick=()=>{KBK.role=b.dataset.role;KBK.rolePicked=true;el.style.display='none';kbkOpen(cb)};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')pick()}});
  const go=()=>{el.style.display='none';KBK.chosen=true;cb()};
  $('kbksolo').onclick=()=>{KBK.net=false;KBK.owner=true;KBK.id=0;KBK.host=0;KBK.code='';KBK.peers.clear();go()};
- const join=create=>{const run=()=>{if(KBK.pending)return;const code=$('kbkcode').value.trim();if(!create&&!code){$('kbkstatus').textContent='Oda kodunu yaz.';return}
+ const join=create=>{const run=()=>{if(KBK.pending)return;const code=$('kbkcode').value.trim();if(!create&&!code){$('kbkdlgstatus').textContent='Oda kodunu yaz.';return}
   const pend=()=>{el.style.display='none';KBK.chosen=true;cb()};
-  KBK.pending=pend;$('kbkstatus').textContent='Sunucuya bağlanılıyor...';
+  KBK.pending=pend;$('kbkdlgstatus').textContent='Sunucuya bağlanılıyor...';
   mpSend({t:create?'kbk_create':'kbk_join',code,pass:$('kbkpass').value,role:create?KBK.role:(KBK.rolePicked?KBK.role:'auto')});
-  setTimeout(()=>{if(KBK.pending===pend){KBK.pending=null;$('kbkstatus').textContent='Sunucu yanıt vermedi. Güncel server.js ile sunucuyu yeniden aç.'}},8000)};
+  setTimeout(()=>{if(KBK.pending===pend){KBK.pending=null;$('kbkdlgstatus').textContent='Sunucu yanıt vermedi. Güncel server.js ile sunucuyu yeniden aç.'}},8000)};
   if(!MPL.authed)mpOpenDialog(run);else run()};
  $('kbkcreate').onclick=()=>join(true);
  $('kbkjoin').onclick=()=>join(false);
@@ -649,7 +672,7 @@ function kbkNetMsg(m){
   const cb=KBK.pending;KBK.pending=null;if(cb)cb();else mpSend({t:'kbk_leave'});
   return;
  }
- if(m.t==='kbk_error'){KBK.pending=null;const el=$('kbkstatus');if(el)el.textContent=m.message;if(m.need==='pass'&&typeof roomsAskPass==='function')roomsAskPass('kbk',m.code,m.message);return}
+ if(m.t==='kbk_error'){KBK.pending=null;const el=$('kbkdlgstatus');if(el)el.textContent=m.message;if(m.need==='pass'&&typeof roomsAskPass==='function')roomsAskPass('kbk',m.code,m.message);return}
  if(m.t==='kbk_peers'){const ids=new Set(m.players.map(q=>q.id));for(const id of KBK.peers.keys())if(!ids.has(id)){KBK.peers.delete(id);const av=KBK.avatars.get(id);if(av)S.remove(av.root);KBK.avatars.delete(id)}for(const q of m.players)KBK.peers.set(q.id,{hp:100,x:0,y:0,z:0,role:q.role||'auto',...KBK.peers.get(q.id),...q});return}
  if(!KBK.on||mode!=='kbk')return;
  if(m.t==='kbk_closed'){kbkEnd('closed');$('sub').textContent=m.reason;return}
