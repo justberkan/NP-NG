@@ -154,8 +154,8 @@
 <script>
 'use strict';
 /* Böcek Mutfak v2 — DEDE animasyon motoru (düşüş/patlama/yıldırım/partikül) + Böcek teması.
-   Böcek Mutfak v3 — DEDE'nin BİREBİR şans motoru (Berkan: "aynı şans, %2 fazla"): 8 sembol (8-9/10-11/12+ kademeli ödeme),
-   çarpan küreleri (2x-100x, kazanç çarpanı), 4+ scatter = 10 bedava dönüş (retrig +5), RTP hedefi ~%98 (DEDE ~%96, katmanlı simülasyonla kalibre).
+   Böcek Mutfak v3 — DEDE'nin BİREBİR şans motoru (Berkan: "aynı şans, %2 fazla"): 9 sembol (8-9/10-11/12+ kademeli ödeme),
+   çarpan küreleri (2x-100x, kazanç çarpanı), 4+ scatter = 10 bedava dönüş (retrig +5), RTP ~%98.5 (DEDE ~%96.5; katmanlı simülasyonla kalibre: small=0.112).
    Para yalnız oyundadır: sayfa onBet/onWin bildirir, setCredit oyundan gelir. */
 const $=id=>document.getElementById(id);
 const COLS=6,ROWS=5,N=30,SCAT='scat';
@@ -167,6 +167,7 @@ const SYM={
  can:{icon:'🥫',w:8,pay:[1.0,2.0,4.0]},
  chicken:{icon:'🍗',w:8,pay:[1.5,3.0,6.0]},
  cd:{icon:'💿',w:7,pay:[2.0,4.0,8.0]},
+ egg:{icon:'🥚',w:6,pay:[3.0,6.0,12.0]},
  cash:{icon:'💵',w:5,pay:[5.0,10.0,25.0]}
 };
 const ORB_VALUES=[2,3,4,5,10,25,50,100];
@@ -191,11 +192,11 @@ const betL=[],winL=[],chgL=[];
 try{credit=Math.max(0,Math.floor(+localStorage.getItem('npng_roach_demo')||1000))}catch(e){}
 function saveDemo(){if(!embedded)try{localStorage.setItem('npng_roach_demo',String(credit))}catch(e){}}
 /* DEDE ile aynı kategori sistemi. Yapay "kıl payı kaçırma" yok (near varsayılan kapalı,
-   olasılığı loss absorbe eder). small 0.128: katmanlı 1M simülasyonla RTP ~%98 (DEDE ~%96'nın ~2 puan üstü). */
+   olasılığı loss absorbe eder). small=0.112: sayfa çekirdeğinde katmanlı simülasyonla RTP %98.48 (DEDE'nin ~%96.5'inin ~2 puan üstü). */
 const CONFIG={nearMiss:false};
 let CATS=[
  ['near',0.110,null,0],
- ['small',0.128,()=>0.4+rng()*1.6,0],
+ ['small',0.112,()=>0.4+rng()*1.6,0],
  ['big',0.011,()=>2+rng()*13,0.15],
  ['mega',0.0038,()=>15+rng()*35,0.15],
  ['epic',0.0008,()=>50+rng()*150,0.15],
@@ -239,7 +240,7 @@ function plantScatters(board,count){clearSym(board,SCAT);let n=0;while(n<count){
 function forceWin(board,target){
  const capped=Math.min(target,5000);
  if(capped<2.2){
-  const pick=capped<0.5?['pizza',8]:capped<0.9?['beer',8]:capped<1.3?['cheese',8]:capped<1.8?['bacon',8]:['can',8];
+  const pick=capped<0.5?['pizza',8]:capped<0.9?['beer',8]:capped<1.3?['can',8]:capped<1.8?['chicken',8]:['cd',8];
   clearOrbs(board);clearSym(board,pick[0]);plant(board,pick[0],pick[1]);return;
  }
  clearSym(board,'cash');clearOrbs(board);
@@ -570,7 +571,7 @@ const API={
  unseed:()=>{rng=Math.random},
  _core:{SYM,evaluate,cascade,CATS,FS,POOL,CONFIG,drawCat,runSpin,simulate,
   /* test kancası: sonraki spin bu tahtayla başlar (SYMBOLS nesneleri kabul eder) */
-  SYMBOLS:[{id:'pizza',icon:'🍕'},{id:'beer',icon:'🍺'},{id:'cheese',icon:'🧀'},{id:'bacon',icon:'🥓'},{id:'can',icon:'🥫'},{id:'chicken',icon:'🍗'},{id:'cd',icon:'💿'},{id:'cash',icon:'💵'},{id:'scat',icon:'🪳',isScatter:true},{id:'orb',icon:'💣',isMultiplier:true}],
+  SYMBOLS:[{id:'pizza',icon:'🍕'},{id:'beer',icon:'🍺'},{id:'cheese',icon:'🧀'},{id:'bacon',icon:'🥓'},{id:'can',icon:'🥫'},{id:'chicken',icon:'🍗'},{id:'cd',icon:'💿'},{id:'egg',icon:'🥚'},{id:'cash',icon:'💵'},{id:'scat',icon:'🪳',isScatter:true},{id:'orb',icon:'💣',isMultiplier:true}],
   fill:arr=>{forceNext=arr.map(s=>s.isScatter?SCAT:s.isMultiplier?{o:2}:s.id)},
   resetFS:()=>{fs=0;glob=1;fsPaid=0;updFS()}},
  _ui:{say,bubble,bugPose,strikeCell},
