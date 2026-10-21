@@ -10,5 +10,7 @@ contextBridge.exposeInMainWorld('npngLauncher',Object.freeze({
  exportReport:()=>ipcRenderer.invoke('npng:export'),
  chooseFolder:()=>ipcRenderer.invoke('npng:folder'),
  startLocal:()=>ipcRenderer.invoke('npng:start-local'),
+ ghFetch:()=>ipcRenderer.invoke('npng:gh-fetch'),
+ ghPublish:url=>ipcRenderer.invoke('npng:gh-publish',url),
  onStatus:callback=>{ipcRenderer.on('npng:status',(_,message)=>callback(String(message)))}
 }));

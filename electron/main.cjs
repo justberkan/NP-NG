@@ -4,6 +4,52 @@ const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('n
 const os=require('node:os');
 const {settings,probe,startLocal}=require('./services.cjs');
 const {PERFORMANCE_SWITCHES,gameURL,canNavigate,shortcut}=require('./policy.cjs');
+const {spawn}=require('node:child_process');
+/* Sunucu linki (SUNUCU.json) GitHub üzerinden paylaşılır. Token koda gömülmez;
+   push yalnızca makinedeki git kimliği (credential manager) ile çalışır. */
+const GH_RAW='https://raw.githubusercontent.com/justberkan/NP-NG/main/SUNUCU.json';
+let ghUrl='',ghT=0,ghBusy=false;
+async function ghFetch(){
+ try{
+  const r=await fetch(GH_RAW,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);
+  const j=await r.json(),u=typeof j.url==='string'?j.url.trim():'';
+  if(!/^https:\/\//.test(u)){ghUrl='';ghT=0;return{ok:true,url:'',t:0}}
+  ghUrl=u;ghT=j.t|0;return{ok:true,url:u,t:ghT};
+ }catch(e){return{ok:false,error:'GitHub’dan link okunamadı.'}}
+}
+function runGit(folder,args){
+ return new Promise(resolve=>{
+  const g=spawn('git',args,{cwd:folder,windowsHide:true});
+  let out='';g.stdout.on('data',b=>out+=b);g.stderr.on('data',b=>out+=b);
+  g.on('error',()=>resolve({ok:false,error:'git komutu bulunamadı.'}));
+  g.on('exit',code=>resolve(code===0?{ok:true,out:out.trim()}:{ok:false,error:(out.trim()||'git çıkış kodu '+code).slice(0,220)}));
+ })
+}
+async function ghPublish(url){
+ if(ghBusy)return{ok:false,error:'Yayın işlemi sürüyor.'};
+ const u=(url||'').trim();
+ if(!/^https:\/\//.test(u))return{ok:false,error:'Geçerli bir https:// linki gir.'};
+ const folder=readPreferences().localFolder;
+ if(!folder||!fs.existsSync(path.join(folder,'server.js')))return{ok:false,error:'Önce oyun klasörünü seç (içinde server.js olan klasör).'};
+ if(!fs.existsSync(path.join(folder,'.git')))return{ok:false,error:'Bu oyun klasörü GitHub’a bağlı değil; yayın yapılamaz.'};
+ ghBusy=true;
+ try{
+  fs.writeFileSync(path.join(folder,'SUNUCU.json'),JSON.stringify({url:u,t:Date.now()})+'\n');
+  const add=await runGit(folder,['add','SUNUCU.json']);if(!add.ok)return add;
+  await runGit(folder,['commit','-m','Sunucu linki güncellendi [launcher]']);
+  const push=await runGit(folder,['push']);if(!push.ok)return{ok:false,error:'GitHub’a gönderilemedi: '+(push.error||'')};
+  ghUrl=u;ghT=Date.now();return{ok:true,url:u};
+ }catch(e){return{ok:false,error:'Yayınlanamadı.'}}
+ finally{ghBusy=false}
+}
+async function autoPublish(){
+ try{
+  const r=await fetch('http://127.0.0.1:3000/public-url.json',{signal:AbortSignal.timeout(3000)});
+  if(!r.ok)return;const j=await r.json();
+  if(!j.url||j.url===ghUrl)return;
+  await ghPublish(j.url);
+ }catch(e){}
+}
 // GPU ve zamanlama anahtarları Electron hazır olmadan eklenir.
 for(const name of PERFORMANCE_SWITCHES)app.commandLine.appendSwitch(name);
 app.setName('NPNG');
@@ -105,9 +151,11 @@ ipcMain.handle('npng:start-local',async event=>{
   return await startLocal({folder:readPreferences().localFolder,executable:process.execPath,log:path.join(app.getPath('userData'),'local-server.log')});
  }catch(e){return{ok:false,error:'Yerel sunucu başlatılamadı.'}}finally{startingLocal=false}
 });
+ipcMain.handle('npng:gh-fetch',async event=>{trusted(event);return ghFetch()});
+ipcMain.handle('npng:gh-publish',async(event,url)=>{trusted(event);return ghPublish(url)});
 if(!app.requestSingleInstanceLock())app.quit();else{
  app.on('second-instance',()=>{const w=game&&!game.isDestroyed()?game:launcher;if(w){if(w.isMinimized())w.restore();w.show();w.focus()}});
- app.whenReady().then(()=>{Menu.setApplicationMenu(null);makeLauncher()});
+ app.whenReady().then(()=>{Menu.setApplicationMenu(null);makeLauncher();ghFetch().catch(()=>{});setInterval(()=>{autoPublish().catch(()=>{})},120000).unref?.()});
 }
 app.on('before-quit',()=>{quitting=true;stopSleepBlocker()});
 app.on('window-all-closed',()=>app.quit());

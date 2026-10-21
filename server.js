@@ -28,6 +28,23 @@ for (const x of [-10, -5, 0, 5, 10]) { SPAWNS.push([x, 24]); SPAWNS.push([x, -24
 
 /* ---------- HTTP: oyun dosyalarını sun ---------- */
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.webp': 'image/webp', '.jpeg': 'image/jpeg', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav' };
+/* Halka açık adres (Cloudflare tünel vb.) algılama: Host başlığı localhost/LAN değilse
+   oyun dış dünyadan bir adresten açılmış demektir; data/public-url.json'a yazılır.
+   Launcher bu dosyayı okuyup SUNUCU.json üzerinden GitHub'a yayınlar. */
+const LOCAL_HOST = /^(localhost|127\.0\.0\.1|0\.0\.0\.0|\[?::1\]?|192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.)/i;
+let PUBLIC_URL = null, PUBLIC_URL_T = 0;
+try {
+  const p = JSON.parse(fs.readFileSync(path.join(process.env.MMOFPS_DATA || path.join(ROOT, 'data'), 'public-url.json'), 'utf8'));
+  if (p && typeof p.url === 'string' && p.url) { PUBLIC_URL = p.url; PUBLIC_URL_T = p.t | 0; }
+} catch (e) { }
+function notePublicHost(req) {
+  const h = String(req.headers.host || '');
+  if (!h || LOCAL_HOST.test(h)) return;
+  const u = 'https://' + h;
+  if (u === PUBLIC_URL) return;
+  PUBLIC_URL = u; PUBLIC_URL_T = Date.now();
+  try { fs.mkdirSync(path.join(process.env.MMOFPS_DATA || path.join(ROOT, 'data')), { recursive: true }); fs.writeFileSync(path.join(process.env.MMOFPS_DATA || path.join(ROOT, 'data'), 'public-url.json'), JSON.stringify({ url: u, t: PUBLIC_URL_T })); } catch (e) { }
+}
 const server = http.createServer((req, res) => {
   // Yalnız istemci dosyalarını sun; Git, hesaplar ve yedekler web kökü değildir.
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -35,7 +52,9 @@ const server = http.createServer((req, res) => {
   let u;
   try { u = decodeURIComponent((req.url || '/').split('?')[0]); }
   catch (e) { res.writeHead(400); res.end('400'); return; }
+  notePublicHost(req);
   if (u === '/api/info') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify({ game: 'mmofps', players: totalPlayers(), max: MAXP })); return; }
+  if (u === '/public-url.json') { res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }); res.end(JSON.stringify({ url: PUBLIC_URL, t: PUBLIC_URL_T })); return; }
   if (u === '/') u = '/index.html';
   const parts = u.split('/');
   const publicPath = u === '/index.html' || /^\/(assets|js|css|lib)\//.test(u);
