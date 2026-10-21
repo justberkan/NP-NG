@@ -2,7 +2,8 @@
 /* ===== N.P.N.G: Mağaza + Envanter (sıfırdan) =====
    3B küçük resimli kartlar, canlı dönen vitrin, filtreler, istatistik çubukları, yükleme (loadout) şeridi. */
 const SH={tab:'w',sub:'all',sel:null,msg:'',raf:0,sr:null,ss:null,sc:null,so:null,reg:{},selKey:'',t0:0,stOk:false};
-const SH_TABS=[['w','Silahlar'],['o','Kılıçlar'],['c','Karakterler'],['h','Şampiyonlar'],['f','Formalar'],['g','Kaplamalar'],['p','Nişangah'],['k','Kasalar']];
+const SH_TABS=[['w','Silahlar'],['o','Kılıçlar'],['c','Karakterler'],['h','Şampiyonlar'],['f','Formalar'],['g','Kaplamalar'],['p','Nişangah'],['e','Eklentiler'],['k','Kasalar']];
+const STITEMS=[{id:'st1',n:'StartTrack Sayaç',p:1500,t:'st',r:'epic'}]; /* 2026-10-21: starttrack.glb harita değil, kill sayan silah eklentisi (StatTrak tarzı) */
 const SH_SUB=[['all','Tümü'],['ar','Tüfek'],['sn','Nişancı'],['sg','Pompalı'],['smg','SMG'],['pi','Tabanca'],['kn','Bıçak'],['cls','Klasik']];
 const SH_RN={common:'SIRADIŞI',rare:'NADİR',epic:'DESTANSI',legendary:'EFSANEVİ'};
 
@@ -24,6 +25,7 @@ function shList(){
  else if(t==='f')L=[{id:'f0',n:'Formasız',p:0,t:'f',r:'common',c:0x555d68}].concat(FORMS.map(f=>({id:f.id,n:f.n,p:f.p,t:'f',r:f.r,c:f.c})));
  else if(t==='g')L=SKINS.map(s=>({id:s.id,n:s.n,p:s.p,t:'g',r:s.r,c:s.c,a:s.a}));
  else if(t==='p')L=OPT.map(o=>({id:o.id,n:o.n,p:o.p,t:'op',r:o.r,o}));
+ else if(t==='e')L=STITEMS.slice();
  else if(t==='x')L=XH.map(x=>({id:x.id,n:x.n,p:x.p,t:'x',r:x.r,c:x.c}));
  else L=inv?[]:CRATES.map(c=>({id:c.id,n:c.n,p:c.p,t:'k',r:c.r,cr:c}));
  if(inv)L=L.filter(own);
@@ -34,12 +36,14 @@ const shFind=id=>shList().find(x=>x.id===id);
 /* ----- Metinler, istatistikler ----- */
 function shDesc(i){
  if(i.t==='op')return i.o.d+' Tüfek, SMG ve tekli tabancanın üstüne takılır, nişan alırken (sağ tık) yakınlaştırır.';
+ if(i.t==='st')return 'Silaha takılan sayaç: takılıyken yaptığın her öldürmeyi silah slotuna göre sayar. Sökülünce saymaz, sayaç silinmez.';
  if(i.t==='k')return i.cr.d+' Çıkacak eşya rastgele, sahip olmadıkların arasından seçilir.';
  if(i.t==='m')return `${i.m.sub}. ${WM_CLS[i.m.cls]} slotuna bağlanır: kuşanınca o slotun görünümü ve değerleri değişir.`+(i.m.cat==='sg'?' Tek atışta 7 saçma fırlatır.':'')+(i.m.cat==='sn'?' Yavaş ama ağır vurur, uzak menzilde ölümcül.':'');
  return dsc(i);
 }
 function shStats(i){
  let L=null,V=null,mag=null;
+ if(i.t==='st'){const t=Object.values(SV.stk||{}).reduce((a,b)=>a+b,0);return `<div class='sr'><span>Toplam öldürme</span><span class='bar'><em class='c0' style='width:${Math.min(100,t)}%'></em></span><b>${t}</b></div>`}
  if(i.t==='op'){L=['Yakınlaştırma'];V=[Math.min(100,Math.round((i.o.z-1)*28))];return `<div class='sr'><span>Yakınlaştırma</span><span class='bar'><em class='c0' style='width:${V[0]}%'></em></span><b>${i.o.z}x</b></div>`}
  if(i.t==='m'&&!i.m.cs.mel){L=['Hasar','İsabet','Tepme','Atış hızı','Mermi'];V=i.m.st;mag=i.m.cs.mag}
  else if(i.t==='m'){L=['Hasar','Hız'];V=[i.m.st[0],i.m.st[3]]}
@@ -59,6 +63,8 @@ function shLabel(i){
 }
 
 /* ----- Küçük resimler ----- */
+function stIcon(n){n=(n===undefined?Object.values(SV.stk||{}).reduce((a,b)=>a+b,0):n);const s=String(Math.min(9999,n)).padStart(4,'0');
+ return `<svg viewBox='0 0 64 40' style='width:100%;height:100%'><rect x='2' y='6' width='60' height='28' rx='4' fill='#15191e' stroke='#3a4552' stroke-width='2'/><rect x='6' y='11' width='52' height='18' rx='2' fill='#0a0d10'/><text x='32' y='27' text-anchor='middle' font-family='monospace' font-size='15' font-weight='bold' fill='#ff9a2a'>${s}</text></svg>`}
 function shIconFor(i,el,cb){
  if(i.t==='m')return mdlIcon(i.m.mid,440,200,cb);
  if(i.t==='ws')return mdlIcon(SWMOD[i.sid].mid,440,200,cb);
@@ -81,6 +87,7 @@ function shIconFor(i,el,cb){
  }
  if(i.t==='op'){const o=typeof OPTID!=='undefined'?OPTID[i.id]:null;if(o&&o.mid&&!MDL.cache[o.mid]&&!MDL.fail[o.mid])return mdlLoad(o.mid,()=>shIconFor(i,el,cb));return mdlIconObj('op:'+i.id,440,200,done=>done(optModel(i.id).g),cb,'sidel')}
  if(i.t==='x'){el.innerHTML=xicon(i.c);return cb('svg')}
+ if(i.t==='st'){el.innerHTML=stIcon();return cb('svg')}
  if(i.t==='k'){el.innerHTML=crateArt(i.id)||crateicon(i.cr.col);return cb('svg')}
  if(i.t==='oi'){el.innerHTML=`<span class='em'>${ITM[i.iid].ic}</span>`;return cb('svg')}
  cb(null);
@@ -101,7 +108,7 @@ function shFill(){
 /* ----- Kartlar ve yükleme şeridi ----- */
 function shCard(i){
  SH.reg['c:'+i.id]=i;
- const o=own(i),e=eqd(i),rc=(RAR[i.r]||RAR.common).c,sub=i.t==='m'?i.m.sub:i.t==='w'?'Klasik':i.t==='ws'?'Kılıç':i.t==='g'?'Kaplama':i.t==='c'?(i.ch?'Şampiyon':'Karakter'):i.t==='f'?'Forma':i.t==='op'?'Nişangah':i.t==='x'?'Artı rengi':i.t==='k'?'Kasa':'Eşya';
+ const o=own(i),e=eqd(i),rc=(RAR[i.r]||RAR.common).c,sub=i.t==='m'?i.m.sub:i.t==='w'?'Klasik':i.t==='ws'?'Kılıç':i.t==='g'?'Kaplama':i.t==='c'?(i.ch?'Şampiyon':'Karakter'):i.t==='f'?'Forma':i.t==='op'?'Nişangah':i.t==='st'?'Eklenti':i.t==='x'?'Artı rengi':i.t==='k'?'Kasa':'Eşya';
  const st=e?`<b class='tg eq'>KUŞANILDI</b>`:'';
  const foot=(o&&i.t!=='oi')?`<span class='ok'>${e?'Kuşanıldı':'Sahipsin'}</span>`:shPrice(i.p);
  return `<div class='sc${i.id===SH.sel?' on':''}${o?' own':''}' data-s='${i.id}' style='--rc:${rc}'><div class='sc-i' data-ik='c:${i.id}'></div>${st}<div class='sc-n'>${i.n}</div><div class='sc-s'>${sub}</div><div class='sc-f'>${foot}<button data-b='${i.id}'>${i.t==='oi'?'SAT':i.t==='k'?'AÇ':o?(e?'✓':'KUŞAN'):'AL'}</button></div></div>`;
@@ -144,7 +151,7 @@ function shopNew(){
 function shSide(it){
  const rc=(RAR[it.r]||RAR.common).c,e=eqd(it),o=own(it);
  const btnCls=e&&it.t!=='oi'?'eq':o||it.t==='oi'||it.t==='k'?'go':'buy';
- const sub=it.t==='m'?it.m.sub+' · '+WM_CLS[it.m.cls]:it.t==='w'?'Klasik · '+WP[it.w].n:it.t==='ws'?'Kılıç · Açık Dünya':it.t==='g'?'Kaplama':it.t==='c'?(it.ch?'Şampiyon':'Karakter'):it.t==='f'?'Forma · tüm karakterlere':it.t==='x'?'Nişangah':it.t==='k'?'Kasa':'Eşya';
+ const sub=it.t==='m'?it.m.sub+' · '+WM_CLS[it.m.cls]:it.t==='w'?'Klasik · '+WP[it.w].n:it.t==='ws'?'Kılıç · Açık Dünya':it.t==='g'?'Kaplama':it.t==='c'?(it.ch?'Şampiyon':'Karakter'):it.t==='f'?'Forma · tüm karakterlere':it.t==='op'?'Nişangah':it.t==='st'?'Eklenti · tüm silahlara':it.t==='x'?'Nişangah':it.t==='k'?'Kasa':'Eşya';
  return `<div class='sh-stage' style='--rc:${rc}'><canvas id='shc' width='560' height='300'></canvas><div id='shb' class='sh-big off'></div><span class='sh-rar'>${SH_RN[it.r]||''}</span><span class='sh-pad'></span></div>
  <h2 class='sh-name'>${it.n}</h2><div class='sh-subt'>${sub}</div>
  <p class='sh-desc'>${shDesc(it)}</p>
@@ -174,9 +181,9 @@ function shStageSet(it){
  SH.so=null;
  const big=$('shb'),cv=$('shc');if(!it||!cv)return;
  const key=SH.selKey;
- if(it.t==='x'||it.t==='k'||it.t==='oi'){
+ if(it.t==='x'||it.t==='k'||it.t==='oi'||it.t==='st'){
   cv.classList.add('off');big.classList.remove('off');
-  big.innerHTML=it.t==='x'?xicon(it.c):it.t==='k'?(crateArt(it.id)||crateicon(it.cr.col)):`<span class='em'>${ITM[it.iid].ic}</span>`;
+  big.innerHTML=it.t==='x'?xicon(it.c):it.t==='st'?stIcon():it.t==='k'?(crateArt(it.id)||crateicon(it.cr.col)):`<span class='em'>${ITM[it.iid].ic}</span>`;
   return;
  }
  big.classList.add('off');cv.classList.remove('off');
@@ -221,6 +228,7 @@ function shLoop(){
 /* ----- Eylemler ----- */
 function shEquip(i){
  setTimeout(mdlPreload,50);
+ if(i.t==='st'){SV.eq.st=SV.eq.st===i.id?null:i.id;save();return} /* tak / sök */
  if(i.t==='m'){SV.mod[i.m.cls]=i.id;SV.eq.w=(i.m.cls==='pistol'&&SV.eq.w==='dual')?'dual':i.m.cls;applyEq(true)}
  else if(i.t==='w'){SV.eq.w=i.w;if(i.w!=='dual')delete SV.mod[i.w];applyEq(true)}
  else equip(i);

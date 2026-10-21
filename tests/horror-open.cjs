@@ -1,5 +1,5 @@
 'use strict';
-/* Inlı Cinlı gerçek açılış: lobiden solo moda gir, varlıklar yüklensin, sahne doğrula, görüntü al. */
+/* Korkunçlu gerçek açılış: lobiden solo moda gir, varlıklar yüklensin, sahne doğrula, görüntü al. */
 const {chromium}=require('playwright');
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),out=path.join(root,'test-results');
@@ -36,6 +36,6 @@ const baseURL=process.env.TEST_URL||'http://127.0.0.1:3000';
   const f2=await page.evaluate(()=>IC.flash);assert.equal(f2,false,'F feneri kapatmadı');
   assert.deepEqual(errors,[],'Tarayıcı hataları: '+JSON.stringify(errors.slice(0,3)));
   assert.deepEqual(fails,[],'HTTP hataları: '+JSON.stringify(fails.slice(0,3)));
-  console.log('PASS Inlı Cinlı açılış',JSON.stringify(g));
+  console.log('PASS Korkunçlu açılış',JSON.stringify(g));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

@@ -1,5 +1,5 @@
 'use strict';
-/* Inlı Cinlı (korku) co-op oda ağı: kişi sınırı yok, yönlendirme, kapanma. */
+/* Korkunçlu (korku) co-op oda ağı: kişi sınırı yok, yönlendirme, kapanma. */
 const WebSocket=(()=>{try{return require('ws')}catch(e){return globalThis.WebSocket}})();
 const assert=require('node:assert/strict');
 const port=new URL(process.env.TEST_URL||'http://127.0.0.1:3000').port;

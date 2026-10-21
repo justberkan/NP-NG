@@ -229,7 +229,7 @@ function killEnemy(e,info){
  const pw=((info&&info.power)||4)*(info&&info.head?1.4:1);
  spawnRagdoll(e.rig,vel,info&&info.pt,info&&info.dir,pw);
  e.rig.root.visible=false;
- if(info&&info.player){kills++;cmbHit(true);score+=Math.round((e.kind==='z'?100:150)*cmbMul());hitFlash('kill');killfeed('Sen',e.name,wk,info.head)}
+ if(info&&info.player){kills++;stkKill(wk);cmbHit(true);score+=Math.round((e.kind==='z'?100:150)*cmbMul());hitFlash('kill');killfeed('Sen',e.name,wk,info.head)}
  else if(info&&info.by)killfeed(info.by,e.name,info.w||'rifle',false);
  if(mode==='tdm'){
   tk[e.team===1?2:1]++;upd();
