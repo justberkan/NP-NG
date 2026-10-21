@@ -2,7 +2,7 @@
 /* Co-op oda ortak kuralları (Claude 2026-10-20 · Berkan: lobi listesi, oda kodu, şifreli lobi, arkadaş davet/katıl).
    Dalga Ağacı (wc_) ve Inlı Cinlı (ic_) odaları aynı biçimde: kod, sahip adı, kişi, şifre (yalnız özeti saklanır), davetliler. */
 const crypto = require('crypto');
-const MODES = { wc: 'Koridor: Dalga Ağacı', ic: 'Inlı Cinlı' };
+const MODES = { wc: 'Koridor: Dalga Ağacı', ic: 'Inlı Cinlı', kbk: 'KBK Escort & Hunt' };
 const hashPass = s => { s = String(s || '').trim().slice(0, 32); return s ? crypto.createHash('sha256').update('npng-oda:' + s).digest('hex') : ''; };
 /* oda kurulurken: kod, şifre, ad, harita */
 function setup(r, c, m, mode) {

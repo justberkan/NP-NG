@@ -3,7 +3,7 @@
    Co-op odaları (Koridor: Dalga Ağacı = wc, Korkunçlu = ic) sunucuda; burada yalnız görünüm ve katılma akışı.
    Katılma: roomJoin(mod, kod, şifre) → modu seçer, modun oda ekranını açar, kodu doldurup ODAYA KATIL'a basar. */
 const RL={l:[],open:false,filter:'',iv:0,err:''};
-const RL_MODE={wc:'Koridor: Dalga Ağacı',ic:'Korkunçlu'};
+const RL_MODE={wc:'Koridor: Dalga Ağacı',ic:'Korkunçlu',kbk:'KBK Escort & Hunt'};
 const rlEsc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function roomsModal(){let el=$('rlist');if(!el){el=document.createElement('div');el.id='rlist';el.className='wc-dialog';document.body.appendChild(el)}return el}
 function roomsOpen(filter){
@@ -18,7 +18,7 @@ function roomsRender(){
  const rows=RL.l.filter(r=>!RL.filter||r.mode===RL.filter);
  const tab=(k,t)=>`<button class="btn sm ${RL.filter===k?'':'alt'}" data-f="${k}">${t}</button>`;
  el.innerHTML=`<div class="wc-card rlcard"><p class="wc-kicker">N.P.N.G. / CO-OP</p><h1>Açık lobiler</h1>
- <div class="row">${tab('','Tümü')}${tab('wc','Koridor')}${tab('ic','Korkunçlu')}</div>
+ <div class="row">${tab('','Tümü')}${tab('wc','Koridor')}${tab('ic','Korkunçlu')}${tab('kbk','KBK')}</div>
  <div class="row"><input id="rlcode" maxlength="8" placeholder="Oda kodu ile bul / katıl" autocomplete="off"><button class="btn" id="rlgo">KODLA KATIL</button></div>
  <div class="rll">${rows.length?rows.map(r=>`<div class="rlr${r.lock?' lock':''}"><div class="rlm"><b>${rlEsc(r.name)}</b><small>Kod <code>${rlEsc(r.code)}</code>${r.map?' · '+rlEsc(r.map):''} · ${r.max?r.n+'/'+r.max:r.n+' kişi'}${r.lock?' · 🔒 şifreli':''}</small>
    <span class="rlp">${r.players.map((n,i)=>`<i${i===0&&n===r.owner?' class="host"':''}>${i===0&&n===r.owner?'👑 ':''}${rlEsc(n)}</i>`).join('')}</span></div>
@@ -47,10 +47,10 @@ function roomsAskPass(mode,code,msg){
 function roomJoin(mode,code,pass){
  if(!code)return;
  if(typeof state!=='undefined'&&state!=='menu'&&typeof toLobby==='function')toLobby();
- for(const id of ['icselect','wcselect'])if($(id))$(id).style.display='none';
+ for(const id of ['icselect','wcselect','kbkselect'])if($(id))$(id).style.display='none';
  selMode=mode;document.querySelectorAll('.mode[data-m]').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
  const req={code:String(code).toUpperCase(),pass:pass||''};
- if(mode==='ic'){IC.chosen=false;IC.joinReq=req}else if(mode==='wc'){WCG.chosen=false;WCG.joinReq=req}else return;
+ if(mode==='ic'){IC.chosen=false;IC.joinReq=req}else if(mode==='wc'){WCG.chosen=false;WCG.joinReq=req}else if(mode==='kbk'){KBK.chosen=false;KBK.joinReq=req}else return;
  startMatch();
 }
 /* sunucu mesajları */
@@ -70,10 +70,10 @@ function roomsInvite(m){
 /* oyundaki oda üyeleri paneli: kim var, kim oda sahibi */
 function roomsPanel(){
  let el=$('roomPanel');
- const net=typeof mode!=='undefined'&&((mode==='ic'&&typeof IC!=='undefined'&&IC.on&&IC.net)||(mode==='wc'&&typeof WCG!=='undefined'&&WCG.net));
+ const net=typeof mode!=='undefined'&&((mode==='ic'&&typeof IC!=='undefined'&&IC.on&&IC.net)||(mode==='wc'&&typeof WCG!=='undefined'&&WCG.net)||(mode==='kbk'&&typeof KBK!=='undefined'&&KBK.on&&KBK.net));
  if(!net){if(el&&el.style.display!=='none')el.style.display='none';return}
  if(!el){el=document.createElement('div');el.id='roomPanel';$('hud').appendChild(el)}
- const G=mode==='ic'?IC:WCG,me=MPL.acct||'Sen';
+ const G=mode==='ic'?IC:mode==='wc'?WCG:KBK,me=MPL.acct||'Sen';
  const list=[...G.peers.entries()].map(([id,q])=>({id,name:id===G.id?me:(q.name||'Oyuncu '+id),host:id===G.host,me:id===G.id,hp:q.hp}));
  if(!list.some(q=>q.me))list.unshift({id:G.id,name:me,host:G.id===G.host,me:true});
  const html=`<div class="rph">${rlEsc(RL_MODE[mode])} · ODA <b>${rlEsc(G.code)}</b> <small>${list.length} kişi</small></div>`+list.map(q=>`<div class="rpi${q.me?' me':''}">${q.host?'👑 ':''}${rlEsc(q.name)}${q.me?' (sen)':''}</div>`).join('')+`<div class="rpk">Arkadaş listesinden <b>Davet</b> ile çağır</div>`;
