@@ -36,13 +36,20 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
     /* 2) Trade ekranı açılır, grafik çizilir, fiyat canlı */
     await page.evaluate(() => view('trade'));
     await sleep(1200);
-    const r2 = await page.evaluate(() => ({
-      canvas: !!document.querySelector('#trchart canvas'),
-      px: ($('trpx') || {}).textContent || '',
-      ticking: typeof TR !== 'undefined' && TR.iv > 0,
-      n0: SV.trade.n
-    }));
+    const r2 = await page.evaluate(() => {
+      const cv = document.querySelector('#trchart canvas');
+      const box = document.getElementById('trchart');
+      const a = cv ? cv.getBoundingClientRect() : null, b = box ? box.getBoundingClientRect() : null;
+      return {
+        canvas: !!cv,
+        inBox: !!(a && b && a.left >= b.left - 1 && a.right <= b.right + 1 && a.top >= b.top - 1 && a.bottom <= b.bottom + 1),
+        px: ($('trpx') || {}).textContent || '',
+        ticking: typeof TR !== 'undefined' && TR.iv > 0,
+        n0: SV.trade.n
+      };
+    });
     check('Trade ekranı + mum grafiği açıldı', r2.canvas && /TL/.test(r2.px), {px: r2.px});
+    check('Grafik tuvali trade penceresine hapsolmuş (dışarı taşmıyor)', r2.inBox);
     check('Fiyat döngüsü işliyor', r2.ticking);
     await sleep(800);
     const n1 = await page.evaluate(() => SV.trade.n);
