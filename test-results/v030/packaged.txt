@@ -1,0 +1,13 @@
+PASS No copy: offline button disabled
+PASS Close captures only approved seed keys ["npng_legal_v1","npng_map"]
+PASS Offline launch returns success {"ok":true}
+PASS Offline origin and no account token
+PASS Sandboxed offline window, no preload {"sandbox":true,"isolation":true,"node":false,"title":"N.P.N.G. — Çevrimdışı"}
+PASS Offline aim starts
+PASS Offline ow starts
+PASS Casino DEDE iframe exists in current main
+PASS DEDE same-origin page loaded
+PASS No page errors []
+PASS No unexpected failed requests []
+PASS VSync restart changes only two switches [false,false,true,true,true]
+PASS Cache available after launcher restart

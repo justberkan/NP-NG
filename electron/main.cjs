@@ -1,9 +1,18 @@
 'use strict';
-const {app,BrowserWindow,Menu,ipcMain,session,dialog,powerSaveBlocker,shell}=require('electron');
+const {app,BrowserWindow,Menu,ipcMain,session,dialog,powerSaveBlocker,shell,protocol}=require('electron');
 const fs=require('node:fs'),path=require('node:path'),{pathToFileURL}=require('node:url');
 const os=require('node:os');
+const offline=require('./offline.cjs');
+protocol.registerSchemesAsPrivileged([{scheme:'npng',privileges:{standard:true,secure:true,supportFetchAPI:true,corsEnabled:true,stream:true}}]);
+let offlineProgress={state:'idle'};
+function cacheProgress(p){offlineProgress=p;if(launcher&&!launcher.isDestroyed())launcher.webContents.send('npng:offline-status',p)}
+const offlineHome=()=>app.getPath('userData');
+let seedCapture=Promise.resolve();
+function captureSeed(win){const task=seedCapture.catch(()=>{}).then(()=>captureSeedNow(win));seedCapture=task;return task}
+async function captureSeedNow(win){if(!win||win.isDestroyed()||!/^https?:/.test(win.webContents.getURL()))return;try{const data=await win.webContents.executeJavaScript('(()=>{const o={};for(const k of '+JSON.stringify(offline.SEED_KEYS)+')o[k]=localStorage.getItem(k);if(new TextEncoder().encode(JSON.stringify(o)).length>2097152)throw Error("Seed too large");return o})()');await offline.saveSeed(offlineHome(),data)}catch(e){/* Untrusted/closing renderer: retain the last valid seed. */}}
+
 const {settings,probe,startLocal}=require('./services.cjs');
-const {PERFORMANCE_SWITCHES,gameURL,canNavigate,shortcut}=require('./policy.cjs');
+const {PERFORMANCE_SWITCHES,performanceSwitches,gameURL,canNavigate,shortcut}=require('./policy.cjs');
 const {spawn}=require('node:child_process');
 /* Sunucu linki (SUNUCU.json) GitHub üzerinden paylaşılır. Token koda gömülmez;
    push yalnızca makinedeki git kimliği (credential manager) ile çalışır. */
@@ -51,9 +60,11 @@ async function autoPublish(){
  }catch(e){}
 }
 // GPU ve zamanlama anahtarları Electron hazır olmadan eklenir.
-for(const name of PERFORMANCE_SWITCHES)app.commandLine.appendSwitch(name);
+
 app.setName('NPNG');
 if(process.env.NPNG_USER_DATA)app.setPath('userData',path.resolve(process.env.NPNG_USER_DATA));
+let startupVsync=false;try{startupVsync=JSON.parse(fs.readFileSync(path.join(app.getPath('userData'),'server.json'),'utf8')).vsync===true}catch(e){}
+for(const name of performanceSwitches(startupVsync))app.commandLine.appendSwitch(name);
 let sleepBlocker=null;
 function stopSleepBlocker(){if(sleepBlocker!==null){powerSaveBlocker.stop(sleepBlocker);sleepBlocker=null}}
 let launcher,game,quitting=false,connecting=false,gameOrigin='',lastError='',configuredSession;
@@ -82,7 +93,7 @@ function makeLauncher(){
  launcher.webContents.on('will-navigate',(event,url)=>{if(url!==launcherURL)event.preventDefault()});
  launcher.webContents.on('will-attach-webview',event=>event.preventDefault());
  bindKeys(launcher);launcher.once('ready-to-show',()=>launcher.show());
- launcher.on('close',()=>{quitting=true;if(game&&!game.isDestroyed())game.destroy()});
+ launcher.on('close',event=>{if(game&&!game.isDestroyed()&&!quitting){event.preventDefault();quitting=true;captureSeed(game).finally(()=>{if(game&&!game.isDestroyed())game.destroy();launcher.close()});return}quitting=true;});
  launcher.loadFile(launcherFile);
 }
 function permissions(gameSession){
@@ -102,41 +113,54 @@ function permissions(gameSession){
  });
  gameSession.on('will-download',event=>event.preventDefault());
 }
-async function connect(value,options){
+async function connect(value,options,isOffline=false){
  if(connecting)return{ok:false,error:'Bağlantı zaten hazırlanıyor.'};
- let url;try{url=gameURL(value)}catch(e){return{ok:false,error:e.message}}
+ let url;try{url=isOffline?'npng://game/index.html':gameURL(value)}catch(e){return{ok:false,error:e.message}}
  const opts=settings(options||readPreferences());
- connecting=true;gameOrigin=new URL(url).origin;let win;
+ connecting=true;gameOrigin=isOffline?'npng://game':new URL(url).origin;let win;
  try{
   if(game&&!game.isDestroyed())game.destroy();
   const gameSession=session.fromPartition('persist:npng-game');permissions(gameSession);
-  win=new BrowserWindow({width:1440,height:900,minWidth:800,minHeight:600,show:false,fullscreen:opts.fullscreen,fullscreenable:true,title:'N.P.N.G. — No Pain No Gain',icon:path.join(__dirname,'build/icon.ico'),backgroundColor:'#080d13',autoHideMenuBar:true,
+  win=new BrowserWindow({width:1440,height:900,minWidth:800,minHeight:600,show:false,fullscreen:opts.fullscreen,fullscreenable:true,title:isOffline?'N.P.N.G. — Çevrimdışı':'N.P.N.G. — No Pain No Gain',icon:path.join(__dirname,'build/icon.ico'),backgroundColor:'#080d13',autoHideMenuBar:true,
    webPreferences:{session:gameSession,contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:false,spellcheck:false,navigateOnDragDrop:false}});
   game=win;bindKeys(win);win.setMenuBarVisibility(false);
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-attach-webview',event=>event.preventDefault());
   win.webContents.on('will-navigate',(event,target)=>{if(!canNavigate(target,gameOrigin))event.preventDefault()});
   win.webContents.on('will-redirect',(event,target)=>{if(!canNavigate(target,gameOrigin))event.preventDefault()});
-  win.webContents.on('page-title-updated',event=>{event.preventDefault();win.setTitle('N.P.N.G. — No Pain No Gain')});
+  win.webContents.on('page-title-updated',event=>{event.preventDefault();win.setTitle(isOffline?'N.P.N.G. — Çevrimdışı':'N.P.N.G. — No Pain No Gain')});
   win.webContents.on('render-process-gone',()=>{if(!quitting){if(!win.isDestroyed())win.destroy();showLauncher('Oyun görüntü işlemi kapandı. Yeniden bağlanabilirsin.')}});
   win.on('closed',()=>{if(game===win){stopSleepBlocker();game=null;if(!quitting)showLauncher()}});
   const timeout=new Promise((_,reject)=>{const timer=setTimeout(()=>reject(new Error('Sunucu 20 saniyede yanıt vermedi.')),20000);timer.unref();win.once('closed',()=>clearTimeout(timer));win.webContents.once('did-finish-load',()=>clearTimeout(timer))});
+  if(isOffline){
+   await win.loadURL('npng://game/__seed');const seed=await offline.readSeed(offlineHome());
+   await win.webContents.executeJavaScript('localStorage.clear();for(const [k,v] of Object.entries('+JSON.stringify(seed)+'))localStorage.setItem(k,v);');
+  }
   await Promise.race([win.loadURL(url),timeout]);
-  savePreferences({url,...opts});if(opts.keepAwake)sleepBlocker=powerSaveBlocker.start('prevent-display-sleep');lastError='';win.show();win.focus();launcher.hide();return{ok:true};
+  if(!isOffline){
+   let closing=false;const seedTimer=setInterval(()=>captureSeed(win),60000);seedTimer.unref();
+   win.on('close',event=>{if(closing)return;event.preventDefault();closing=true;captureSeed(win).finally(()=>{if(!win.isDestroyed())win.close()})});
+   win.once('closed',()=>clearInterval(seedTimer));
+   await captureSeed(win);
+   offline.sync(offlineHome(),url,cacheProgress).catch(()=>cacheProgress({state:'error'}));
+  }
+  if(!isOffline)savePreferences({url,...opts});if(opts.keepAwake)sleepBlocker=powerSaveBlocker.start('prevent-display-sleep');lastError='';win.show();win.focus();launcher.hide();return{ok:true};
  }catch(e){if(win&&!win.isDestroyed())win.destroy();const message='Sunucuya bağlanılamadı. Yerel sunucunun açık ve adresin doğru olduğunu kontrol et.';showLauncher(message);return{ok:false,error:message};
  }finally{connecting=false}
 }
 ipcMain.handle('npng:preferences',event=>{
  if(event.sender!==launcher?.webContents||event.senderFrame?.url!==launcherURL)throw new Error('İzin verilmeyen pencere');
- return{...readPreferences(),error:lastError,version:app.getVersion()};
+ return{...readPreferences(),error:lastError,version:app.getVersion(),startupVsync};
 });
 ipcMain.handle('npng:connect',(event,url,options)=>{
  if(event.sender!==launcher?.webContents||event.senderFrame?.url!==launcherURL)throw new Error('İzin verilmeyen pencere');
  return connect(url,options);
 });
 function trusted(event){if(event.sender!==launcher?.webContents||event.senderFrame?.url!==launcherURL)throw new Error('İzin verilmeyen pencere')}
+ipcMain.handle('npng:offline-status',async event=>{trusted(event);return {...await offline.status(offlineHome()),progress:offlineProgress}});
+ipcMain.handle('npng:offline-play',async event=>{trusted(event);if(!(await offline.status(offlineHome())).available)return{ok:false,error:'Önce bir kez internetle bağlan.'};return connect('',readPreferences(),true)});
 ipcMain.handle('npng:probe',async(event,url)=>{trusted(event);return probe(url)});
-ipcMain.handle('npng:settings',(event,value)=>{trusted(event);const opts=settings(value);savePreferences(opts);return opts});
+ipcMain.handle('npng:settings',(event,value)=>{trusted(event);const opts=settings(value);savePreferences(opts);return {...opts,restartRequired:opts.vsync!==startupVsync}});
 async function diagnostics(){
  const gpu=await app.getGPUInfo('basic').catch(()=>({gpuDevice:[]}));
  return {created:new Date().toISOString(),launcher:app.getVersion(),electron:process.versions.electron,os:os.platform()+' '+os.release(),cpu:os.cpus()[0]?.model||'Bilinmiyor',ramGB:Math.round(os.totalmem()/1073741824),graphics:app.getGPUFeatureStatus(),adapters:(gpu.gpuDevice||[]).map(d=>({vendorId:d.vendorId,deviceId:d.deviceId,active:d.active})),switches:PERFORMANCE_SWITCHES.map(name=>({name,active:app.commandLine.hasSwitch(name)})),settings:settings(readPreferences())};
@@ -155,7 +179,7 @@ ipcMain.handle('npng:gh-fetch',async event=>{trusted(event);return ghFetch()});
 ipcMain.handle('npng:gh-publish',async(event,url)=>{trusted(event);return ghPublish(url)});
 if(!app.requestSingleInstanceLock())app.quit();else{
  app.on('second-instance',()=>{const w=game&&!game.isDestroyed()?game:launcher;if(w){if(w.isMinimized())w.restore();w.show();w.focus()}});
- app.whenReady().then(()=>{Menu.setApplicationMenu(null);makeLauncher();ghFetch().catch(()=>{});setInterval(()=>{autoPublish().catch(()=>{})},120000).unref?.()});
+ app.whenReady().then(()=>{Menu.setApplicationMenu(null);const gs=session.fromPartition('persist:npng-game');gs.protocol.handle('npng',request=>offline.serve(offlineHome(),request));gs.webRequest.onBeforeRequest((details,callback)=>{callback({cancel:gameOrigin==='npng://game'&&/^(https?|wss?):/.test(details.url)})});makeLauncher();ghFetch().catch(()=>{});setInterval(()=>{autoPublish().catch(()=>{})},120000).unref?.()});
 }
 app.on('before-quit',()=>{quitting=true;stopSleepBlocker()});
 app.on('window-all-closed',()=>app.quit());
