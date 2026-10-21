@@ -162,7 +162,7 @@ function ensureSV(){
  if(!WKEYS.includes(SV.eq.w))SV.eq.w='rifle';
  ['c0','x0','g0','c6','o0'].forEach(i=>{if(!SV.own.includes(i))SV.own.push(i)});
  if(!SV.op1){SV.op1=1;if(SV.eq.c==='c0')SV.eq.c='c6'}
- if(typeof ensureEco==='function')ensureEco(); if(typeof save==='function')save();
+ if(typeof ensureEco==='function')ensureEco(); if(typeof ensureTrade==='function')ensureTrade(); if(typeof save==='function')save();
 }
 /* Berkan kuralı (2026-10-19): çevrimdışı (hesaba bağlı değil) = para sınırsız, HİÇBİR ilerleme kaydedilmez.
    Ne bu bilgisayara ne hesaba yazılır; hesaba bağlanınca bellekteki çevrimdışı durum atılır, hesaptaki kayıt yüklenir.

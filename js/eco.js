@@ -86,7 +86,8 @@ function payDialog(price,label,cb){
  return true;
 }
 
-/* ---------- Borsa: 5 coin, haftalık yön değiştiren fiyatlar ---------- */
+/* ---------- Borsa KALDIRILDI (Berkan 2026-10-21): yerine js/trade.js (TradingSim) geldi.
+   COINS + wkPrice + coinPrice yalnızca eski hesaplardaki coin bakiyelerinin TL'ye çevrilmesi (tek seferlik göç) için saklandı. */
 const COINS=[
  {id:'beko',n:'Bekocoin',sym:'BKC',base:120,ph:.7,ph2:2.1,col:'#ffb020'},
  {id:'amina',n:'Amınacoin',sym:'AMN',base:35,ph:2.4,ph2:.3,col:'#ff5a5a'},
@@ -102,23 +103,6 @@ function coinPrice(c,t){
  const noise=1+.025*Math.sin(t/(37*60e3)+c.ph*3)+.015*Math.sin(t/(7*60e3)+c.ph2*2);
  return Math.max(.5,base*noise);
 }
-const coinTrendUp=c=>{const w=Math.floor(eNow()/WEEK);return wkPrice(c,w+1)>wkPrice(c,w)};
-function coinWeekPct(c){const w=Math.floor(eNow()/WEEK);return (wkPrice(c,w+1)/wkPrice(c,w)-1)*100}
-function coinHold(id){return SV.eco.coins[id]||(SV.eco.coins[id]={q:0,cost:0})}
-function coinBuy(id,tl){
- const c=COINS.find(x=>x.id===id);tl=Math.floor(tl);
- if(!(tl>=1))return'Geçersiz tutar';if(SV.tl<tl)return'Bakiye yetmiyor';
- const fee=Math.ceil(tl*.01),q=(tl-fee)/coinPrice(c);
- SV.tl-=tl;const h=coinHold(id);h.q+=q;h.cost+=tl;save();return'';
-}
-function coinSell(id,frac){
- const c=COINS.find(x=>x.id===id),h=coinHold(id);
- if(h.q<=0)return'Elinde yok';
- const q=h.q*frac,gross=q*coinPrice(c),get=Math.floor(gross*.99);
- h.cost*=(1-frac);h.q-=q;if(h.q<1e-9){h.q=0;h.cost=0}
- SV.tl+=get;save();return'';
-}
-function portfolioValue(){let v=0;for(const c of COINS){const h=SV.eco.coins[c.id];if(h&&h.q>0)v+=h.q*coinPrice(c)}return v}
 
 /* ---------- Görevler ---------- */
 const DAILY_Q=[
