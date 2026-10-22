@@ -30,3 +30,6 @@ Berkan, Claude onayı şartını bu iş için kaldırdı; yetki kendisinde ve Co
 
 ## HTTP test hazırlığı
 İkinci tam turda kalan hata, ana daldaki HTTP fixture'ının yeni server-kbk.js bağımlılığını geçici dizine kopyalamamasıydı. Testin kopyalama listesine bu tek dosya eklendi; sunucu kodu ve test beklentileri değişmedi. İzole HTTP grubu düzeltme sonrası 5/5 PASS (http.txt). İkinci turun çıktısı npm-test-attempt-2.txt içinde korunur. Değişen test dosyalarına tests/http.cjs de dahildir.
+
+## KBK hareket sınırı
+Ortak js/player.js arena sınırı, KBK spawn'ını ormanın ortasına çekiyordu. Yalnız KBK dalında kullanılan sınır KBK_WORLD_R-3 yapıldı; diğer modların sınırları ve hareket hızları değişmedi. js/player.js bu nedenle değişen dosyalara dahildir. Tarayıcı testine, girdi yokken üç rolde de spawn kaymasının 0,5 m altında kalması eklendi (ölçülen 0 m).

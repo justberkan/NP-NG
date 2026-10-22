@@ -239,7 +239,7 @@ function stepPlayer(dt){
  grCd-=dt;
  canMove.keep=false;const nx=p.x+p.vx*dt;if(canMove(nx,p.z))p.x=nx;else if(!canMove.keep)p.vx=0;
  canMove.keep=false;const nz=p.z+p.vz*dt;if(canMove(p.x,nz))p.z=nz;else if(!canMove.keep)p.vz=0;
- const bd=mode==='wc'?WC.totalRounds*WC.gap+40:OW.on?OWH-3:(MAPS.cur?MAPS.cur.ext:29.5);p.x=clamp(p.x,-bd,bd);p.z=clamp(p.z,-bd,bd);
+ const bd=mode==='kbk'?KBK_WORLD_R-3:mode==='wc'?WC.totalRounds*WC.gap+40:OW.on?OWH-3:(MAPS.cur?MAPS.cur.ext:29.5);p.x=clamp(p.x,-bd,bd);p.z=clamp(p.z,-bd,bd);
  const gy=groundAt(p.x,p.z,p.y);
  p.vy-=22*dt;
  /* tırmanma kameranın duvara bakmasına göre (W+A gibi çapraz tuşlar artık tırmandırmaz) */
