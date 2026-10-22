@@ -33,3 +33,6 @@ Berkan, Claude onayı şartını bu iş için kaldırdı; yetki kendisinde ve Co
 
 ## KBK hareket sınırı
 Ortak js/player.js arena sınırı, KBK spawn'ını ormanın ortasına çekiyordu. Yalnız KBK dalında kullanılan sınır KBK_WORLD_R-3 yapıldı; diğer modların sınırları ve hareket hızları değişmedi. js/player.js bu nedenle değişen dosyalara dahildir. Tarayıcı testine, girdi yokken üç rolde de spawn kaymasının 0,5 m altında kalması eklendi (ölçülen 0 m).
+
+## Sonuç
+Son tam npm test turu: PASS, çıkış kodu 0; hata satırı yok. KBK tarayıcı testi 30/30 PASS, HTTP grubu 5/5 PASS. Audit, offline-save, casino, co-op, hareket, mobil, açık dünya, ses ve admin kontrolleri dahil. Son kanıt test-results/kbk-forest/npm-test-full.txt ve results.json dosyalarıdır. Önceki iki başarısız deneme ayrı tutulmuştur.

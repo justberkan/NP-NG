@@ -1,0 +1,114 @@
+PASS Role selection retains room input 
+PASS Selected role is accessible 
+PASS Room password is masked 
+PASS Mobile layout fits width 
+PASS Mobile play button reachable 
+PASS Solo role guardian {
+  chosen: 'guardian',
+  inside: true,
+  cps: [
+    { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+    { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+    { along: 0.4999999999999998, cross: 0 },
+    { along: 0.6666666666666663, cross: 0 },
+    { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+  ],
+  moved: 0,
+  spawnDrift: 0,
+  geo: 43,
+  draws: 13,
+  triangles: 31910
+}
+PASS Real WebGL scene renders 
+PASS Spawn remains in forest rather than arena clamp 
+PASS Player cannot leave forest boundary 
+PASS Five checkpoints cover village-to-house route [
+  { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+  { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+  { along: 0.4999999999999998, cross: 0 },
+  { along: 0.6666666666666663, cross: 0 },
+  { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+]
+PASS Solo role kbk {
+  chosen: 'kbk',
+  inside: true,
+  cps: [
+    { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+    { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+    { along: 0.4999999999999998, cross: 0 },
+    { along: 0.6666666666666663, cross: 0 },
+    { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+  ],
+  moved: 0,
+  spawnDrift: 0,
+  geo: 52,
+  draws: 68,
+  triangles: 169865
+}
+PASS Real WebGL scene renders 
+PASS Spawn remains in forest rather than arena clamp 
+PASS Player cannot leave forest boundary 
+PASS Five checkpoints cover village-to-house route [
+  { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+  { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+  { along: 0.4999999999999998, cross: 0 },
+  { along: 0.6666666666666663, cross: 0 },
+  { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+]
+PASS Solo role wolf {
+  chosen: 'wolf',
+  inside: true,
+  cps: [
+    { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+    { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+    { along: 0.4999999999999998, cross: 0 },
+    { along: 0.6666666666666663, cross: 0 },
+    { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+  ],
+  moved: 4.399999999998238,
+  spawnDrift: 0,
+  geo: 53,
+  draws: 70,
+  triangles: 169901
+}
+PASS Real WebGL scene renders 
+PASS Spawn remains in forest rather than arena clamp 
+PASS Player cannot leave forest boundary 
+PASS Five checkpoints cover village-to-house route [
+  { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+  { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+  { along: 0.4999999999999998, cross: 0 },
+  { along: 0.6666666666666663, cross: 0 },
+  { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+]
+PASS VIP escort advances at bounded speed 
+PASS Solo role wolf {
+  chosen: 'wolf',
+  inside: true,
+  cps: [
+    { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+    { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+    { along: 0.4999999999999998, cross: 0 },
+    { along: 0.6666666666666663, cross: 0 },
+    { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+  ],
+  moved: 4.399999999998238,
+  spawnDrift: 0,
+  geo: 53,
+  draws: 70,
+  triangles: 169901
+}
+PASS Real WebGL scene renders 
+PASS Spawn remains in forest rather than arena clamp 
+PASS Player cannot leave forest boundary 
+PASS Five checkpoints cover village-to-house route [
+  { along: 0.16666666666666657, cross: 1.7604509307526862e-15 },
+  { along: 0.33333333333333315, cross: 3.5209018615053724e-15 },
+  { along: 0.4999999999999998, cross: 0 },
+  { along: 0.6666666666666663, cross: 0 },
+  { along: 0.833333333333333, cross: 7.041803723010745e-15 }
+]
+PASS VIP escort advances at bounded speed 
+PASS Repeated forest geometry stays bounded [ 43, 52, 53, 53 ]
+PASS Leaving mode restores lobby and removes forest 
+PASS No browser errors []
