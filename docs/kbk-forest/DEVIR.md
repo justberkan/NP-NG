@@ -24,3 +24,9 @@ Berkan, Claude onayı şartını bu iş için kaldırdı; yetki kendisinde ve Co
 - Ekranlar: test-results/kbk-forest/desktop.png, mobile.png, forest.png. Sonuçlar: results.json.
 - Oyun: js/kbk.js, css/style.css, index.html; varlık: assets/kbk/roles-reference.jpg.
 - Eski sürüm Git tabanı 78e33b3'te korunur. İndirilen GLB ve canlı oyun klasörü değiştirilmedi.
+
+## İlk tam test denemesi
+İlk npm test turu, index.html içindeki build ile tüm ?v= sürümlerini eşit isteyen smoke.cjs kontrolünde düştü. Başlangıçta yalnız değişen CSS/KBK sürümleri güncellenmişti. Tüm sürüm işaretleri 202610230001'e eşitlendi; test veya kabul sınırı değiştirilmedi. İlk çıktı npm-test-attempt-1.txt olarak korunur. Son doğrulama ayrı npm-test-full.txt dosyasındadır.
+
+## HTTP test hazırlığı
+İkinci tam turda kalan hata, ana daldaki HTTP fixture'ının yeni server-kbk.js bağımlılığını geçici dizine kopyalamamasıydı. Testin kopyalama listesine bu tek dosya eklendi; sunucu kodu ve test beklentileri değişmedi. İzole HTTP grubu düzeltme sonrası 5/5 PASS (http.txt). İkinci turun çıktısı npm-test-attempt-2.txt içinde korunur. Değişen test dosyalarına tests/http.cjs de dahildir.
