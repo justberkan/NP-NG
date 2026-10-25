@@ -24,10 +24,10 @@ const KBK_Dirs=['N','NE','E','SE','S','SW','W','NW'];
 function kbkOpen(cb){
  if(KBK.on)kbkDispose();
  let el=$('kbkselect');if(!el){el=document.createElement('div');el.id='kbkselect';el.className='wc-dialog';document.body.appendChild(el)}
- const card=(r,icon,portrait,name,desc)=>`
-  <div class="kbk-class ${KBK.role===r?'sel':''}" data-role="${r}" role="button" tabindex="0">
+ const card=(r,icon,name,desc)=>`
+  <div class="kbk-class ${KBK.role===r?'sel':''}" data-role="${r}" role="button" aria-pressed="${KBK.role===r}" tabindex="0">
    <div class="kbk-class-ic">${icon}</div>
-   <div class="kbk-class-portrait">${portrait}</div>
+   <div class="kbk-class-portrait" aria-hidden="true"></div>
    <div class="kbk-class-name">${name}</div>
    <div class="kbk-class-desc">${desc}</div>
    <div class="kbk-class-pick"><span class="kbk-class-ring"></span><span class="kbk-class-picktxt">${KBK.role===r?'SEÇİLDİ':'SEÇ'}</span></div>
@@ -37,10 +37,11 @@ function kbkOpen(cb){
   <h1 class="kbk-title">KBK ESCORT & HUNT</h1>
   <p class="kbk-sub">Karanlık ormanda Kırmızı Başlıklı Kız'ı eve ulaştır ya da <b>kurt</b> olup kızı mağaraya kaçır · Ödül: <b>+${KBK_REWARD} TL</b></p>
   <div class="kbk-classes">
-   ${card('wolf','🐺','🐺','KURT','Sınırsız sprint · Q sersemletme · E kaçırma')}
-   ${card('guardian','🛡️','🪖','KORUMA','Silahlı + el feneri · KBK\'yı koru ve eve götür')}
-   ${card('kbk','👑','👧','KIRMIZI BAŞLIKLI KIZ','Silahsız VIP · pusulayla yol göster · takımı iyileştir')}
+   ${card('wolf','🐺','KURT','Sınırsız sprint · Q sersemletme · E kaçırma')}
+   ${card('guardian','🛡️','KORUMA','Silahlı + el feneri · KBK\'yı koru ve eve götür')}
+   ${card('kbk','👑','KIRMIZI BAŞLIKLI KIZ','Silahsız VIP · pusulayla yol göster · takımı iyileştir')}
   </div>
+  <div class="kbk-expedition"><div><span class="wc-kicker">01 / AY IŞIĞI ORMANI</span><h2>Patikayı izle. Birlikte dön.</h2><p>Başlangıç köyü → 5 yol taşı → orman evi</p></div><div id="kbkroster" aria-live="polite"></div></div>
   <p class="note kbk-note">Tilki ısırığı kanama yapar (H: sargı) · Pusula hareket ederken sallanır, durunca sabitlenir · KBK: 20 HP heal + düşeni kaldırma · Kurt ölürse 15 sn sonra doğar.</p>
   <div class="kbk-actions">
    <button class="kbk-btn kbk-btn-primary" id="kbksolo">▶ TEK BAŞINA BAŞLA</button>
@@ -48,7 +49,7 @@ function kbkOpen(cb){
   </div>
   <div class="kbk-joinrow">
    <input id="kbkcode" maxlength="8" placeholder="Oda kodu" aria-label="KBK oda kodu">
-   <input id="kbkpass" maxlength="32" placeholder="Şifre (isteğe bağlı)" aria-label="Oda şifresi" autocomplete="off">
+   <input id="kbkpass" type="password" maxlength="32" placeholder="Şifre (isteğe bağlı)" aria-label="Oda şifresi" autocomplete="off">
    <button class="kbk-btn" id="kbkjoin">KATIL</button>
    <button class="kbk-btn kbk-btn-ghost" id="kbklist">AÇIK LOBİLER</button>
   </div>
@@ -59,7 +60,9 @@ function kbkOpen(cb){
   </div>
  </div>`;
  el.style.display='flex';
- el.querySelectorAll('[data-role]').forEach(b=>{const pick=()=>{KBK.role=b.dataset.role;KBK.rolePicked=true;el.style.display='none';kbkOpen(cb)};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' ')pick()}});
+ const roster=()=>{$('kbkroster').textContent=KBK.role==='wolf'?'Sen: Kurt · VIP: bot · 3 koruma botu':KBK.role==='kbk'?'Tek oyunculu: Sen VIP · 3 koruma botu. Kurt rakibi co-op’ta.':'Tek oyunculu: Sen koruma · VIP bot. Kurt rakibi co-op’ta.'};
+ roster();
+ el.querySelectorAll('[data-role]').forEach(b=>{const pick=()=>{KBK.role=b.dataset.role;KBK.rolePicked=true;el.querySelectorAll('[data-role]').forEach(q=>{const on=q===b;q.classList.toggle('sel',on);q.setAttribute('aria-pressed',String(on));q.querySelector('.kbk-class-picktxt').textContent=on?'SEÇİLDİ':'SEÇ'});roster()};b.onclick=pick;b.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}}});
  const go=()=>{el.style.display='none';KBK.chosen=true;cb()};
  $('kbksolo').onclick=()=>{KBK.net=false;KBK.owner=true;KBK.id=0;KBK.host=0;KBK.code='';KBK.peers.clear();go()};
  const join=create=>{const run=()=>{if(KBK.pending)return;const code=$('kbkcode').value.trim();if(!create&&!code){$('kbkdlgstatus').textContent='Oda kodunu yaz.';return}
@@ -89,21 +92,43 @@ function kbkRoles(){
  if(kbk==null){for(let i=ids.length-1;i>=0;i--)if(ids[i]!==wolf){kbk=ids[i];break}}
  return{wolf,kbk};
 }
-function kbkMyRole(){const r=kbkRoles();return KBK.id===r.wolf?'wolf':KBK.id===r.kbk?'kbk':'guardian'}
+function kbkMyRole(){if(!KBK.net)return ['wolf','guardian','kbk'].includes(KBK.role)?KBK.role:'guardian';const r=kbkRoles();return KBK.id===r.wolf?'wolf':KBK.id===r.kbk?'kbk':'guardian'}
+
+/* Shared route geometry: village, checkpoints and the house use the same axis. */
+function kbkRoutePoint(t){const h=KBK.housePos,d=Math.hypot(h.x,h.z)||1,start=-KBK_WORLD_R*.9,n=start+(d-start)*t;return{x:h.x/d*n,z:h.z/d*n}}
+function kbkRouteSync(){
+ if(!KBK.route)return;
+ const a=kbkRoutePoint(0),b=kbkRoutePoint(1),d=Math.hypot(b.x-a.x,b.z-a.z);
+ KBK.route.position.set((a.x+b.x)/2,.012,(a.z+b.z)/2);KBK.route.rotation.y=Math.atan2(b.x-a.x,b.z-a.z);KBK.route.scale.set(1,1,d);
+}
+function kbkKeepInside(q){const d=Math.hypot(q.x,q.z),limit=KBK_WORLD_R-3;if(d>limit){q.x*=limit/d;q.z*=limit/d;if('vx' in q){q.vx=0;q.vz=0}}}
+function kbkFreeScenery(root){const gs=new Set(),ms=new Set();root.traverse(o=>{if(o.geometry)gs.add(o.geometry);if(o.material)for(const m of [].concat(o.material))ms.add(m)});if(root.parent)root.parent.remove(root);for(const g of gs)g.dispose();for(const m of ms)m.dispose()}
+function kbkNpcMove(n,x,z,dt,speed){const dx=x-n.x,dz=z-n.z,d=Math.hypot(dx,dz),step=Math.min(Math.max(0,d-.6),speed*dt);if(d>.001){n.x+=dx/d*step;n.z+=dz/d*step;if(step>0)n.g.rotation.y=Math.atan2(dx,dz)}kbkKeepInside(n);n.g.position.set(n.x,0,n.z);animHuman(n.rig,{t:clock,speed:step/Math.max(dt,.001),fwd:1,air:false,pitch:0,lookYaw:0,rq:-1,sw:-1},dt)}
+function kbkClearTrail(x,z){const h=KBK.housePos,d=Math.hypot(h.x,h.z)||1,nx=-h.z/d,nz=h.x/d,side=x*nx+z*nz;if(Math.abs(side)<5){const shift=(side<0?-5:5)-side;x+=nx*shift;z+=nz*shift}return{x,z}}
 
 /* ---------- Orman kurulumu ---------- */
 function kbkBuildWorld(){
  const rnd=kbkSrand(KBK.code||'solo'+((SV&&SV.t0)||1));
+ {
+  const cands=[];
+  for(let i=0;i<10;i++){const a=(i/10)*6.283+rnd()*.5,r=KBK_WORLD_R*(.55+rnd()*.35);cands.push([Math.cos(a)*r,Math.sin(a)*r])}
+  const c=cands[Math.floor(rnd()*10)];
+  if(!KBK.housePos)KBK.housePos={x:c[0],z:c[1]};
+ }
  KBK.group=new THREE.Group();S.add(KBK.group);KBK.meshes=[];
  const G=KBK.group;
+ G.add(new THREE.HemisphereLight(0x9abfca,0x233c2b,.85));
  const ground=new THREE.Mesh(new THREE.CircleGeometry(KBK_WORLD_R+40,40),new THREE.MeshLambertMaterial({color:0x14231b}));
  ground.rotation.x=-Math.PI/2;G.add(ground);KBK.meshes.push(ground);
+ /* A flat, readable route is cheap: one mesh rather than per-frame terrain rays. */
+ const routeGeo=new THREE.PlaneGeometry(6,1);routeGeo.rotateX(-Math.PI/2);
+ KBK.route=new THREE.Mesh(routeGeo,new THREE.MeshLambertMaterial({color:0x596052}));G.add(KBK.route);kbkRouteSync();
  /* ağaçlar (instanced) */
- const TN=260,tt=new THREE.Object3D();
+ const TN=650,tt=new THREE.Object3D();
  const trunks=new THREE.InstancedMesh(new THREE.CylinderGeometry(.16,.26,2.2,5),new THREE.MeshLambertMaterial({color:0x4a3220}),TN);
  const leaves=new THREE.InstancedMesh(new THREE.ConeGeometry(1.5,4.2,6),new THREE.MeshLambertMaterial({color:0x15311d}),TN);
  for(let i=0;i<TN;i++){
-  const a=rnd()*6.283,r=14+rnd()*(KBK_WORLD_R-16),x=Math.cos(a)*r,z=Math.sin(a)*r,s=.8+rnd()*.9;
+  const a=rnd()*6.283,r=14+rnd()*(KBK_WORLD_R-16),{x,z}=kbkClearTrail(Math.cos(a)*r,Math.sin(a)*r),s=.8+rnd()*.9;
   tt.position.set(x,1.1*s,z);tt.scale.setScalar(s);tt.rotation.y=rnd()*6.28;tt.updateMatrix();trunks.setMatrixAt(i,tt.matrix);
   tt.position.y=(2.2+2.0)*s;tt.updateMatrix();leaves.setMatrixAt(i,tt.matrix);
  }
@@ -113,7 +138,7 @@ function kbkBuildWorld(){
  KBK.bushPts=[];
  const bushes=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1.1,0),new THREE.MeshLambertMaterial({color:0x1d3a24}),BN);
  for(let i=0;i<BN;i++){
-  const a=rnd()*6.283,r=10+rnd()*(KBK_WORLD_R-14),x=Math.cos(a)*r,z=Math.sin(a)*r;
+  const a=rnd()*6.283,r=10+rnd()*(KBK_WORLD_R-14),{x,z}=kbkClearTrail(Math.cos(a)*r,Math.sin(a)*r);
   KBK.bushPts.push([x,z]);
   tt.position.set(x,.55,z);tt.scale.set(1+rnd(),.7+rnd()*.5,1+rnd());tt.rotation.y=rnd()*6.28;tt.updateMatrix();bushes.setMatrixAt(i,tt.matrix);
  }
@@ -123,16 +148,17 @@ function kbkBuildWorld(){
  const rocks=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(.9,0),new THREE.MeshLambertMaterial({color:0x3a3f45}),RN);
  for(let i=0;i<RN;i++){
   const a=rnd()*6.283,r=16+rnd()*(KBK_WORLD_R-20);
-  tt.position.set(Math.cos(a)*r,.35,Math.sin(a)*r);tt.scale.setScalar(.6+rnd()*1.4);tt.rotation.set(rnd()*3,rnd()*3,rnd()*3);tt.updateMatrix();rocks.setMatrixAt(i,tt.matrix);
+  const pos=kbkClearTrail(Math.cos(a)*r,Math.sin(a)*r);tt.position.set(pos.x,.35,pos.z);tt.scale.setScalar(.6+rnd()*1.4);tt.rotation.set(rnd()*3,rnd()*3,rnd()*3);tt.updateMatrix();rocks.setMatrixAt(i,tt.matrix);
  }
  G.add(rocks);KBK.meshes.push(rocks);
+ /* Low-poly luminous mushrooms: two instanced draws, no extra lights. */
+ const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(.035,.05,.22,4),new THREE.MeshLambertMaterial({color:0x81999a}),90);
+ const caps=new THREE.InstancedMesh(new THREE.ConeGeometry(.20,.12,6),new THREE.MeshBasicMaterial({color:0x58b5a8}),90);
+ const decor=kbkSrand((KBK.code||'solo')+'mushrooms');
+ for(let i=0;i<90;i++){const a=decor()*Math.PI*2,r=18+decor()*140;tt.rotation.set(0,a,0);tt.scale.setScalar(.7+decor()*.8);tt.position.set(Math.cos(a)*r,.11,Math.sin(a)*r);tt.updateMatrix();stems.setMatrixAt(i,tt.matrix);tt.position.y=.25;tt.updateMatrix();caps.setMatrixAt(i,tt.matrix)}
+ G.add(stems,caps);
  /* ev: 10 adaydan rastgele 1 (sahip seçer, snapshot ile gelir) */
- if(!KBK.housePos){
-  const cands=[];
-  for(let i=0;i<10;i++){const a=(i/10)*6.283+rnd()*.5,r=KBK_WORLD_R*(.55+rnd()*.35);cands.push([Math.cos(a)*r,Math.sin(a)*r])}
-  const c=cands[Math.floor(rnd()*10)];
-  KBK.housePos={x:c[0],z:c[1]};
- }
+
  const h=new THREE.Group();
  const hb=new THREE.Mesh(new THREE.BoxGeometry(7,4.5,6),new THREE.MeshLambertMaterial({color:0x5a4632}));
  hb.position.y=2.25;
@@ -155,7 +181,7 @@ function kbkBuildWorld(){
  KBK.checkpoints=[];
  const cpMat=new THREE.MeshLambertMaterial({color:0x2f6b4f,emissive:0x0a2a1a});
  for(let i=1;i<=5;i++){
-  const t=i/6,x=KBK.housePos.x*t,z=KBK.housePos.z*t;
+  const {x,z}=kbkRoutePoint(i/6);
   const cp=new THREE.Mesh(new THREE.CylinderGeometry(.35,.5,3.2,5),cpMat.clone());
   cp.position.set(x,1.6,z);G.add(cp);KBK.meshes.push(cp);
   KBK.checkpoints.push({mesh:cp,x,z,passed:false});
@@ -213,14 +239,14 @@ function kbkStart(){
  KBK.on=true;KBK.chosen=false;KBK.ended=false;KBK.earned=0;KBK.sendT=0;
  KBK.bleed={on:false,preHp:100,t:0};KBK.crippleT=0;KBK.stunT=0;KBK.stunCd=0;KBK.wolfHp=null;KBK.wolfRespawnT=0;KBK.carry=false;
  KBK.healUsed=false;KBK.reviveT=-1;KBK.stam=100;KBK.stamCd=0;KBK.flash=true;KBK.stillT=0;KBK.locked=false;KBK.exhausted=false;
- KBK.hostRole=KBK.role;
+ if(!KBK.net)KBK.hostRole=KBK.role;
  /* çevre yedekle + arena kutularını gizle (ic deseni) */
  KBK.baseBoxes=boxes.slice();KBK.baseMeshes=boxMeshes.slice();
  for(const b of boxes)b.m.visible=false;boxes.length=0;boxMeshes.length=0;
  KBK.env={floor:floor.position.y,fog:[S.fog.near,S.fog.far],fogColor:S.fog.color.getHex(),sky:S.background.getHex()};
  floor.position.y=-500;
  KBK.lights=[];S.traverse(o=>{if(o.isAmbientLight||o.isDirectionalLight||o.isHemisphereLight||o.isPointLight){KBK.lights.push([o,o.intensity]);o.intensity*=.12}});
- S.background.setHex(0x04070d);S.fog.near=3;S.fog.far=34;S.fog.color.setHex(0x030608);
+ S.background.setHex(0x102127);S.fog.near=12;S.fog.far=85;S.fog.color.setHex(0x102127);
  KBK.housePos=KBK.owner||!KBK.net?null:KBK.housePos; /* ev konumunu host belirler */
  kbkBuildWorld();
  /* el feneri (koruma) */
@@ -489,9 +515,8 @@ function kbkTick(dt){
  /* solo NPC takip */
  if(!KBK.net){
   if(KBK.kbkNpc&&KBK.mine!=='kbk'){
-   const anchor=KBK.mine==='guardian'?{x:p.x,z:p.z}:{x:KBK.guardNpcs[0]?KBK.guardNpcs[0].x:p.x,z:KBK.guardNpcs[0]?KBK.guardNpcs[0].z:p.z};
-   KBK.kbkNpc.x+=((anchor.x+2)-KBK.kbkNpc.x)*Math.min(1,dt*1.2);
-   KBK.kbkNpc.z+=((anchor.z+2)-KBK.kbkNpc.z)*Math.min(1,dt*1.2);
+   const anchor=KBK.mine==='guardian'?{x:p.x,z:p.z}:KBK.housePos;
+   kbkNpcMove(KBK.kbkNpc,anchor.x+2,anchor.z+2,dt,2.2);
   }
   for(let i=0;i<KBK.guardNpcs.length;i++){
    const g=KBK.guardNpcs[i];
@@ -499,10 +524,10 @@ function kbkTick(dt){
    g.g.rotation.x=0;
    const anchor=KBK.mine==='kbk'?{x:p.x,z:p.z}:KBK.kbkNpc?{x:KBK.kbkNpc.x,z:KBK.kbkNpc.z}:{x:p.x,z:p.z};
    const ox=Math.cos(i*2.1)*2.4,oz=Math.sin(i*2.1)*2.4;
-   g.x+=((anchor.x+ox)-g.x)*Math.min(1,dt*1.5);g.z+=((anchor.z+oz)-g.z)*Math.min(1,dt*1.5);
+   kbkNpcMove(g,anchor.x+ox,anchor.z+oz,dt,3.2);
   }
-  if(KBK.kbkNpc){KBK.kbkNpc.g.position.set(KBK.kbkNpc.x,0,KBK.kbkNpc.z)}
-  for(const g of KBK.guardNpcs)g.g.position.set(g.x,0,g.z);
+  if(KBK.kbkNpc){kbkKeepInside(KBK.kbkNpc);KBK.kbkNpc.g.position.set(KBK.kbkNpc.x,0,KBK.kbkNpc.z)}
+  for(const g of KBK.guardNpcs){kbkKeepInside(g);g.g.position.set(g.x,0,g.z)}
  }
  /* ağ senkronu */
  if(KBK.net&&!KBK.ended){KBK.sendT-=dt;if(KBK.sendT<=0){KBK.sendT=.1;
@@ -535,8 +560,9 @@ function kbkApplySnapshot(d){
  if(d.house){KBK.housePos={x:d.house.x,z:d.house.z};
   if(KBK.house)KBK.house.position.set(d.house.x,0,d.house.z);
   /* checkpoint taşları + ev çarpışma kutusu da gerçek konuma taşınır */
-  for(let i=0;i<5;i++){const c=KBK.checkpoints[i];if(!c)continue;const t=(i+1)/6;c.x=d.house.x*t;c.z=d.house.z*t;c.mesh.position.set(c.x,1.6,c.z)}
+  for(let i=0;i<5;i++){const c=KBK.checkpoints[i];if(!c)continue;const pt=kbkRoutePoint((i+1)/6);c.x=pt.x;c.z=pt.z;c.mesh.position.set(c.x,1.6,c.z)}
   if(KBK.houseBox){const b=KBK.houseBox;b.x1=d.house.x-3.6;b.x2=d.house.x+3.6;b.z1=d.house.z-3.6;b.z2=d.house.z+3.6;b.m.position.set(d.house.x,2.5,d.house.z)}
+  kbkRouteSync();
   /* ay da eve baksın */
   if(KBK.moon){KBK.moon.position.set(-d.house.x*.4,55,-d.house.z*.4);KBK.moon.lookAt(0,10,0)}
  }
@@ -647,13 +673,14 @@ function kbkDispose(){
  if(!KBK.on)return;
  KBK.on=false;KBK.pending=null;KBK.ended=false;
  if(KBK.net)mpSend({t:'kbk_leave'});KBK.net=false;
- for(const f of KBK.foxes)S.remove(f.g);KBK.foxes=[];
+ for(const f of KBK.foxes)kbkFreeScenery(f.g);KBK.foxes=[];
  if(KBK.kbkNpc){freeActor(KBK.kbkNpc.g);KBK.kbkNpc=null}
  for(const g of KBK.guardNpcs)freeActor(g.g);KBK.guardNpcs=[];
  for(const av of KBK.avatars.values())freeActor(av.root);KBK.avatars.clear();KBK.peers.clear();
  if(KBK.spot){S.remove(KBK.spot);S.remove(KBK.spotTgt);KBK.spot=null}
  if(KBK.glow){S.remove(KBK.glow);KBK.glow=null}
- if(KBK.group){S.remove(KBK.group);KBK.group=null}
+ if(KBK.houseBox)kbkFreeScenery(KBK.houseBox.m);KBK.houseBox=null;
+ if(KBK.group){kbkFreeScenery(KBK.group);KBK.group=null}KBK.route=null;
  KBK.meshes=[];
  if(KBK.baseBoxes){boxes.length=0;boxMeshes.length=0;for(const b of KBK.baseBoxes){boxes.push(b);boxMeshes.push(b.m);b.m.visible=true}KBK.baseBoxes=null}
  if(KBK.env){floor.position.y=KBK.env.floor;S.fog.near=KBK.env.fog[0];S.fog.far=KBK.env.fog[1];S.fog.color.setHex(KBK.env.fogColor);S.background.setHex(KBK.env.sky);KBK.env=null}
@@ -748,7 +775,7 @@ const _kbkHurt=hurt;hurt=function(d,from){
  _kbkHurt(d,from);
 };
 const _kbkEnemies=updE;updE=function(dt){if(mode==='kbk')return;return _kbkEnemies(dt)};
-const _kbkStep=stepPlayer;stepPlayer=function(dt){_kbkStep(dt);if(mode!=='kbk'||!KBK.on)return;kbkPeerTick(dt);kbkTick(dt)};
+const _kbkStep=stepPlayer;stepPlayer=function(dt){_kbkStep(dt);if(mode!=='kbk'||!KBK.on)return;kbkKeepInside(p);kbkPeerTick(dt);kbkTick(dt)};
 const _kbkView=updPlayerView;updPlayerView=function(dt){_kbkView(dt);if(mode!=='kbk'||!KBK.on||p.dead<=0)return;
  const q=kbkPlayers().find(q=>q.alive&&q.id!==KBK.id)||kbkPlayers().find(q=>q.alive);
  if(q){cam.position.set(q.x+2.4,q.y+2.6,q.z+2.4);cam.lookAt(q.x,q.y+1.2,q.z)}};

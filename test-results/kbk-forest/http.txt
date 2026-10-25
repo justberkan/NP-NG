@@ -1,0 +1,13 @@
+✔ Oyun dosyaları ve yeni dosya yeniden başlatmadan sunulur (396.7391ms)
+✔ Özel dosyalar HTTP üzerinden okunamaz (4.4033ms)
+✔ HEAD gövdesiz, yazma yöntemleri reddedilir (3.645ms)
+✔ API bilgi yanıtı ve sunucu canlılığı (0.6877ms)
+✔ Bozuk yüzde kodlaması sunucuyu kapatmaz (0.908ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 513.3149
