@@ -1,0 +1,24 @@
+
+> npng-desktop@0.3.0 test
+> node --test tests/policy.cjs tests/services.cjs tests/offline.cjs
+
+✔ Untrusted paths, manifests, seed keys and scheme origin (7.8389ms)
+✔ Real HTTP: two transfers, changed-only download, atomic failure, 404, protocol and recovery (261.8209ms)
+✔ Offline MIME matches the server table (0.9064ms)
+✔ All approved seed formats round-trip; 5001 files rejected (0.2277ms)
+✔ Yalnız HTTP(S) sunucular; dosya/komut/kimlik bilgisi reddedilir (1.0689ms)
+✔ Oyun başka kaynağa yönlenemez (0.2181ms)
+✔ W/R ve oyun tuşları korunur; tarayıcı pencere/sekme kısayolları engellenir (0.1586ms)
+✔ Zorunlu beş performans anahtarı mevcut (0.0854ms)
+✔ VSync defaults off, on removes only the two uncapping switches (5.804ms)
+✔ Tercihler boolean olarak normalize edilir (0.9345ms)
+✔ Gercek HTTP kontrolu: basari, hata, yonlendirme, kesin zaman asimi (112.9754ms)
+✔ Yerel sunucu gercek alt surecle baslar, tekrar baslatmaz, gecersiz klasoru reddeder (270.7792ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 460.8109

@@ -1,0 +1,14 @@
+✔ Oyun dosyaları ve yeni dosya yeniden başlatmadan sunulur (607.5206ms)
+✔ Özel dosyalar HTTP üzerinden okunamaz (7.3557ms)
+✔ HEAD gövdesiz, yazma yöntemleri reddedilir (4.9113ms)
+✔ API bilgi yanıtı ve sunucu canlılığı (0.6263ms)
+✔ Bozuk yüzde kodlaması sunucuyu kapatmaz (1.5525ms)
+✔ Manifest yalnız public dosyalar; doğru hash, cache güncelleme ve silme (44.5269ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 856.6718

@@ -1,0 +1,27 @@
+
+> npng-desktop@0.3.0 prebuild
+> node tools/make-icon.cjs && node node_modules/electron/install.js
+
+
+> npng-desktop@0.3.0 build
+> electron-builder --win nsis --x64 --publish never
+
+  • electron-builder  version=26.15.3 os=10.0.26200
+  • loaded configuration  file=package.json ("build" field)
+  • executing @electron/rebuild  electronVersion=44.7.2 arch=x64 buildFromSource=false workspaceRoot=C:\Users\berkan\codex-work\NP-NG-EXE\electron projectDir=./ appDir=./
+  • installing native dependencies  arch=x64
+  • completed installing native dependencies
+  • packaging       platform=win32 arch=x64 electron=44.7.2 appOutDir=dist\win-unpacked
+  • using custom unpacked Electron distribution  electronDist=node_modules\electron\dist
+  • copying unpacked Electron  source=C:\Users\berkan\codex-work\NP-NG-EXE\electron\node_modules\electron\dist destination=C:\Users\berkan\codex-work\NP-NG-EXE\electron\dist\win-unpacked
+  • searching for node modules  pm=npm searchDir=C:\Users\berkan\codex-work\NP-NG-EXE\electron
+  • searching for node modules  pm=traversal searchDir=C:\Users\berkan\codex-work\NP-NG-EXE\electron
+  • using manual traversal of node_modules to build dependency tree
+  • no node modules returned while searching directories  searchDirectories=[""]
+  • updating asar integrity executable resource  executablePath=dist\win-unpacked\NPNG.exe
+  • signing with signtool.exe  path=dist\win-unpacked\NPNG.exe
+  • building        target=nsis file=dist\NPNG-Kurulum-0.3.0-x64.exe archs=x64 oneClick=false perMachine=false
+  • signing with signtool.exe  path=dist\win-unpacked\resources\elevate.exe
+  • signing with signtool.exe  path=dist\NPNG-Kurulum-0.3.0-x64.__uninstaller.exe
+  • signing with signtool.exe  path=dist\NPNG-Kurulum-0.3.0-x64.exe
+  • building block map  blockMapFile=dist\NPNG-Kurulum-0.3.0-x64.exe.blockmap
